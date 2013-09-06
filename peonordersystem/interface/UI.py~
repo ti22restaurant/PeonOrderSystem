@@ -1,0 +1,89 @@
+#! /usr/bin/env python
+# -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
+### BEGIN LICENSE
+# This file is in the public domain
+### END LICENSE
+
+import Builder
+
+from path import SYSTEM_XML_PATH
+
+from gi.repository import Gtk
+
+import copy
+
+from MenuItem import MenuItem
+from Orders import Orders
+from Reservations import Reservations
+
+from NoteEntryDialog import NoteEntryDialog
+from StarEntryDialog import StarEntryDialog
+from OptionEntryDialog import OptionEntryDialog
+from ConfirmationDialog import ConfirmationDialog
+
+class UI(object):
+	
+	def __init__(self, parent, title):
+	    xml_path = SYSTEM_XML_PATH + 'PeonOrderSystemWindow.ui'
+	    
+	    self.builder = Builder()
+	    
+		self.builder.add_from_file(xml_path, title)
+		self.builder.connect_signals(self)
+		self.orders = Orders(self.builder.order_window)
+		self.orders.set_select_function(self.set_accessible_buttons)
+		self.reservations = Reservations(self.builder.reservation_window)
+	
+	def table_button_clicked(self, table_button):
+	    table = table_button.get_label()
+	    if table != "TOGO":
+	        n = table.split(' ')[1]
+	        n = int(n)
+	        
+	    self.builder.set_table(table)
+	    self.orders.set_current_table(n)
+	
+	def menu_button_clicked(self, widget):
+	    menu_item = widget.MenuItem
+	    self.orders.add(copy.copy(menu_item))
+	
+	def remove_menu_item(self, widget):
+	    self.orders.remove()
+	
+	def remove_selected_reservation(self, *args):
+	    print "remove"
+	
+	def add_new_reservation(self, *args):
+	    print "add"
+	
+	def edit_note(self, widget):
+	    menu_item = self.orders.get()
+	    if menu_item is not None:
+	        note_entry = NoteEntryDialog(self.builder.window, menu_item)
+	        del note_entry
+	    self.orders.update()
+	
+	def edit_stars(self, widget):
+	    menu_item = self.orders.get()
+	    if menu_item is not None:
+	        stars_entry = StarEntryDialog(self.builder.window, menu_item)
+	        del stars_entry
+	    self.orders.update()
+	
+	def edit_options(self, widget):
+	    menu_item = self.orders.get()
+	    if menu_item is not None and menu_item.is_editable():
+	        option_entry = OptionEntryDialog(self.builder.window,
+	            menu_item)
+	        del option_entry
+	    self.orders.update()
+	
+	def confirm_order(self, widget):
+	    current_order = self.orders.get_current_order()
+	    signal = confirmation_dialog = ConfirmationDialog(self.window,
+	        current_order)
+	
+	def set_accessible_buttons(self, *args):
+	    menu_item = self.orders.get()
+        self.builder.set_item_display(menu_item)
+	

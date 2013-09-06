@@ -1,0 +1,72 @@
+#! /usr/bin/env python
+# -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
+### BEGIN LICENSE
+# This file is in the public domain
+### END LICENSE
+
+from gi.repository import Gtk
+
+from exe.path import SYSTEM_XML_PATH
+
+""" Superclass designed to be extended by other Button-based dialog
+    windows.
+    
+    Creates general dialog window that is relatively unpopulated.
+
+"""
+
+
+# Depreciated. Needs to be removed
+class ButtonEntryDialog(object):
+    
+    # filename must be of the name_type. Where type represents the
+    # key that it will be stored under. Examples: menu_options,
+    # wine_drinks, beer_drinks, etc.
+	def __init__(self, parent, title, curr_list):
+		xml_file = SYSTEM_XML_PATH + 'ButtonEntryDialog.ui'
+       
+        
+        builder = Gtk.Builder()
+        builder.add_from_file(xml_file)
+        builder.connect_signals(self)
+        
+        self.dialog = builder.get_object('entryDialog')
+        self.dialog.set_default_size(500, 500)
+        self.dialog.set_transient_for(parent)
+        self.dialog.set_title(title)
+        
+        self.toggle_buttons = {}
+        
+        box_list = []
+        box_list.append(builder.get_object('leftBox'))
+        box_list.append(builder.get_object('centerBox'))
+        box_list.append(builder.get_object('rightBox'))
+        
+        self.set_layout(curr_list, box_list)
+            
+    def set_layout(self, item_list, box_list):
+        for x in item_list:
+            temp = box_list.pop(0)
+            new_button = Gtk.ToggleButton(label=x)
+            temp.add(new_button)
+            box_list.append(temp)
+            self.toggle_buttons[x] = new_button
+    
+    def set_active_toggles(self, item_list):
+        for x in item_list:
+            curr_button = self.toggle_buttons[x]
+            curr_button.set_active(True)
+                
+    def confirm_button(self, *args):
+        self.confirm_data()
+        self.dialog_quit()
+        
+    def confirm_data(self):
+        temp = []
+        for x in self.toggle_buttons.values():
+            if x.get_active():
+                temp.append(x.get_label())
+        return temp
+            
+    def dialog_quit(self, *args):
+        self.dialog.destroy()

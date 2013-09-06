@@ -1,0 +1,715 @@
+{
+    "CAKES": [
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "SPICY CATFISH CAKES", 
+            "price": 11.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "GARLIC SHRIMP/PORK CAKES", 
+            "price": 11.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "CALIFORNIA SEAFOOD CAKES", 
+            "price": 12.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "SALMON CROQUETTES", 
+            "price": 11.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "INDIAN CURRY SALMON CAKES", 
+            "price": 12.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "TARO CAKES", 
+            "price": 9.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "THAI FISH CAKES", 
+            "price": 11.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "CHILI/BASIL SNAPPER CAKES", 
+            "price": 11.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "CORN/GROUND PORK CAKES", 
+            "price": 11.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "SAMPLER PLATE", 
+            "price": 16.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "OUR CHEFS CRAB CAKES", 
+            "price": 14.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "GARLIC TROUT CAKES", 
+            "price": 11.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }
+    ], 
+    "SALAD": [
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "PRAWN SALAD", 
+            "price": 11.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {
+                "SEAFOOD": 2.0
+            }
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "BEEF SALAD", 
+            "price": 11.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {
+                "PORK": 0.0, 
+                "CHICKEN": 0.0
+            }
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "CRISPY TROUT SALAD", 
+            "price": 14.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "GREEN PAPAYA/PRAWN SALAD", 
+            "price": 10.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }
+    ], 
+    "DESSERT": [
+        {
+            "confirmed": 1, 
+            "__MenuItem__": "ICE CREAM ONE SCOOP", 
+            "price": 3.95, 
+            "editable": 1, 
+            "stars": 0, 
+            "options": {
+                "SKAGIT STRAWBERRY": 0.0, 
+                "VANILLA": 0.0, 
+                "CLEARLY COCONUT": 0.0, 
+                "GREEN TEA": 0.0, 
+                "DECIDEDLY CHOCOLATE": 0.0, 
+                "MAPLE NUT": 0.0, 
+                "MINT CHIP": 0.0
+            }
+        }, 
+        {
+            "confirmed": 1, 
+            "__MenuItem__": "ICE CREAM TWO SCOOPS", 
+            "price": 4.95, 
+            "editable": 1, 
+            "stars": 0, 
+            "options": {
+                "SKAGIT STRAWBERRY": 0.0, 
+                "VANILLA": 0.0, 
+                "CLEARLY COCONUT": 0.0, 
+                "GREEN TEA": 0.0, 
+                "DECIDEDLY CHOCOLATE": 0.0, 
+                "MAPLE NUT": 0.0, 
+                "MINT CHIP": 0.0
+            }
+        }, 
+        {
+            "__MenuItem__": "FRIED BANANA/ICE CREAM", 
+            "price": 50.0, 
+            "editable": 0, 
+            "confirmed": 1, 
+            "stars": 0
+        }, 
+        {
+            "__MenuItem__": "BROWNIE", 
+            "price": 50.0, 
+            "editable": 0, 
+            "confirmed": 1, 
+            "stars": 0
+        }
+    ], 
+    "FISH": [
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "THREE MUSKETEERS", 
+            "price": 11.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "SALMON PANANG CURRY", 
+            "price": 14.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "GARLIC PEPPER PRAWNS", 
+            "price": 14.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "CRISPY TROUT SALAD", 
+            "price": 14.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "FRIED TILAPIA FILLET", 
+            "price": 14.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "BEER BATTERED POLLOCK", 
+            "price": 14.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "RED SNAPPER", 
+            "price": 14.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }
+    ], 
+    "MISC": [], 
+    "CURRIES": [
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "MASSAMUN CURRY", 
+            "price": 10.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "PINEAPPLE PRAWN CURRY", 
+            "price": 12.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "GREEN CURRY", 
+            "price": 10.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {
+                "SEAFOOD": 2.0, 
+                "PRAWNS": 2.0
+            }
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "RED CURRY", 
+            "price": 10.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {
+                "SEAFOOD": 2.0, 
+                "PRAWNS": 2.0
+            }
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "PANANG CURRY", 
+            "price": 10.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "YELLOW CURRY", 
+            "price": 10.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }
+    ], 
+    "APPETIZER": [
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "PORK SHORT RIBS", 
+            "price": 6.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "FRIED SPRING ROLLS", 
+            "price": 6.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "MOO YANG PORK ON SKEWERS", 
+            "price": 6.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "CHICKEN SATAY", 
+            "price": 6.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "GAR/PEPP CHICKEN WINGS", 
+            "price": 6.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "FRIED TARO", 
+            "price": 6.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }
+    ], 
+    "SOUP": [
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "TOM YUM SPICY SOUP", 
+            "price": 7.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {
+                "SEAFOOD": 2.0, 
+                "PRAWNS": 2.0
+            }
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "TOFU SPINACH SOUP", 
+            "price": 7.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "NOODLE SOUP", 
+            "price": 7.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "TOM KA CHICKEN", 
+            "price": 7.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }
+    ], 
+    "BEER": [
+        {
+            "__MenuItem__": "SIERRA NEVADA PALE ALE", 
+            "price": 50.0, 
+            "editable": 1, 
+            "confirmed": 0, 
+            "stars": 0
+        }, 
+        {
+            "__MenuItem__": "PIKE INDIA PALE ALE", 
+            "price": 50.0, 
+            "editable": 0, 
+            "confirmed": 1, 
+            "stars": 0
+        }, 
+        {
+            "__MenuItem__": "PIKE HEIRLOOM AMBER", 
+            "price": 50.0, 
+            "editable": 0, 
+            "confirmed": 1, 
+            "stars": 0
+        }, 
+        {
+            "__MenuItem__": "TSINGTAO", 
+            "price": 50.0, 
+            "editable": 1, 
+            "confirmed": 0, 
+            "stars": 0
+        }, 
+        {
+            "__MenuItem__": "PIKE NAUGHTY NELLIE", 
+            "price": 50.0, 
+            "editable": 0, 
+            "confirmed": 1, 
+            "stars": 0
+        }, 
+        {
+            "__MenuItem__": "SINGHA LAGER", 
+            "price": 50.0, 
+            "editable": 1, 
+            "confirmed": 0, 
+            "stars": 0
+        }, 
+        {
+            "__MenuItem__": "DESCHUTES BLACK BUTTE", 
+            "price": 50.0, 
+            "editable": 1, 
+            "confirmed": 0, 
+            "stars": 0
+        }, 
+        {
+            "__MenuItem__": "PIKE KILT LIFTER", 
+            "price": 50.0, 
+            "editable": 0, 
+            "confirmed": 1, 
+            "stars": 0
+        }, 
+        {
+            "__MenuItem__": "HALES ALE", 
+            "price": 50.0, 
+            "editable": 1, 
+            "confirmed": 0, 
+            "stars": 0
+        }
+    ], 
+    "FRIED RICE": [
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "HAWAIIAN FRIED RICE", 
+            "price": 10.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {
+                "SEAFOOD": 2.0, 
+                "PRAWNS": 2.0
+            }
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "CHEFS CRAB FRIED RICE", 
+            "price": 12.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "PRAWN FRIED RICE", 
+            "price": 10.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }
+    ], 
+    "NOODLES": [
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "PRA RAM NOODLE", 
+            "price": 8.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "PHAD THAI FAVORITE", 
+            "price": 8.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {
+                "PRAWNS": 2.0
+            }
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "PAD KEE MAO", 
+            "price": 9.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {
+                "SEAFOOD": 2.0, 
+                "PRAWNS": 2.0
+            }
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "PAD SEE LEW", 
+            "price": 8.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "LARD NA NOODLE", 
+            "price": 8.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {
+                "SEAFOOD": 2.0, 
+                "PRAWNS": 2.0
+            }
+        }
+    ], 
+    "LUNCH PLATTER": [
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "PANANG CURRY", 
+            "price": 8.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {
+                "DINNER:SIDE RICE": 1.5, 
+                "DINNER:BROWN RICE": 2.5, 
+                "LUNCH:BROWN RICE": 1.0
+            }
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "ORANGE CHICKEN", 
+            "price": 8.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {
+                "DINNER:SIDE RICE": 1.5, 
+                "DINNER:BROWN RICE": 2.5, 
+                "LUNCH:BROWN RICE": 1.0
+            }
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "CASHEW NUT CHICKEN", 
+            "price": 8.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {
+                "DINNER:SIDE RICE": 1.5, 
+                "DINNER:BROWN RICE": 2.5, 
+                "LUNCH:BROWN RICE": 1.0
+            }
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "HOUSE FRIED RICE", 
+            "price": 8.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {
+                "DINNER:SIDE RICE": 1.5, 
+                "DINNER:BROWN RICE": 2.5, 
+                "LUNCH:BROWN RICE": 1.0
+            }
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "HOUSE BEEF/MUSHROOM", 
+            "price": 9.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {
+                "DINNER:SIDE RICE": 1.5, 
+                "DINNER:BROWN RICE": 2.5, 
+                "LUNCH:BROWN RICE": 1.0
+            }
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "SESAME HONEY BEEF", 
+            "price": 10.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {
+                "DINNER:SIDE RICE": 1.5, 
+                "DINNER:BROWN RICE": 2.5, 
+                "LUNCH:BROWN RICE": 1.0
+            }
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "THAI CHICKEN CURRY", 
+            "price": 8.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {
+                "DINNER:SIDE RICE": 1.5, 
+                "DINNER:BROWN RICE": 2.5, 
+                "LUNCH:BROWN RICE": 1.0
+            }
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "CHILI BASIL PLATE", 
+            "price": 8.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {
+                "DINNER:SIDE RICE": 1.5, 
+                "DINNER:BROWN RICE": 2.5, 
+                "LUNCH:BROWN RICE": 1.0
+            }
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "SWEET/SOUR VEGGIES", 
+            "price": 8.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {
+                "DINNER:SIDE RICE": 1.5, 
+                "DINNER:BROWN RICE": 2.5, 
+                "LUNCH:BROWN RICE": 1.0
+            }
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "CHICKEN VEGGIE DELIGHT", 
+            "price": 7.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {
+                "DINNER:SIDE RICE": 1.5, 
+                "DINNER:BROWN RICE": 2.5, 
+                "LUNCH:BROWN RICE": 1.0
+            }
+        }, 
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "HOUSE GARLIC DELIGHT", 
+            "price": 7.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {
+                "DINNER:SIDE RICE": 1.5, 
+                "DINNER:BROWN RICE": 2.5, 
+                "LUNCH:BROWN RICE": 1.0
+            }
+        }
+    ], 
+    "DRINKS": [], 
+    "SPECIAL": [
+        {
+            "confirmed": 0, 
+            "__MenuItem__": "CRISPY CALAMARI", 
+            "price": 8.95, 
+            "editable": 1, 
+            "stars": 3, 
+            "options": {}
+        }
+    ], 
+    "WINE": [
+        {
+            "__MenuItem__": "LONE BIRCH SAUVIGNON BLANC", 
+            "price": 50.0, 
+            "editable": 0, 
+            "confirmed": 1, 
+            "stars": 0
+        }, 
+        {
+            "__MenuItem__": "AIRFIELD RED", 
+            "price": 50.0, 
+            "editable": 0, 
+            "confirmed": 1, 
+            "stars": 0
+        }, 
+        {
+            "__MenuItem__": "LONE BIRCH RIESLING", 
+            "price": 50.0, 
+            "editable": 0, 
+            "confirmed": 1, 
+            "stars": 0
+        }, 
+        {
+            "__MenuItem__": "AIRFIELD SAUVIGNON BLANC", 
+            "price": 50.0, 
+            "editable": 0, 
+            "confirmed": 1, 
+            "stars": 0
+        }, 
+        {
+            "__MenuItem__": "C.M., PINOT NOIR", 
+            "price": 50.0, 
+            "editable": 0, 
+            "confirmed": 1, 
+            "stars": 0
+        }
+    ]
+}

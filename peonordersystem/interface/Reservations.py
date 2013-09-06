@@ -1,0 +1,420 @@
+#! /usr/bin/env python
+# -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
+# ## BEGIN LICENSE
+# This file is in the public domain
+# ## END LICENSE
+
+"""Reservations Module provides all basic functionality and display
+for the Reservations class.
+
+This module is subdivided into two groups:
+
+@group Reservations_Components: This group represents implementation
+classes for the Reservations group. These classes provide the underlying
+functionality for the Reservations.
+
+members:
+
+    Reserver: Wrapped class that holds the information for any given
+    reservation.
+    
+    ReservationTreeView: Gtk.TreeView extending class that provides the
+    display for the Reservation object
+    
+    ReservationStore: Gtk.ListStore extending class that provides the
+    data storage and basic functions to be displayed.
+
+@group Reservations: This group represents the user interaction classes
+that perform wrap the functionality from the Reservations_Components
+group.
+
+members:
+    
+    Reservations: Class that provides the basic functionality with
+    implementation hidden from the user.
+
+@author: Carl McGraw
+@contact: cjmcgraw@u.washington.edu
+@version: 1.0
+"""
+
+from gi.repository import Gtk, GObject  # IGNORE:E0611 @UnresolvedImport
+
+import time
+
+class Reserver(object):
+    """Reserver class represents a single reservation. This
+    class stores information pertaining to a reservation and
+    provides access and comparison methods.
+    
+    @group Reservations_Component: member of the 
+    Reservations_Component group. As such this class
+    provides the basic functionality for the Reservations
+    group. Changes in this class will effect the basic
+    functions of the Reservations group members.
+    
+    @var name: str representing the name that the reservation
+    is stored under.
+    
+    @var number: str representing the number that is associated
+    with the reservation.
+    
+    @var arrival_time: float representing the time 
+    of the expected arrival. This is represented as the number
+    of seconds since the epoch.
+    
+    @var _curr_time: float representing the time that the order
+    was placed. This value is utilized for determining an accurate
+    percentage. As such it should not be altered.
+    """
+    def __init__(self, name, number, arrival_time):
+        """Initializes a new Reserver object.
+        
+        @param name: str representing the name to be
+        stored for this reservation.
+        
+        @param number: str representing the number
+        to be stored for this reservation.
+        
+        @param arrival_time: float representing
+        the time of the arrival. Expected to be
+        generated from time import.
+        
+        @raise ValueError: If the given arrival_time
+        is less than the current time as generated from
+        time.time function
+        """
+        self._curr_time = time.time()
+        
+        if self._curr_time > arrival_time:
+            raise ValueError('Reserver class expected ' + 
+                             'an arrival time parameter that ' + 
+                             'was set in the future, and generated ' + 
+                             "from python's import time function, such " + 
+                             'that it is a number representing the ' + 
+                             'number of seconds from the epoch. The value ' + 
+                             'you gave was ' + str(arrival_time) + ' which is ' + 
+                             'before the current time of ' + str(self._curr_time))
+        
+        self.name = name
+        self.number = number
+        self._arrival_time = arrival_time
+    
+    def get_arrival_time_str(self):
+        """Gets the current arrival time in str
+        form. 
+        
+        @return: str representing the current
+        times "Hours:Mins, weekday, mth/yr' as
+        the format.
+        """
+        t = time.localtime(self._arrival_time)
+        return time.strftime('%H:%M %a, %m/%y', t)
+        
+    def get_eta(self):
+        """Gets the expected time of arrival as a number
+        representing the percentage away from the current
+        time.
+        
+        @return: float representing the percentage value as
+        the distance from the arrival. 0.0 for far distance,
+        100.0 for right now or already occurred.
+        """
+        arrival_time = self._arrival_time
+        curr_time = time.time()
+        
+        if arrival_time >= curr_time:
+            return (curr_time - self._curr_time) / (arrival_time - self._curr_time) * 100 + 10
+        return 100.0
+    
+    def __cmp__(self, other):
+        """Comparison function that is used for
+        comparing two Reserver objects to eachother.
+        The comparison is made solely on their arrival
+        times.
+        
+        @param other: Reserver object that is being
+        compared to this one.
+        
+        @return: int which represents the relation to
+        the other Reserver. Negative if the other
+        object is greater than this one. Positive if
+        the other object is less than, and zero if they
+        are equal.
+        """
+        return int(self._arrival_time - other._arrival_time)
+
+class ReservationTreeView(Gtk.TreeView):
+    """ReservationTreeView class provides the basic
+    functionality for the TreeView to be displayed.
+    
+    @group Reservations_Component: member of the 
+    Reservations_Component group. As such this class
+    provides the basic functionality for the Reservations
+    group. Changes in this class will effect the basic
+    functions of the Reservations group members.
+    """
+    
+    def __init__(self):
+        """Initializes the ReservationTreeView object.
+        """
+        super(ReservationTreeView, self).__init__()
+        col_list = self.generate_columns()
+        
+        for col in col_list:
+            self.append_column(col)
+    
+    def generate_columns(self,
+                        col_names=['Name', 'Number',
+                                    'ArrivalTime', 'Estimated Arrival']):
+        """Generates the columns for the display. At default
+        names for each column are obtained from keyword.
+        
+        @keyword col_names: list of str that represents the names 
+        of the generated columns. DEFAULT = ['Name', 'Number', 
+        'ArrivalTime', 'Estimated Arrival']
+        
+        @return: list of Gtk.TreeViewColumns representing the
+        columns to be added.
+        """
+        col_list = []
+        
+        rend = Gtk.CellRendererText()
+        col = Gtk.TreeViewColumn(col_names[0], rend, text=0)
+        col_list.append(col)
+        
+        col = Gtk.TreeViewColumn(col_names[1], rend, text=1)
+        col_list.append(col)
+        
+        col = Gtk.TreeViewColumn(col_names[2], rend, text=2)
+        col_list.append(col)
+        
+        rend = Gtk.CellRendererProgress()
+        col = Gtk.TreeViewColumn(col_names[3], rend, value=3)
+        col_list.append(col)
+        
+        rend = Gtk.CellRendererText()
+        col = Gtk.TreeViewColumn('', rend)
+        col_list.append(col)
+        
+        return col_list
+    
+    def get_selected_iter(self):
+        """Gets the iter representing the currently
+        selected item.
+        
+        @return: Gtk.TreeIter representing the currently
+        selected item.
+        """
+        tree_selection = self.get_selection()
+        model, itr = tree_selection.get_selected()
+        return itr
+    
+
+class ReservationStore(Gtk.ListStore):
+    """ReservationStore class controls the creation
+    and insertion of data and values into the model
+    that will be displayed in pair with the Reservation
+    TreeView.
+    
+    @group Reservations_Component: member of the 
+    Reservations_Component group. As such this class
+    provides the basic functionality for the Reservations
+    group. Changes in this class will effect the basic
+    functions of the Reservations group members.
+    
+    @var _reservation_list: list of Reserver objects that
+    is representative of the information displayed. This
+    list is sorted, and changes in it will have unintended
+    consequences.
+    
+    @var _timeout_id: GObject id that runs every 10 minutes
+    to update the displayed ETA. 
+    """
+    
+    def __init__(self):
+        """Initializes the ReservationStore
+        object and generates the timeout_id.
+        """
+        super(ReservationStore, self).__init__(str, str, str, float)
+        self._reservation_list = []
+        self._timeout_id = GObject.timeout_add(1000, self._on_timeout, None)
+    
+    def add_reservation(self, name, number, arrival_time):
+        """Adds the given information as a new Reserver
+        on model to be displayed.
+        
+        @param name: str representing the name to be
+        stored in the Reserver object
+        
+        @param number: str representing the number to
+        be stored in the REserver object
+        
+        @param arrival_time: float representing time value
+        generated from time.time
+        
+        @return: Reserver object that is linked to the
+        value stored.
+        """
+        reserver = Reserver(name, number, arrival_time)
+        
+        # find insertion
+        index = self._insertion_index(reserver, self._reservation_list)
+
+        self._reservation_list.insert(index, reserver)
+        values = (reserver.name, reserver.number,
+                  reserver.get_arrival_time_str(),
+                  reserver.get_eta())
+            
+        self.insert(index, row=values)
+        
+        return reserver
+    
+    def _insertion_index(self, other, curr_list):
+        """Private Method.
+        Performs a search on the given list to find
+        the index that the given value should be placed.
+        
+        @param other: Reserver object that is to be placed
+        in the list.
+        
+        @param curr_list: list of Reserver objects that is
+        to have the other placed into it.
+        
+        @return: int representing the index that the value
+        should be inserted at.
+        """
+        if len(curr_list) > 0:
+            start = curr_list[0].__cmp__(other)
+            end = curr_list[-1].__cmp__(other)
+            if start > 0 or end <= 0:
+                if end <= 0:
+                    return len(curr_list) + 1
+                    
+            else:
+                new_length = len(curr_list) / 2
+                middle = curr_list[new_length].__cmp__(other)
+                
+                if middle > 0:
+                    return self._insertion_index(other, curr_list[1:new_length]) + 1
+                else:
+                    new_list = curr_list[new_length:-1 - 2]
+                    return self._insertion_index(other, new_list) + new_length + 1
+                
+            
+        return 0
+    
+    def _get_index(self, itr):
+        """Gets the index of the given
+        iter.
+        
+        @raise ValueError: if given Gtk.TreeIter is
+        not a valud iter on this model.
+        
+        @param itr: Gtk.TreeIter object that
+        represents a valid iter.
+        
+        @return: int representing the index of
+        the entry selected by the given iter
+        """
+        if not self.iter_is_valid(itr):
+            raise ValueError('Expected valid iter given in ' + 
+                             ' ReservationStore object')
+        path = self.get_path(itr)
+        path = path.get_indices()
+        return path[0]
+    
+    def get_selected_reservation(self, itr):
+        """Gets the selected Reserver object
+        assocaited with the iter.
+        
+        @param itr: Gtk.TreeIter representing
+        the Reserver object that was selected.
+        
+        @return: Reserver object linked to the
+        model.
+        """
+        index = self._get_index(itr)
+        return self._reservation_list[index]
+    
+    def remove_selected(self, itr):
+        """Removes the Reserver object
+        from the model that is represented
+        by the value pointed to by the given
+        iter.
+        
+        @param itr: Gtk.TreeIter that represents
+        the selected Reserver object.
+        
+        @return: Reserver object that was removed
+        from the model
+        """
+        index = self._get_index(itr)
+        self.remove(itr)
+        return self._reservation_list.pop(index)
+    
+    def _on_timeout(self, *args):
+        """Callback method that is performed
+        on the given interval by the _timeout_id.
+        
+        @param *args: Wildcard parameter used as a
+        catchall.
+        
+        @return bool that lets the _timeout_id know
+        if the process should continue. 
+        """
+        for row, reserver in zip(self, self._reservation_list):
+            row[3] = reserver.get_eta()
+        return True
+            
+class Reservations(object):
+    """Reservations class generates and
+    performs the functionality of displaying
+    and maintaining the reservations list windows.
+    
+    @group Reservations: member of the Reservations
+    group. This group relies on the Reservations_Components
+    group for its functionality.
+    
+    @var tree_view: ReservationTreeView object that
+    represents the display.
+    
+    @var model: ReservationStore object that represents
+    the model to store the data.
+    """
+    def __init__(self, parent):
+        """Intializes a new Reservations object that
+        displays and controls data.
+        
+        @param parent: subclass of Gtk.widget. Used
+        to display the stored information.
+        """
+        self.tree_view = ReservationTreeView()
+        self.model = ReservationStore()
+        parent.add(self.tree_view)
+        
+        self.tree_view.set_model(self.model)
+        self.tree_view.show_all()
+    
+    def add_reservation(self, name, number, arrival_time):
+        """Adds a reservation to the display and keeps
+        track of the reservation.
+        
+        @param name: str representing the reservations stored
+        name.
+        
+        @param number: str representing the reservations stored
+        number.
+        
+        @param arrival_time: float representing the expected
+        arrival time of this reservation. This is expected to
+        be generated from the time.time function.
+        """
+        self.model.add_reservation(name, number, arrival_time)
+    
+    def remove_selected_reservation(self):
+        """Removes the selected reservation.
+        """
+        itr = self.tree_view.get_selected_iter()
+        self.model.remove_selected(itr)
+

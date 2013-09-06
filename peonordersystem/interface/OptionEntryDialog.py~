@@ -1,0 +1,40 @@
+#! /usr/bin/env python
+# -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
+### BEGIN LICENSE
+# This file is in the public domain
+### END LICENSE
+
+from gi.repository import Gtk
+
+from exe import path
+
+from peon_order_system_lib.ButtonEntryDialog import ButtonEntryDialog
+
+""" Creates, displays and runs an EntryDialog for editing the given
+    MenuItem's selected options.
+"""
+
+class OptionEntryDialog(ButtonEntryDialog):
+    
+	def __init__(self, parent, curr_item):
+	    """ Generates and displays the EntryDialog.
+	    """
+	    TITLE = 'OPTION ENTRY'
+	    options = curr_item.get_option_choices().keys()
+	    
+	    self.curr_item = curr_item
+	    
+	    super(OptionEntryDialog, self).__init__(parent, TITLE, options)
+        
+        self.set_active_toggles(self.curr_item.options)
+        
+        self.dialog.show_all()
+        self.dialog.run()
+
+    def confirm_data(self):
+        """Sets the toggled EntryDialog buttons as options chosen. Any
+            modifications completely erase previous option permutations
+            chosen.
+        """
+        self.curr_item.options = super(OptionEntryDialog,
+            self).confirm_data()
