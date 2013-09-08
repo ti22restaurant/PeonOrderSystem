@@ -11,55 +11,16 @@ new objects of dialog windows. These differ from other types
 are they are used for user interactions of adjustments of 
 singular menu items.
 
-    (1) EntryDialog - as a superclass solely this 
-    object can not be instantiated. Extended by
-    all other EntryDialogs. This class has
-    abstract methods that must be overridden by
-    subclasses.
-
-    (2) OptionEntryDialog - as a subclass of 
-    EntryDialog this object is for interacting
-    with MenuItems that have an options attribute.
-
-    (3) NoteEntryDialog - as a subclass of the
-    EntryDialog. This object is for interacting
-    with MenuItems to store a string represented
-    as notes
-
-    (4) StarEntryDialog - as a subclass of the
-    EntryDialog. This object is for interacting
-    with MenuItems to adjust the stored int value
-    that is represented as stars
-
 @group ConfirmationDialog: This group represents all subclasses
 of the ConfirmationDialogs and other confirmation type dialogs.
 These are all classes that instantiate new object dialog windows.
 This differ from the EntryDialogs as they are simply confirmations
 of a current orders list and do not allow for adjustment
 
-    (1) ConfirmationDialog - Abstract Base class that sets the
-    main functionality for Confirmation Dialog. This class is
-    a subclass of Dialog group.
-    
-    (2) OrderConfirmationDialog - as a subclass of 
-    ConfirmationDialog. This object interacts with a
-    given orders list and display it to be confirmed
-    and forwarded as a confirmed order.
-    
-    (3) CheckoutConfirmationDialog - as a subclass of
-    ConfirmationDialog. This object interacts with
-    a given orders list and displays it to be confirmed
-    and forwarded as a checked out order
-    
-    
-@group ReservationsDialog: This group represents all subclasses
-of the ReservationsDialog window. 
+@group ReservationsDialog: This group represents all classes
+of the ReservationsDialog window. ReservationsDialog group are
+subclass members of the Dialog group
 
-    (1) AddReservationsDialog - as a subclass of 
-    ReservationsDialog. This object interacts with 
-    the user to have a new reservation obtained.
-    
-    
 @author: Carl McGraw
 @contact: cjmcgraw@u.washington.edu
 @version: 1.0
@@ -201,6 +162,11 @@ class Dialog(object):
         self.dialog.destroy()
     
     def run_dialog(self):
+        """Runs the stored dialog window.
+        
+        @return: int representing the Gtk.ResponseType signal
+        emitted
+        """
         return self.dialog.run()
 
 class EntryDialog(Dialog):
@@ -228,15 +194,18 @@ class EntryDialog(Dialog):
     # for ABC or abstract base class
     __metaclass__ = ABCMeta
     
-    def __init__(self, parent, title, dialog):
+    def __init__(self, parent, title, dialog=None):
         """Initializes the basic EntryDialog object, and generates
         the base layout for the EntryDialog window.
+        
+        @param parent: object that is the parent of this EntryDialog.
+        Expected Gtk.Window object. 
         
         @param title: str representing the title to be displayed on
         the EntryDialog window.
         
-        @param parent: object that is the parent of this EntryDialog.
-        Expected Gtk.Window object. 
+        @keyword dialog: potential dialog to be added. This feature is
+        not fully supported
         """
         super(EntryDialog, self).__init__(parent, title, dialog)
     
@@ -247,7 +216,7 @@ class EntryDialog(Dialog):
         necessary data. This method also calls the set_layout
         function passing in the three generated VBoxes.
         
-        @return: @type content_area: HBox representing the
+        @return: HBox representing the
         content area of the window dialog. 
         """
         content_area = Gtk.HBox(True, 5)
@@ -331,7 +300,7 @@ class OptionEntryDialog(EntryDialog):
     include the user selected buttons from the option choices.
     
     Dialog confirmation stores the selected options as the options for
-    the given MenuItem. Dialog cancelation returns to the originally
+    the given MenuItem. Dialog cancellation returns to the originally
     selected items that the menu item had.
     
     @group EntryDialog: subclass member of the EntryDialog group
@@ -356,6 +325,11 @@ class OptionEntryDialog(EntryDialog):
         
         @param menu_item: MenuItem object representing the
         MenuItem to have the options selected.
+        
+        @keyword dialog: Gtk.Dialog object that allows for
+        the given dialog to be constructed from another
+        dialog window. This feature is not fully supported.
+        
         """
         self.options = copy(menu_item.options)
         self.menu_item = menu_item
@@ -405,6 +379,8 @@ class OptionEntryDialog(EntryDialog):
         """Cancel's selected options, and reverts to
         previously selected options set for the stored 
         MenuItem
+        
+        @return: 
         """
         return super(OptionEntryDialog, self).cancel_data()
     
@@ -485,7 +461,7 @@ class NoteEntryDialog(EntryDialog):
         self.text_entry = Gtk.Entry()
         self.text_entry.connect("changed", self.note_edited)
         self.text_entry.connect("activate",
-                                super(NoteEntryDialog, self).confirm_button_clicked)
+            super(NoteEntryDialog, self).confirm_button_clicked)
         content_area.pack_end(self.text_entry, False, False, padding=5)
         
         item_label = Gtk.Label()
@@ -559,6 +535,7 @@ class StarEntryDialog(EntryDialog):
         """
         self.menu_item = menu_item
         self.stars_value = menu_item.stars
+        self.star_label = None
         super(StarEntryDialog, self).__init__(parent, title,
                                               dialog)
     
@@ -964,8 +941,38 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
         return tree_model
     
 class ToGoConfirmationDialog(ConfirmationDialog):
+    """ToGoConfirmation window displays the current
+    ToGo list for the user. The dialog is displayed
+    when the run_dialog method is invoked. This allows
+    for the user to select the ToGo order to be displayed.
     
+    @var name_list: list of 3-tuples that represents the
+    current ToGo orders
+    
+    @var name_entry: Gtk.Entry that is the area for users
+    to input a new name to be added.
+    
+    @var number_entry: Gtk.Entry that is the area for users
+    to input a new number associated with a name.
+    
+    @var model: Gtk.TreeModel that represents the model
+    associated with the display.
+    """
     def __init__(self, parent, confirm_func, name_list):
+        """Initializes a new ToGoConfirmationDialog window.
+        
+        @param parent: subclass of Gtk.Window that the 
+        Dialog will be a child of.
+        
+        @param confirm_func: function pointer that is to be
+        called when the dialog window has been confirmed.
+        
+        @param name_list: list of 3-tuples representing the
+        names on the togo list. This tuple is of (str, str, str)
+        where each entry represents the (name, number, time) that
+        the order was placed.
+        
+        """
         self.name_list = name_list
         self.name_entry = None
         self.number_entry = None
@@ -975,6 +982,11 @@ class ToGoConfirmationDialog(ConfirmationDialog):
                                                      confirm_func)
     
     def generate_layout(self):
+        """Generates the layout for the dialog window.
+        
+        @return: Gtk.VBox representing the box to be
+        added to the content area of the dialog window.
+        """
         main_box = Gtk.VBox()
         scrolled_window = super(ToGoConfirmationDialog,
                                 self).generate_layout()
@@ -1015,6 +1027,14 @@ class ToGoConfirmationDialog(ConfirmationDialog):
         return main_box
     
     def generate_columns(self):
+        """Generates the columns to be
+        displayed in the TreeView displayed in
+        the content area.
+        
+        @return: list of Gtk.TreeViewColumns that
+        represents the columns to be added to the
+        TreeView displayed.
+        """
         col_list = []
         
         rend = Gtk.CellRendererText()
@@ -1030,6 +1050,13 @@ class ToGoConfirmationDialog(ConfirmationDialog):
         return col_list
     
     def generate_model(self):
+        """Generates the model for the display. The
+        model stores 3 strings that are derived from
+        each entry in the name_list entries.
+        
+        @return: Gtk.TreeModel representing the 
+        store for the display.
+        """
         self.model = Gtk.ListStore(str, str, str)
         
         if self.name_list is not None:
@@ -1039,6 +1066,13 @@ class ToGoConfirmationDialog(ConfirmationDialog):
         return self.model
     
     def add_new_order(self, *args):
+        """Callback Method that is called when
+        the add new order button is clicked.
+        
+        @param *args: wildcard that represents a
+        catch all. The first argument is the
+        widget that emitted the signal
+        """
         name = self.name_entry.get_text()
         number = self.number_entry.get_text()
         if name is not '' and number is not '':
@@ -1047,18 +1081,64 @@ class ToGoConfirmationDialog(ConfirmationDialog):
             self.confirm_button_clicked(args[0], order=new_order)
     
     def get_selected(self, *args):
+        """Gets the selected order in the standard
+        3-tuple form.
+        
+        @param *args: wildcard that represents the
+        widget that called this method.
+        
+        @return: 3-tuple of (str, str, str) representing
+        the (name, number, and time) of the order.
+        """
         tree_selection = self.tree_view.get_selection()
         model, itr = tree_selection.get_selected()
         return model.get(itr, 0, 1, 2)
     
     def confirm_button_clicked(self, widget, order=None):
+        """Callback Method that is called when the confirm
+        button is clicked. 
+        
+        @param widget: Gtk.Button that emitted the signal and
+        called this method
+        
+        @keyword order: Default None. Expected 3-tuple that
+        represents the (str, str, str) of the given order.
+        """
         if order is None:
             order = self.get_selected()
         super(ToGoConfirmationDialog, self).confirm_button_clicked(widget, order)
     
 class AddReservationsDialog(Dialog):
+    """AddResdervationsDialog prompts the user with
+    a dialog window to insert a new reservation into
+    the reservations list.
     
-    def __init__(self, parent, *args):
+    @group ReservationsDialog: This class is a member of
+    the Reservations Dialog group.
+    
+    @var self.name_entry: Gtk.Entry representing the 
+    area that the user inputs the name associated with
+    the new reservation. 
+    
+    @var self.number_entry: Gtk.Entry representing the
+    area that the user inputs the number associated with
+    the new reservation
+    
+    @var hour_combo_box: Gtk.ComboBox representing an
+    integer of hours selection to be made by the user.
+    
+    @var min_combo_box: Gtk.ComboBox representing an
+    integer of minutes selection to be made by the user.
+    """
+    
+    def __init__(self, parent):
+        """initializes a new AddReservationsDialog that
+        the user may interact with to add a new reservation
+        to the reservations list.
+        
+        @param parent: Gtk.Window that the dialog will be
+        a child of
+        """
         self.name_entry = None
         self.number_entry = None
         self.hour_combo_box = None
@@ -1067,7 +1147,12 @@ class AddReservationsDialog(Dialog):
                                                     'Add Reservations Dialog')
     
     def generate_layout(self):
+        """Generates the layout to be added to the
+        content area of the dialog window.
         
+        @return: Gtk.VBox that is to be added to the
+        content area
+        """
         t = time.localtime()
         hour = t[3]
         
@@ -1119,6 +1204,12 @@ class AddReservationsDialog(Dialog):
     
     
     def get_information(self):
+        """Gets the information entered by the
+        user and returns.
+        
+        @return: 3-tuple of (str, str, float) representing
+        name, number, and time in secs since epoch, respectively.
+        """
         name = self.name_entry.get_text()
         number = self.number_entry.get_text()
         
@@ -1136,26 +1227,35 @@ class AddReservationsDialog(Dialog):
         return name, number, t
     
     def confirm_button_clicked(self, *args):
+        """Callback method called when the confirm button has been
+        clicked.
+        
+        @param *args: wildcard that represents a catch all for the
+        widget that emitted the call.
+        """
         super(AddReservationsDialog, self).confirm_button_clicked()
         
     def cancel_button_clicked(self, *args):
+        """Callback method called when the cancel button
+        has been clicked.
+        
+        @param *args: wildcard catch all that is used to catch
+        the widget that emitted this call.
+        """
         super(AddReservationsDialog, self).cancel_button_clicked()
     
     def run_dialog(self):
+        """Runs the current dialog window
+        
+        @attention: returns an empty 3-tuple if the signal
+        emitted was a cancellation of the dialog window.
+        
+        @return: 3-tuple representing the newly added reservation
+        in the (str, str, float) form representing name, number, 
+        and secs from the epoch respectively.
+        """
         signal = super(AddReservationsDialog, self).run_dialog()
         if signal is int(Gtk.ResponseType.ACCEPT):
             print 'returning correctly'
             return self.get_information()
-        return 0, 0, 0
-    
-if __name__ == '__main__':
-    window = Gtk.Window()
-    
-    
-    name_list = []
-    
-    def confirm(value):
-        print (value)
-    
-    t = ToGoConfirmationDialog(window, name_list, confirm)
-    t.run_dialog()
+        return None, None, None

@@ -2,10 +2,13 @@
 relies on the Dialog windows to generate, display
 and run the Dialog windows to edit MenuItems and
 confirm Orders.
+
+@author: Carl McGraw
+@contact: cjmcgraw@u.washington.edu
+@version: 1.0
 """
 
 from peonordersystem.interface import Dialog
-from peonordersystem.MenuItem import MenuItem
 
 class Editor(object):
     """Editor performs the control functionality
@@ -38,6 +41,9 @@ class Editor(object):
         @param entry_dialog: function pointer representing
         the dialog to be called. this parameter is
         expected to be subclass instances of the EntryDialog
+        
+        @return: value returned by the dialog windows run_dialog
+        method.
         """
         dialog_window = entry_dialog(self.parent, menu_item)
         return dialog_window.run_dialog()
@@ -145,4 +151,12 @@ class Editor(object):
                      confirm_function)
     
     def add_new_reservation(self):
+        """Calls a dialog window to add a new reservation to
+        the reservations list. Calls the edit function.
+        
+        @return: returns a 3-tuple representing the added
+        reservation. Format will be (str, str, float) 
+        representing the name, number, and secs since the epoch
+        respectively.
+        """
         return self.edit(None, Dialog.AddReservationsDialog)

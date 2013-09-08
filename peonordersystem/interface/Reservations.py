@@ -124,7 +124,7 @@ class Reserver(object):
         curr_time = time.time()
         
         if arrival_time >= curr_time:
-            return (curr_time - self._curr_time) / (arrival_time - self._curr_time) * 100 + 10
+            return (curr_time - self._curr_time) / (arrival_time - self._curr_time) * 100
         return 100.0
     
     def __cmp__(self, other):

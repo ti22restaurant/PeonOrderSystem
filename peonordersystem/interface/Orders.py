@@ -15,23 +15,9 @@ instantiated and given the necessary components to function.
 This object is built from the Orders_Components group and
 provides all top level functionality to user.
 
-    (1): Orders object represents the main interactions which
-    through this sub branch of the UI will be accessed and
-    operated on.
-
 @group Orders_Components: This group represents the 
 implementation components of the Orders object. This is
 where changes are made that would 
-
-    (1): OrderTreeView class represents the component that
-    stores the Gtk.TreeView that is specialized for the
-    PeonOrderSystem UI. This object generally creates the
-    Gtk.TreeView object with the necessary requirements to
-    display that data.
-    
-    (2): OrderStore class represents the Gtk.TreeStore object
-    that stores and accesses the necessary information for
-    display in the Gtk.TreeView.
     
 @author: Carl McGraw
 @contact: cjmcgraw@u.washington.edu
@@ -43,7 +29,7 @@ from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 from peonordersystem.MenuItem import MenuItem
 
 class OrderTreeView(Gtk.TreeView):
-    """@summary: OrderTreeView object that creates
+    """OrderTreeView object that creates
     and operates basic TreeView functionality. Extends
     Gtk.TreeView
     
@@ -76,7 +62,7 @@ class OrderTreeView(Gtk.TreeView):
         character length for the word wrap in the first column.
         By default wrap_with=250
         
-        @param col_names: keyword argument that represents a
+        @keyword col_names: keyword argument that represents a
         3-tuple where each entry represents a column to be
         generated in the OrderTreeView. By default
         col_names=('Menu Items', 'Stars', 'Notes')
@@ -135,7 +121,7 @@ class OrderStore(Gtk.TreeStore):
     
     def __init__(self):
         """Initalizes the OrderStore object. Generates
-        a new OrderStore that stores a 3-tuple of str type.
+        a new OrderStore that stores a 3 str types.
         """
         super(OrderStore, self).__init__(str, str, str)
         self.order_list = []
@@ -377,7 +363,7 @@ class Orders(object):
     
     def select_togo_order(self, key):
         """Selects the given 3-tuple which represents
-        a given 
+        a given order.
         """
         if key in self.to_go_dict:
             self.current_order = self.to_go_dict[key]
@@ -453,8 +439,7 @@ class Orders(object):
         the removed MenuItem
         """
         itr = self.tree_view.get_selected_iter()
-        self.current_order.remove(itr)
-        print self.current_order.order_list
+        return self.current_order.remove(itr)
     
     def update(self):
         """Updates the currently selected MenuItem

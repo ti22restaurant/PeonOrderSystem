@@ -4,9 +4,13 @@
 # This file is in the public domain
 # ## END LICENSE
 
-"""Contains PeonOrderSystem class, and main method if this
-is called as main. Main method generates an instance of the
-PeonOrderSystem class
+"""This module contains the PeonOrderSystem class which 
+is the top level object that generates and controls
+the PeonOrderSystem GUI.
+
+@author: Carl McGraw
+@contact: cjmcgraw@u.washington.edu
+@version: 1.0
 """
 
 from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
@@ -17,10 +21,15 @@ class PeonOrderSystem(UI):
     """Generates and controls the PeonOrderSystem GUI and
     establishes its functionality.
     """
-    def __init__(self, title):
-        """Creates PeonOrderSystem"""
+    def __init__(self, title='Fish Cake Factory'):
+        """Initializes and displays PeonOrderSystem GUI
+        
+        @keyword title: Keyword argument that sets the title
+        of the main GUI window. Default value is 'Fish Cake
+        Factory'
+        """
         super(PeonOrderSystem, self).__init__(title)
         
 if __name__ == '__main__':
-    USER = PeonOrderSystem("Fish Cake Factory")
+    USER = PeonOrderSystem()
     Gtk.main()
