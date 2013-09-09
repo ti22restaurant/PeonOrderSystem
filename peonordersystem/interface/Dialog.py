@@ -733,7 +733,6 @@ class ConfirmationDialog(Dialog):
         """
         super(ConfirmationDialog, self).confirm_button_clicked()
         if len(args) > 0:
-            print(args)
             self.confirm_func(args[0])
         else:
             self.confirm_func()
@@ -1258,6 +1257,5 @@ class AddReservationsDialog(Dialog):
         """
         signal = super(AddReservationsDialog, self).run_dialog()
         if signal is int(Gtk.ResponseType.ACCEPT):
-            print 'returning correctly'
             return self.get_information()
         return None, None, None
