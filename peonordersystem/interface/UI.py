@@ -98,6 +98,18 @@ class UI(object):
         """
         self.reservations.remove_selected_reservation()
         
+    def _menu_item_check(self, menu_item):
+        """Private method.
+        
+        Checks whether the given MenuItem is a valid 
+        MenuItem to have operations performed on it.
+        
+        @return: bool representing True if the MenuItem
+        is not None and the MenuItem is editable. False
+        otherwise.
+        """
+        return menu_item != None and menu_item.is_editable()
+    
     def add_new_reservation(self, *args):  # @IGNORE:W0613
         """Callback method when reservation has been added.
         Calls dialog window to get new reservation information
@@ -119,8 +131,9 @@ class UI(object):
         @param *args: wildcard representing the button clicked.
         """
         menu_item = self.orders.get_selected()
-        self.editor.edit_note(menu_item)
-        self.orders.update()
+        if self._menu_item_check(menu_item):
+            self.editor.edit_note(menu_item)
+            self.orders.update()
         
     def edit_stars(self, *args):  # @IGNORE:W0613
         """Callback method when edit stars button has been
@@ -131,8 +144,9 @@ class UI(object):
         @param *args: wildcard representing the button clicked
         """
         menu_item = self.orders.get_selected()
-        self.editor.edit_stars(menu_item)
-        self.orders.update()
+        if self._menu_item_check(menu_item):
+            self.editor.edit_stars(menu_item)
+            self.orders.update()
         
     def edit_options(self, *args):  # @IGNORE:W0613
         """Callback method when edit options button has been
@@ -143,8 +157,9 @@ class UI(object):
         @param *args: wildcard representing the button clicked
         """
         menu_item = self.orders.get_selected()
-        self.editor.edit_options(menu_item)
-        self.orders.update()
+        if self._menu_item_check(menu_item):
+            self.editor.edit_options(menu_item)
+            self.orders.update()
         
     def order_confirmed(self, *args):
         """Method called when the order has been
@@ -153,6 +168,17 @@ class UI(object):
         @param args: wildcard parameter as catch all  
         """
         pass
+        
+    def _order_check(self, current_order):
+        """Private method.
+        
+        Checks if the current order is a accessible, valid
+        order.
+        
+        @return: bool representing True if the given order is
+        not None and is of length > 0. False otherwise.
+        """
+        return current_order != None and len(current_order) > 0
         
     def confirm_order(self, *args):  # @IGNORE:W0613
         """Callback method when confirm order button has been
@@ -164,7 +190,7 @@ class UI(object):
         @param *args: wildcard representing the button clicked.
         """
         current_order = self.orders.get_current_order()
-        if current_order != None and len(current_order) > 0:
+        if self._order_check(current_order):
             self.editor.confirm_order(current_order, self.order_confirmed)
         
     def set_accessible_buttons(self, *args):  # @IGNORE:W0613
@@ -185,7 +211,7 @@ class UI(object):
         @param *args: wildcard that represents the button pressed
         """
         current_order = self.orders.get_current_order()
-        if current_order != None and len(current_order) > 0:
+        if self._order_check(current_order):
             self.editor.checkout_order(current_order, self.checkout_confirm)
     
     def checkout_confirm(self, *args):
