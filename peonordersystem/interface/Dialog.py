@@ -83,7 +83,6 @@ class Dialog(object):
         # Currently this is not fully functional and therefore
         # should not be used
         if dialog is not None:
-            print "initializing old window"
             dialog.set_title(title)
             self.dialog = dialog
             dialog.set_transient_for(parent)
