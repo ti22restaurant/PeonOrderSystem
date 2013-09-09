@@ -106,7 +106,8 @@ class UI(object):
         the selected item 
         """
         name, number, arrival_time = self.editor.add_new_reservation()
-        self.reservations.add_reservation(name, number, arrival_time)
+        if (name. number, arrival_time) is not (None, None, None):
+            self.reservations.add_reservation(name, number, arrival_time)
     
     def edit_note(self, *args):  # @IGNORE:W0613
         """Callback method when edit note button has been
@@ -182,7 +183,8 @@ class UI(object):
         @param *args: wildcard that represents the button pressed
         """
         current_order = self.orders.get_current_order()
-        self.editor.checkout_order(current_order, self.checkout_confirm)
+        if current_order != None and len(current_order) > 0:
+            self.editor.checkout_order(current_order, self.checkout_confirm)
     
     def checkout_confirm(self, *args):
         """Callback method when the checkout window has been confirmed.

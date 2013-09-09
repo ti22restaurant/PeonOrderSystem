@@ -404,7 +404,8 @@ class Orders(object):
         been selected.
         """
         if self.current_order != None:
-            return self.current_order.order_list
+            order_list = self.current_order.order_list
+            return order_list
         return None
     
     def get_selected(self):

@@ -1131,13 +1131,15 @@ class AddReservationsDialog(Dialog):
     integer of minutes selection to be made by the user.
     """
     
-    def __init__(self, parent):
+    def __init__(self, parent, *args):
         """initializes a new AddReservationsDialog that
         the user may interact with to add a new reservation
         to the reservations list.
         
         @param parent: Gtk.Window that the dialog will be
         a child of
+        
+        @param *args: wildcard for unexpected parameters
         """
         self.name_entry = None
         self.number_entry = None
