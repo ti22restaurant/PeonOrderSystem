@@ -75,7 +75,8 @@ class UI(object):
         as MenuItem.
         """
         menu_item = menu_button.MenuItem
-        self.orders.add(copy.copy(menu_item))
+        if menu_item != None:
+            self.orders.add(copy.copy(menu_item))
         
     def remove_menu_item(self, *args):  # @IGNORE:W0613
         """Removes currently selected MenuItem
@@ -106,7 +107,7 @@ class UI(object):
         the selected item 
         """
         name, number, arrival_time = self.editor.add_new_reservation()
-        if (name. number, arrival_time) is not (None, None, None):
+        if not None in (name, number, arrival_time):
             self.reservations.add_reservation(name, number, arrival_time)
     
     def edit_note(self, *args):  # @IGNORE:W0613
@@ -214,7 +215,8 @@ class UI(object):
         togo order.
         """
         # order is 3-tuple (name, number, time)
-        self.orders.select_togo_order(curr_order)
-        self.builder.set_table(curr_order[0] + 
-                               ' (' + curr_order[1] + ')')
+        if curr_order is not None:
+            self.orders.select_togo_order(curr_order)
+            self.builder.set_table(curr_order[0] + 
+                                   ' (' + curr_order[1] + ')')
 
