@@ -163,7 +163,8 @@ class UI(object):
         @param *args: wildcard representing the button clicked.
         """
         current_order = self.orders.get_current_order()
-        self.editor.confirm_order(current_order, self.order_confirmed)
+        if current_order != None and len(current_order) > 0:
+            self.editor.confirm_order(current_order, self.order_confirmed)
         
     def set_accessible_buttons(self, *args):  # @IGNORE:W0613
         """Callback method that is preformed any time an item
