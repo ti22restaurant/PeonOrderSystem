@@ -175,7 +175,7 @@ class OrderStore(Gtk.TreeStore):
         level parent. If a top level parent is
         given then that is returned by this method.
         """
-        if not self.iter_is_valid(tree_iter):
+        if tree_iter is None or not self.iter_is_valid(tree_iter):
             raise Exception("Invalid Gtk.TreeIter " + 
                             "given as parameter." + 
                             "Given TreeIter: " + 
@@ -197,7 +197,7 @@ class OrderStore(Gtk.TreeStore):
         @return: int representing the selected MenuItem's
         index.
         """
-        if not self.iter_is_valid(tree_iter):
+        if tree_iter is None or not self.iter_is_valid(tree_iter):
             Exception("Invalid Tree Iter " + 
                       "given as parameter.")
         path = self.get_path(tree_iter)
@@ -440,7 +440,8 @@ class Orders(object):
         the removed MenuItem
         """
         itr = self.tree_view.get_selected_iter()
-        return self.current_order.remove(itr)
+        if self.current_order != None:
+            return self.current_order.remove(itr)
     
     def update(self):
         """Updates the currently selected MenuItem
