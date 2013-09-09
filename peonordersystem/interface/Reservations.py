@@ -317,9 +317,10 @@ class ReservationStore(Gtk.ListStore):
         @return: int representing the index of
         the entry selected by the given iter
         """
-        if not self.iter_is_valid(itr):
-            raise ValueError('Expected valid iter given in ' + 
-                             ' ReservationStore object')
+        if itr == None or not self.iter_is_valid(itr):
+            raise ValueError('Expected valid Gtk.TreeIter given in ' + 
+                             ' ReservationStore object, ' + 
+                             'got ' + str(type(itr)))
         path = self.get_path(itr)
         path = path.get_indices()
         return path[0]
