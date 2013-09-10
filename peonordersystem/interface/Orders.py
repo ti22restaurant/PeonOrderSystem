@@ -76,15 +76,24 @@ class OrderTreeView(Gtk.TreeView):
         rend = Gtk.CellRendererText()
         rend.set_property('wrap-width', wrap_width)
         
-        column = Gtk.TreeViewColumn(col_names[0], rend, text=0)
+        # Each entry in list_store = (str, str, str, str, bool)
+        # representing: 
+        #
+        # 0. name: str of the menu_items name
+        # 1. stars: str of the menu_items stars rating
+        # 2. image: str representing Gtk.STOCK_image to be used for note display
+        # 3. color: str representing the hexadecimal color for the foreground
+        # 4. has note: bool representing if the image should be displayed
+        
+        column = Gtk.TreeViewColumn(col_names[0], rend, text=0, foreground=3)
         col_list.append(column)
         
         rend = Gtk.CellRendererText()
-        column2 = Gtk.TreeViewColumn(col_names[1], rend, text=1)
+        column2 = Gtk.TreeViewColumn(col_names[1], rend, text=1, foreground=3)
         col_list.append(column2)
         
         rend = Gtk.CellRendererPixbuf()
-        column3 = Gtk.TreeViewColumn(col_names[2], rend, stock_id=2, visible=3)
+        column3 = Gtk.TreeViewColumn(col_names[2], rend, stock_id=2, visible=4)
         col_list.append(column3)
         
         return col_list
@@ -123,7 +132,15 @@ class OrderStore(Gtk.TreeStore):
         """Initalizes the OrderStore object. Generates
         a new OrderStore that stores a 3 str types.
         """
-        super(OrderStore, self).__init__(str, str, str, bool)
+        # Complicated list store. Stores information to be displayed.
+        #
+        # 0. name: str of the menu_items name
+        # 1. stars: str of the menu_items stars rating
+        # 2. image: str representing Gtk.STOCK_image to be used for note display
+        # 3. color: str representing the hexadecimal color for the foreground
+        # 4. has note: bool representing if the image should be displayed
+        
+        super(OrderStore, self).__init__(str, str, str, str, bool)
         self.order_list = []
         
     def append(self, menu_item):
@@ -158,13 +175,41 @@ class OrderStore(Gtk.TreeStore):
         
         if menu_item.is_editable():
             stars = str(menu_item.stars)
+            
+        # 0. name: str representing menu_item name
         new_entry.append(name)
+        
+        # 1. stars: str representing menu_item star rating.
         new_entry.append(stars)
-        boolean_flag = menu_item.has_note()
-        new_entry.append(self._get_icon(boolean_flag))
-        new_entry.append(boolean_flag)
+        
+        # 2. image: str representing the image to be displayed
+        # in the notes column.
+        new_entry.append(Gtk.STOCK_DND)
+        
+        # 3. color: str representation of hexadecimal color for
+        # the item to be displayed at.
+        new_entry.append(self._get_color(menu_item.confirmed))
+        
+        # 4. display_image: bool representing if the image should
+        # be displayed.
+        new_entry.append(menu_item.has_note())
         
         return super(OrderStore, self).append(None, new_entry)
+    
+    def _get_color(self, is_confirmed):
+        """Private Method.
+        
+        Gets the hexadecimal color associated with
+        the value. 
+        
+        @return: str representing hexadecimal number for
+        gray if True, black otherwise.
+        """
+        if is_confirmed:
+            # Hexadecimal SAFE GRAY.
+            return '#999999'
+        # Hexadecimal BLACK
+        return '#000000'
     
     def _ensure_top_level_iter(self, tree_iter):
         """Private Method.
@@ -274,38 +319,22 @@ class OrderStore(Gtk.TreeStore):
             itr = self.iter_children(tree_iter)
             super(OrderStore, self).remove(itr)
         
+        text_color = self._get_color(menu_item.confirmed)
+        
         # add post-update information
         if menu_item.has_note():
             super(OrderStore, self).append(tree_iter,
                                            (menu_item.notes,
-                                            '', None, False))
+                                            '', None, text_color, False))
         if menu_item.has_options():
             super(OrderStore, self).append(tree_iter,
                                            (str(menu_item.options)[1:-1],
-                                            '', None, False))
+                                            '', None, text_color, False))
         self[tree_iter][1] = str(menu_item.stars)
-        icon = self._get_icon(menu_item.has_note())
-        self[tree_iter][2] = icon
-        self[tree_iter][3] = menu_item.has_note()
+        self[tree_iter][3] = text_color
+        self[tree_iter][4] = menu_item.has_note()
         
         return tree_iter
-    
-    def _get_icon(self, boolean_flag):
-        """Private Method.
-        Gets the icon assocaited with
-        the boolean_flag variable.
-        
-        @param boolean_flag: Represents the 
-        MenuItem.has_note result in this program.
-        
-        @return: Gtk.STOCK_IMAGE that is utilized
-        for displaying the current items note status.
-        """
-        if boolean_flag:
-            return Gtk.STOCK_DND
-        else:
-            Gtk
-            return Gtk.STOCK_REMOVE
 
 class Orders(object):
     """Orders represents the main interactions with
