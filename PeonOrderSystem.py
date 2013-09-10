@@ -13,7 +13,6 @@ the PeonOrderSystem GUI.
 @version: 1.0
 """
 
-
 from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 
 from peonordersystem.interface.UI import UI
