@@ -781,7 +781,11 @@ class OrderConfirmationDialog(ConfirmationDialog):
         represents the current order being considered for
         confirmation by the ConfirmationDialog 
         """
-        self.order_list = order_list
+        def is_confirmed(menu_item):
+            return not menu_item.confirmed
+        
+        self.order_list = filter(is_confirmed, order_list)
+        
         super(OrderConfirmationDialog, self).__init__(parent, title,
                                                       confirm_func, dialog)
         
