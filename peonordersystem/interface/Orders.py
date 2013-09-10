@@ -84,7 +84,7 @@ class OrderTreeView(Gtk.TreeView):
         col_list.append(column2)
         
         rend = Gtk.CellRendererPixbuf()
-        column3 = Gtk.TreeViewColumn(col_names[2], rend, stock_id=2)
+        column3 = Gtk.TreeViewColumn(col_names[2], rend, stock_id=2, visible=3)
         col_list.append(column3)
         
         return col_list
@@ -123,7 +123,7 @@ class OrderStore(Gtk.TreeStore):
         """Initalizes the OrderStore object. Generates
         a new OrderStore that stores a 3 str types.
         """
-        super(OrderStore, self).__init__(str, str, str)
+        super(OrderStore, self).__init__(str, str, str, bool)
         self.order_list = []
         
     def append(self, menu_item):
@@ -152,10 +152,17 @@ class OrderStore(Gtk.TreeStore):
             
         self.order_list.append(menu_item)
         new_entry = []
-        new_entry.append(menu_item.get_name())
-        new_entry.append(str(menu_item.stars))
+        
+        name = menu_item.get_name()
+        stars = ''
+        
+        if menu_item.is_editable():
+            stars = str(menu_item.stars)
+        new_entry.append(name)
+        new_entry.append(stars)
         boolean_flag = menu_item.has_note()
         new_entry.append(self._get_icon(boolean_flag))
+        new_entry.append(boolean_flag)
         
         return super(OrderStore, self).append(None, new_entry)
     
@@ -271,14 +278,15 @@ class OrderStore(Gtk.TreeStore):
         if menu_item.has_note():
             super(OrderStore, self).append(tree_iter,
                                            (menu_item.notes,
-                                            '', None))
+                                            '', None, False))
         if menu_item.has_options():
             super(OrderStore, self).append(tree_iter,
                                            (str(menu_item.options)[1:-1],
-                                            '', None))
+                                            '', None, False))
         self[tree_iter][1] = str(menu_item.stars)
         icon = self._get_icon(menu_item.has_note())
         self[tree_iter][2] = icon
+        self[tree_iter][3] = menu_item.has_note()
         
         return tree_iter
     
@@ -296,7 +304,8 @@ class OrderStore(Gtk.TreeStore):
         if boolean_flag:
             return Gtk.STOCK_DND
         else:
-            return Gtk.STOCK_FILE
+            Gtk
+            return Gtk.STOCK_REMOVE
 
 class Orders(object):
     """Orders represents the main interactions with
