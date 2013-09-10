@@ -261,7 +261,7 @@
                         <property name="image">image2</property>
                         <property name="relief">half</property>
                         <property name="focus_on_click">False</property>
-                        <signal name="clicked" handler="checkout_order" swapped="no"/>
+                        <signal name="clicked" handler="confirm_checkout" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
