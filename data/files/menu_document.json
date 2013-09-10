@@ -390,63 +390,63 @@
         {
             "__MenuItem__": "SIERRA NEVADA PALE ALE", 
             "price": 50.0, 
-            "editable": 1, 
+            "editable": 0, 
             "confirmed": 1, 
             "stars": 0
         }, 
         {
             "__MenuItem__": "PIKE INDIA PALE ALE", 
             "price": 50.0, 
-            "editable": 1, 
+            "editable": 0, 
             "confirmed": 1, 
             "stars": 0
         }, 
         {
             "__MenuItem__": "PIKE HEIRLOOM AMBER", 
             "price": 50.0, 
-            "editable": 1, 
+            "editable": 0, 
             "confirmed": 1, 
             "stars": 0
         }, 
         {
             "__MenuItem__": "TSINGTAO", 
             "price": 50.0, 
-            "editable": 1, 
+            "editable": 0, 
             "confirmed": 1, 
             "stars": 0
         }, 
         {
             "__MenuItem__": "PIKE NAUGHTY NELLIE", 
             "price": 50.0, 
-            "editable": 1, 
+            "editable": 0, 
             "confirmed": 1, 
             "stars": 0
         }, 
         {
             "__MenuItem__": "SINGHA LAGER", 
             "price": 50.0, 
-            "editable": 1, 
+            "editable": 0, 
             "confirmed": 1, 
             "stars": 0
         }, 
         {
             "__MenuItem__": "DESCHUTES BLACK BUTTE", 
             "price": 50.0, 
-            "editable": 1, 
+            "editable": 0, 
             "confirmed": 1, 
             "stars": 0
         }, 
         {
             "__MenuItem__": "PIKE KILT LIFTER", 
             "price": 50.0, 
-            "editable": 1, 
+            "editable": 0, 
             "confirmed": 1, 
             "stars": 0
         }, 
         {
             "__MenuItem__": "HALES ALE", 
             "price": 50.0, 
-            "editable": 1, 
+            "editable": 0, 
             "confirmed": 1, 
             "stars": 0
         }
@@ -679,35 +679,35 @@
         {
             "__MenuItem__": "LONE BIRCH SAUVIGNON BLANC", 
             "price": 50.0, 
-            "editable": 1, 
+            "editable": 0, 
             "confirmed": 1, 
             "stars": 0
         }, 
         {
             "__MenuItem__": "AIRFIELD RED", 
             "price": 50.0, 
-            "editable": 1, 
+            "editable": 0, 
             "confirmed": 1, 
             "stars": 0
         }, 
         {
             "__MenuItem__": "LONE BIRCH RIESLING", 
             "price": 50.0, 
-            "editable": 1, 
+            "editable": 0, 
             "confirmed": 1, 
             "stars": 0
         }, 
         {
             "__MenuItem__": "AIRFIELD SAUVIGNON BLANC", 
             "price": 50.0, 
-            "editable": 1, 
+            "editable": 0, 
             "confirmed": 1, 
             "stars": 0
         }, 
         {
             "__MenuItem__": "C.M., PINOT NOIR", 
             "price": 50.0, 
-            "editable": 1, 
+            "editable": 0, 
             "confirmed": 1, 
             "stars": 0
         }
