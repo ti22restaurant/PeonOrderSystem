@@ -276,10 +276,7 @@ stored on table box. Last index is the 'TOGO' button.
         for button in self.generated_table_buttons:
             function = parent.table_button_clicked
             label = button.get_label()
-            print(label)
-            print label == 'TOGO'
             if label == 'TOGO':
-                print (label)
                 function = parent.confirm_togo
             button.connect('clicked', function, label)
         
