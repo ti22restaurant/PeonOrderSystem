@@ -167,7 +167,7 @@ class UI(object):
         
         @param args: wildcard parameter as catch all  
         """
-        pass
+        self.orders.confirm_order()
         
     def _order_check(self, current_order):
         """Private method.

@@ -206,7 +206,7 @@ class OrderStore(Gtk.TreeStore):
         gray if True, black otherwise.
         """
         if is_confirmed:
-            # Hexadecimal SAFE GRAY.
+            # Hexadecimal GRAY
             return '#999999'
         # Hexadecimal BLACK
         return '#000000'
@@ -335,6 +335,16 @@ class OrderStore(Gtk.TreeStore):
         self[tree_iter][4] = menu_item.has_note()
         
         return tree_iter
+        
+    def confirm_order(self, tree_iter):
+        """Sets all MenuItem's in the order to confirmed.
+        """
+        if tree_iter != None:
+            menu_item = self.get_menu_item(tree_iter)
+            if not menu_item.confirmed:
+                menu_item.confirmed = True
+                self.update_item(tree_iter)
+            self.confirm_order(self.iter_next(tree_iter))
 
 class Orders(object):
     """Orders represents the main interactions with
@@ -487,3 +497,10 @@ class Orders(object):
         """
         itr = self.tree_view.get_selected_iter()
         self.current_order.update_item(itr)
+    
+    def confirm_order(self):
+        """Set all MenuItems in the current order to
+        confirmed
+        """
+        tree_iter = self.current_order.get_iter_first()
+        self.current_order.confirm_order(tree_iter)
