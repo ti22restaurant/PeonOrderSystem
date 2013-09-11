@@ -99,3 +99,4 @@ class MenuItem(object):
         stored in the MenuItem
         """
         return self._name
+    
