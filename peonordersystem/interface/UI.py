@@ -32,7 +32,7 @@ class UI(object):
     operates the current reservations. 
     """
     
-    def __init__(self, title):
+    def __init__(self, title, load_data=None):
         """Initializes a new object. Generates the base GUI
         from XML file obtained from Path. Instantiates the
         component objects.
@@ -44,9 +44,23 @@ class UI(object):
         
         self.builder.add_from_file(MAIN_UI_PATH, title)
         self.builder.connect_signals(self)
-        self.orders = Orders(self.builder.order_window)
+        self.orders = Orders(self.builder.order_window, load_data=load_data)
         self.reservations = Reservations(self.builder.reservation_window)
         self.editor = Editor(self.builder.window)
+        
+    def get_order_info(self):
+        """Gets the current information associated
+        with the current order.
+        
+        @return: 2-tuple representing the information
+        of the table. The first entry represents the
+        table number or order information, and the
+        second entry represents the MenuItem list associated
+        with that entry.
+        """
+        current_order = self.orders.get_current_order()
+        current_table_info = self.orders.get_order_info()
+        return current_table_info, current_order
         
     def table_button_clicked(self, table_button, table):
         """Callback method called when a table button is clicked.
@@ -168,6 +182,7 @@ class UI(object):
         @param args: wildcard parameter as catch all  
         """
         self.orders.confirm_order()
+    
         
     def _order_check(self, current_order):
         """Private method.

@@ -58,18 +58,19 @@ def generate_files():
         dirpath, dirnames, filenames = itr.next()
         
         for curr_filename in filenames:
-            
             filename, filetype = curr_filename.split('.')
             
-            if filetype is 'table':
+            if filetype == 'table':
                 current_orders = table_orders
             else:
                 current_orders = togo_orders
             
-            for f in curr_filename:
-                unpickle = cPickle.Unpickler(curr_directory + f)
-                current_orders[filename] = unpickle.load()
+            data = open(dirpath + curr_filename)
+            unpickler = cPickle.Unpickler(data)
+            current_orders[filename] = unpickler.load()
                 
+    print table_orders
+    print togo_orders
     return (table_orders, togo_orders)
 
 def order_confirmed(order_name, order_list):
@@ -78,6 +79,11 @@ def order_confirmed(order_name, order_list):
     the parent directories confirmed folder.
     """
     curr_directory = directory + '/confirmed/'
+    
+    if 'table_' in order_name and len(order_name) < 9:
+        order_name = order_name + '.table'
+    else:
+        order_name = order_name + '.togo'
     
     curr_file = open(curr_directory + order_name, 'w')
     

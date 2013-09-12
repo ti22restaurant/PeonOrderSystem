@@ -28,6 +28,8 @@ from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 
 from peonordersystem.MenuItem import MenuItem
 
+import time
+
 class OrderTreeView(Gtk.TreeView):
     """OrderTreeView object that creates
     and operates basic TreeView functionality. Extends
@@ -373,11 +375,17 @@ class Orders(object):
     
     """
     
-    def __init__(self, parent, num_of_tables=10):
+    def __init__(self, parent, load_data=None, num_of_tables=10):
         """Initializes and creates the Orders object.
         
         @param parent: Gtk.Container subclass from
         which the TreeView will be displayed.
+        
+        @keyword load_data: represents the data that the
+        orders should be loaded from. This is either None
+        or a 2-tuple of Dicts, where load_data[0] is
+        representative of the table orders and load_data[1]
+        is representative of the togo_orders.
         
         @keyword num_of_tables: represents the number
         of tables for orders to be generated for.
@@ -399,7 +407,54 @@ class Orders(object):
             
         self.to_go_dict = {}
         self.current_order = None
+        
+        if load_data is not None and type(load_data) is tuple:
+            try:
+                self._load_data(load_data)
+            finally:
+                print('Unable to load data from file')
+                
     
+    def _load_data(self, load_data):
+        """Loads the data from the files, and
+        places them in the orders.
+        """
+        table_orders = load_data[0]
+        togo_orders = load_data[1]
+        
+        if type(table_orders) is not dict or type(togo_orders) is not dict:
+            raise TypeError("LOADING DATA FROM FILE. " + 
+                            "Expected load_data provided to orders " + 
+                            "to be type(obj) = dict. Instead got a 2-tuple " + 
+                            "of {}, and {}".format(type(table_orders),
+                                                   type(togo_orders)))
+        
+        for table_num in table_orders:
+            table, num = table_num.split('_')
+            
+            num = int(num) - 1
+            
+            self.current_order = self.order_list[num]
+            
+            load_order = table_orders[table_num]
+            
+            for menu_item in load_order:
+                self.add(menu_item)
+        
+        for togo_name in togo_orders:
+            name, number = togo_name.split('_')
+            
+            # standard Dialog generated time format.
+            curr_time = time.strftime('%X, %A, %m/%y')
+            
+            key = (name, number, curr_time)
+            
+            self.select_togo_order(key)
+            load_order = togo_orders[togo_name]
+            
+            for menu_item in load_order:
+                self.add(menu_item)
+        
     def get_togo_orders(self):
         """Gets a list of the current togo orders.
         
@@ -497,6 +552,23 @@ class Orders(object):
         """
         itr = self.tree_view.get_selected_iter()
         self.current_order.update_item(itr)
+    
+    def get_order_info(self):
+        """Gets the label associated with the
+        current table.
+        
+        @return: str representing the given current
+        order. Either table_n, where n is the number,
+        or name_number if the order is a togo order.
+        """
+        if self.current_order in self.order_list:
+            index = self.order_list.index(self.current_order)
+            return 'table_{}'.format(index + 1)
+        else:
+            for keys in self.to_go_dict:
+                if self.current_order == self.to_go_dict[keys]:
+                    return '{}_{}'.format(keys[0], keys[1])
+        
     
     def confirm_order(self):
         """Set all MenuItems in the current order to
