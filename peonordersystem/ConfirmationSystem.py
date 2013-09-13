@@ -71,20 +71,64 @@ def generate_files():
                 
     return (table_orders, togo_orders)
 
-def order_confirmed(order_name, order_list):
-    """Confirms an order by dumping a binary
-    file representing the confirmed order into
-    the parent directories confirmed folder.
+def standardize_confirm_file_name(order_name):
+    """Standardizes the name of the file,
+    under the standard format for confirmed
+    orders
+    
+    @return: str representing the standardized
+    file format.
     """
-    curr_directory = directory + '/confirmed/'
     
     if 'table_' in order_name and len(order_name) < 9:
         order_name = order_name + '.table'
     else:
         order_name = order_name + '.togo'
     
+    return order_name
+
+def standardize_checkout_file_name(order_name):
+    """Standardizes the name of the file,
+    under the standard format for checked out
+    orders.
+    """
+    curr_time = time.strftime('%H-%M-%S')
+    return order_name + '_' + curr_time + '.checkout'
+
+def order_confirmed(order_name, order_list):
+    """Confirms an order by dumping a binary
+    file representing the confirmed order into
+    the parent directories confirmed folder.
+    """
+    curr_directory = directory + '/confirmed/'
+    order_name = standardize_confirm_file_name(order_name)
+    
     curr_file = open(curr_directory + order_name, 'w')
     
     cPickle.dump(order_list, curr_file)
-            
-                
+
+def remove_order_confirmed_file(order_name):
+    """Removes the file associated with the
+    confirmed order from the necessary
+    directory.
+    """
+    curr_directory = directory + '/confirmed/'
+    order_name = standardize_confirm_file_name(order_name)
+    
+    os.remove(curr_directory + order_name)
+    
+def checkout_confirmed(order_name, order_list):
+    """Generates the necessary checkout files
+    and adds the given order to that file for
+    storage. This is utilized later.
+    """
+    remove_order_confirmed_file(order_name)
+    
+    curr_directory = directory + '/checkout/'
+    
+    order_name = standardize_checkout_file_name(order_name)
+    
+    curr_file = open(curr_directory + order_name, 'w')
+    
+    cPickle.dump(order_list, curr_file)
+    
