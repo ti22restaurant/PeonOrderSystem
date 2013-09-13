@@ -144,7 +144,19 @@ class OrderStore(Gtk.TreeStore):
         
         super(OrderStore, self).__init__(str, str, str, str, bool)
         self.order_list = []
+    
+    def clear(self):
+        """Clears the current order from the 
+        OrdersStore.
         
+        @return: list of MenuItems that represents
+        the order cleared.
+        """
+        super(OrderStore, self).clear()
+        order_list = self.order_list
+        self.order_list = []
+        return order_list
+    
     def append(self, menu_item):
         """Appends the given menu_item to the
         OrderStore storing its values for display.
@@ -339,7 +351,8 @@ class OrderStore(Gtk.TreeStore):
         return tree_iter
         
     def confirm_order(self, tree_iter):
-        """Sets all MenuItem's in the order to confirmed.
+        """Sets all MenuItem's in the order to confirmed,
+        and disallows further editing of MenuItems.
         """
         if tree_iter != None:
             menu_item = self.get_menu_item(tree_iter)
@@ -412,7 +425,7 @@ class Orders(object):
         if load_data is not None and type(load_data) is tuple:
             try:
                 self._load_data(load_data)
-            finally:
+            except:
                 print('Unable to load data from file')
                 
     
@@ -577,3 +590,11 @@ class Orders(object):
         """
         tree_iter = self.current_order.get_iter_first()
         self.current_order.confirm_order(tree_iter)
+    
+    def clear_order(self):
+        """Clears the current order.
+        
+        @return: list of MenuItems, represents
+        the cleared order.
+        """
+        return self.current_order.clear()
