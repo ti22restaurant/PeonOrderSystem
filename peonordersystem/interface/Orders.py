@@ -345,6 +345,7 @@ class OrderStore(Gtk.TreeStore):
             menu_item = self.get_menu_item(tree_iter)
             if not menu_item.confirmed:
                 menu_item.confirmed = True
+                menu_item.editable = False
                 self.update_item(tree_iter)
             self.confirm_order(self.iter_next(tree_iter))
 

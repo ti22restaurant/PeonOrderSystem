@@ -35,7 +35,7 @@ class MenuItem(object):
         confirmed=False, option_choices=None):
         self._name = name
         self._price = price
-        self._editable = bool(editable)
+        self.editable = bool(editable)
         self.stars = int(stars)
         self.notes = ''
         self.options = []
@@ -64,7 +64,7 @@ class MenuItem(object):
         @return: bool, True if the item is editable,
         false otherwise.
         """
-        return self._editable
+        return self.editable
     
     def get_option_choices(self):
         """Gets the available option choices for the item
