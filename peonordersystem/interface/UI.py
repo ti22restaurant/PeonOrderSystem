@@ -234,7 +234,7 @@ class UI(object):
         
         @param *args: wildcard as a catch all
         """
-        pass
+        self.orders.clear_order()
     
     def confirm_togo(self, *args):
         """Callback method when the togo button has been pressed.
