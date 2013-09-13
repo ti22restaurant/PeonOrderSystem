@@ -69,8 +69,6 @@ def generate_files():
             unpickler = cPickle.Unpickler(data)
             current_orders[filename] = unpickler.load()
                 
-    print table_orders
-    print togo_orders
     return (table_orders, togo_orders)
 
 def order_confirmed(order_name, order_list):
