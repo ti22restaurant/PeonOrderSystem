@@ -22,6 +22,9 @@ from peonordersystem import path
 
 directory = path.SYSTEM_ORDERS_PATH
 
+if not os.path.exists(directory):
+    os.mkdir(directory)
+
 current_date = time.localtime()[:3]
 
 for value in current_date:
@@ -125,9 +128,7 @@ def checkout_confirmed(order_name, order_list):
     remove_order_confirmed_file(order_name)
     
     curr_directory = directory + '/checkout/'
-    
     order_name = standardize_checkout_file_name(order_name)
-    
     curr_file = open(curr_directory + order_name, 'w')
     
     cPickle.dump(order_list, curr_file)
