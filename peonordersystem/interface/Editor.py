@@ -136,19 +136,19 @@ class Editor(object):
         self.confirm(order_list, Dialog.CheckoutConfirmationDialog,
                      confirm_function)
     
-    def select_togo_order(self, name_list, confirm_function):
-        """Calls the togo selection confirmation dialog on the
+    def select_misc_order(self, name_list, confirm_function):
+        """Calls the misc selection confirmation dialog on the
         given name list. Calls the confirmation function if the
-        togo selection is confirmed.
+        misc selection is confirmed.
         
         @param name_list: list of 3-tuples that represent the
-        given togo orders.
+        given misc orders.
         
         @param confirm_function: function pointer that is called
-        when the a togo order has been confirmed or added
+        when the a misc order has been confirmed or added
         """
-        self.confirm(name_list, Dialog.ToGoConfirmationDialog,
-                     confirm_function)
+        self.confirm(name_list,
+                    Dialog.OrderSelectionConfirmationDialog, confirm_function)
     
     def add_new_reservation(self):
         """Calls a dialog window to add a new reservation to
