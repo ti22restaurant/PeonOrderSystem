@@ -942,14 +942,14 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
         
         return tree_model
     
-class ToGoConfirmationDialog(ConfirmationDialog):
-    """ToGoConfirmation window displays the current
-    ToGo list for the user. The dialog is displayed
+class OrderSelectionConfirmationDialog(ConfirmationDialog):
+    """OrderSelectionConfirmation window displays the current
+    OrderSelection list for the user. The dialog is displayed
     when the run_dialog method is invoked. This allows
-    for the user to select the ToGo order to be displayed.
+    for the user to select the OrderSelection order to be displayed.
     
     @var name_list: list of 3-tuples that represents the
-    current ToGo orders
+    current OrderSelection orders
     
     @var name_entry: Gtk.Entry that is the area for users
     to input a new name to be added.
@@ -961,7 +961,7 @@ class ToGoConfirmationDialog(ConfirmationDialog):
     associated with the display.
     """
     def __init__(self, parent, confirm_func, name_list):
-        """Initializes a new ToGoConfirmationDialog window.
+        """Initializes a new OrderSelectionConfirmationDialog window.
         
         @param parent: subclass of Gtk.Window that the 
         Dialog will be a child of.
@@ -970,7 +970,7 @@ class ToGoConfirmationDialog(ConfirmationDialog):
         called when the dialog window has been confirmed.
         
         @param name_list: list of 3-tuples representing the
-        names on the togo list. This tuple is of (str, str, str)
+        names on the OrderSelection list. This tuple is of (str, str, str)
         where each entry represents the (name, number, time) that
         the order was placed.
         
@@ -979,7 +979,7 @@ class ToGoConfirmationDialog(ConfirmationDialog):
         self.name_entry = None
         self.number_entry = None
         self.model = None
-        super(ToGoConfirmationDialog, self).__init__(parent,
+        super(OrderSelectionConfirmationDialog, self).__init__(parent,
                                                      'To Go Selection',
                                                      confirm_func)
     
@@ -990,7 +990,7 @@ class ToGoConfirmationDialog(ConfirmationDialog):
         added to the content area of the dialog window.
         """
         main_box = Gtk.VBox()
-        scrolled_window = super(ToGoConfirmationDialog,
+        scrolled_window = super(OrderSelectionConfirmationDialog,
                                 self).generate_layout()
         main_box.pack_start(scrolled_window, True, True, 5)
         
@@ -1108,7 +1108,8 @@ class ToGoConfirmationDialog(ConfirmationDialog):
         """
         if order is None:
             order = self.get_selected()
-        super(ToGoConfirmationDialog, self).confirm_button_clicked(widget, order)
+        super(OrderSelectionConfirmationDialog,
+              self).confirm_button_clicked(widget, order)
     
 class AddReservationsDialog(Dialog):
     """AddResdervationsDialog prompts the user with

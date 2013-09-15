@@ -113,7 +113,7 @@ class OrderTreeView(Gtk.TreeView):
 
 class OrderStore(Gtk.TreeStore):
     """OrderStore class creates and stores
-    the model to be sored in the OrderTreeView
+    the model to be stored in the OrderTreeView
     as well as additional menu item and order
     information.
     
