@@ -58,6 +58,7 @@ stored on table box. Last index is the 'TOGO' button.
         self.window = None
         self.reservation_window = None
         self.order_window = None
+        self.upcoming_orders_window = None
         
     def add_from_file(self, filename, title):  # @IGNORE:E1002
         """ Generates the GUI from the given XML file utilizing 
@@ -109,7 +110,12 @@ stored on table box. Last index is the 'TOGO' button.
             if name == ('editstarsButton' or 
                 'editnoteButton' or 'edititemButton'):
                 self.order_buttons.append(widget)
-                
+            
+            if name == 'upcomingOrdersRemoveButton':
+                self.upcoming_orders_remove_button = widget
+            
+            if name == 'upcomingOrdersScrollWindow':
+                self.upcoming_orders_window = widget
                 
         # Populate menu tabs
         for each in option_choices.values():
@@ -138,7 +144,7 @@ stored on table box. Last index is the 'TOGO' button.
             self.generated_table_buttons.append(button)
         
         # additional TOGO button
-        button = Gtk.Button('TOGO')
+        button = Gtk.Button('MISC ORDERS')
         tables_box.pack_start(button, True, True, 2.5)
         self.generated_table_buttons.append(button)
             
@@ -276,9 +282,13 @@ stored on table box. Last index is the 'TOGO' button.
         for button in self.generated_table_buttons:
             function = parent.table_button_clicked
             label = button.get_label()
-            if label == 'TOGO':
-                function = parent.confirm_togo
+            if label == 'MISC ORDERS':
+                function = parent.select_misc_order
             button.connect('clicked', function, label)
+        
+        
+        function = parent.remove_selected_upcoming_order
+        self.upcoming_orders_remove_button.connect('clicked', function)
         
     def set_table(self, string):
         """Sets the current table display label to the given str
