@@ -591,10 +591,20 @@ class Orders(object):
         tree_iter = self.current_order.get_iter_first()
         self.current_order.confirm_order(tree_iter)
     
-    def clear_order(self):
+    def clear_order(self, order_name):
         """Clears the current order.
         
         @return: list of MenuItems, represents
         the cleared order.
         """
+        itr = self.to_go_dict.iteritems()
+        found_key = None
+        
+        for key, value in itr:
+            if value is self.current_order:
+                found_key = key
+        
+        if found_key != None:
+            del self.to_go_dict[found_key]
+        
         return self.current_order.clear()
