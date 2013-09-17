@@ -184,6 +184,8 @@ class OrderStore(Gtk.TreeStore):
         self.order_list.append(menu_item)
         new_entry = []
         
+        print menu_item.confirmed
+        
         name = menu_item.get_name()
         stars = ''
         
@@ -469,6 +471,9 @@ class Orders(object):
             for menu_item in load_order:
                 self.add(menu_item)
         
+        self.current_order = None
+        self._set_model()
+        
     def get_togo_orders(self):
         """Gets a list of the current togo orders.
         
@@ -579,9 +584,8 @@ class Orders(object):
             index = self.order_list.index(self.current_order)
             return 'table_{}'.format(index + 1)
         else:
-            for keys in self.to_go_dict:
-                if self.current_order == self.to_go_dict[keys]:
-                    return '{}_{}'.format(keys[0], keys[1])
+            found_key = self._get_to_go_order_key()
+            return '{}_{}'.format(found_key[0], found_key[1])
         
     
     def confirm_order(self):
@@ -591,20 +595,27 @@ class Orders(object):
         tree_iter = self.current_order.get_iter_first()
         self.current_order.confirm_order(tree_iter)
     
-    def clear_order(self, order_name):
+    def clear_order(self):
         """Clears the current order.
         
         @return: list of MenuItems, represents
         the cleared order.
         """
+        found_key = self._get_to_go_order_key()
+        if found_key != None:
+            del self.to_go_dict[found_key]
+            self.current_order.clear()
+            self.current_order = None
+            self._set_model()
+        else:
+            return self.current_order.clear()
+    
+    def _get_to_go_order_key(self):
         itr = self.to_go_dict.iteritems()
         found_key = None
         
         for key, value in itr:
             if value is self.current_order:
                 found_key = key
-        
-        if found_key != None:
-            del self.to_go_dict[found_key]
-        
-        return self.current_order.clear()
+                
+        return found_key

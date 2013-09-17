@@ -159,12 +159,11 @@ class UpcomingOrderStore(Gtk.ListStore):
         """
         order_name = order_name.replace('_', ' ')
         itr = self.get_iter_first()
-        
-        if self.iter_is_valid(itr):
+        if itr != None and self.iter_is_valid(itr):
             itr = self._search_for_order(order_name, itr)
         
         if itr != None:
-            self.remove(itr)
+            value = self.remove(itr)
         
     
     def update_priority(self, itr):
@@ -222,7 +221,7 @@ class UpcomingOrders(object):
     provided from the UpcomingOrdersComponents group.
     """
     
-    def __init__(self, parent):
+    def __init__(self, parent, load_data=None):
         """Initializes UpcomingOrders object.
         """
         self.tree_view = UpcomingOrdersView()
@@ -232,6 +231,25 @@ class UpcomingOrders(object):
         self.tree_view.set_model(self.model)
         
         parent.show_all()
+        
+        if load_data != None:
+            self._load_data(load_data)
+    
+    def _load_data(self, load_data):
+        """Loads the data from a previous
+        session.
+        
+        @param load_data: 2-tuple of dicts.
+        Where each dict has a key that represents
+        the orders name and a value that is a list
+        of MenuItems. The first entry is the dict
+        of the table orders, the second entry is
+        the dict of the misc orders
+        """
+        for order in load_data:
+            for key, value in order.items():
+                self.add_order(key, value)
+            
     
     def add_order(self, order_name, current_order):
         """Adds the given order to the UpcomingOrders

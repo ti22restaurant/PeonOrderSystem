@@ -46,8 +46,7 @@ class PeonOrderSystem(UI):
         @param *args: wildcard argument to catch button that calls
         this method.
         """
-        super(PeonOrderSystem, self).order_confirmed()
-        order_name, order_list = self.get_order_info()
+        order_name, order_list = super(PeonOrderSystem, self).order_confirmed()
         ConfirmationSystem.order_confirmed(order_name, order_list)
     
     def checkout_confirm(self, *args):
@@ -58,8 +57,7 @@ class PeonOrderSystem(UI):
         @param *args: wildcard argument to catch button that calls
         this method.
         """
-        super(PeonOrderSystem, self).checkout_confirm()
-        order_name, order_list = self.get_order_info()
+        order_name, order_list = super(PeonOrderSystem, self).checkout_confirm()
         ConfirmationSystem.checkout_confirmed(order_name, order_list)
     
 if __name__ == '__main__':

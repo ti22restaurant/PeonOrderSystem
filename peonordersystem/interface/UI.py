@@ -41,17 +41,22 @@ class UI(object):
         @param title: str representing the current title to
         be displayed on the GUI
         """
+        
+        print load_data
+        
         self.builder = Builder()
         
         self.builder.add_from_file(MAIN_UI_PATH, title)
         self.builder.connect_signals(self)
         
         # These objects control the main orders and their displays
-        self.orders = Orders(self.builder.order_window, load_data=load_data)
+        self.orders = Orders(self.builder.order_window,
+                             load_data=load_data)
         
         # These objects control secondary displays
         self.reservations = Reservations(self.builder.reservation_window)
-        self.upcoming_orders = UpcomingOrders(self.builder.upcoming_orders_window)
+        self.upcoming_orders = UpcomingOrders(self.builder.upcoming_orders_window,
+                                              load_data=load_data)
         
         # These objects control dialog windows.
         self.editor = Editor(self.builder.window)
@@ -131,6 +136,12 @@ class UI(object):
         self.reservations.remove_selected_reservation()
     
     def remove_selected_upcoming_order(self, *args):
+        """Callback method called when the remove order
+        button for the upcoming orders tab is pressed.
+        
+        @param *args: wildcard that represents a catch
+        for the selected widget
+        """
         self.upcoming_orders.remove_selected_order()
     
     #===========================================================================
@@ -233,15 +244,17 @@ class UI(object):
         self.orders.confirm_order()
         curr_name, curr_order = self.get_order_info()
         self.upcoming_orders.add_order(curr_name, curr_order)
+        return curr_name, curr_order
     
     def checkout_confirm(self, *args):
         """Callback method when the checkout window has been confirmed.
         
         @param *args: wildcard as a catch all
         """
-        self.orders.clear_order()
-        curr_name, _ = self.get_order_info()
+        curr_name, curr_order = self.get_order_info()
         self.upcoming_orders.remove_by_name(curr_name)
+        self.orders.clear_order()
+        return curr_name, curr_order
     
     def togo_confirm_function(self, curr_order):
         """Callback method that is called when a given TOGO confirmation
