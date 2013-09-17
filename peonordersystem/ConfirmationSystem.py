@@ -103,7 +103,7 @@ def order_confirmed(order_name, order_list):
     file representing the confirmed order into
     the parent directories confirmed folder.
     """
-    curr_directory = directory + '/confirmed/'
+    curr_directory = directory + 'confirmed/'
     order_name = standardize_confirm_file_name(order_name)
     
     curr_file = open(curr_directory + order_name, 'w')
@@ -115,7 +115,7 @@ def remove_order_confirmed_file(order_name):
     confirmed order from the necessary
     directory.
     """
-    curr_directory = directory + '/confirmed/'
+    curr_directory = directory + 'confirmed/'
     order_name = standardize_confirm_file_name(order_name)
     
     os.remove(curr_directory + order_name)
@@ -127,7 +127,7 @@ def checkout_confirmed(order_name, order_list):
     """
     remove_order_confirmed_file(order_name)
     
-    curr_directory = directory + '/checkout/'
+    curr_directory = directory + 'checkout/'
     order_name = standardize_checkout_file_name(order_name)
     curr_file = open(curr_directory + order_name, 'w')
     
