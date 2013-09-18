@@ -27,6 +27,7 @@ where changes are made that would
 from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 
 from peonordersystem.MenuItem import MenuItem
+from peonordersystem import ErrorLogger
 
 import time
 
@@ -363,7 +364,17 @@ class OrderStore(Gtk.TreeStore):
                 menu_item.editable = False
                 self.update_item(tree_iter)
             self.confirm_order(self.iter_next(tree_iter))
+    
+    def __repr__(self):
+        """Gets a string representation of
+        the current order store.
+        
+        @return: str representation of a list
+        of MenuItem objects stored in this object.
+        """
+        return str(self.order_list)
 
+@ErrorLogger.error_logging
 class Orders(object):
     """Orders represents the main interactions with
     the Orders for the user. This object will add a
@@ -429,7 +440,6 @@ class Orders(object):
                 self._load_data(load_data)
             except:
                 print('Unable to load data from file')
-                
     
     def _load_data(self, load_data):
         """Loads the data from the files, and
@@ -611,6 +621,13 @@ class Orders(object):
             return self.current_order.clear()
     
     def _get_to_go_order_key(self):
+        """Gets the key associated with the current
+        order.
+        
+        @return: 3-tuple representing the key that
+        the current order is stored in. None if the
+        current order is not in the to go dict.
+        """
         itr = self.to_go_dict.iteritems()
         found_key = None
         
@@ -619,3 +636,12 @@ class Orders(object):
                 found_key = key
                 
         return found_key
+    
+    def __repr__(self):
+        """Gets a string representation of the
+        object.
+        
+        @return: str representing the objects
+        __dict__
+        """
+        return str(self.__dict__)

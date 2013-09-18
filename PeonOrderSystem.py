@@ -15,10 +15,14 @@ the PeonOrderSystem GUI.
 
 from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 
-from peonordersystem import path
+# Path import unused. Imported to set working directory
+# as the one that PeonOrderSystem object is placed in.
+from peonordersystem import path  # IGNORE:W0611
 from peonordersystem.interface.UI import UI
 from peonordersystem import ConfirmationSystem
+from peonordersystem import ErrorLogger
 
+@ErrorLogger.error_logging
 class PeonOrderSystem(UI):
     """Generates and controls the PeonOrderSystem GUI and
     establishes its functionality.
@@ -35,8 +39,10 @@ class PeonOrderSystem(UI):
         of the main GUI window. Default value is 'Fish Cake
         Factory'
         """
+        ErrorLogger.initializing_fencepost_begin()
         load_data = ConfirmationSystem.generate_files()
         super(PeonOrderSystem, self).__init__(title, load_data=load_data)
+        ErrorLogger.initializing_fencepost_finish()
     
     def order_confirmed(self, *args):
         """Callback Method. Called when the order has been confirmed.

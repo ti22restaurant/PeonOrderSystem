@@ -98,5 +98,6 @@ class MenuItem(object):
         @return: str that is a representation of information
         stored in the MenuItem
         """
-        return self._name
+        return str(self.__dict__)
+        
     

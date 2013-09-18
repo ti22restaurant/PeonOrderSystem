@@ -143,6 +143,9 @@ class Reserver(object):
         are equal.
         """
         return int(self._arrival_time - other._arrival_time)
+    
+    def __repr__(self):
+        return str(self.__dict__)
 
 class ReservationTreeView(Gtk.TreeView):
     """ReservationTreeView class provides the basic
@@ -367,6 +370,15 @@ class ReservationStore(Gtk.ListStore):
         for row, reserver in zip(self, self._reservation_list):
             row[3] = reserver.get_eta()
         return True
+    
+    def __repr__(self):
+        """Gets a string representation of the
+        reservations stored in this object.
+        
+        @return: str representation of a list
+        of reservations as 3-tuples
+        """
+        return str(self._reservation_list)
             
 class Reservations(object):
     """Reservations class generates and
@@ -418,4 +430,13 @@ class Reservations(object):
         """
         itr = self.tree_view.get_selected_iter()
         self.model.remove_selected(itr)
+    
+    def __repr__(self):
+        """Gets a string representation of the
+        state stored in this object.
+        
+        @return: str representing the classes
+        __dict__
+        """
+        return str(self.__dict__)
 

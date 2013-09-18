@@ -9,7 +9,9 @@ confirm Orders.
 """
 
 from peonordersystem.interface import Dialog
+from peonordersystem import ErrorLogger
 
+@ErrorLogger.error_logging
 class Editor(object):
     """Editor performs the control functionality
     of the dialog windows. This object allows for

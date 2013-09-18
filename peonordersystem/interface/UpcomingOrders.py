@@ -21,6 +21,8 @@ from gi.repository import Gtk
 
 import time
 
+from peonordersystem import ErrorLogger
+
 class UpcomingOrdersView(Gtk.TreeView):
     """UpcomingOrdersView provides the basic
     Gtk.TreeView that display the information on
@@ -167,7 +169,14 @@ class UpcomingOrderStore(Gtk.ListStore):
         
     
     def update_priority(self, itr):
-        self[itr][2] = Gtk.STOCK_NO
+        """Updates the priority of the given
+        item stored at itr.
+        
+        @param itr: Gtk.TreeIter pointing to the
+        object to be updated.
+        """
+        if self.iter_is_valid(itr):
+            self[itr][2] = Gtk.STOCK_NO
     
     def _search_for_order(self, order_name, itr):
         """Private Method.
@@ -211,6 +220,7 @@ class UpcomingOrderStore(Gtk.ListStore):
             return Gtk.STOCK_YES
         return Gtk.STOCK_NO
 
+@ErrorLogger.error_logging
 class UpcomingOrders(object):
     """UpcomingOrders class provides the component
     functionality. This object displays, stores, and
@@ -278,5 +288,8 @@ class UpcomingOrders(object):
         self.model.remove_by_name(order_name)
     
     def confirm_priority(self):
+        """Confirms the priority flag on the selected
+        order.
+        """
         itr = self.tree_view.get_selected_iter()
         self.model.update_priority(itr)
