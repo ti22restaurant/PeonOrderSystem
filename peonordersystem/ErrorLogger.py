@@ -7,7 +7,6 @@ from peonordersystem.path import SYSTEM_LOG_PATH
 
 import logging
 import inspect
-from pprint import pformat
 
 def generate_logger(log_type=logging.DEBUG, file_name='debug.log'):
     """Generates the logger object and stores it in the

@@ -185,8 +185,6 @@ class OrderStore(Gtk.TreeStore):
         self.order_list.append(menu_item)
         new_entry = []
         
-        print menu_item.confirmed
-        
         name = menu_item.get_name()
         stars = ''
         

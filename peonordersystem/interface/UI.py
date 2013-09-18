@@ -41,9 +41,6 @@ class UI(object):
         @param title: str representing the current title to
         be displayed on the GUI
         """
-        
-        print load_data
-        
         self.builder = Builder()
         
         self.builder.add_from_file(MAIN_UI_PATH, title)
