@@ -74,13 +74,10 @@ class UI(object):
         the current table button clicked.
         
         @param table: str representing the stored text on the
-        table button. Represented as 'Table N', where N is the
-        table number.
+        table button.
         """
-        num = int(table.split(' ')[1])
-        
         self.builder.set_table(table)
-        self.orders.set_current_table(num - 1)
+        self.orders.set_current_table(table)
         
     def menu_button_clicked(self, menu_button):
         """Callback method called when a MenuButton has been

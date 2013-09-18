@@ -384,8 +384,9 @@ class Orders(object):
     members of the Orders_Components groups to create their
     base functionality.
     
-    @var order_list: list of OrderStores where each nth entry
-    represents the table at n + 1. 
+    @var orders_dict: dict of str representing the table as a key
+    to OrderStores values, where the value represents the current
+    OrderStore associated with the table
     
     @var tree_view: OrderTreeView represents the OrderTreeView
     where each OrderStore is displayed.
@@ -425,10 +426,13 @@ class Orders(object):
         self.tree_view = OrderTreeView()
         parent.add(self.tree_view)
         
-        self.order_list = []
-        for _ in range(num_of_tables):
-            tree_model = OrderStore()
-            self.order_list.append(tree_model)
+        self.orders_dict = {}
+        for num in range(num_of_tables):
+            value = OrderStore()
+            key = 'TABLE ' + str(num)
+            
+            self.orders_dict[key] = value
+            
             
         self.to_go_dict = {}
         self.current_order = None
@@ -453,16 +457,15 @@ class Orders(object):
                             "of {}, and {}".format(type(table_orders),
                                                    type(togo_orders)))
         
-        for table_num in table_orders:
-            table, num = table_num.split('_')
+        for table in table_orders:
+            table = table.replace('_', ' ')
             
-            num = int(num) - 1
+            if table not in self.orders_dict:
+                self.orders_dict[table] = OrderStore()
+                
+            self.current_order = self.orders_dict[table]
             
-            self.current_order = self.order_list[num]
-            
-            load_order = table_orders[table_num]
-            
-            for menu_item in load_order:
+            for menu_item in table_orders[table]:
                 self.add(menu_item)
         
         for togo_name in togo_orders:
@@ -511,7 +514,7 @@ class Orders(object):
         self.tree_view.show_all()
         
     
-    def set_current_table(self, num):
+    def set_current_table(self, table):
         """Sets the current table and order considered
         to the given value.
         
@@ -521,9 +524,10 @@ class Orders(object):
         @raise IndexError: If number given is outside
         of the range of the the length of order_list.
         """
-        if num not in range(len(self.order_list)):
-            raise IndexError()
-        self.current_order = self.order_list[num]
+        if table not in self.orders_dict:
+            self.orders_dict[table] = OrderStore()
+            
+        self.current_order = self.orders_dict[table]
         self._set_model()
     
     def get_current_order(self):
@@ -588,12 +592,10 @@ class Orders(object):
         order. Either table_n, where n is the number,
         or name_number if the order is a togo order.
         """
-        if self.current_order in self.order_list:
-            index = self.order_list.index(self.current_order)
-            return 'table_{}'.format(index + 1)
-        else:
-            found_key = self._get_to_go_order_key()
-            return '{}_{}'.format(found_key[0], found_key[1])
+        key, order_list = self._get_order_key
+        
+        return key, order_list[key]
+        
         
     
     def confirm_order(self):
@@ -609,31 +611,31 @@ class Orders(object):
         @return: list of MenuItems, represents
         the cleared order.
         """
-        found_key = self._get_to_go_order_key()
-        if found_key != None:
-            del self.to_go_dict[found_key]
-            self.current_order.clear()
-            self.current_order = None
-            self._set_model()
-        else:
-            return self.current_order.clear()
+        found_key, order_list = self._get_order_key()
+        if order_list is self.to_go_dict:
+            del order_list[found_key]
+        self.current_order.clear()
+        self.current_order = None
+        self._set_model()
     
-    def _get_to_go_order_key(self):
+    def _get_order_key(self):
         """Gets the key associated with the current
         order.
         
-        @return: 3-tuple representing the key that
-        the current order is stored in. None if the
-        current order is not in the to go dict.
+        @return: 2-tuple. First index is the key as str
+        or 3-tuple that is the key, the second index is
+        the order_list that contains that key.
         """
-        itr = self.to_go_dict.iteritems()
-        found_key = None
-        
-        for key, value in itr:
-            if value is self.current_order:
-                found_key = key
-                
-        return found_key
+        for order_list in (self.orders_dict, self.to_go_dict):
+            
+            itr = order_list.iteritems()
+            found_key = None
+            
+            for key, value in itr:
+                if value is self.current_order:
+                    found_key = key
+                    
+            return found_key, order_list
     
     def __repr__(self):
         """Gets a string representation of the
