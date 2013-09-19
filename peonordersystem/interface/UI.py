@@ -16,8 +16,9 @@ from peonordersystem.interface.Orders import Orders
 from peonordersystem.interface.Reservations import Reservations
 from peonordersystem.interface.Editor import Editor
 from peonordersystem.interface.UpcomingOrders import UpcomingOrders
+from peonordersystem import ErrorLogger
 
-
+@ErrorLogger.error_logging
 class UI(object):
     """UI Object operates on higher level functions of the
     PeonOrderSystem GUI. Functionally it instantiates all
