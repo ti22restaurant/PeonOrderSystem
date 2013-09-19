@@ -5,6 +5,9 @@
 '''
 from peonordersystem.path import SYSTEM_LOG_PATH
 
+
+import traceback
+
 import logging
 import inspect
 
@@ -21,6 +24,7 @@ def generate_logger(log_type=logging.DEBUG, file_name='debug.log'):
     @return: logging.Logger object that represents the newly
     created logger.
     """
+    print 'generating'
     fmt = '%(asctime)s | %(levelname)s: %(message)s'
     date_fmt = "%Y-%m-%d, %H:%M:%S"
     formatter = logging.Formatter(fmt=fmt, datefmt=date_fmt)
@@ -101,6 +105,10 @@ def log_func_data(func):
             except Exception as e:
                 logger.error(e)
                 spaces = '   '
+                logger.error('')
+                logger.error('TRACEBACK')
+                logger.error(traceback.format_exc())
+                logger.error('')
                 logger.error(spaces + 'Parameters: ')
                 
                 spaces = spaces * 2
@@ -108,12 +116,14 @@ def log_func_data(func):
                     for param_set in (args, kwargs):
                         for arg in param_set:
                             arg_type = str(type(arg))
-                            arg_value = pformat(arg, indent=4, depth=60)
+                            arg_value = str(arg)
                             logger.error(spaces + 'type = ' + arg_type)
                             logger.error(spaces + 'value = ' + arg_value)
                             logger.error('')
                 else:
                     logger.error(spaces + 'No Parameters given to function')
+                
+                raise
         
         finally:
             if logger.getEffectiveLevel() == logging.DEBUG:
