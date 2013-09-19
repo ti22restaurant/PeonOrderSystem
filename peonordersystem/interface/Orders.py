@@ -483,7 +483,7 @@ class Orders(object):
             self.current_order = self.orders_dict[table]
             
             for menu_item in table_orders[table]:
-                self.add(menu_item)
+                self.current_order.append(menu_item)
         
         for togo_name in togo_orders:
             name, number = togo_name.split(TOGO_SEPARATOR)
@@ -497,7 +497,7 @@ class Orders(object):
             load_order = togo_orders[togo_name]
             
             for menu_item in load_order:
-                self.add(menu_item)
+                self.current_order.append(menu_item)
         
         self.current_order = None
         self._set_model()
