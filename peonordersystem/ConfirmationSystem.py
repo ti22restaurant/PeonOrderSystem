@@ -85,7 +85,7 @@ def standardize_confirm_file_name(order_name):
     @return: str representing the standardized
     file format.
     """
-    
+    order_name = order_name.replace('.', '_')
     order_name = order_name.replace(' ', '_')
     
     if TOGO_SEPARATOR in order_name:
