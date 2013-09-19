@@ -102,6 +102,20 @@ class OrderTreeView(Gtk.TreeView):
         
         return col_list
     
+    def select_iter(self, itr):
+        """Selects the entry pointed to by
+        given iter.
+        
+        @param itr: Gtk.TreeIter pointing to an
+        entry.
+        
+        @return: Gtk.TreeIter pointing to the
+        selected entry.
+        """
+        selection = self.get_selection()
+        selection.select_iter(itr)
+        return itr
+    
     def get_selected_iter(self):
         """Gets a Gtk.TreeIter representing the
         currently selected item in the OrderTreeView.
@@ -358,9 +372,10 @@ class OrderStore(Gtk.TreeStore):
         """
         if tree_iter != None:
             menu_item = self.get_menu_item(tree_iter)
-            if not menu_item.confirmed:
+            if not menu_item.confirmed and _check_menu_item(menu_item):
                 menu_item.confirmed = True
                 menu_item.editable = False
+                menu_item.toggle_lock_menu_item()
                 self.update_item(tree_iter)
             self.confirm_order(self.iter_next(tree_iter))
     
@@ -468,7 +483,7 @@ class Orders(object):
             self.current_order = self.orders_dict[table]
             
             for menu_item in table_orders[table]:
-                self.add(menu_item)
+                self.current_order.append(menu_item)
         
         for togo_name in togo_orders:
             name, number = togo_name.split(TOGO_SEPARATOR)
@@ -482,7 +497,7 @@ class Orders(object):
             load_order = togo_orders[togo_name]
             
             for menu_item in load_order:
-                self.add(menu_item)
+                self.current_order.append(menu_item)
         
         self.current_order = None
         self._set_model()
@@ -539,10 +554,9 @@ class Orders(object):
         the current order list. None if no order has
         been selected.
         """
-        if self.current_order != None:
+        if _check_order(self.current_order):
             order_list = self.current_order.order_list
             return order_list
-        return None
     
     def get_selected(self):
         """Gets the selected MenuItem.
@@ -550,23 +564,20 @@ class Orders(object):
         @return: MenuItem object representing the
         currently selected MenuItem
         """
-        itr = self.tree_view.get_selected_iter()
-        return self.current_order.get_menu_item(itr)
+        if _check_order(self.current_order):
+            itr = self.tree_view.get_selected_iter()
+            return self.current_order.get_menu_item(itr)
     
     def add(self, menu_item):
         """Adds the given menu_item to the
         current order.
         
-        @raise TypeError: if given menu_item is
-        not of type MenuItem
-        
         @param menu_item: MenuItem object representing
         the menu item to be added to the current order.
         """
-        if not type(menu_item) is MenuItem:
-            raise TypeError('Expected MenuItem object, ' + 
-                            'got ' + str(type(menu_item)))
-        itr = self.current_order.append(menu_item)
+        if _check_order(self.current_order) and _check_menu_item(menu_item):
+            itr = self.current_order.append(menu_item)
+            self.tree_view.select_iter(itr)
     
     def remove(self):
         """Removes the currently selected
@@ -575,16 +586,19 @@ class Orders(object):
         @return: MenuItem object that represents
         the removed MenuItem
         """
-        itr = self.tree_view.get_selected_iter()
-        if self.current_order != None:
-            return self.current_order.remove(itr)
+        if _check_order(self.current_order):
+            itr = self.tree_view.get_selected_iter()
+            menu_item = self.get_selected()
+            if _check_menu_item(menu_item):
+                return self.current_order.remove(itr)
     
     def update(self):
         """Updates the currently selected MenuItem
         so that it displays updated information.
         """
-        itr = self.tree_view.get_selected_iter()
-        self.current_order.update_item(itr)
+        if _check_order(self.current_order):
+            itr = self.tree_view.get_selected_iter()
+            self.current_order.update_item(itr)
     
     def get_order_info(self):
         """Gets the label associated with the
@@ -608,8 +622,9 @@ class Orders(object):
         """Set all MenuItems in the current order to
         confirmed
         """
-        tree_iter = self.current_order.get_iter_first()
-        self.current_order.confirm_order(tree_iter)
+        if _check_order(self.current_order):
+            tree_iter = self.current_order.get_iter_first()
+            self.current_order.confirm_order(tree_iter)
     
     def clear_order(self):
         """Clears the current order.
@@ -617,12 +632,13 @@ class Orders(object):
         @return: list of MenuItems, represents
         the cleared order.
         """
-        found_key, order_list = self._get_order_key()
-        if order_list is self.to_go_dict:
-            del order_list[found_key]
-        self.current_order.clear()
-        self.current_order = None
-        self._set_model()
+        if _check_order(self.current_order):
+            found_key, order_list = self._get_order_key()
+            if order_list is self.to_go_dict:
+                del order_list[found_key]
+            self.current_order.clear()
+            self.current_order = None
+            self._set_model()
     
     def _get_order_key(self):
         """Gets the key associated with the current
@@ -650,3 +666,40 @@ class Orders(object):
         __dict__
         """
         return str(self.__dict__)
+
+def _check_menu_item(menu_item):
+    """Checks if the given MenuItem is a valid
+    MenuItem.
+    
+    @param menu_item: MenuItem object that represents
+    the MenuItem to be checked.
+    
+    @raise TypeError: when the given Menuitem is not
+    an instance of MenuItem
+    
+    @return: bool representing if the MenuItem given
+    is valid and operations can be performed on it.
+    """
+    
+    if not isinstance(menu_item, MenuItem):
+        raise TypeError('Expected MenuItem type. ' + 
+                        'Got {} instead'.format(type(menu_item)))
+    return not menu_item.is_locked()
+
+def _check_order(current_order):
+    """Checks if the stored current_order is a valid
+    OrderStore.
+    
+    @param current_order: OrderStore object that represents
+    the OrderStore to be checked.
+    
+    @raise TypeError: when the current_order given is
+    not an instance of OrderStore
+    
+    @return: bool representing of the current_order
+    stored is valid and operations can be performed on it.
+    """
+    if not isinstance(current_order, OrderStore):
+        raise TypeError('Expected OrderStore type. ' + 
+                        'Got {} instead'.format(type(current_order)))
+    return current_order != None

@@ -33,15 +33,33 @@ class MenuItem(object):
     
     def __init__(self, name, price, stars=0, editable=True,
         confirmed=False, option_choices=None):
+        
         self._name = name
         self._price = price
+        self._option_choices = option_choices
+        self._locked = False
+        
         self.editable = bool(editable)
         self.stars = int(stars)
         self.notes = ''
         self.options = []
-        self._option_choices = option_choices
         self.confirmed = bool(confirmed)
+    
+    def toggle_lock_menu_item(self):
+        """Toggles if the MenuItem is locked.
+        If true toggles to false, if false toggles
+        true.
+        """
+        self._locked = not self._locked
+    
+    def is_locked(self):
+        """Returns the value of the locked attribute.
         
+        @return: bool representing if the MenuItem is
+        locked.
+        """
+        return self._locked
+    
     def get_name(self):
         """Gets the name of the MenuItem.
         
