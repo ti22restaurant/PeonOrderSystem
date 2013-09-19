@@ -31,6 +31,12 @@ class UI(object):
     
     @var reservations: Reservations object that stores and
     operates the current reservations. 
+    
+    @var upcoming_orders: UpcomingOrders object that stores
+    and operates the current upcoming orders display.
+    
+    @var editor: Editor object that operates and displays
+    dialog windows.
     """
     
     def __init__(self, title, load_data=None):
@@ -79,18 +85,16 @@ class UI(object):
         self.builder.set_table(table)
         self.orders.set_current_table(table)
         
-    def menu_button_clicked(self, menu_button):
-        """Callback method called when a MenuButton has been
-        clicked. MenuButton stores an instance of the MenuItem
-        that it corresponds to as MenuItem. This method obtains
-        that MenuItem and adds it to the current Order object.
+    def menu_button_clicked(self, menu_button, menu_item):
+        """Callback method called when a menu button has been
+        clicked. 
         
-        @param menu_button: Gtk.Button object that stores a MenuItem
-        as MenuItem.
+        @param menu_button: Gtk.Button object.
+        
+        @param menu_item: MenuItem object that represents
+        the MenuItem associated with the clicked button.
         """
-        menu_item = menu_button.MenuItem
-        if menu_item != None:
-            self.orders.add(copy.copy(menu_item))
+        self.orders.add(copy.copy(menu_item))
         
     def remove_menu_item(self, *args):  # @IGNORE:W0613
         """Removes currently selected MenuItem
@@ -116,8 +120,7 @@ class UI(object):
         the selected item 
         """
         name, number, arrival_time = self.editor.add_new_reservation()
-        if not None in (name, number, arrival_time):
-            self.reservations.add_reservation(name, number, arrival_time)
+        self.reservations.add_reservation(name, number, arrival_time)
     
     def remove_selected_reservation(self, *args):  # @IGNORE:W0613
         """Callback method called when remove reservation
@@ -154,9 +157,8 @@ class UI(object):
         @param *args: wildcard representing the button clicked.
         """
         menu_item = self.orders.get_selected()
-        if menu_item_check(menu_item):
-            self.editor.edit_note(menu_item)
-            self.orders.update()
+        self.editor.edit_note(menu_item)
+        self.orders.update()
         
     def edit_stars(self, *args):  # @IGNORE:W0613
         """Callback method when edit stars button has been
@@ -167,9 +169,8 @@ class UI(object):
         @param *args: wildcard representing the button clicked
         """
         menu_item = self.orders.get_selected()
-        if menu_item_check(menu_item):
-            self.editor.edit_stars(menu_item)
-            self.orders.update()
+        self.editor.edit_stars(menu_item)
+        self.orders.update()
         
     def edit_options(self, *args):  # @IGNORE:W0613
         """Callback method when edit options button has been
@@ -180,9 +181,8 @@ class UI(object):
         @param *args: wildcard representing the button clicked
         """
         menu_item = self.orders.get_selected()
-        if menu_item_check(menu_item):
-            self.editor.edit_options(menu_item)
-            self.orders.update()
+        self.editor.edit_options(menu_item)
+        self.orders.update()
     
     #===========================================================================
     # This block contains methods pertaining to dialog windows that
@@ -200,8 +200,7 @@ class UI(object):
         @param *args: wildcard representing the button clicked.
         """
         current_order = self.orders.get_current_order()
-        if order_check(current_order):
-            self.editor.confirm_order(current_order, self.order_confirmed)
+        self.editor.confirm_order(current_order, self.order_confirmed)
     
     def confirm_checkout(self, *args):  # @IGNORE:W0613
         """Callback method when check order button has been
@@ -211,8 +210,7 @@ class UI(object):
         @param *args: wildcard that represents the button pressed
         """
         current_order = self.orders.get_current_order()
-        if order_check(current_order):
-            self.editor.checkout_order(current_order, self.checkout_confirm)
+        self.editor.checkout_order(current_order, self.checkout_confirm)
     
     def select_misc_order(self, *args):
         """Callback method when the misc order button has been pressed.
@@ -222,7 +220,7 @@ class UI(object):
         """
         current_names = self.orders.get_togo_orders()
         self.editor.select_misc_order(current_names,
-                                      self.togo_confirm_function)
+          self.order_selection_confirm_function)
     
     #===========================================================================
     # This block contains methods that are called via callback only when a
@@ -234,6 +232,11 @@ class UI(object):
         confirmed as is to be sent to the kitchen.
         
         @param args: wildcard parameter as catch all  
+        
+        @return: 2-tuple where first index is a str
+        representing the order's associated name, and
+        the second index is a list of MenuItem objects
+        that represent the order.
         """
         self.orders.confirm_order()
         curr_name, curr_order = self.get_order_info()
@@ -244,13 +247,18 @@ class UI(object):
         """Callback method when the checkout window has been confirmed.
         
         @param *args: wildcard as a catch all
+        
+        @return:  2-tuple where first index is a str
+        representing the order's associated name, and
+        the second index is a list of MenuItem objects
+        that represent the order.
         """
         curr_name, curr_order = self.get_order_info()
         self.upcoming_orders.remove_by_name(curr_name)
         self.orders.clear_order()
         return curr_name, curr_order
     
-    def togo_confirm_function(self, curr_order):
+    def order_selection_confirm_function(self, curr_order):
         """Callback method that is called when a given TOGO confirmation
         dialog has been confirmed. Sets the GUI for menu items to be
         added to the order created or selected.
@@ -259,11 +267,8 @@ class UI(object):
         and time which is used for storing information about the
         togo order.
         """
-        # order is 3-tuple (name, number, time)
-        if curr_order is not None:
-            self.orders.select_togo_order(curr_order)
-            self.builder.set_table(curr_order[0] + 
-                                   ' (' + curr_order[1] + ')')
+        self.orders.select_togo_order(curr_order)
+        self.builder.set_table(curr_order[0])
     
     #===========================================================================
     # This block contains methods that are used for obtaining information
@@ -282,34 +287,5 @@ class UI(object):
         second entry represents the MenuItem list associated
         with that entry.
         """
-        current_order = self.orders.get_current_order()
-        current_table_info = self.orders.get_order_info()
-        return current_table_info, current_order
-
-
-#===========================================================================
-# This block contains functions that are called as conditionals to
-# ensure that specific conditions are met with given items. These functions
-# are module wide.
-#===========================================================================
-
-def menu_item_check(menu_item):
-    """Checks whether the given MenuItem is a valid 
-    MenuItem to have operations performed on it.
-    
-    @return: bool representing True if the MenuItem
-    is not None and the MenuItem is editable. False
-    otherwise.
-    """
-    return menu_item != None and menu_item.is_editable()
-
-def order_check(current_order):
-    """Checks if the current order is a accessible, valid
-    order.
-    
-    @return: bool representing True if the given order is
-    not None and is of length > 0. False otherwise.
-    """
-    return current_order != None and len(current_order) > 0
-    
+        return self.orders.get_order_info()
 

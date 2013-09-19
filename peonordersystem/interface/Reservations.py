@@ -423,6 +423,10 @@ class Reservations(object):
         arrival time of this reservation. This is expected to
         be generated from the time.time function.
         """
+        if name == None or number == None or arrival_time == None:
+            raise TypeError('Reservations expected values for ' + 
+                            'parameters. Instead got ({}, {}, {}'.format(
+                             type(name), type(number), type(arrival_time)))
         self.model.add_reservation(name, number, arrival_time)
     
     def remove_selected_reservation(self):

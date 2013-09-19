@@ -22,6 +22,7 @@ from gi.repository import Gtk
 import time
 
 from peonordersystem import ErrorLogger
+from peonordersystem.ConfirmationSystem import TOGO_SEPARATOR
 
 class UpcomingOrdersView(Gtk.TreeView):
     """UpcomingOrdersView provides the basic
@@ -128,7 +129,7 @@ class UpcomingOrderStore(Gtk.ListStore):
         
         order = (order_name, curr_time, priority_icon)
         
-        return super(UpcomingOrderStore, self).append(row=order)
+        return super(UpcomingOrderStore, self).append(order)
         
     
     def _order_has_priority(self, current_order):
@@ -229,10 +230,24 @@ class UpcomingOrders(object):
     @group UpcomingOrders: This class is a main component
     of the UpcomingOrders group that has its functionality
     provided from the UpcomingOrdersComponents group.
+    
+    @var tree_view: UpcomingOrdersView that displays the stored
+    information
+    
+    @var model: UpcomingOrderStore that stores the information to
+    be displayed.
+    
     """
     
     def __init__(self, parent, load_data=None):
         """Initializes UpcomingOrders object.
+        
+        @param parent: Gtk.Container subclass that will be holding the
+        generated treeview.
+        
+        @param load_data: 2-tuple of dicts that repersent the given
+        saved orders. First entry is table orders, second entry is
+        togo orders.
         """
         self.tree_view = UpcomingOrdersView()
         parent.add(self.tree_view)
@@ -272,6 +287,7 @@ class UpcomingOrders(object):
         @param current_order: list of MenuItem objects that
         is the current order list being confirmed
         """
+        order_name = order_name.replace(TOGO_SEPARATOR, ' ')
         self.model.append(order_name, current_order)
     
     def remove_selected_order(self):
@@ -285,6 +301,7 @@ class UpcomingOrders(object):
         """Removes the name that is displayed by
         order_name 
         """
+        order_name = order_name.replace(TOGO_SEPARATOR, ' ')
         self.model.remove_by_name(order_name)
     
     def confirm_priority(self):

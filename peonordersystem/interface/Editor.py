@@ -47,8 +47,10 @@ class Editor(object):
         @return: value returned by the dialog windows run_dialog
         method.
         """
-        dialog_window = entry_dialog(self.parent, menu_item)
-        return dialog_window.run_dialog()
+        if menu_item_check(menu_item):
+            dialog_window = entry_dialog(self.parent, menu_item)
+            dialog_window.run_dialog()
+            del dialog_window
     
     def edit_stars(self, menu_item):
         """Calls a dialog window on the given MenuItem
@@ -76,7 +78,8 @@ class Editor(object):
         @param menu_item: MenuItem object that is to
         have the dialog initiated on it.
         """
-        self.edit(menu_item, Dialog.OptionEntryDialog)
+        if len(menu_item.get_option_choices()) > 0:
+            self.edit(menu_item, Dialog.OptionEntryDialog)
     
     def confirm(self, order_list, confirm_dialog, confirm_function):
         """Generates and runs the given ConfirmationDialog with
@@ -94,18 +97,11 @@ class Editor(object):
         @param confirm_function: function pointer that is executed
         when confirmation of the dialog occurs.
         """
-        is_confirm_dialog = issubclass(confirm_dialog,
-                                       Dialog.ConfirmationDialog)
-        if not is_confirm_dialog:
-            raise TypeError('Editor object expected subclass ' + 
-                            'instance of ConfirmationDialog. ' + 
-                            'subclass of ConfirmationDialog ' + 
-                            ' ---> ' + str(is_confirm_dialog))
-        
-        dialog_window = confirm_dialog(self.parent, confirm_function,
-                                            order_list)
-        dialog_window.run_dialog()
-        del dialog_window
+        if order_check(order_list):
+            dialog_window = confirm_dialog(self.parent, confirm_function,
+                                                order_list)
+            dialog_window.run_dialog()
+            del dialog_window
     
     def confirm_order(self, order_list, confirm_function):
         """Calls the confirm order dialog on the given
@@ -149,16 +145,44 @@ class Editor(object):
         @param confirm_function: function pointer that is called
         when the a misc order has been confirmed or added
         """
-        self.confirm(name_list,
-                    Dialog.OrderSelectionConfirmationDialog, confirm_function)
+        dialog = Dialog.OrderSelectionConfirmationDialog(self.parent, confirm_function,
+                                                         name_list)
+        return dialog.run_dialog()
     
     def add_new_reservation(self):
         """Calls a dialog window to add a new reservation to
-        the reservations list. Calls the edit function.
+        the reservations list. Runs dialog via this method.
         
         @return: returns a 3-tuple representing the added
         reservation. Format will be (str, str, float) 
         representing the name, number, and secs since the epoch
         respectively.
         """
-        return self.edit(None, Dialog.AddReservationsDialog)
+        dialog = Dialog.AddReservationsDialog(self.parent)
+        return dialog.run_dialog()
+
+#===========================================================================
+# This block contains functions that are called as conditionals to
+# ensure that specific conditions are met with given items. These functions
+# are module wide.
+#===========================================================================
+
+def menu_item_check(menu_item):
+    """Checks whether the given MenuItem is a valid 
+    MenuItem to have operations performed on it.
+    
+    @return: bool representing True if the MenuItem
+    is not None and the MenuItem is editable. False
+    otherwise.
+    """
+    return menu_item != None and menu_item.is_editable()
+
+def order_check(current_order):
+    """Checks if the current order is a accessible, valid
+    order.
+    
+    @return: bool representing True if the given order is
+    not None and is of length > 0. False otherwise.
+    """
+    return current_order != None and len(current_order) > 0
+    

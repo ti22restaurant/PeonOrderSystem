@@ -28,6 +28,7 @@ from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 
 from peonordersystem.MenuItem import MenuItem
 from peonordersystem import ErrorLogger
+from peonordersystem.ConfirmationSystem import TOGO_SEPARATOR
 
 import time
 
@@ -398,7 +399,6 @@ class Orders(object):
     placed. Keys are 2-tupes represented by name and phone
     number. Values are OrderStores that represent that
     order.
-    
     """
     
     def __init__(self, parent, load_data=None, num_of_tables=10):
@@ -448,7 +448,9 @@ class Orders(object):
         places them in the orders.
         """
         table_orders = load_data[0]
+        print table_orders
         togo_orders = load_data[1]
+        print togo_orders
         
         if type(table_orders) is not dict or type(togo_orders) is not dict:
             raise TypeError("LOADING DATA FROM FILE. " + 
@@ -469,7 +471,7 @@ class Orders(object):
                 self.add(menu_item)
         
         for togo_name in togo_orders:
-            name, number = togo_name.split('_')
+            name, number = togo_name.split(TOGO_SEPARATOR)
             
             # standard Dialog generated time format.
             curr_time = time.strftime('%X, %A, %m/%y')
@@ -589,12 +591,16 @@ class Orders(object):
         current table.
         
         @return: str representing the given current
-        order. Either table_n, where n is the number,
-        or name_number if the order is a togo order.
+        order. If the order is a togo order the the
+        string returned is a combination of
+        name + TOGO_SEPARATOR + number.
         """
-        key, order_list = self._get_order_key
+        key, order_list = self._get_order_key()
         
-        return key, order_list[key]
+        if order_list is self.to_go_dict:
+            key = key[0] + TOGO_SEPARATOR + key[1]
+        
+        return key, self.current_order.order_list
         
         
     
@@ -629,13 +635,12 @@ class Orders(object):
         for order_list in (self.orders_dict, self.to_go_dict):
             
             itr = order_list.iteritems()
-            found_key = None
             
             for key, value in itr:
                 if value is self.current_order:
-                    found_key = key
-                    
-            return found_key, order_list
+                    return key, order_list
+        
+        return None
     
     def __repr__(self):
         """Gets a string representation of the

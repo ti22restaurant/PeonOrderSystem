@@ -277,7 +277,8 @@ stored on table box. Last index is the 'TOGO' button.
         
         for button in self.generated_menu_buttons:
             button.connect('clicked',
-                parent.menu_button_clicked)
+                parent.menu_button_clicked,
+                button.MenuItem)
         
         for button in self.generated_table_buttons:
             function = parent.table_button_clicked
