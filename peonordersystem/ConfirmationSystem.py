@@ -18,6 +18,7 @@ import cPickle
 import time
 
 from peonordersystem import path
+from peonordersystem import MenuItem
 
 
 directory = path.SYSTEM_ORDERS_PATH
@@ -33,6 +34,7 @@ for value in current_date:
     if not os.path.exists(directory):
         os.mkdir(directory)
 
+TOGO_SEPARATOR = '::@::'
 
 
 def generate_files():
@@ -62,6 +64,7 @@ def generate_files():
         
         for curr_filename in filenames:
             filename, filetype = curr_filename.split('.')
+            filename = filename.replace('_', ' ')
             
             if filetype == 'table':
                 current_orders = table_orders
@@ -83,10 +86,12 @@ def standardize_confirm_file_name(order_name):
     file format.
     """
     
-    if 'table_' in order_name and len(order_name) < 9:
-        order_name = order_name + '.table'
-    else:
+    order_name = order_name.replace(' ', '_')
+    
+    if TOGO_SEPARATOR in order_name:
         order_name = order_name + '.togo'
+    else:
+        order_name = order_name + '.table'
     
     return order_name
 
@@ -95,6 +100,7 @@ def standardize_checkout_file_name(order_name):
     under the standard format for checked out
     orders.
     """
+    order_name = order_name.replace(' ', '_')
     curr_time = time.strftime('%H-%M-%S')
     return order_name + '_' + curr_time + '.checkout'
 
@@ -107,6 +113,9 @@ def order_confirmed(order_name, order_list):
     order_name = standardize_confirm_file_name(order_name)
     
     curr_file = open(curr_directory + order_name, 'w')
+    
+    print order_list
+    print curr_file
     
     cPickle.dump(order_list, curr_file)
 
