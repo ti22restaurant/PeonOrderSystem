@@ -60,6 +60,11 @@ class MenuItem(object):
         """
         return self._locked
     
+    def edit_price(self, value):
+        """Sets the MenuItem's price to the given amount.
+        """
+        self._price = value
+    
     def get_name(self):
         """Gets the name of the MenuItem.
         

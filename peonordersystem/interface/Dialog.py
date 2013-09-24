@@ -30,9 +30,15 @@ from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 
 from abc import ABCMeta, abstractmethod
 
+from collections import deque
+
 from copy import copy
 
 import time
+
+import math
+
+from peonordersystem import CheckOperations
 
 class Dialog(object):
     """Abstract Base Class. Provides the base functionality
@@ -604,7 +610,7 @@ class StarEntryDialog(EntryDialog):
     def increase_star_value(self, widget):
         """Callback method when the increase button
         is clicked. Increases the temporary star
-        level by one. THis value is not stored
+        level by one. This value is not stored
         in the star value of the MenuItem object.
         """
         self.stars_value = 1 + self.stars_value
@@ -664,7 +670,6 @@ class ConfirmationDialog(Dialog):
         self.tree_view = None
         super(ConfirmationDialog, self).__init__(parent, title,
                                                  dialog, default_size)
-        # override Dialog default size
         
     def generate_layout(self):
         """Generates the basic layout of the
@@ -682,6 +687,8 @@ class ConfirmationDialog(Dialog):
         
         self.tree_view = Gtk.TreeView(model)
         column_list = self.generate_columns()
+        
+        self.tree_view.get_selection().set_mode(Gtk.SelectionMode.MULTIPLE)
         
         for column in column_list:
             self.tree_view.append_column(column)
@@ -746,7 +753,11 @@ class ConfirmationDialog(Dialog):
         and called this method.
         """
         super(ConfirmationDialog, self).cancel_button_clicked()
-        
+    
+    def _get_items_selected(self, *args):
+        selection = self.tree_view.get_selection()
+        return selection.get_selected_rows()
+    
 class OrderConfirmationDialog(ConfirmationDialog):
     """OrderConfirmationDialog displays a dialog window
     prompting the user to either confirm the other and
@@ -783,7 +794,7 @@ class OrderConfirmationDialog(ConfirmationDialog):
         """
         def is_confirmed(menu_item):
             return not menu_item.confirmed
-        
+        self. total_row_reference = None
         self.order_list = filter(is_confirmed, order_list)
         
         super(OrderConfirmationDialog, self).__init__(parent, title,
@@ -878,12 +889,13 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
         which the Dialog window was called. Expected Gtk.Window
         
         @param confirm_func: Pointer to external function that
-        is called when confirmation of the dialog occurrs
+        is called when confirmation of the dialog occurs
         
         @param order_list: list of MenuItem object that represents
         the current order being considered for checkout
         """
         self.order_list = order_list
+        self.tree_view = None
         super(CheckoutConfirmationDialog, self).__init__(parent, title,
                                                          confirm_func,
                                                          dialog)
@@ -921,6 +933,7 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
         @return: Gtk.TreeModel representing
         the data to be displayed
         """
+        
         tree_model = Gtk.TreeStore(str, str)
         
         total = 0
@@ -938,9 +951,314 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
                     total = total + option_price
                     tree_model.append(treeiter, (option,
                                                  str(option_price)))
-        tree_model.append(None, ('Total', str(total)))
+                    
+        total = CheckOperations.get_total(self.order_list)
+        itr = tree_model.append(None, ('Total', str(total)))
+        self.total_row_reference = Gtk.TreeRowReference.new(tree_model,
+                                                            tree_model.get_path(itr))
         
         return tree_model
+    
+    def _check_row_changed(self, added_itr=None):
+        
+        model = self.tree_view.get_model()
+        total = CheckOperations.get_total(self.order_list)
+        
+        path = self.total_row_reference.get_path()
+        itr = model.get_iter(path)
+        
+        model[itr][1] = str(total)
+        
+        if added_itr != None:
+            model.swap(added_itr, itr)
+    
+class SplitCheckConfirmationDialog(CheckoutConfirmationDialog):
+    
+    def __init__(self, parent, confirm_func, order_list, dialog=None,
+                 title='Split Check'):
+        self.check_dict = {}
+        self.checks_view = None
+        self.items_view = None
+        
+        super(SplitCheckConfirmationDialog, self).__init__(parent,
+            confirm_func, order_list, dialog=dialog, title=title)
+        
+        self.dialog.set_default_size(1100, 700)
+        self.items_view = self.tree_view
+    
+    def generate_layout(self):
+        main_box = Gtk.VBox()
+        
+        lower_sub_box1 = Gtk.HBox()
+        lower_sub_box2 = Gtk.HBox()
+        
+        select_all_button1 = Gtk.Button('SELECT ALL')
+        select_all_button1.connect('clicked', self.items_select_all)
+        select_all_button1.set_size_request(200, 40)
+        lower_sub_box1.pack_start(select_all_button1, False, False, 5)
+        
+        select_all_button2 = Gtk.Button('SELECT ALL')
+        select_all_button2.set_size_request(200, 40)
+        select_all_button2.connect('clicked', self.checks_select_all)
+        lower_sub_box1.pack_end(select_all_button2, False, False, 5)
+        
+        remove_check_button = Gtk.Button('REMOVE CHECK')
+        remove_check_button.connect('clicked', self.remove_selected_check)
+        remove_check_button.set_size_request(200, 40)
+        lower_sub_box2.pack_end(remove_check_button, False, False, 5)
+        
+        add_check_button = Gtk.Button("ADD CHECK")
+        add_check_button.connect('clicked', self.add_new_check)
+        add_check_button.set_size_request(200, 40)
+        lower_sub_box2.pack_end(add_check_button, False, False, 5)
+        
+        main_box.pack_end(lower_sub_box2, False, False, 5)
+        main_box.pack_end(lower_sub_box1, False, False, 5)
+        
+        
+        center_sub_box = Gtk.HBox()
+        
+        items_scroll_window = super(SplitCheckConfirmationDialog,
+                                    self).generate_layout()
+        center_sub_box.pack_start(items_scroll_window, True, True, 5)
+        
+        center_column_box = Gtk.VBox()
+        center_column_box.set_homogeneous(True)
+        
+        center_column_box.pack_start(Gtk.Fixed(), True, True, 5)
+        
+        push_button = Gtk.Button('>')
+        push_button.connect('clicked', self.push_items)
+        push_button.set_size_request(100, 100)
+        center_column_box.pack_start(push_button, True, True, 5)
+        
+        center_column_box.pack_start(Gtk.Fixed(), True, True, 5)
+        
+        pull_button = Gtk.Button('<')
+        pull_button.connect('clicked', self.pull_items)
+        pull_button.set_size_request(100, 100)
+        center_column_box.pack_start(pull_button, True, True, 5)
+        
+        center_column_box.pack_start(Gtk.Fixed(), True, True, 5)
+        
+        center_sub_box.pack_start(center_column_box, False, False, 5)
+        
+        checks_scroll_window = self.generate_check_treeview()
+        center_sub_box.pack_start(checks_scroll_window, True, True, 5)
+        
+        main_box.pack_end(center_sub_box, True, True, 5)
+        
+        top_sub_box = Gtk.HBox()
+        
+        item_label = Gtk.Label('ITEMS')
+        top_sub_box.pack_start(item_label, False, False, 5)
+        check_label = Gtk.Label('CHECKS')
+        top_sub_box.pack_end(check_label, False, False, 5)
+        
+        main_box.pack_end(top_sub_box, False, False, 5)
+        
+        main_box.show_all()
+        
+        return main_box
+    
+    def generate_check_treeview(self):
+        scroll_window = Gtk.ScrolledWindow()
+        self.checks_view = Gtk.TreeView()
+        
+        self.checks_view.get_selection().set_mode(Gtk.SelectionMode.MULTIPLE)
+        
+        col_list = self.generate_check_columns()
+        
+        for column in col_list:
+            self.checks_view.append_column(column)
+        
+        model = self.generate_check_model()
+        self.checks_view.set_model(model)
+        
+        scroll_window.add(self.checks_view)
+        
+        return scroll_window
+    
+    def generate_check_columns(self):
+        col_list = []
+        
+        rend = Gtk.CellRendererText()
+        col = Gtk.TreeViewColumn('Items', rend, text=0)
+        col_list.append(col)
+        
+        rend = Gtk.CellRendererText()
+        col = Gtk.TreeViewColumn('Price', rend, text=1)
+        col_list.append(col)
+        
+        return col_list
+    
+    def generate_check_model(self):
+        tree_model = Gtk.TreeStore(str, str)
+        return tree_model
+    
+    def _get_check_selected(self, *args):
+        selection = self.checks_view.get_selection()
+        return selection.get_selected_rows()
+    
+    def checks_select_all(self, *args):
+        pass
+    
+    def items_select_all(self, *args):
+        self.tree_view.get_selection().select_all()
+    
+    def add_new_check(self, *args):
+        model = self.checks_view.get_model()
+        key = 'Check ' + str(len(self.check_dict) + 1)
+        
+        self.check_dict[key] = deque()
+        itr = model.append(None, (key, '0.0'))
+    
+    def remove_selected_check(self, *args):
+        model, paths = self._get_check_selected()
+        rows = []
+        for path in paths:
+            rows.append(Gtk.TreeRowReference.new(model, path))
+        
+        for row in rows:
+            path = row.get_path()
+            itr = model.get_iter(path)
+            itr = self._ensure_top_level(model, itr)
+            
+            key = model[itr][0]
+            
+            if key in self.check_dict:
+                self.pull_items()
+                model.remove(itr)
+                del self.check_dict[key]
+                
+    def _get_item_at_index(self, key, index):
+        current_order = self.check_dict[key]
+        current_order.rotate(-index)
+        menu_item = current_order.popleft()
+        current_order.rotate(index)
+        return menu_item
+        
+    
+    def push_items(self, *args):
+        item_model, item_paths = self._get_items_selected()
+        check_model, check_paths = self._get_check_selected()
+        
+        if len(item_paths) > 0 and len(check_paths) > 0:
+            
+            rows = []
+            for item_path in item_paths:
+                row_ref = Gtk.TreeRowReference.new(item_model, item_path)
+                rows.append(row_ref)
+                
+            for row_ref in rows:
+                item_path = row_ref.get_path()
+                item_iter = item_model.get_iter(item_path)
+                index = item_path.get_indices()[0]
+                
+                item_model.remove(item_iter)
+                menu_item = self.order_list.pop(index)
+                
+                name = menu_item.get_name()
+                price = menu_item.get_price()
+                price = math.ceil(price / len(check_paths) * 100) / 100
+                
+                menu_item.edit_price(price)
+                
+                for check_path in check_paths:
+                    check_iter = check_model.get_iter(check_path)
+                    check_iter = self._ensure_top_level(check_model, check_iter)
+                    
+                    key = check_model[check_iter][0]
+                    check_list = self.check_dict[key]
+                    check_list.appendleft(menu_item)
+                    
+                    check_model.prepend(check_iter,
+                                       (name, str(price)))
+                    
+                    self._check_row_changed(check_model, check_iter)
+                    super(SplitCheckConfirmationDialog, self)._check_row_changed()
+        
+    
+    def pull_items(self, *args):
+        model, paths = self._get_check_selected()
+        
+        if len(paths) > 0:
+            parent_iter = None
+            rows = []
+            
+            for path in paths:
+                
+                itr = model.get_iter(path)
+                
+                if model.iter_has_child(itr):
+                    parent_iter = itr
+                    key = model[itr][0]
+                    itr = model.iter_children(itr)
+                    
+                    while itr != None:
+                        path = model.get_path(itr)
+                        index = path.get_indices()[1]
+                        row_ref = Gtk.TreeRowReference.new(model, path)
+                        rows.append((key, index, row_ref))
+                        itr = model.iter_next(itr)
+                
+                else:
+                    parent_iter = model.iter_parent(itr)
+                    key = model[parent_iter][0]
+                    
+                    path = model.get_path(itr)
+                    index = path.get_indices()[1]
+                    row_ref = Gtk.TreeRowReference.new(model, path)
+                    rows.append((key, index, row_ref))
+            
+            for row in rows:
+                key = row[0]
+                index = row[1]
+                row_ref = row[2]
+                
+                path = row_ref.get_path()
+                itr = model.get_iter(path)
+                
+                model.remove(itr)
+                
+                menu_item = self._get_item_at_index(key, index)
+                name = menu_item.get_name()
+                price = menu_item.get_price()
+                
+                
+                self.order_list.append(menu_item)
+                
+                item_model = self.tree_view.get_model()
+                added_itr = item_model.append(None, (name, str(price)))
+                
+                self._check_row_changed(model, parent_iter)
+                super(SplitCheckConfirmationDialog, self)._check_row_changed(added_itr)
+        
+    
+    def _check_row_changed(self, tree_model, itr, *args):
+        if itr != None and tree_model.iter_is_valid(itr):
+            
+            parent_iter = tree_model.iter_parent(itr)
+            
+            if parent_iter == None:
+                parent_iter = itr
+            
+            if tree_model.iter_has_child(parent_iter):
+                check_name = tree_model[parent_iter][0]
+                
+                current_order = self.check_dict[check_name]
+                
+            tree_model[parent_iter][1] = str(CheckOperations.get_total(current_order))
+            
+    
+    def _ensure_top_level(self, model, itr):
+        
+        parent_iter = model.iter_parent(itr)
+        
+        if parent_iter != None:
+            return parent_iter
+        
+        return itr
     
 class OrderSelectionConfirmationDialog(ConfirmationDialog):
     """OrderSelectionConfirmation window displays the current
@@ -1263,3 +1581,22 @@ class AddReservationsDialog(Dialog):
         if signal is int(Gtk.ResponseType.ACCEPT):
             return self.get_information()
         return None, None, None
+
+if __name__ == '__main__':
+    
+    def boom(*args):
+        print 'Confirmed!'
+    
+    from peonordersystem.MenuItem import MenuItem
+    
+    order = []
+    
+    for _ in range(3):
+        order.append(MenuItem('Carls Item', 10.0))
+        order.append(MenuItem('Loras Item', 10.0))
+        order.append(MenuItem('Bobs Item', 10.23))
+    
+    
+    dialog = SplitCheckConfirmationDialog(None, boom, order)
+    dialog.run_dialog()
+                                          
