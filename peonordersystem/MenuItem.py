@@ -41,7 +41,6 @@ class MenuItem(object):
         self._price = price
         self._option_choices = option_choices
         self._locked = False
-        self.priority = False
         
         self.editable = bool(editable)
         self.stars = int(stars)
