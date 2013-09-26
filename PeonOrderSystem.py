@@ -45,7 +45,7 @@ class PeonOrderSystem(UI):
         super(PeonOrderSystem, self).__init__(title, load_data=load_data)
         ErrorLogger.initializing_fencepost_finish()
     
-    def order_confirmed(self, *args):
+    def order_confirmed(self, priority_order, non_priority_order):
         """Callback Method. Called when the order has been confirmed.
         This method calls the ConfirmationSystem functions to export
         the data to the parent directory.
@@ -53,8 +53,9 @@ class PeonOrderSystem(UI):
         @param *args: wildcard argument to catch button that calls
         this method.
         """
-        order_name, order_list = super(PeonOrderSystem, self).order_confirmed()
-        ConfirmationSystem.order_confirmed(order_name, order_list)
+        order_name, current_order = super(PeonOrderSystem, self).order_confirmed()
+        ConfirmationSystem.order_confirmed(order_name, priority_order,
+                                           non_priority_order, current_order)
     
     def checkout_confirm(self, *args):
         """Callback Method. Called when the order checkout has been
