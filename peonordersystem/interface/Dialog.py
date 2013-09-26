@@ -34,6 +34,10 @@ from copy import copy
 
 import time
 
+
+STANDARD_TEXT = 100
+STANDARD_TEXT_BOLD = 700
+
 class Dialog(object):
     """Abstract Base Class. Provides the base functionality
     for a Dialog window.
@@ -137,28 +141,45 @@ class Dialog(object):
         """ Abstract Method. Represents the callback
         method called when the Gtk.Dialog's confirm
         button is clicked in the action_area.
-        
+
+        @param args: wildcard catchall used to catch
+        the widget that activated this method.
+
         @attention: super calls on this method yield
         the appropriate response to be emitted by the
         Gtk.Dialog window and then the dialog to hide.
         This functionality is utilized by sub classes.
+
+        @return: int representing a Gtk.ResponseType
+        that is associated with this dialog windows
+        appropriate button.
         """
         self.dialog.response(Gtk.ResponseType.ACCEPT)
         self.dialog.hide()
+        return Gtk.ResponseType.ACCEPT
+
     
     @abstractmethod
     def cancel_button_clicked(self, *args):
         """ Abstract Method. Represents the callback
         method called when the Gtk.Dialog's cancel
         button is clicked in the action_area.
-        
+
+        @param args: wildcard catchall used to catch
+        the widget that activated this method.
+
         @attention: super calls on this method yield
         the appropriate response to be emitted by the
         Gtk.Dialog window and then the dialog to hide.
         This functionality is utilized by sub classes.
+
+        @return: int representing a Gtk.ResponseType
+        that is associated with this dialog windows
+        appropriate button.
         """
         self.dialog.response(Gtk.ResponseType.CANCEL)
         self.dialog.destroy()
+        return Gtk.ResponseType.CANCEL
     
     def run_dialog(self):
         """Runs the stored dialog window.
@@ -167,6 +188,7 @@ class Dialog(object):
         emitted
         """
         return self.dialog.run()
+
 
 class EntryDialog(Dialog):
     """ Abstract class that provides base functionality
@@ -290,7 +312,8 @@ class EntryDialog(Dialog):
         user.
         """
         pass
-    
+
+
 class OptionEntryDialog(EntryDialog):
     """ Creates, displays and runs an EntryDialog for editing the given
     MenuItem's selected options. Possible button choices for options are
@@ -388,6 +411,7 @@ class OptionEntryDialog(EntryDialog):
         in the MenuItem's options attribute
         """
         self.menu_item.options = self.options
+
 
 class NoteEntryDialog(EntryDialog):
     """Creates, displays and runs an EntryDialog that
@@ -498,6 +522,7 @@ class NoteEntryDialog(EntryDialog):
         to its original
         """
         return super(NoteEntryDialog, self).cancel_data()
+
 
 class StarEntryDialog(EntryDialog):
     """Creates, displays and runs an EntryDialog that
@@ -623,7 +648,8 @@ class StarEntryDialog(EntryDialog):
         to the MenuItem's stars
         """
         return super(StarEntryDialog, self).cancel_data()
-    
+
+
 class ConfirmationDialog(Dialog):
     """Abstract Base Class. ConfirmationDialog provides
     the base functionality for a ConfirmationDialog window.
@@ -634,7 +660,7 @@ class ConfirmationDialog(Dialog):
     the ConfirmationDialog group. This class is a super
     class of all members of the ConfirmationDialog group
     
-    @requires: Override generate_columns method that
+    @requires Override generate_columns method that
     returns a list of columns to be added to the
     Gtk.TreeView that will be displayed as part of
     the ConfirmationDialog
@@ -664,7 +690,6 @@ class ConfirmationDialog(Dialog):
         self.tree_view = None
         super(ConfirmationDialog, self).__init__(parent, title,
                                                  dialog, default_size)
-        # override Dialog default size
         
     def generate_layout(self):
         """Generates the basic layout of the
@@ -685,7 +710,9 @@ class ConfirmationDialog(Dialog):
         
         for column in column_list:
             self.tree_view.append_column(column)
+
         scrolled_window.add(self.tree_view)
+
         return scrolled_window
     
     @abstractmethod
@@ -729,12 +756,11 @@ class ConfirmationDialog(Dialog):
         @attention: Calls function external to object.
         Possible unintended consequences based on value
         passed in.
+
+        @return: expected int that represents
+        Gtk.ResponseType of the dialog
         """
-        super(ConfirmationDialog, self).confirm_button_clicked()
-        if len(args) > 0:
-            self.confirm_func(args[0])
-        else:
-            self.confirm_func()
+        return super(ConfirmationDialog, self).confirm_button_clicked()
     
     def cancel_button_clicked(self, *args):
         """Callback Method that is called when
@@ -742,11 +768,52 @@ class ConfirmationDialog(Dialog):
         calls on base functionality.
         
         @param *args: Gtk.Widget wildcard that represents
-        the component or Gtk.Widget that emitted this signal
-        and called this method.
+        the component or Gtk.Widget that emitted
+        this signal and called this method.
+
+        @return: expected int that represents t
+        he Gtk.ResponseTypeof the dialog.
         """
-        super(ConfirmationDialog, self).cancel_button_clicked()
-        
+        return super(ConfirmationDialog, self).cancel_button_clicked()
+
+    def get_selected(self):
+        """ Gets the currently selected item
+        from the tree_view.
+
+        @return: 2-tuple (Gtk.TreeModel, Gtk.TreeIter)
+        representing the associated model and an iter
+        pointing to the selected row.
+        """
+        selection = self.tree_view.get_selection()
+        return selection.get_selected()
+
+    def _ensure_top_level_item(self, model, tree_iter):
+        """ Private Method.
+
+        Ensures that the given iter is a valid iter on the
+        given model, and that the iter points to the parent
+        most item, that represents the menu item stored in
+        the model.
+
+        @param model: Gtk.TreeModel object, that stores the
+        given tree_iter.
+
+        @param tree_iter: Gtk.TreeIter object, that represents
+        a row in the given model.
+
+        @return: tree_iter pointing to the top_most parent
+        of the selected row, or None if the given iter is
+        not a row present in the model.
+        """
+        if model.iter_is_valid(tree_iter):
+            parent_iter = model.iter_parent(tree_iter)
+
+            if parent_iter != None:
+                return self._ensure_top_level_item(model, parent_iter)
+            return tree_iter
+
+        return None
+
 class OrderConfirmationDialog(ConfirmationDialog):
     """OrderConfirmationDialog displays a dialog window
     prompting the user to either confirm the other and
@@ -764,11 +831,12 @@ class OrderConfirmationDialog(ConfirmationDialog):
     @var order_list: list of MenuItem objects representing
     the order list the dialog actions will be performed on
     """
+
     def __init__(self, parent, confirm_func, order_list, dialog=None,
                  title='Order Confirmation'):
         """Initializes the OrderConfirmationDialog window and
         generates the layout. Builds from superclasses.
-        
+
         @param parent: Object representing the parent that this
         ConfirmationDialog window was called on. Expected
         Gtk.Window
@@ -785,10 +853,34 @@ class OrderConfirmationDialog(ConfirmationDialog):
             return not menu_item.confirmed
         
         self.order_list = filter(is_confirmed, order_list)
-        
         super(OrderConfirmationDialog, self).__init__(parent, title,
                                                       confirm_func, dialog)
-        
+
+    def generate_layout(self):
+        """Override Method.
+
+        Generates the layout to be displayed
+        in the main content area of the dialog
+        window.
+
+        @return: Gtk.Widget representing the object
+        to be displayed in the main content area of
+        the dialog window.
+        """
+        main_box = Gtk.VBox()
+
+        scrolled_window = super(OrderConfirmationDialog, self).generate_layout()
+        main_box.pack_start(scrolled_window, True, True, 5)
+
+        button_box = Gtk.HBox()
+        priority_button = Gtk.Button('Add Priority')
+        priority_button.connect('clicked', self._set_selected_priority)
+        button_box.pack_start(priority_button, False, False, 5)
+
+        main_box.pack_start(button_box, False, False, 5)
+
+        return main_box
+
     def generate_columns(self):
         """Generates the columns for the
         OrderConfirmationDialog.
@@ -803,26 +895,19 @@ class OrderConfirmationDialog(ConfirmationDialog):
         size = self.dialog.get_size()
         horizontal = size[0]
         
-        renderer1 = Gtk.CellRendererText()
+        renderer = Gtk.CellRendererText()
+        renderer.set_property('weight-set', True)
         # Contingency: Absurdly long notes stored in a
         # MenuItem object. Solution: wrap text
-        renderer1.set_property('wrap-width', horizontal)
-        
-        # Establish first TreeView column to
-        # correspond to model's value stored
-        # at the 0 index entry
-        col1 = Gtk.TreeViewColumn('Menu Item',
-                                  renderer1, text=0)
+        renderer.set_property('wrap-width', horizontal)
+        col1 = Gtk.TreeViewColumn('Menu Item', renderer,
+                                  text=0, weight=2)
         column_list.append(col1)
-        
-        renderer2 = Gtk.CellRendererText()
-        # Establish second TreeView column to
-        # correspond to the model's value stored
-        # at the 1 index entry
-        col2 = Gtk.TreeViewColumn('Stars',
-                                  renderer2, text=1)
+
+        col2 = Gtk.TreeViewColumn('Stars', renderer,
+                                  text=1, weight=2)
         column_list.append(col2)
-        
+
         return column_list
     
     def generate_model(self):
@@ -836,20 +921,81 @@ class OrderConfirmationDialog(ConfirmationDialog):
         that stores the given data passed
         into this objects constructor
         """
-        tree_model = Gtk.TreeStore(str, str)
-        
+        tree_model = Gtk.TreeStore(str, str, int)
+
         for menu_item in self.order_list:
-            name = menu_item.get_name()
-            treeiter = tree_model.append(None, (name, str(menu_item.stars)))
+
+            info = menu_item.get_name(), str(menu_item.stars), STANDARD_TEXT
+            treeiter = tree_model.append(None, info)
+
             if menu_item.has_options():
-                options_position = tree_model.append(treeiter, ('Options', None))
-                tree_model.append(options_position,
-                                   (str(menu_item.options)[1:-1], None))
+
+                # Get string of options. Slice brackets from front and back
+                info = str(menu_item.options)[1:-1], None, STANDARD_TEXT
+                tree_model.append(treeiter, info)
+
             if menu_item.has_note():
-                treeiter = tree_model.append(treeiter, ('Note', None))
-                tree_model.append(treeiter, (menu_item.notes, None))
+
+                info = menu_item.notes, None, STANDARD_TEXT
+                tree_model.append(treeiter, info)
         
         return tree_model
+
+    def confirm_button_clicked(self, *args):
+        """Override Method.
+
+        Callback Method executed when the confirm
+        button is pressed. This method calls the
+        confirm_func passed into this object.
+
+        @param args: wildcard catchall used to catch
+        the widget that activated this method.
+
+        @return: int as Gtk.ResponseType representing
+        which response the dialog logged.
+        """
+        model = self.tree_view.get_model()
+
+        model_iter = iter(model)
+
+        priority_list = []
+        normal_order_list = []
+
+        for item in self.order_list:
+            row = model_iter.next()
+
+            priority_value = row[2]
+
+            if priority_value == STANDARD_TEXT:
+                normal_order_list.append(item)
+            else:
+                priority_list.append(item)
+
+        self.confirm_func(priority_list, normal_order_list)
+
+        return super(OrderConfirmationDialog, self).confirm_button_clicked(args)
+
+    def _set_selected_priority(self, *args):
+        """Private Method.
+
+        Toggles the priority level stored in the
+        selected items.
+
+        @param args: wildcard catchall that catches
+        the widget that activated this method.
+
+        @return: None
+        """
+        model, itr = self.get_selected()
+
+        itr = self._ensure_top_level_item(model, itr)
+        priority_value = model[itr][2]
+
+        if priority_value == STANDARD_TEXT:
+            model[itr][2] = STANDARD_TEXT_BOLD
+        else:
+            model[itr][2] = STANDARD_TEXT
+
     
 class CheckoutConfirmationDialog(ConfirmationDialog):
     """CheckoutConfirmationDialog displays a current
@@ -941,6 +1087,7 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
         tree_model.append(None, ('Total', str(total)))
         
         return tree_model
+
     
 class OrderSelectionConfirmationDialog(ConfirmationDialog):
     """OrderSelectionConfirmation window displays the current
@@ -1108,8 +1255,9 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
         """
         if order is None:
             order = self.get_selected()
-        super(OrderSelectionConfirmationDialog,
-              self).confirm_button_clicked(widget, order)
+        self.confirm_func(order)
+        super(OrderSelectionConfirmationDialog, self).confirm_button_clicked()
+
     
 class AddReservationsDialog(Dialog):
     """AddResdervationsDialog prompts the user with

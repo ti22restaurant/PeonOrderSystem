@@ -17,6 +17,7 @@ from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 
 # Path import unused. Imported to set working directory
 # as the one that PeonOrderSystem object is placed in.
+
 from peonordersystem import path  # IGNORE:W0611
 from peonordersystem.interface.UI import UI
 from peonordersystem import ConfirmationSystem
