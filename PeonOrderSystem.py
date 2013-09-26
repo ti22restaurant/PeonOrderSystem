@@ -53,7 +53,8 @@ class PeonOrderSystem(UI):
         @param *args: wildcard argument to catch button that calls
         this method.
         """
-        order_name, current_order = super(PeonOrderSystem, self).order_confirmed()
+        order_name, current_order = super(PeonOrderSystem,
+                                          self).order_confirmed(priority_order)
         ConfirmationSystem.order_confirmed(order_name, priority_order,
                                            non_priority_order, current_order)
     
