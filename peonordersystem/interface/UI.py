@@ -133,14 +133,14 @@ class UI(object):
         """
         self.reservations.remove_selected_reservation()
     
-    def remove_selected_upcoming_order(self, *args):
+    def confirm_selected_upcoming_order(self, *args):
         """Callback method called when the remove order
         button for the upcoming orders tab is pressed.
         
         @param *args: wildcard that represents a catch
         for the selected widget
         """
-        self.upcoming_orders.remove_selected_order()
+        self.upcoming_orders.confirm_priority()
     
     #===========================================================================
     # This block contains methods that are utilized to edit/adjust selected

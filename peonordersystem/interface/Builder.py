@@ -111,8 +111,8 @@ stored on table box. Last index is the 'TOGO' button.
                 'editnoteButton' or 'edititemButton'):
                 self.order_buttons.append(widget)
             
-            if name == 'upcomingOrdersRemoveButton':
-                self.upcoming_orders_remove_button = widget
+            if name == 'upcomingOrdersConfirmPriorityButton':
+                self.upcoming_orders_confirm_priority_button = widget
             
             if name == 'upcomingOrdersScrollWindow':
                 self.upcoming_orders_window = widget
@@ -288,8 +288,8 @@ stored on table box. Last index is the 'TOGO' button.
             button.connect('clicked', function, label)
         
         
-        function = parent.remove_selected_upcoming_order
-        self.upcoming_orders_remove_button.connect('clicked', function)
+        function = parent.confirm_selected_upcoming_order
+        self.upcoming_orders_confirm_priority_button.connect('clicked', function)
         
     def set_table(self, string):
         """Sets the current table display label to the given str

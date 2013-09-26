@@ -642,8 +642,8 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkButton" id="upcomingOrdersRemoveButton">
-                                <property name="label" translatable="yes">REMOVE ORDER</property>
+                              <object class="GtkButton" id="upcomingOrdersConfirmPriorityButton">
+                                <property name="label" translatable="yes">CONFIRM PRIORITY</property>
                                 <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
