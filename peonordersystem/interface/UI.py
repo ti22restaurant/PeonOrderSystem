@@ -228,28 +228,27 @@ class UI(object):
     # dialog window has been confirmed.
     #===========================================================================
     
-    def order_confirmed(self, priority_order, order):
+    def order_confirmed(self, priority_order, *args):
         """Method called when the order has been
         confirmed as is to be sent to the kitchen.
 
         @param priority_order: list of MenuItem objects that
         represents the order list that has priority.
-
-        @param order: list of MenuItem objects that represents
-        the standard order list.
         
         @return: 2-tuple where first index is a str
         representing the order's associated name, and
         the second index is a list of MenuItem objects
         that represent the order.
         """
+
         has_priority = len(priority_order) > 0
 
         self.orders.confirm_order()
         curr_name, curr_order = self.get_order_info()
         self.upcoming_orders.add_order(curr_name, curr_order,
                                        has_priority=has_priority)
-        return curr_name, priority_order, order
+
+        return curr_name, curr_order
     
     def checkout_confirm(self, *args):
         """Callback method when the checkout window has been confirmed.
