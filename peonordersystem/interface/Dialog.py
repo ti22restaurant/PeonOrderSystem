@@ -1,4 +1,4 @@
-"""EntryDialog module stores the following groups:
+"""Dialog module stores the following groups:
 
 @group Dialog: This is the main superclass type of all
 classes inside this module. All classes have Dialog as
@@ -742,7 +742,7 @@ class ConfirmationDialog(Dialog):
         """
         pass
     
-    def confirm_button_clicked(self, widget, *args):
+    def confirm_button_clicked(self, *args):
         """Callback Method that is called when
         the confirm button on the dialog window
         is clicked. Calls base functionality and
@@ -813,6 +813,7 @@ class ConfirmationDialog(Dialog):
             return tree_iter
 
         return None
+
 
 class OrderConfirmationDialog(ConfirmationDialog):
     """OrderConfirmationDialog displays a dialog window
@@ -1087,6 +1088,11 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
         tree_model.append(None, ('Total', str(total)))
         
         return tree_model
+
+    def confirm_button_clicked(self, *args):
+        super(CheckoutConfirmationDialog, self).confirm_button_clicked()
+        self.confirm_func()
+
 
     
 class OrderSelectionConfirmationDialog(ConfirmationDialog):
