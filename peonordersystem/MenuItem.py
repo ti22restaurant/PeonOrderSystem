@@ -18,6 +18,9 @@ class MenuItem(object):
     @var _editable: private attribute. bool representing if
     the item is editable
     
+    @var _locked: private attribute. bool representing if the
+    item has been locked and shouldn't be editable.
+    
     @var star: int representing the value of the items stars
     
     @var notes: str representing the notes associated with
@@ -87,7 +90,7 @@ class MenuItem(object):
         @return: bool, True if the item is editable,
         false otherwise.
         """
-        return self.editable
+        return self.editable and not self._locked
     
     def get_option_choices(self):
         """Gets the available option choices for the item

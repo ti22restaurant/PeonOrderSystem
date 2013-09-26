@@ -60,9 +60,9 @@ class UpcomingOrdersView(Gtk.TreeView):
         """
         col_list = []
         
-        # ListStore will store (str, str, str) representing
-        # the name, and confirmation time, and if the order
-        # has a priority item attached to it.
+        # ListStore will store (str, str, str, bool) representing
+        # the name, and confirmation time, image used for the priorty display
+        # and if the order has a priority item attached to it.
         
         rend = Gtk.CellRendererText()
         col = Gtk.TreeViewColumn(column_names[0],
@@ -75,8 +75,9 @@ class UpcomingOrdersView(Gtk.TreeView):
         col_list.append(col)
         
         rend = Gtk.CellRendererPixbuf()
-        col = Gtk.TreeViewColumn(column_names[2],
-                                 rend, stock_id=2)
+        col = Gtk.TreeViewColumn(column_names[2], rend,
+                                 stock_id=2,
+                                 visible=3)
         col_list.append(col)
         
         return col_list
@@ -108,48 +109,30 @@ class UpcomingOrderStore(Gtk.ListStore):
         Generates a new UpcomingOrderStore that stores
         3 str types.
         """
-        super(UpcomingOrderStore, self).__init__(str, str, str)
+        super(UpcomingOrderStore, self).__init__(str, str,
+                                                 str, bool)
     
-    def append(self, order_name, current_order):
+    def append(self, order_name, has_priority):
         """Appends the given order_name, and current_order
         to the UpcomingOrderStore.
         
         @param order_name: str representing the given name
         of the order that is being confirmed.
-        
-        @param current_order: list of MenuItem objects that
-        represents the current order being confirmed.
+
+        @param has_priority: bool representing if there is
+        a priority order associated with the order. False if
+        no, True if so.
         
         @return: Gtk.TreeIter pointing at the added item
         """
-        priority_icon = self._get_icon(current_order)
         curr_time = time.asctime()
         
         order_name = order_name.replace('_', ' ')
         
-        order = (order_name, curr_time, priority_icon)
+        order = (order_name, curr_time, Gtk.STOCK_YES, has_priority)
         
         return super(UpcomingOrderStore, self).append(order)
-        
-    
-    def _order_has_priority(self, current_order):
-        """Private Method.
-        
-        Checks if the given order list has any
-        menu items that are of priority.
-        
-        @param current_order: list of MenuItem objects
-        
-        @return: bool True if the given order list has
-        a MenuItem that has priority. False otherwise.
-        """
-        priority = False
-        
-        for menu_item in current_order:
-            # TODO check if MenuItem has priorty
-            pass
-        
-        return priority
+
     
     def remove_by_name(self, order_name):
         """Searches for and removes the given
@@ -177,7 +160,7 @@ class UpcomingOrderStore(Gtk.ListStore):
         object to be updated.
         """
         if self.iter_is_valid(itr):
-            self[itr][2] = Gtk.STOCK_NO
+            self[itr][3] = False
     
     def _search_for_order(self, order_name, itr):
         """Private Method.
@@ -205,21 +188,6 @@ class UpcomingOrderStore(Gtk.ListStore):
                 return self._search_for_order(order_name, itr)
         
         return None
-    
-    def _get_icon(self, current_order):
-        """Private Method.
-        
-        Gets the icon associated with the given
-        order list.
-        
-        @param current_order: list of MenuItem objects
-        
-        @return: str representing the Gtk.STOCK item that
-        was associated with the given order_list.
-        """
-        if self._order_has_priority(current_order):
-            return Gtk.STOCK_YES
-        return Gtk.STOCK_NO
 
 @ErrorLogger.error_logging
 class UpcomingOrders(object):
@@ -276,7 +244,7 @@ class UpcomingOrders(object):
                 self.add_order(key, value)
             
     
-    def add_order(self, order_name, current_order):
+    def add_order(self, order_name, current_order, has_priority=False):
         """Adds the given order to the UpcomingOrders
         display and stores it under the given order_name
         
@@ -286,9 +254,13 @@ class UpcomingOrders(object):
         
         @param current_order: list of MenuItem objects that
         is the current order list being confirmed
+
+        @keyword has_priority: bool representing if the given order
+        has a priority order associated with it. False if no, True
+        if so. Default is False
         """
         order_name = order_name.replace(TOGO_SEPARATOR, ' ')
-        self.model.append(order_name, current_order)
+        self.model.append(order_name, has_priority)
     
     def remove_selected_order(self):
         """Removes the selected order from the

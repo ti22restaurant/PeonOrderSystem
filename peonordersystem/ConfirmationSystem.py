@@ -81,7 +81,10 @@ def standardize_confirm_file_name(order_name):
     """Standardizes the name of the file,
     under the standard format for confirmed
     orders
-    
+
+    @param order_name: str representing the name
+    of the order.
+
     @return: str representing the standardized
     file format.
     """
@@ -99,30 +102,54 @@ def standardize_checkout_file_name(order_name):
     """Standardizes the name of the file,
     under the standard format for checked out
     orders.
+
+    @param order_name: str representing the orders
+    name.
+
+    @return: str representing the standard form for
+    check out files.
     """
     order_name = order_name.replace(' ', '_')
     curr_time = time.strftime('%H-%M-%S')
     return order_name + '_' + curr_time + '.checkout'
 
-def order_confirmed(order_name, order_list):
+def order_confirmed(order_name, priority_list,
+                    non_priority_list, full_order):
     """Confirms an order by dumping a binary
     file representing the confirmed order into
     the parent directories confirmed folder.
+
+    @param order_name: str representing the name of the
+    order
+
+    @param priority_list: list of MenuItem objects that
+    represents the associated priority order
+
+    @param non_priority_list: list of MenuItems objects that
+    do not have priority.
+
+    @param full_order: list of MenuItem objects that includes
+    previous confirmed and non-kitchen MenuItem objects. This
+    is included for purposes of printing and retrieving
+    accurate data.
     """
+    # TODO send priority_list, order_list to kitchen
+
     curr_directory = directory + 'confirmed/'
     order_name = standardize_confirm_file_name(order_name)
     
     curr_file = open(curr_directory + order_name, 'w')
     
-    print order_list
-    print curr_file
-    
-    cPickle.dump(order_list, curr_file)
+    cPickle.dump(full_order, curr_file)
 
 def remove_order_confirmed_file(order_name):
     """Removes the file associated with the
     confirmed order from the necessary
     directory.
+
+    @param order_name: str representing the name
+    associated with the given order. The given name
+    will be transformed into the standarized format.
     """
     curr_directory = directory + 'confirmed/'
     order_name = standardize_confirm_file_name(order_name)
@@ -133,7 +160,15 @@ def checkout_confirmed(order_name, order_list):
     """Generates the necessary checkout files
     and adds the given order to that file for
     storage. This is utilized later.
+
+    @param order_name: str representing the name
+    associated with the given order.
+
+    @param order_list: list of MenuItem objects
+    that represents the current order.
     """
+    # TODO send order_list to checkout printer
+
     remove_order_confirmed_file(order_name)
     
     curr_directory = directory + 'checkout/'

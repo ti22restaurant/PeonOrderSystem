@@ -133,14 +133,14 @@ class UI(object):
         """
         self.reservations.remove_selected_reservation()
     
-    def remove_selected_upcoming_order(self, *args):
+    def confirm_selected_upcoming_order(self, *args):
         """Callback method called when the remove order
         button for the upcoming orders tab is pressed.
         
         @param *args: wildcard that represents a catch
         for the selected widget
         """
-        self.upcoming_orders.remove_selected_order()
+        self.upcoming_orders.confirm_priority()
     
     #===========================================================================
     # This block contains methods that are utilized to edit/adjust selected
@@ -197,7 +197,7 @@ class UI(object):
         that the user interacts with to confirm the order and
         send it to the kitchen. Upon closing the window
         is deleted.
-        
+
         @param *args: wildcard representing the button clicked.
         """
         current_order = self.orders.get_current_order()
@@ -228,20 +228,26 @@ class UI(object):
     # dialog window has been confirmed.
     #===========================================================================
     
-    def order_confirmed(self, *args):
+    def order_confirmed(self, priority_order, *args):
         """Method called when the order has been
         confirmed as is to be sent to the kitchen.
-        
-        @param args: wildcard parameter as catch all  
+
+        @param priority_order: list of MenuItem objects that
+        represents the order list that has priority.
         
         @return: 2-tuple where first index is a str
         representing the order's associated name, and
         the second index is a list of MenuItem objects
         that represent the order.
         """
+
+        has_priority = len(priority_order) > 0
+
         self.orders.confirm_order()
         curr_name, curr_order = self.get_order_info()
-        self.upcoming_orders.add_order(curr_name, curr_order)
+        self.upcoming_orders.add_order(curr_name, curr_order,
+                                       has_priority=has_priority)
+
         return curr_name, curr_order
     
     def checkout_confirm(self, *args):

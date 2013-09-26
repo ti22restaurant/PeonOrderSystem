@@ -17,6 +17,7 @@ from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 
 # Path import unused. Imported to set working directory
 # as the one that PeonOrderSystem object is placed in.
+
 from peonordersystem import path  # IGNORE:W0611
 from peonordersystem.interface.UI import UI
 from peonordersystem import ConfirmationSystem
@@ -44,16 +45,24 @@ class PeonOrderSystem(UI):
         super(PeonOrderSystem, self).__init__(title, load_data=load_data)
         ErrorLogger.initializing_fencepost_finish()
     
-    def order_confirmed(self, *args):
+    def order_confirmed(self, priority_order, non_priority_order):
         """Callback Method. Called when the order has been confirmed.
         This method calls the ConfirmationSystem functions to export
         the data to the parent directory.
-        
+
+        @param priority_order: list of MenuItems that represents the
+        current priority order associated with the order.
+
+        @param non_priority_order: list of MenuItems that represents
+        the non-priority order associated with the order.
+
         @param *args: wildcard argument to catch button that calls
         this method.
         """
-        order_name, order_list = super(PeonOrderSystem, self).order_confirmed()
-        ConfirmationSystem.order_confirmed(order_name, order_list)
+        order_name, current_order = super(PeonOrderSystem,
+                                          self).order_confirmed(priority_order)
+        ConfirmationSystem.order_confirmed(order_name, priority_order,
+                                           non_priority_order, current_order)
     
     def checkout_confirm(self, *args):
         """Callback Method. Called when the order checkout has been
