@@ -38,6 +38,7 @@ import time
 STANDARD_TEXT = 100
 STANDARD_TEXT_BOLD = 700
 
+
 class Dialog(object):
     """Abstract Base Class. Provides the base functionality
     for a Dialog window.

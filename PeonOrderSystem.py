@@ -49,7 +49,13 @@ class PeonOrderSystem(UI):
         """Callback Method. Called when the order has been confirmed.
         This method calls the ConfirmationSystem functions to export
         the data to the parent directory.
-        
+
+        @param priority_order: list of MenuItems that represents the
+        current priority order associated with the order.
+
+        @param non_priority_order: list of MenuItems that represents
+        the non-priority order associated with the order.
+
         @param *args: wildcard argument to catch button that calls
         this method.
         """

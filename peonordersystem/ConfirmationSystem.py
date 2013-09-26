@@ -146,6 +146,10 @@ def remove_order_confirmed_file(order_name):
     """Removes the file associated with the
     confirmed order from the necessary
     directory.
+
+    @param order_name: str representing the name
+    associated with the given order. The given name
+    will be transformed into the standarized format.
     """
     curr_directory = directory + 'confirmed/'
     order_name = standardize_confirm_file_name(order_name)
@@ -156,6 +160,12 @@ def checkout_confirmed(order_name, order_list):
     """Generates the necessary checkout files
     and adds the given order to that file for
     storage. This is utilized later.
+
+    @param order_name: str representing the name
+    associated with the given order.
+
+    @param order_list: list of MenuItem objects
+    that represents the current order.
     """
     # TODO send order_list to checkout printer
 
