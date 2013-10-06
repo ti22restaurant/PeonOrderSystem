@@ -115,8 +115,10 @@ class Dialog(object):
             action_area = self.dialog.get_action_area()
             
             cancel_button = Gtk.Button('Cancel')
+            cancel_button.set_can_focus(False)
             cancel_button.set_size_request(80, 50)
             confirm_button = Gtk.Button('Confirm')
+            confirm_button.set_can_focus(False)
             confirm_button.set_size_request(100, 50)
             
             action_area.set_homogeneous(True)
@@ -1965,8 +1967,18 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
 
     @var confirm_func: external function pointer to be
     called at confirmation.
+
+    @var order: The current order to be confirmed or
+    submitted.
+
+    @var NUM_OF_EXTERIOR_TABLES: int representing the number
+    of tables that are on the exterior, and are to be displayed.
+
+    @var NUM_OF_COUNTER_SPACES: int representing the number of
+    spaces that are on the counter, and are to be displayed.
     """
-    def __init__(self, parent, confirm_func, name_list):
+    def __init__(self, parent, confirm_func, name_list,
+                 num_of_exterior_tables=4, num_of_counter_spaces=4):
         """Initializes a new OrderSelectionConfirmationDialog window.
         
         @param parent: subclass of Gtk.Window that the 
@@ -1979,8 +1991,20 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
         names on the OrderSelection list. This tuple is of (str, str, str)
         where each entry represents the (name, number, time) that
         the order was placed.
-        
+
+        @keyword num_of_exterior_tables: int representing the number
+        of tables in the exterior that are to be accounted for. Default
+        value is 4.
+
+        @keyword num_of_counter_spaces: int representing the number
+        of counter spaces that are to be accounted for. Default value
+        is 4.
         """
+        self.NUM_OF_EXTERIOR_TABLES = int(num_of_exterior_tables)
+        self.NUM_OF_COUNTER_SPACES = int(num_of_counter_spaces)
+
+        self.order = None
+
         self.confirm_func = confirm_func
         self.name_list = name_list
         self.name_entry = None
@@ -1995,10 +2019,42 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
         @return: Gtk.VBox representing the box to be
         added to the content area of the dialog window.
         """
-        main_box = Gtk.VBox()
+        main_box = Gtk.HBox()
+
+        table_box = Gtk.VBox()
+
+        table_sub_box1 = Gtk.VBox()
+
+        for x in range(0, self.NUM_OF_EXTERIOR_TABLES):
+            button = Gtk.Button("Ext. Table " + str(x + 1))
+            button.set_size_request(100, 20)
+            button.connect("clicked", self.table_button_clicked,
+                            button.get_label())
+            button.set_focus_on_click(False)
+            button.set_can_focus(False)
+            table_sub_box1.pack_start(button, True, True, 0.5)
+
+        table_box.pack_start(table_sub_box1, True, True, 10)
+
+        table_sub_box2 = Gtk.VBox()
+
+        for x in range(0, self.NUM_OF_COUNTER_SPACES):
+            button = Gtk.Button("Counter " + str(x + 1))
+            button.set_size_request(100, 20)
+            button.connect("clicked", self.table_button_clicked,
+                           button.get_label())
+            button.set_focus_on_click(False)
+            button.set_can_focus(False)
+            table_sub_box2.pack_start(button, True, True, 0.5)
+
+        table_box.pack_start(table_sub_box2, True, True, 10)
+
+        main_box.pack_start(table_box, False, False, 10)
+
+        right_box = Gtk.VBox()
         scrolled_window = super(OrderSelectionConfirmationDialog,
                                 self).generate_layout()
-        main_box.pack_start(scrolled_window, True, True, 5)
+        right_box.pack_start(scrolled_window, True, True, 5)
         
         name_label = Gtk.Label('NAME: ')
         number_label = Gtk.Label('NUMBER: ')
@@ -2008,7 +2064,7 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
         sub_box.pack_start(name_label, True, True, 5)
         sub_box.pack_start(number_label, True, True, 5)
         
-        main_box.pack_start(sub_box, False, False, 5)
+        right_box.pack_start(sub_box, False, False, 5)
         
         self.name_entry = Gtk.Entry()
         self.number_entry = Gtk.Entry()
@@ -2018,7 +2074,7 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
         sub_box.pack_start(self.name_entry, True, True, 5)
         sub_box.pack_start(self.number_entry, True, True, 5)
         
-        main_box.pack_start(sub_box, False, False, 5)
+        right_box.pack_start(sub_box, False, False, 5)
         
         add_new_button = Gtk.Button('Add')
         add_new_button.set_size_request(150, 50)
@@ -2030,8 +2086,11 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
         sub_box.pack_start(Gtk.Fixed(), True, True, 5)
         sub_box.pack_start(Gtk.Fixed(), True, True, 5)
         
-        main_box.pack_start(sub_box, False, False, 5)
-        
+        right_box.pack_start(sub_box, False, False, 5)
+        main_box.pack_start(right_box, True, True, 5)
+
+        self.name_entry.grab_focus()
+
         return main_box
     
     def generate_columns(self):
@@ -2087,35 +2146,47 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
             t = time.strftime('%X, %A, %m/%y')
             new_order = (name, number, t)
 
-        itr = self.model.append(new_order)
+        self.order = new_order
+        super(OrderSelectionConfirmationDialog, self).confirm_button_clicked()
 
-        self.tree_view.get_selection().select_iter(itr)
+    def table_button_clicked(self, button, table):
+        """Callback Method that is called when
+        a table button has been clicked. This
+        method closes the dialog
+
+        @param button: Gtk.widget that called this
+        method.
+
+        @param table: str representing the table
+        representing the button pressed.
+
+        @return: None
+        """
+        self.order = table
         super(OrderSelectionConfirmationDialog, self).confirm_button_clicked()
 
     def get_selected(self, *args):
         """Gets the selected order in the standard
         3-tuple form.
-        
+
         @param *args: wildcard that represents the
         widget that called this method.
-        
+
         @return: 3-tuple of (str, str, str) representing
         the (name, number, and time) of the order.
         """
         tree_selection = self.tree_view.get_selection()
         model, itr = tree_selection.get_selected()
         return model.get(itr, 0, 1, 2)
-    
+
     def confirm_data(self):
         """Callback Method that is called when the confirm
         button is clicked.
-        
-        @keyword order: Default None. Expected 3-tuple that
-        represents the (str, str, str) of the given order.
         """
-        order = self.get_selected()
-
-        self.confirm_func(order)
+        if self.order:
+            self.confirm_func(self.order)
+        else:
+            self.confirm_func(self.get_selected())
 
     
 class AddReservationsDialog(Dialog):
@@ -2231,7 +2302,7 @@ class AddReservationsDialog(Dialog):
         t = time.localtime()
         
         while minute < t[4]:
-            minute = minute + 30
+            minute += 30
         
         t = time.mktime(t[:3] + (hour, minute, 0) + t[6:])
         
@@ -2320,38 +2391,3 @@ def ensure_top_level_item(model, tree_iter):
     if parent_iter:
         return ensure_top_level_item(model, parent_iter)
     return tree_iter
-
-
-
-if __name__ == '__main__':
-    
-    def boom(*args):
-        spaces = "    "
-        index = 0
-
-        for each in args:
-            for one in each:
-                print index
-                counter = 0
-                for menu_item in one:
-                    print spaces + str(counter)
-                    print spaces + menu_item.get_name()
-                    print spaces + spaces + str(menu_item.get_price())
-                    counter += 1
-                index += 1
-    
-    from peonordersystem.MenuItem import MenuItem
-    
-    order = []
-    
-    for _ in range(1):
-        menu_item_1 = MenuItem('Carls Item', 10.0, 3.9, option_choices={'Lora': 10.0, 'Carl': 12.0})
-        menu_item_1.options = ['Lora', 'Carl']
-        order.append(menu_item_1)
-        order.append(menu_item_1)
-        order.append(MenuItem('Loras Item', 10.0))
-        order.append(MenuItem('Bobs Item', 10.23))
-    
-    
-    dialog = SplitCheckConfirmationDialog(None, boom, order)
-    dialog.run_dialog()
