@@ -270,12 +270,14 @@ class UI(object):
         dialog has been confirmed. Sets the GUI for menu items to be
         added to the order created or selected.
         
-        @param curr_order: 3-tuple, representing the name, number
-        and time which is used for storing information about the
-        togo order.
+        @param curr_order: either a 3-tuple representing a togo order,
+        or a string representing a misc table.
         """
-        self.orders.select_togo_order(curr_order)
-        self.builder.set_table(curr_order[0])
+        if type(curr_order) is tuple:
+            self.orders.select_togo_order(curr_order)
+            self.builder.set_table(curr_order[0])
+        else:
+            self.table_button_clicked(None, curr_order)
     
     #===========================================================================
     # This block contains methods that are used for obtaining information
