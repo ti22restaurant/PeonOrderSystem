@@ -6,6 +6,9 @@ information about MenuItems.
 @version: 1.0
 """
 
+from copy import copy
+
+
 class MenuItem(object):
     """ This object stores information regarding a MenuItem.
     
@@ -35,12 +38,13 @@ class MenuItem(object):
     """
     
     def __init__(self, name, price, stars=0, editable=True,
-        confirmed=False, option_choices=None):
+        confirmed=False, option_choices={}):
         
         self._name = name
         self._price = price
         self._option_choices = option_choices
         self._locked = False
+        self._price_scalar = 1.0
         
         self.editable = bool(editable)
         self.stars = int(stars)
@@ -66,7 +70,16 @@ class MenuItem(object):
     def edit_price(self, value):
         """Sets the MenuItem's price to the given amount.
         """
-        self._price = value
+        price = self._price
+
+        for key in self.options:
+            price += self._option_choices[key]
+
+        self._price_scalar = value / price
+
+        if self._price_scalar > 1.0:
+            self._price_scalar = 1.0
+
     
     def get_name(self):
         """Gets the name of the MenuItem.
@@ -82,7 +95,11 @@ class MenuItem(object):
         
         @return: float representing the price.
         """
-        return self._price
+        price = self._price
+        for key in self.options:
+            price += self._option_choices[key]
+
+        return self._price_scalar * price
     
     def is_editable(self):
         """Checks if the item is editable.
@@ -93,14 +110,19 @@ class MenuItem(object):
         return self.editable and not self._locked
     
     def get_option_choices(self):
-        """Gets the available option choices for the item
+        """Gets a copy of the current options choices dict.
         
         @return: dict where each key is a str that represents
         an option, and each value is a float that represents
-        the cost
+        the cost.
         """
-        return self._option_choices
-    
+        options_copy = copy(self._option_choices)
+
+        for key in options_copy:
+            options_copy[key] *= self._price_scalar
+
+        return options_copy
+
     def has_note(self):
         """Checks if the item as a note associated with it.
         
@@ -125,5 +147,3 @@ class MenuItem(object):
         stored in the MenuItem
         """
         return str(self.__dict__)
-        
-    

@@ -167,6 +167,7 @@ class Editor(object):
 # are module wide.
 #===========================================================================
 
+
 def menu_item_check(menu_item):
     """Checks whether the given MenuItem is a valid 
     MenuItem to have operations performed on it.
@@ -176,6 +177,7 @@ def menu_item_check(menu_item):
     otherwise.
     """
     return menu_item != None and menu_item.is_editable()
+
 
 def order_check(current_order):
     """Checks if the current order is a accessible, valid
