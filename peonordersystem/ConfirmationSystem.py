@@ -156,7 +156,7 @@ def remove_order_confirmed_file(order_name):
     
     os.remove(curr_directory + order_name)
     
-def checkout_confirmed(order_name, order_list):
+def checkout_confirmed(order_name, orders, order_list):
     """Generates the necessary checkout files
     and adds the given order to that file for
     storage. This is utilized later.
@@ -164,16 +164,25 @@ def checkout_confirmed(order_name, order_list):
     @param order_name: str representing the name
     associated with the given order.
 
-    @param order_list: list of MenuItem objects
-    that represents the current order.
-    """
-    # TODO send order_list to checkout printer
+    @param orders: n-tuple that comprises a order.
+    This tuple structure allows for n subdivided
+    checks to be sent to the checkout confirmation
+    if there was a split operation performed. If
+    no split operation was performed then expect
+    a single entry for the order.
 
+    @param order_list: list of MenuItem objects
+    that comprises the total order. This is utilized
+    for logging purposes.
+    """
     remove_order_confirmed_file(order_name)
-    
+
     curr_directory = directory + 'checkout/'
     order_name = standardize_checkout_file_name(order_name)
     curr_file = open(curr_directory + order_name, 'w')
-    
     cPickle.dump(order_list, curr_file)
+
+    for order in orders:
+        # TODO send order to checkout printer
+        pass
     

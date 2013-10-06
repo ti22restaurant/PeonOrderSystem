@@ -64,16 +64,17 @@ class PeonOrderSystem(UI):
         ConfirmationSystem.order_confirmed(order_name, priority_order,
                                            non_priority_order, current_order)
     
-    def checkout_confirm(self, *args):
+    def checkout_confirm(self, order):
         """Callback Method. Called when the order checkout has been
         confirmed. This method calls the ConfirmationSystem functions
         to export the checkout data to its parent directory.
         
-        @param *args: wildcard argument to catch button that calls
-        this method.
+        @param order: n-tuple of subdivded checks. This is to ensure
+        that checks that have had the split operation performed on
+        them are acceptable as well.
         """
         order_name, order_list = super(PeonOrderSystem, self).checkout_confirm()
-        ConfirmationSystem.checkout_confirmed(order_name, order_list)
+        ConfirmationSystem.checkout_confirmed(order_name, order, order_list)
     
 if __name__ == '__main__':
     

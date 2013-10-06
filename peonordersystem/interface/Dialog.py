@@ -1942,7 +1942,7 @@ class SplitCheckConfirmationDialog(CheckoutConfirmationDialog):
         for key in self.check_dict:
             curr_order.append(self.check_dict[key])
 
-        self.confirm_func(curr_order)
+        self.confirm_func(tuple(curr_order))
 
 
 class OrderSelectionConfirmationDialog(ConfirmationDialog):
