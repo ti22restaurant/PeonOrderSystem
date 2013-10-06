@@ -45,6 +45,8 @@ from peonordersystem import CheckOperations
 STANDARD_TEXT = 100
 STANDARD_TEXT_BOLD = 700
 
+SPLIT_CHECK_DIALOG_RESPONSE = 99
+
 
 class Dialog(object):
     """Abstract Base Class. Provides the base functionality
@@ -1072,6 +1074,46 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
         self.confirm_func = confirm_func
         super(CheckoutConfirmationDialog, self).__init__(parent, title, dialog)
 
+    def generate_layout(self):
+        """Override Method.
+
+        Generates the layout to be displayed
+        in the main content area of the dialog window.
+
+        @return: Gtk.Container that holds the necessary
+        structures that are to be displayed in the content
+        area of the dialog window.
+        """
+        main_box = Gtk.VBox()
+
+        scroll_window = super(CheckoutConfirmationDialog, self).generate_layout()
+        main_box.pack_start(scroll_window, True, True, 5)
+
+        sub_box = self.generate_related_buttons()
+
+        main_box.pack_start(sub_box, False, False, 5)
+
+        return main_box
+
+    def generate_related_buttons(self):
+        """Generates the related buttons to
+        be displayed beneath the generated layout
+        that are associated with the functionality
+        for this dialog window.
+
+        @return: Gtk.Container that holds the
+        buttons associated with the functionality
+        for this dialog.
+        """
+        sub_box = Gtk.HBox()
+
+        button = Gtk.Button("SPLIT CHECK")
+        button.set_size_request(200, 20)
+        button.connect('clicked', self._split_check_dialog)
+        sub_box.pack_start(button, False, False, 0)
+
+        return sub_box
+
     def generate_columns(self):
         """Generates the columns used to
         establish the format of the display.
@@ -1108,6 +1150,22 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
         tree_model = Gtk.TreeStore(str, str, bool)
         self.update_items(self.order_list, model=tree_model)
         return tree_model
+
+    def _split_check_dialog(self, *args):
+        """Private Method.
+
+        Called when the split check button has
+        been pressed. This method eliminates
+        the current dialog and emits the
+        appropriate response.
+
+        @param args: wildcard catchall to catch
+        the Gtk.Widget that called this method.
+
+        @return: None
+        """
+        self.dialog.response(SPLIT_CHECK_DIALOG_RESPONSE)
+        self.dialog.destroy()
 
     def confirm_data(self):
         """Callback Method. Called when confirmation
@@ -1317,40 +1375,12 @@ class SplitCheckConfirmationDialog(CheckoutConfirmationDialog):
         added directly to the dialog's content area.
         """
         main_box = Gtk.VBox()
-        
-        lower_sub_box1 = Gtk.HBox()
-        lower_sub_box2 = Gtk.HBox()
-        
-        select_all_button1 = Gtk.Button('SELECT ALL')
-        select_all_button1.connect('clicked',
-                                   super(SplitCheckConfirmationDialog, self).select_all)
-        select_all_button1.set_size_request(200, 40)
-        lower_sub_box1.pack_start(select_all_button1, False, False, 5)
-        
-        select_all_button2 = Gtk.Button('SELECT ALL')
-        select_all_button2.set_size_request(200, 40)
-        select_all_button2.connect('clicked', self.select_all)
-        lower_sub_box1.pack_end(select_all_button2, False, False, 5)
-        
-        remove_check_button = Gtk.Button('REMOVE CHECK')
-        remove_check_button.connect('clicked', self.remove_selected_check)
-        remove_check_button.set_size_request(200, 40)
-        lower_sub_box2.pack_end(remove_check_button, False, False, 5)
-        
-        add_check_button = Gtk.Button("ADD CHECK")
-        add_check_button.connect('clicked', self.add_new_check)
-        add_check_button.set_size_request(200, 40)
-        lower_sub_box2.pack_end(add_check_button, False, False, 5)
-        
-        main_box.pack_end(lower_sub_box2, False, False, 5)
-        main_box.pack_end(lower_sub_box1, False, False, 5)
-        
-        
+
         center_sub_box = Gtk.HBox()
         
-        items_scroll_window = super(SplitCheckConfirmationDialog,
-                                    self).generate_layout()
-        center_sub_box.pack_start(items_scroll_window, True, True, 5)
+        items_box = super(SplitCheckConfirmationDialog, self).generate_layout()
+
+        center_sub_box.pack_start(items_box, True, True, 5)
         
         center_column_box = Gtk.VBox()
         center_column_box.set_homogeneous(True)
@@ -1373,8 +1403,9 @@ class SplitCheckConfirmationDialog(CheckoutConfirmationDialog):
         
         center_sub_box.pack_start(center_column_box, False, False, 5)
         
-        checks_scroll_window = self.generate_check_treeview()
-        center_sub_box.pack_start(checks_scroll_window, True, True, 5)
+        checks_box = self.generate_check_treeview()
+
+        center_sub_box.pack_start(checks_box, True, True, 5)
         
         main_box.pack_end(center_sub_box, True, True, 5)
         
@@ -1391,12 +1422,33 @@ class SplitCheckConfirmationDialog(CheckoutConfirmationDialog):
         
         return main_box
 
+    def generate_related_buttons(self):
+        """Override Method.
+
+        Generates the buttons associated
+        with this dialog windows functionality.
+
+        @return: Gtk.Container that holds the
+        generated buttons.
+        """
+        sub_box = Gtk.HBox()
+
+        button = Gtk.Button("SELECT ALL")
+        button.connect('clicked', super(SplitCheckConfirmationDialog, self).select_all)
+        button.set_size_request(175, 25)
+        sub_box.pack_start(button, False, False, 5)
+
+        return sub_box
+
+
     def generate_check_treeview(self):
         """Generates the Gtk.TreeView
 
         @return: Gtk.ScrollWindow object that holds
         the generated view.
         """
+        main_box = Gtk.VBox()
+
         scroll_window = Gtk.ScrolledWindow()
         self.checks_view = Gtk.TreeView()
         
@@ -1415,7 +1467,13 @@ class SplitCheckConfirmationDialog(CheckoutConfirmationDialog):
         selection = self.checks_view.get_selection()
         selection.set_select_function(self._select_method, None)
         
-        return scroll_window
+        main_box.pack_start(scroll_window, True, True, 5)
+
+        related_buttons = self.generate_check_related_buttons()
+
+        main_box.pack_start(related_buttons, False, False, 5)
+
+        return main_box
     
     def generate_check_columns(self):
         """Generates the columns associated with
@@ -1435,6 +1493,38 @@ class SplitCheckConfirmationDialog(CheckoutConfirmationDialog):
         col_list.append(col)
         
         return col_list
+
+    def generate_check_related_buttons(self):
+        """Generates the buttons associated with
+        the check tree view functionality.
+
+        @return: Gtk.Container that holds the
+        related buttons.
+        """
+        sub_box = Gtk.VBox()
+
+        lower_sub_box1 = Gtk.HBox()
+        lower_sub_box2 = Gtk.HBox()
+
+        select_all_button2 = Gtk.Button('SELECT ALL')
+        select_all_button2.set_size_request(175, 30)
+        select_all_button2.connect('clicked', self.select_all)
+        lower_sub_box1.pack_end(select_all_button2, False, False, 5)
+
+        remove_check_button = Gtk.Button('REMOVE CHECK')
+        remove_check_button.connect('clicked', self.remove_selected_check)
+        remove_check_button.set_size_request(175, 30)
+        lower_sub_box2.pack_end(remove_check_button, False, False, 5)
+
+        add_check_button = Gtk.Button("ADD CHECK")
+        add_check_button.connect('clicked', self.add_new_check)
+        add_check_button.set_size_request(175, 30)
+        lower_sub_box2.pack_end(add_check_button, False, False, 5)
+
+        sub_box.pack_end(lower_sub_box2, True, True, 5)
+        sub_box.pack_end(lower_sub_box1, True, True, 5)
+
+        return sub_box
 
     def get_selected(self):
         """Override Method.

@@ -96,12 +96,20 @@ class Editor(object):
         
         @param confirm_function: function pointer that is executed
         when confirmation of the dialog occurs.
+
+        @return: int representing the Gtk.ResponseType emitted by
+        the dialog window, or None if no dialog window was
+        executed.
         """
         if order_check(order_list):
             dialog_window = confirm_dialog(self.parent, confirm_function,
                                                 order_list)
-            dialog_window.run_dialog()
+            response = dialog_window.run_dialog()
             del dialog_window
+
+            return response
+
+        return None
     
     def confirm_order(self, order_list, confirm_function):
         """Calls the confirm order dialog on the given
@@ -131,8 +139,13 @@ class Editor(object):
         @param confirm_function: function pointer that points to the
         function to be executed if the checkout is confirmed.
         """
-        self.confirm(order_list, Dialog.CheckoutConfirmationDialog,
-                     confirm_function)
+        response = self.confirm(order_list, Dialog.CheckoutConfirmationDialog,
+                                confirm_function)
+
+        if response == Dialog.SPLIT_CHECK_DIALOG_RESPONSE:
+
+            response= self.confirm(order_list, Dialog.SplitCheckConfirmationDialog,
+                                   confirm_function)
     
     def select_misc_order(self, name_list, confirm_function):
         """Calls the misc selection confirmation dialog on the
@@ -176,7 +189,7 @@ def menu_item_check(menu_item):
     is not None and the MenuItem is editable. False
     otherwise.
     """
-    return menu_item != None and menu_item.is_editable()
+    return menu_item and menu_item.is_editable()
 
 
 def order_check(current_order):
@@ -186,5 +199,4 @@ def order_check(current_order):
     @return: bool representing True if the given order is
     not None and is of length > 0. False otherwise.
     """
-    return current_order != None and len(current_order) > 0
-    
+    return current_order and len(current_order) > 0
