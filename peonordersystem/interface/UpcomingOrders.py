@@ -133,7 +133,6 @@ class UpcomingOrderStore(Gtk.ListStore):
         
         return super(UpcomingOrderStore, self).append(order)
 
-    
     def remove_by_name(self, order_name):
         """Searches for and removes the given
         order from the UpcomingOrderStore, if the
@@ -144,14 +143,19 @@ class UpcomingOrderStore(Gtk.ListStore):
         be replaced with whitespace.
         """
         order_name = order_name.replace('_', ' ')
-        itr = self.get_iter_first()
-        if itr != None and self.iter_is_valid(itr):
-            itr = self._search_for_order(order_name, itr)
-        
-        if itr != None:
-            value = self.remove(itr)
-        
-    
+
+        index = 0
+
+        while index < len(self):
+            value = self[index]
+
+            if value[0] == order_name:
+                itr = value.iter
+                self.remove(itr)
+
+            else:
+                index += 1
+
     def update_priority(self, itr):
         """Updates the priority of the given
         item stored at itr.
@@ -161,33 +165,6 @@ class UpcomingOrderStore(Gtk.ListStore):
         """
         if self.iter_is_valid(itr):
             self[itr][3] = False
-    
-    def _search_for_order(self, order_name, itr):
-        """Private Method.
-        
-        Searches the given itr by calling the next on
-        this store.
-        
-        @param order_name: str representing the displayed
-        order_name. This object should have all underscores
-        replaced with whitespace
-        
-        @param itr: Gtk.TreeIter that represents the given
-        itr to search from.
-        
-        @return: Gtk.TreeIter pointing to the given value,
-        or None if the value didn't exist in the Store.
-        """
-        if itr != None:
-            curr_name = self.get_value(itr, 0)
-            
-            if curr_name == order_name:
-                return itr
-            else:
-                itr = self.iter_next(itr)
-                return self._search_for_order(order_name, itr)
-        
-        return None
 
 @ErrorLogger.error_logging
 class UpcomingOrders(object):
@@ -242,8 +219,7 @@ class UpcomingOrders(object):
         for order in load_data:
             for key, value in order.items():
                 self.add_order(key, value)
-            
-    
+
     def add_order(self, order_name, current_order, has_priority=False):
         """Adds the given order to the UpcomingOrders
         display and stores it under the given order_name
