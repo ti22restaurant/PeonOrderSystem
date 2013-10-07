@@ -59,6 +59,9 @@ stored on table box. Last index is the 'TOGO' button.
         self.reservation_window = None
         self.order_window = None
         self.upcoming_orders_window = None
+
+        self.remove_upcoming_orders_button = None
+        self.upcoming_orders_confirm_priority_button = None
         
     def add_from_file(self, filename, title):  # @IGNORE:E1002
         """ Generates the GUI from the given XML file utilizing 
@@ -110,6 +113,9 @@ stored on table box. Last index is the 'TOGO' button.
             if name == ('editstarsButton' or 
                 'editnoteButton' or 'edititemButton'):
                 self.order_buttons.append(widget)
+
+            if name == 'removeUpcomingOrdersButton':
+                self.remove_upcoming_orders_button = widget
             
             if name == 'upcomingOrdersConfirmPriorityButton':
                 self.upcoming_orders_confirm_priority_button = widget
@@ -286,10 +292,12 @@ stored on table box. Last index is the 'TOGO' button.
             if label == 'MISC ORDERS':
                 function = parent.select_misc_order
             button.connect('clicked', function, label)
-        
-        
+
         function = parent.confirm_selected_upcoming_order
         self.upcoming_orders_confirm_priority_button.connect('clicked', function)
+
+        function = parent.remove_selected_upcoming_order
+        self.remove_upcoming_orders_button.connect('clicked', function)
         
     def set_table(self, string):
         """Sets the current table display label to the given str
