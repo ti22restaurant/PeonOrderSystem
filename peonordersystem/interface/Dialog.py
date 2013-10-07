@@ -2026,7 +2026,7 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
         table_sub_box1 = Gtk.VBox()
 
         for x in range(0, self.NUM_OF_EXTERIOR_TABLES):
-            button = Gtk.Button("Ext. Table " + str(x + 1))
+            button = Gtk.Button("Ext Table " + str(x + 1))
             button.set_size_request(100, 20)
             button.connect("clicked", self.table_button_clicked,
                             button.get_label())
