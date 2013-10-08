@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <!-- interface-requires gtk+ 3.0 -->
-  <object class="GtkImage" id="image2">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-select-color</property>
-  </object>
   <object class="GtkWindow" id="POS_main_window">
     <property name="can_focus">False</property>
     <child>
@@ -31,46 +26,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem1">
-                        <property name="label">gtk-new</property>
-                        <property name="use_action_appearance">False</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem2">
-                        <property name="label">gtk-open</property>
-                        <property name="use_action_appearance">False</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem3">
-                        <property name="label">gtk-save</property>
-                        <property name="use_action_appearance">False</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem4">
-                        <property name="label">gtk-save-as</property>
-                        <property name="use_action_appearance">False</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                    <child>
                       <object class="GtkSeparatorMenuItem" id="separatormenuitem1">
                         <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
@@ -78,7 +33,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem5">
+                      <object class="GtkImageMenuItem" id="quitImageMenuItem">
                         <property name="label">gtk-quit</property>
                         <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
@@ -206,7 +161,6 @@
                     <property name="column_homogeneous">True</property>
                     <child>
                       <object class="GtkButton" id="confirmOrderButton">
-                        <property name="label" translatable="yes">CONFIRM ORDER</property>
                         <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -215,6 +169,17 @@
                         <property name="relief">half</property>
                         <property name="focus_on_click">False</property>
                         <signal name="clicked" handler="confirm_order" swapped="no"/>
+                        <child>
+                          <object class="GtkLabel" id="confirmOrderButtonLabel">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="ypad">8</property>
+                            <property name="label" translatable="yes">CONFIRM ORDER</property>
+                            <attributes>
+                              <attribute name="foreground" value="#34b73157e78d"/>
+                            </attributes>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -225,16 +190,24 @@
                     </child>
                     <child>
                       <object class="GtkButton" id="checkoutButton">
-                        <property name="label" translatable="yes">CHECKOUT</property>
                         <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="use_action_appearance">False</property>
-                        <property name="image">image2</property>
                         <property name="relief">half</property>
                         <property name="focus_on_click">False</property>
                         <signal name="clicked" handler="confirm_checkout" swapped="no"/>
+                        <child>
+                          <object class="GtkLabel" id="checkoutButtonLabel">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">CHECKOUT</property>
+                            <attributes>
+                              <attribute name="foreground" value="#0d6f7f3a1fa5"/>
+                            </attributes>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -245,7 +218,6 @@
                     </child>
                     <child>
                       <object class="GtkButton" id="removeMenuItemButton">
-                        <property name="label" translatable="yes">REMOVE MENU ITEM</property>
                         <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -255,6 +227,18 @@
                         <property name="focus_on_click">False</property>
                         <signal name="activate" handler="remove_menu_item" swapped="no"/>
                         <signal name="clicked" handler="remove_menu_item" swapped="no"/>
+                        <child>
+                          <object class="GtkLabel" id="removeMenuButtonLabel">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">REMOVE ITEM</property>
+                            <attributes>
+                              <attribute name="style" value="normal"/>
+                              <attribute name="weight" value="heavy"/>
+                              <attribute name="foreground" value="#a84a13111311"/>
+                            </attributes>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -285,6 +269,7 @@
                       <object class="GtkBox" id="tablesBox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="hexpand">True</property>
                         <property name="orientation">vertical</property>
                         <property name="homogeneous">True</property>
                         <child>
@@ -323,6 +308,7 @@
                           <object class="GtkScrolledWindow" id="orderView">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <property name="has_focus">True</property>
                             <property name="vexpand">True</property>
                             <property name="window_placement">bottom-left</property>
                             <property name="window_placement_set">True</property>
@@ -363,11 +349,13 @@
               <object class="GtkBox" id="box1">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkNotebook" id="menuNotebook">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="hexpand">True</property>
                     <property name="vexpand">True</property>
                     <property name="tab_pos">bottom</property>
@@ -430,7 +418,7 @@
                     <property name="label" translatable="yes">EDIT NOTE</property>
                     <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="use_action_appearance">False</property>
                     <property name="focus_on_click">False</property>
@@ -449,7 +437,7 @@
                     <property name="label" translatable="yes">EDIT STARS</property>
                     <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="use_action_appearance">False</property>
                     <property name="focus_on_click">False</property>
@@ -481,7 +469,7 @@
                     <property name="label" translatable="yes">EDIT ITEM</property>
                     <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="use_action_appearance">False</property>
                     <property name="focus_on_click">False</property>
@@ -547,7 +535,7 @@
                                 <property name="label" translatable="yes">ADD NEW RESERVATION</property>
                                 <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="receives_default">True</property>
                                 <property name="margin_left">6</property>
                                 <property name="margin_right">6</property>
@@ -567,7 +555,7 @@
                                 <property name="label" translatable="yes">REMOVE RESERVATION</property>
                                 <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="receives_default">True</property>
                                 <property name="margin_left">5</property>
                                 <property name="margin_right">5</property>
@@ -636,9 +624,10 @@
                                 <property name="label" translatable="yes">REMOVE ORDER</property>
                                 <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="receives_default">True</property>
                                 <property name="use_action_appearance">False</property>
+                                <property name="focus_on_click">False</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -651,9 +640,10 @@
                                 <property name="label" translatable="yes">CONFIRM PRIORITY</property>
                                 <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="receives_default">True</property>
                                 <property name="use_action_appearance">False</property>
+                                <property name="focus_on_click">False</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>

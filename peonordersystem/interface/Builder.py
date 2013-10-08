@@ -85,7 +85,7 @@ stored on table box. Last index is the 'TOGO' button.
         tree = ElementTree()
         tree.parse(filename)
 
-        elements = tree.getiterator('object')
+        elements = tree.iter('object')
         
         # Populate this objects attributes
         for current_widget in elements:
@@ -97,7 +97,10 @@ stored on table box. Last index is the 'TOGO' button.
             
             if name == 'POS_main_window':
                 self.window = widget
-                self.window.connect('delete_event', Gtk.main_quit)
+                self.window.connect('delete_event', self.quit)
+
+            if name == 'quitImageMenuItem':
+                widget.connect('activate', self.quit)
             
             # find order window
             if name == 'orderView':
@@ -146,11 +149,13 @@ stored on table box. Last index is the 'TOGO' button.
         """
         for i in range(1, num_of_tables + 1):
             button = Gtk.Button('TABLE ' + str(i))
+            button.set_focus_on_click(False)
             tables_box.pack_start(button, True, True, 2.5)
             self.generated_table_buttons.append(button)
         
         # additional TOGO button
         button = Gtk.Button('MISC ORDERS')
+        button.set_focus_on_click(False)
         tables_box.pack_start(button, True, True, 2.5)
         self.generated_table_buttons.append(button)
             
@@ -220,9 +225,10 @@ stored on table box. Last index is the 'TOGO' button.
                 sub_box2 = Gtk.HBox()
                 sub_box2.set_homogeneous(True)
                 box.pack_start(sub_box2, True, True, 5)
-                
+
                 # generate queues for boxes and add them to list
-                temp.append(generate_menu_layout(sub_box2))
+                temp.append(generate_menu_layout(sub_box2,
+                                                 num_of_cols=len(option_list)))
                 
         self._generate_menu_buttons(temp,
             option_list, load_menu_items())
@@ -261,6 +267,7 @@ stored on table box. Last index is the 'TOGO' button.
                 
                 # Store MenuItem in button
                 button.MenuItem = item
+                button.set_focus_on_click(False)
                 box.pack_start(button, True, True, 5)
                 
                 # Cycle queue of boxes for evenly distributed
@@ -314,6 +321,16 @@ stored on table box. Last index is the 'TOGO' button.
         """   
         pass
 
+    def quit(self, *args):
+        """Callback Method used to end Gtk loop.
+
+        @param args: wildcard catchall used to
+        catch the widget that called this method.
+
+        @return: None
+        """
+        Gtk.main_quit()
+
 
 def load_menu_items():
     """Generates a dict of current MenuItem objects and returns
@@ -353,7 +370,7 @@ def load_menu_items():
     # Generate MenuItem's from JSON file
     return json.load(menu, object_hook=generate_menu)
     
-def generate_menu_layout(main_box):
+def generate_menu_layout(main_box, num_of_cols=2):
     """ Generates the menu layout for any given menu box.
     
     This is a helper method called from inside of
@@ -369,7 +386,7 @@ def generate_menu_layout(main_box):
     # deque is convenient for evenly distributing boxes
     box_queue = deque()
     # subdivide box
-    for _ in range(2):
+    for _ in range(num_of_cols):
         box = Gtk.VBox()
         # box.set_homogeneous(True)
         box_queue.append(box)
