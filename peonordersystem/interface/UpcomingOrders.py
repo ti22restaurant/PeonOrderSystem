@@ -75,10 +75,9 @@ class UpcomingOrdersView(Gtk.TreeView):
                                  rend, text=1)
         col_list.append(col)
         
-        rend = Gtk.CellRendererPixbuf()
-        col = Gtk.TreeViewColumn(column_names[2], rend,
-                                 stock_id=2,
-                                 visible=3)
+        rend = Gtk.CellRendererText()
+        col = Gtk.TreeViewColumn(column_names[2],
+                                 rend, text=2)
         col_list.append(col)
         
         return col_list
@@ -110,8 +109,7 @@ class UpcomingOrderStore(Gtk.ListStore):
         Generates a new UpcomingOrderStore that stores
         3 str types.
         """
-        super(UpcomingOrderStore, self).__init__(str, str,
-                                                 str, bool)
+        super(UpcomingOrderStore, self).__init__(str, str, str)
 
     def remove(self, itr):
         """Removes the selected item from
@@ -127,16 +125,17 @@ class UpcomingOrderStore(Gtk.ListStore):
         super(UpcomingOrderStore, self).remove(itr)
         return name
 
-    def append(self, order_name, has_priority):
+    def append(self, order_name, priority_info):
         """Appends the given order_name, and current_order
         to the UpcomingOrderStore.
         
         @param order_name: str representing the given name
         of the order that is being confirmed.
 
-        @param has_priority: bool representing if there is
-        a priority order associated with the order. False if
-        no, True if so.
+        @param priority_info: str representing the current
+        list of selected MenuItems that represent the
+        priority order associated with this order. None if
+        there were no items.
         
         @return: Gtk.TreeIter pointing at the added item
         """
@@ -144,7 +143,7 @@ class UpcomingOrderStore(Gtk.ListStore):
         
         order_name = order_name.replace('_', ' ')
         
-        order = (order_name, curr_time, Gtk.STOCK_YES, has_priority)
+        order = (order_name, curr_time, priority_info)
         
         return super(UpcomingOrderStore, self).append(order)
 
@@ -181,8 +180,7 @@ class UpcomingOrderStore(Gtk.ListStore):
         @return: str representing the name of the
         priority order confirmed.
         """
-        if self.iter_is_valid(itr):
-            self[itr][3] = False
+        self[itr][2] = ''
 
         return self[itr][0]
 
@@ -262,7 +260,7 @@ class UpcomingOrders(object):
 
         return itr
 
-    def add_order(self, order_name, current_order, has_priority=False):
+    def add_order(self, order_name, current_order, priority_order=[]):
         """Adds the given order to the UpcomingOrders
         display and stores it under the given order_name
         
@@ -273,12 +271,17 @@ class UpcomingOrders(object):
         @param current_order: list of MenuItem objects that
         is the current order list being confirmed
 
-        @keyword has_priority: bool representing if the given order
-        has a priority order associated with it. False if no, True
-        if so. Default is False
+        @keyword priority_order: list of MenuItem objects that
+        represent the priority order associated with the
+        current order. By default this value is an empty list.
         """
         order_name = order_name.replace(TOGO_SEPARATOR, ' ')
-        self.model.append(order_name, has_priority)
+        priority_info = ''
+
+        for menu_item in priority_order:
+            priority_info += menu_item.get_name() + ', '
+
+        self.model.append(order_name, priority_info[:-2])
     
     def remove_selected_order(self):
         """Removes the selected order from the
