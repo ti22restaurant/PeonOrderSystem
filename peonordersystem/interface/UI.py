@@ -394,7 +394,7 @@ class UI(object):
         the second index is a list of MenuItem objects
         that represent the order.
         """
-        self.orders.confirm_order()
+        self.orders.confirm_order(priority_order)
         curr_name, curr_order = self.get_order_info()
         self.upcoming_orders.add_order(curr_name, curr_order,
                                        priority_order=priority_order)

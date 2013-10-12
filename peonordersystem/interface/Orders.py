@@ -30,6 +30,7 @@ from peonordersystem.MenuItem import MenuItem
 from peonordersystem import ErrorLogger
 from peonordersystem.ConfirmationSystem import TOGO_SEPARATOR
 from peonordersystem import CustomExceptions
+from peonordersystem.interface.Dialog import STANDARD_TEXT, STANDARD_TEXT_BOLD
 
 import time
 
@@ -91,11 +92,11 @@ class OrderTreeView(Gtk.TreeView):
         # 3. color: str representing the hexadecimal color for the foreground
         # 4. has note: bool representing if the image should be displayed
         
-        column = Gtk.TreeViewColumn(col_names[0], rend, text=0, foreground=3)
+        column = Gtk.TreeViewColumn(col_names[0], rend, text=0, foreground=3, weight=5)
         col_list.append(column)
         
         rend = Gtk.CellRendererText()
-        column2 = Gtk.TreeViewColumn(col_names[1], rend, text=1, foreground=3)
+        column2 = Gtk.TreeViewColumn(col_names[1], rend, text=1, foreground=3, weight=5)
         col_list.append(column2)
         
         rend = Gtk.CellRendererPixbuf()
@@ -161,7 +162,7 @@ class OrderStore(Gtk.TreeStore):
         # 3. color: str representing the hexadecimal color for the foreground
         # 4. has note: bool representing if the image should be displayed
         
-        super(OrderStore, self).__init__(str, str, str, str, bool)
+        super(OrderStore, self).__init__(str, str, str, str, bool, int)
         self.order_list = []
     
     def clear(self):
@@ -226,6 +227,11 @@ class OrderStore(Gtk.TreeStore):
         # 4. display_image: bool representing if the image should
         # be displayed.
         new_entry.append(menu_item.has_note())
+
+        # 5. weight: int representing the weight associated with
+        # the menu item. This weight is a reference to if it was
+        # given priority status from the user.
+        new_entry.append(self._get_weight(False))
         
         return super(OrderStore, self).append(None, new_entry)
     
@@ -233,16 +239,38 @@ class OrderStore(Gtk.TreeStore):
         """Private Method.
         
         Gets the hexadecimal color associated with
-        the value. 
+        the value.
+
+        @param is_confirmed: bool value representing
+        if the item is confirmed or not
         
         @return: str representing hexadecimal number for
-        gray if True, black otherwise.
+        gray if parameter was true, black otherwise.
         """
         if is_confirmed:
             # Hexadecimal GRAY
             return '#999999'
         # Hexadecimal BLACK
         return '#000000'
+
+    def _get_weight(self, has_priority):
+        """Private Method.
+
+        Gets the value associated with the
+        priority rating of a menu item.
+
+        @param has_priority: bool value representing
+        if the menu_item has an associated priority
+        with it.
+
+        @return: int representing the value associated
+        with the priority.
+        """
+
+        if has_priority:
+            return STANDARD_TEXT_BOLD
+
+        return STANDARD_TEXT
     
     def _ensure_top_level_iter(self, tree_iter):
         """Private Method.
@@ -296,7 +324,6 @@ class OrderStore(Gtk.TreeStore):
         index = self.get_index(tree_iter)
         return self.order_list[index]
 
-    
     def remove(self, tree_iter):
         """Removes the MenuItem at the selected
         tree_iter from the order list.
@@ -310,12 +337,14 @@ class OrderStore(Gtk.TreeStore):
         tree_iter = self._ensure_top_level_iter(tree_iter)
         
         index = self.get_index(tree_iter)
+
         if index is not None:
             super(OrderStore, self).remove(tree_iter)
             return self.order_list.pop(index)
+
         return None
     
-    def update_item(self, tree_iter):
+    def update_item(self, tree_iter, has_priority=False):
         """Updates the current item to accurately
         display any changed information. Options and
         notes are added as children in the tree. Any
@@ -324,6 +353,10 @@ class OrderStore(Gtk.TreeStore):
         
         @param tree_iter: Gtk.TreeIter representing the
         selected MenuItem.
+
+        @keyword has_priority: bool value representing if
+        the updated MenuItem has priority. Default is
+        False
         
         @return: Gtk.TreeIter pointing to the updated
         MenuItem
@@ -351,12 +384,20 @@ class OrderStore(Gtk.TreeStore):
         self[tree_iter][1] = str(menu_item.stars)
         self[tree_iter][3] = text_color
         self[tree_iter][4] = menu_item.has_note()
+        self[tree_iter][5] = self._get_weight(has_priority)
         
         return tree_iter
         
-    def confirm_order(self, tree_iter):
+    def confirm_order(self, tree_iter, priority_order):
         """Sets all MenuItem's in the order to confirmed,
         and disallows further editing of MenuItems.
+
+        @param tree_iter: Gtk.TreeIter pointing to the
+        row associated with the MenuItem
+
+        @param priority_order: list of MenuItem objects
+        that represents the priority orders associated with
+        the confirmed order.
         """
         if tree_iter != None:
             menu_item = self.get_menu_item(tree_iter)
@@ -364,8 +405,14 @@ class OrderStore(Gtk.TreeStore):
                 menu_item.confirmed = True
                 menu_item.editable = False
                 menu_item.toggle_lock_menu_item()
-                self.update_item(tree_iter)
-            self.confirm_order(self.iter_next(tree_iter))
+
+                if menu_item in priority_order:
+                    has_priority = True
+                else:
+                    has_priority = False
+
+                self.update_item(tree_iter, has_priority=has_priority)
+            self.confirm_order(self.iter_next(tree_iter), priority_order)
     
     def __repr__(self):
         """Gets a string representation of
@@ -606,13 +653,19 @@ class Orders(object):
         
         return key, self.current_order.order_list
 
-    def confirm_order(self):
+    def confirm_order(self, priority_order=[]):
         """Set all MenuItems in the current order to
         confirmed
         """
         if _check_order(self.current_order):
+
+            if len(self.current_order) < len(priority_order):
+                message = 'Priority Order may not exceed the length' + \
+                          'of the given order!'
+                raise RuntimeError(message)
+
             tree_iter = self.current_order.get_iter_first()
-            self.current_order.confirm_order(tree_iter)
+            self.current_order.confirm_order(tree_iter, priority_order)
     
     def clear_order(self):
         """Clears the current order.

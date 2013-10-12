@@ -42,8 +42,8 @@ import math
 from peonordersystem import CheckOperations
 from peonordersystem.CustomExceptions import InvalidOrderError
 
-STANDARD_TEXT = 100
-STANDARD_TEXT_BOLD = 700
+STANDARD_TEXT = 500
+STANDARD_TEXT_BOLD = 850
 
 SPLIT_CHECK_DIALOG_RESPONSE = 99
 
