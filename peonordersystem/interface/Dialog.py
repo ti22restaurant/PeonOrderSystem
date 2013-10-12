@@ -40,7 +40,7 @@ import time
 import math
 
 from peonordersystem import CheckOperations
-
+from peonordersystem.CustomExceptions import InvalidOrderError
 
 STANDARD_TEXT = 100
 STANDARD_TEXT_BOLD = 700
@@ -885,10 +885,8 @@ class OrderConfirmationDialog(ConfirmationDialog):
         represents the current order being considered for
         confirmation by the ConfirmationDialog 
         """
-        def is_confirmed(menu_item):
-            return not menu_item.confirmed
+        self.order_list = order_list
         self. total_row_reference = None
-        self.order_list = filter(is_confirmed, order_list)
         self.confirm_func = confirm_func
         super(OrderConfirmationDialog, self).__init__(parent, title, dialog)
 
@@ -910,6 +908,7 @@ class OrderConfirmationDialog(ConfirmationDialog):
 
         button_box = Gtk.HBox()
         priority_button = Gtk.Button('Add Priority')
+        priority_button.set_size_request(200, 50)
         priority_button.connect('clicked', self._set_selected_priority)
         button_box.pack_start(priority_button, False, False, 5)
 
@@ -2146,8 +2145,7 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
             t = time.strftime('%X, %A, %m/%y')
             new_order = (name, number, t)
 
-        self.order = new_order
-        super(OrderSelectionConfirmationDialog, self).confirm_button_clicked()
+            self.confirm_button_clicked(None, order=new_order)
 
     def table_button_clicked(self, button, table):
         """Callback Method that is called when
@@ -2162,8 +2160,7 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
 
         @return: None
         """
-        self.order = table
-        super(OrderSelectionConfirmationDialog, self).confirm_button_clicked()
+        self.confirm_button_clicked(None, order=table)
 
     def get_selected(self, *args):
         """Gets the selected order in the standard
@@ -2177,16 +2174,39 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
         """
         tree_selection = self.tree_view.get_selection()
         model, itr = tree_selection.get_selected()
-        return model.get(itr, 0, 1, 2)
+
+        if itr:
+            return model.get(itr, 0, 1, 2)
+
+        return None
+
+    def confirm_button_clicked(self, widget, order=None):
+        """Override method
+
+        Callback method. Called when Confirm button
+        is clicked. This method confirms the
+        currently selected order.
+
+        @param args: wildcard catchall used to catch
+        the Gtk.Widget that called this method.
+
+        @return: None
+        """
+        if order:
+            self.order = order
+        else:
+            self.order = self.get_selected()
+
+        if self.order:
+            super(OrderSelectionConfirmationDialog, self).confirm_button_clicked()
 
     def confirm_data(self):
-        """Callback Method that is called when the confirm
+        """Override Method.
+
+        Callback Method that is called when the confirm
         button is clicked.
         """
-        if self.order:
-            self.confirm_func(self.order)
-        else:
-            self.confirm_func(self.get_selected())
+        self.confirm_func(self.order)
 
     
 class AddReservationsDialog(Dialog):
@@ -2212,16 +2232,20 @@ class AddReservationsDialog(Dialog):
     integer of minutes selection to be made by the user.
     """
     
-    def __init__(self, parent, *args):
+    def __init__(self, parent, confirm_func, *args):
         """initializes a new AddReservationsDialog that
         the user may interact with to add a new reservation
         to the reservations list.
         
         @param parent: Gtk.Window that the dialog will be
         a child of
+
+        @param confirm_func: pointer to the function that
+        is to be called if the window has been confirmed.
         
         @param *args: wildcard for unexpected parameters
         """
+        self.confirm_func = confirm_func
         self.name_entry = None
         self.number_entry = None
         self.hour_combo_box = None
@@ -2315,7 +2339,12 @@ class AddReservationsDialog(Dialog):
         @param *args: wildcard that represents a catch all for the
         widget that emitted the call.
         """
-        super(AddReservationsDialog, self).confirm_button_clicked()
+        has_hour = self.hour_combo_box.get_active() > -1
+        has_min = self.min_combo_box.get_active() > -1
+
+        if has_hour and has_min:
+            super(AddReservationsDialog, self).confirm_button_clicked()
+            self.confirm_func(self.get_information())
         
     def cancel_button_clicked(self, *args):
         """Callback method called when the cancel button
@@ -2325,21 +2354,6 @@ class AddReservationsDialog(Dialog):
         the widget that emitted this call.
         """
         super(AddReservationsDialog, self).cancel_button_clicked()
-    
-    def run_dialog(self):
-        """Runs the current dialog window
-        
-        @attention: returns an empty 3-tuple if the signal
-        emitted was a cancellation of the dialog window.
-        
-        @return: 3-tuple representing the newly added reservation
-        in the (str, str, float) form representing name, number, 
-        and secs from the epoch respectively.
-        """
-        signal = super(AddReservationsDialog, self).run_dialog()
-        if signal is int(Gtk.ResponseType.ACCEPT):
-            return self.get_information()
-        return None, None, None
 
 
 def get_row_refs(model, paths):

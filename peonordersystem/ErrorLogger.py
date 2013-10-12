@@ -3,8 +3,8 @@
 @contact: cjmcgraw.u.washington.edu
 @version: 1.0
 '''
-from peonordersystem.path import SYSTEM_LOG_PATH
 
+from peonordersystem.path import SYSTEM_LOG_PATH
 
 import traceback
 
@@ -101,7 +101,7 @@ def log_func_data(func):
                 
             try:
                 return func(*args, **kwargs)
-            
+
             except Exception as e:
                 logger.error(e)
                 spaces = '   '

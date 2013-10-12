@@ -39,8 +39,11 @@ members:
 """
 
 from gi.repository import Gtk, GObject  # IGNORE:E0611 @UnresolvedImport
+from peonordersystem.CustomExceptions import NoSuchSelectionError,\
+    InvalidReservationError
 
 import time
+
 
 class Reserver(object):
     """Reserver class represents a single reservation. This
@@ -80,20 +83,19 @@ class Reserver(object):
         the time of the arrival. Expected to be
         generated from time import.
         
-        @raise ValueError: If the given arrival_time
-        is less than the current time as generated from
-        time.time function
+        @raise ValueError: If the given time is
+        in the past
         """
         self._curr_time = time.time()
         
         if self._curr_time > arrival_time:
-            raise ValueError('Reserver class expected ' + 
-                             'an arrival time parameter that ' + 
-                             'was set in the future, and generated ' + 
-                             "from python's import time function, such " + 
-                             'that it is a number representing the ' + 
-                             'number of seconds from the epoch. The value ' + 
-                             'you gave was ' + str(arrival_time) + ' which is ' + 
+            raise ValueError('Reserver class expected ' +
+                             'an arrival time parameter that ' +
+                             'was set in the future, and generated ' +
+                             "from python's import time function, such " +
+                             'that it is a number representing the ' +
+                             'number of seconds from the epoch. The value ' +
+                             'you gave was ' + str(arrival_time) + ' which is ' +
                              'before the current time of ' + str(self._curr_time))
         
         self.name = name
@@ -146,6 +148,7 @@ class Reserver(object):
     
     def __repr__(self):
         return str(self.__dict__)
+
 
 class ReservationTreeView(Gtk.TreeView):
     """ReservationTreeView class provides the basic
@@ -311,19 +314,12 @@ class ReservationStore(Gtk.ListStore):
         """Gets the index of the given
         iter.
         
-        @raise ValueError: if given Gtk.TreeIter is
-        not a valud iter on this model.
-        
         @param itr: Gtk.TreeIter object that
         represents a valid iter.
         
         @return: int representing the index of
         the entry selected by the given iter
         """
-        if itr == None or not self.iter_is_valid(itr):
-            raise ValueError('Expected valid Gtk.TreeIter given in ' + 
-                             ' ReservationStore object, ' + 
-                             'got ' + str(type(itr)))
         path = self.get_path(itr)
         path = path.get_indices()
         return path[0]
@@ -379,7 +375,8 @@ class ReservationStore(Gtk.ListStore):
         of reservations as 3-tuples
         """
         return str(self._reservation_list)
-            
+
+
 class Reservations(object):
     """Reservations class generates and
     performs the functionality of displaying
@@ -408,6 +405,28 @@ class Reservations(object):
         
         self.tree_view.set_model(self.model)
         self.tree_view.show_all()
+
+    def _get_selected_iter(self):
+        """Private Method.
+
+        Gets the Gtk.TreeIter associated with
+        the selected reservation.
+
+        @raise NoSuchSelectionError: If no selection
+        has been made.
+
+        @return: Gtk.TreeIter pointing to the reservation
+        selected.
+        """
+        itr = self.tree_view.get_selected_iter()
+
+        if not itr:
+            message = 'Expected Gtk.TreeIter from ' +\
+                      'selection. Got {} instead'.format(type(itr))
+
+            raise NoSuchSelectionError(message)
+
+        return itr
     
     def add_reservation(self, name, number, arrival_time):
         """Adds a reservation to the display and keeps
@@ -422,18 +441,25 @@ class Reservations(object):
         @param arrival_time: float representing the expected
         arrival time of this reservation. This is expected to
         be generated from the time.time function.
+
+        @return: 3-tuple of str type that represent the
+        added name, number, and arrival time respectively
         """
-        if name == None or number == None or arrival_time == None:
-            raise TypeError('Reservations expected values for ' + 
-                            'parameters. Instead got ({}, {}, {}'.format(
-                             type(name), type(number), type(arrival_time)))
-        self.model.add_reservation(name, number, arrival_time)
-    
+        if type(name) != str or type(number) != str or type(arrival_time) != float:
+            message = 'Expected values for name, number, and arrival_time' +\
+                      'name -> {}\nnumber -> {}\narrival_time -> {}'.format(name, number,
+                                                                            arrival_time)
+            raise InvalidReservationError(message)
+
+        reserver = self.model.add_reservation(name, number, arrival_time)
+        return reserver.name, reserver.number, reserver.get_arrival_time_str()
+
     def remove_selected_reservation(self):
         """Removes the selected reservation.
         """
-        itr = self.tree_view.get_selected_iter()
-        self.model.remove_selected(itr)
+        itr = self._get_selected_iter()
+        reserver = self.model.remove_selected(itr)
+        return reserver.name, reserver.number, reserver.get_arrival_time_str()
     
     def __repr__(self):
         """Gets a string representation of the

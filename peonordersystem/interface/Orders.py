@@ -29,8 +29,10 @@ from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 from peonordersystem.MenuItem import MenuItem
 from peonordersystem import ErrorLogger
 from peonordersystem.ConfirmationSystem import TOGO_SEPARATOR
+from peonordersystem import CustomExceptions
 
 import time
+
 
 class OrderTreeView(Gtk.TreeView):
     """OrderTreeView object that creates
@@ -126,6 +128,7 @@ class OrderTreeView(Gtk.TreeView):
         tree_selection = self.get_selection()
         _, itr = tree_selection.get_selected()
         return itr
+
 
 class OrderStore(Gtk.TreeStore):
     """OrderStore class creates and stores
@@ -250,18 +253,10 @@ class OrderStore(Gtk.TreeStore):
         @param tree_iter: Gtk.TreeIter pointing at
         the selected item.
         
-        @raise Exception: If invalid Gtk.TreeIter passed
-        as argument.
-        
         @return: Gtk.TreeIter pointing to the top
         level parent. If a top level parent is
         given then that is returned by this method.
         """
-        if tree_iter is None or not self.iter_is_valid(tree_iter):
-            raise Exception("Invalid Gtk.TreeIter " + 
-                            "given as parameter." + 
-                            "Given TreeIter: " + 
-                            (str(type(tree_iter))))
         parent = self.iter_parent(tree_iter)
         if parent is None:
             return tree_iter
@@ -279,9 +274,6 @@ class OrderStore(Gtk.TreeStore):
         @return: int representing the selected MenuItem's
         index.
         """
-        if tree_iter is None or not self.iter_is_valid(tree_iter):
-            Exception("Invalid Tree Iter " + 
-                      "given as parameter.")
         path = self.get_path(tree_iter)
         value = path.get_indices()
         return value[0]
@@ -299,12 +291,11 @@ class OrderStore(Gtk.TreeStore):
         @return: MenuItem object that represents the
         selected MenuItem object pointed at by tree_iter
         """
-        
-        # Possible Exception raised via ensure_top_level_iter
         tree_iter = self._ensure_top_level_iter(tree_iter)
-        
+
         index = self.get_index(tree_iter)
         return self.order_list[index]
+
     
     def remove(self, tree_iter):
         """Removes the MenuItem at the selected
@@ -316,7 +307,6 @@ class OrderStore(Gtk.TreeStore):
         @return: MenuItem object representing the
         MenuItem removed from the order list.
         """
-        # Potential Exception raised on ensure_top_level_iter
         tree_iter = self._ensure_top_level_iter(tree_iter)
         
         index = self.get_index(tree_iter)
@@ -338,8 +328,6 @@ class OrderStore(Gtk.TreeStore):
         @return: Gtk.TreeIter pointing to the updated
         MenuItem
         """
-        
-        # Potential exception raised
         tree_iter = self._ensure_top_level_iter(tree_iter)
         
         menu_item = self.get_menu_item(tree_iter)
@@ -372,7 +360,7 @@ class OrderStore(Gtk.TreeStore):
         """
         if tree_iter != None:
             menu_item = self.get_menu_item(tree_iter)
-            if not menu_item.confirmed and _check_menu_item(menu_item):
+            if not menu_item.confirmed and not menu_item.is_locked():
                 menu_item.confirmed = True
                 menu_item.editable = False
                 menu_item.toggle_lock_menu_item()
@@ -430,14 +418,7 @@ class Orders(object):
         
         @keyword num_of_tables: represents the number
         of tables for orders to be generated for.
-        
-        @raise TypeError: If parent is not a subclass
-        of Gtk.Container.
         """
-        if not isinstance(parent, Gtk.Container):
-            raise TypeError("Expected a subclass of " + 
-                            "Gtk.Container. Instead got " + 
-                            str(type(parent)))
         self.tree_view = OrderTreeView()
         parent.add(self.tree_view)
         
@@ -447,47 +428,39 @@ class Orders(object):
             key = 'TABLE ' + str(num)
             
             self.orders_dict[key] = value
-            
-            
+
         self.to_go_dict = {}
         self.current_order = None
         
         if load_data is not None and type(load_data) is tuple:
-            try:
-                self._load_data(load_data)
-            except:
-                print('Unable to load data from file')
-    
+            self._load_data(load_data)
+
     def _load_data(self, load_data):
         """Loads the data from the files, and
         places them in the orders.
+
+        @param load_data: 2 tuple each of type
+        dict. Where the keys are str types representing
+        the order name, and the values are lists of
+        MenuItem objects representing the order.
         """
         table_orders = load_data[0]
-        print table_orders
         togo_orders = load_data[1]
-        print togo_orders
-        
-        if type(table_orders) is not dict or type(togo_orders) is not dict:
-            raise TypeError("LOADING DATA FROM FILE. " + 
-                            "Expected load_data provided to orders " + 
-                            "to be type(obj) = dict. Instead got a 2-tuple " + 
-                            "of {}, and {}".format(type(table_orders),
-                                                   type(togo_orders)))
         
         for table in table_orders:
-            table = table.replace('_', ' ')
-            
+
             if table not in self.orders_dict:
                 self.orders_dict[table] = OrderStore()
                 
             self.current_order = self.orders_dict[table]
-            
+
             for menu_item in table_orders[table]:
                 self.current_order.append(menu_item)
         
         for togo_name in togo_orders:
+
             name, number = togo_name.split(TOGO_SEPARATOR)
-            
+
             # standard Dialog generated time format.
             curr_time = time.strftime('%X, %A, %m/%y')
             
@@ -501,6 +474,27 @@ class Orders(object):
         
         self.current_order = None
         self._set_model()
+
+    def _get_selected_iter(self):
+        """Private Method.
+
+        Gets the iter associated with the
+        current selection.
+
+        @raise NonSuchSelectionError: If the
+        given itr is None.
+
+        @return: Gtk.TreeIter pointing to the
+        selected row
+        """
+        itr = self.tree_view.get_selected_iter()
+        if not itr:
+            message = 'Expected itr to point to be Gtk.TreeIter. ' + \
+                      'Instead type(itr) -> {}'.format(type(itr))
+
+            raise CustomExceptions.NoSuchSelectionError(message)
+
+        return itr
         
     def get_togo_orders(self):
         """Gets a list of the current togo orders.
@@ -529,17 +523,13 @@ class Orders(object):
         """
         self.tree_view.set_model(self.current_order)
         self.tree_view.show_all()
-        
-    
+
     def set_current_table(self, table):
         """Sets the current table and order considered
         to the given value.
         
         @param num: int value representing the selected
         table
-        
-        @raise IndexError: If number given is outside
-        of the range of the the length of order_list.
         """
         if table not in self.orders_dict:
             self.orders_dict[table] = OrderStore()
@@ -565,7 +555,7 @@ class Orders(object):
         currently selected MenuItem
         """
         if _check_order(self.current_order):
-            itr = self.tree_view.get_selected_iter()
+            itr = self._get_selected_iter()
             return self.current_order.get_menu_item(itr)
     
     def add(self, menu_item):
@@ -587,7 +577,7 @@ class Orders(object):
         the removed MenuItem
         """
         if _check_order(self.current_order):
-            itr = self.tree_view.get_selected_iter()
+            itr = self._get_selected_iter()
             menu_item = self.get_selected()
             if _check_menu_item(menu_item):
                 return self.current_order.remove(itr)
@@ -597,7 +587,7 @@ class Orders(object):
         so that it displays updated information.
         """
         if _check_order(self.current_order):
-            itr = self.tree_view.get_selected_iter()
+            itr = self._get_selected_iter()
             self.current_order.update_item(itr)
     
     def get_order_info(self):
@@ -615,9 +605,7 @@ class Orders(object):
             key = key[0] + TOGO_SEPARATOR + key[1]
         
         return key, self.current_order.order_list
-        
-        
-    
+
     def confirm_order(self):
         """Set all MenuItems in the current order to
         confirmed
@@ -667,24 +655,41 @@ class Orders(object):
         """
         return str(self.__dict__)
 
+
 def _check_menu_item(menu_item):
     """Checks if the given MenuItem is a valid
     MenuItem.
     
     @param menu_item: MenuItem object that represents
     the MenuItem to be checked.
-    
-    @raise TypeError: when the given Menuitem is not
+
+    @raise NonMenuItemError: If the given item is not
     an instance of MenuItem
+
+    @raise InvalidItemError: If the given item is either
+    None or is locked.
     
     @return: bool representing if the MenuItem given
     is valid and operations can be performed on it.
     """
-    
-    if not isinstance(menu_item, MenuItem):
-        raise TypeError('Expected MenuItem type. ' + 
-                        'Got {} instead'.format(type(menu_item)))
-    return not menu_item.is_locked()
+    if menu_item.is_locked():
+        name = menu_item.get_name()
+        price = menu_item.get_price()
+        editable = menu_item.is_editable()
+        confirmed = menu_item.confirmed
+        is_locked = menu_item.is_locked()
+        message = 'Operation Undefined for locked MenuItem.\n' + \
+                  ' Expected menu_item.is_locked = False. MenuItem is:\n' + \
+                  'name -> {}\n'.format(name) + \
+                  'price -> {}\n'.format(price) + \
+                  'editable -> {}\n'.format(editable) + \
+                  'confirmed -> {}\n'.format(confirmed) + \
+                  'is_locked -> {}'.format(is_locked)
+
+        raise CustomExceptions.InvalidItemError(message)
+
+    return True
+
 
 def _check_order(current_order):
     """Checks if the stored current_order is a valid
@@ -693,13 +698,15 @@ def _check_order(current_order):
     @param current_order: OrderStore object that represents
     the OrderStore to be checked.
     
-    @raise TypeError: when the current_order given is
+    @raise InvalidOrderError: when the current_order given is
     not an instance of OrderStore
     
     @return: bool representing of the current_order
     stored is valid and operations can be performed on it.
     """
     if not isinstance(current_order, OrderStore):
-        raise TypeError('Expected OrderStore type. ' + 
-                        'Got {} instead'.format(type(current_order)))
-    return current_order != None
+        message = "Expected OrderStore object, " + \
+                  "{} instead".format(type(current_order))
+        raise CustomExceptions.InvalidOrderError(message)
+
+    return True

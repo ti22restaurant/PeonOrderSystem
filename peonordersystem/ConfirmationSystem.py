@@ -1,4 +1,4 @@
-'''This module provides functionality for the confirmation system.
+"""This module provides functionality for the confirmation system.
 Importing the module implicitly builds the necessary directories
 to store in the data folder of the project. This import builds 
 the following files ontop of data if they do not already exist
@@ -12,7 +12,7 @@ or day changes it instantiates a new directory.
 @author: Carl McGraw
 @contact: cjmcgraw@u.washington.edu
 @version: 1.0
-'''
+"""
 import os
 import cPickle
 import time
@@ -50,32 +50,16 @@ def generate_files():
     dict has a key that maps to a list of the MenuItem
     objects that were present in that order.
     """
-    table_orders = {}
-    togo_orders = {}
-    
     curr_directory = directory + 'confirmed/'
     
     if not os.path.exists(curr_directory):
         os.mkdir(curr_directory)
         os.mkdir(directory + 'checkout/')
     else:
-        itr = os.walk(curr_directory)
-        dirpath, dirnames, filenames = itr.next()
-        
-        for curr_filename in filenames:
-            filename, filetype = curr_filename.split('.')
-            filename = filename.replace('_', ' ')
-            
-            if filetype == 'table':
-                current_orders = table_orders
-            else:
-                current_orders = togo_orders
-            
-            data = open(dirpath + curr_filename)
-            unpickler = cPickle.Unpickler(data)
-            current_orders[filename] = unpickler.load()
-                
-    return (table_orders, togo_orders)
+        return unpack_information(curr_directory)
+
+    return {}, {}
+
 
 def standardize_confirm_file_name(order_name):
     """Standardizes the name of the file,
@@ -98,6 +82,7 @@ def standardize_confirm_file_name(order_name):
     
     return order_name
 
+
 def standardize_checkout_file_name(order_name):
     """Standardizes the name of the file,
     under the standard format for checked out
@@ -112,6 +97,7 @@ def standardize_checkout_file_name(order_name):
     order_name = order_name.replace(' ', '_')
     curr_time = time.strftime('%H-%M-%S')
     return order_name + '_' + curr_time + '.checkout'
+
 
 def order_confirmed(order_name, priority_list,
                     non_priority_list, full_order):
@@ -142,6 +128,7 @@ def order_confirmed(order_name, priority_list,
     
     cPickle.dump(full_order, curr_file)
 
+
 def remove_order_confirmed_file(order_name):
     """Removes the file associated with the
     confirmed order from the necessary
@@ -155,7 +142,8 @@ def remove_order_confirmed_file(order_name):
     order_name = standardize_confirm_file_name(order_name)
     
     os.remove(curr_directory + order_name)
-    
+
+
 def checkout_confirmed(order_name, orders, order_list):
     """Generates the necessary checkout files
     and adds the given order to that file for
@@ -185,4 +173,42 @@ def checkout_confirmed(order_name, orders, order_list):
     for order in orders:
         # TODO send order to checkout printer
         pass
-    
+
+
+def unpack_information(curr_directory):
+    """Unpacks the information stored in
+    the given directory and returns
+    that information.
+
+    @param curr_directory: str representing
+    the system path of the directory
+
+    @return: 2-tuple of dict types. Each
+    dict maps a str key to a list of MenuItem
+    objects. Each key represents the name of
+    an order and each list represents the
+    order.
+    """
+
+    table_orders = {}
+    togo_orders = {}
+    itr = os.walk(curr_directory)
+
+    dirpath, dirnames, filenames = itr.next()
+
+    for curr_filename in filenames:
+        filename, filetype = curr_filename.split('.')
+        filename = filename.replace('_', ' ')
+
+        if filetype == 'table':
+            current_orders = table_orders
+        else:
+            current_orders = togo_orders
+
+        data = open(dirpath + curr_filename)
+
+        unpickler = cPickle.Unpickler(data)
+
+        current_orders[filename] = unpickler.load()
+
+    return table_orders, togo_orders

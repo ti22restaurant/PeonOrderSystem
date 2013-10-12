@@ -59,6 +59,7 @@ stored on table box. Last index is the 'TOGO' button.
         self.reservation_window = None
         self.order_window = None
         self.upcoming_orders_window = None
+        self.status_label = None
 
         self.remove_upcoming_orders_button = None
         self.upcoming_orders_confirm_priority_button = None
@@ -125,6 +126,9 @@ stored on table box. Last index is the 'TOGO' button.
             
             if name == 'upcomingOrdersScrollWindow':
                 self.upcoming_orders_window = widget
+
+            if name == 'statusLabel':
+                self.status_label = widget
                 
         # Populate menu tabs
         for each in option_choices.values():
@@ -313,6 +317,7 @@ stored on table box. Last index is the 'TOGO' button.
         table choice. This string is set directly to display the
         given str in its label
         """
+        self.update_status("Setting Table to {}".format(string))
         self.widgets['orderListLabel'].set_text(string)
     
     def set_accessible_buttons(self, menu_item):
@@ -320,6 +325,31 @@ stored on table box. Last index is the 'TOGO' button.
         menu_option to either be sensitive or not.
         """   
         pass
+
+    def update_status(self, message,
+                      styles=[]):
+        """Updates the status message of
+        the GUI.
+
+        @param message: str representing
+        the status message to be displayed.
+
+        @return: bool if the status was
+        successfully updated.
+        """
+        for style in styles:
+            if style == 'error':
+                message = '<span foreground="red">' + \
+                          message + "</span>"
+                style = 'bold'
+            if style == 'bold':
+                message = '<b>' + message + '</b>'
+            if style == 'italic':
+                message = '<i>' + message + '</i>'
+
+        self.status_label.set_markup(message)
+
+        return self.status_label.get_text() == message
 
     def quit(self, *args):
         """Callback Method used to end Gtk loop.
@@ -357,7 +387,7 @@ def load_menu_items():
         @return: new MenuItem object that represents the given
         dict.
         """
-        options = None
+        options = {}
         if '__MenuItem__' in curr:
             if 'options' in curr:
                 options = curr['options']

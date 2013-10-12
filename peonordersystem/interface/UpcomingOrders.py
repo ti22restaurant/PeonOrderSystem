@@ -23,6 +23,7 @@ import time
 
 from peonordersystem import ErrorLogger
 from peonordersystem.ConfirmationSystem import TOGO_SEPARATOR
+from peonordersystem.CustomExceptions import NoSuchSelectionError
 
 class UpcomingOrdersView(Gtk.TreeView):
     """UpcomingOrdersView provides the basic
@@ -85,7 +86,7 @@ class UpcomingOrdersView(Gtk.TreeView):
     def get_selected_iter(self):
         """Gets a Gtk.TreeIter represent the currently
         selected item in the UpcomingOrdersView.
-        
+
         @return: Gtk.TreeIter representing the currently
         selected order.
         """
@@ -111,7 +112,21 @@ class UpcomingOrderStore(Gtk.ListStore):
         """
         super(UpcomingOrderStore, self).__init__(str, str,
                                                  str, bool)
-    
+
+    def remove(self, itr):
+        """Removes the selected item from
+        the UpcomingOrderStore
+
+        @param itr: Gtk.TreeIter pointing to
+        the item to be removed.
+
+        @return: str representing the name of
+        the UpcomingOrder removed.
+        """
+        name = self[itr][0]
+        super(UpcomingOrderStore, self).remove(itr)
+        return name
+
     def append(self, order_name, has_priority):
         """Appends the given order_name, and current_order
         to the UpcomingOrderStore.
@@ -162,9 +177,14 @@ class UpcomingOrderStore(Gtk.ListStore):
         
         @param itr: Gtk.TreeIter pointing to the
         object to be updated.
+
+        @return: str representing the name of the
+        priority order confirmed.
         """
         if self.iter_is_valid(itr):
             self[itr][3] = False
+
+        return self[itr][0]
 
 @ErrorLogger.error_logging
 class UpcomingOrders(object):
@@ -206,7 +226,9 @@ class UpcomingOrders(object):
             self._load_data(load_data)
     
     def _load_data(self, load_data):
-        """Loads the data from a previous
+        """Private Method.
+
+        Loads the data from a previous
         session.
         
         @param load_data: 2-tuple of dicts.
@@ -219,6 +241,26 @@ class UpcomingOrders(object):
         for order in load_data:
             for key, value in order.items():
                 self.add_order(key, value)
+
+    def _get_selected_iter(self):
+        """Private method.
+
+        Gets the currently selected order.
+
+        @raise InvalidOrderError: if no
+        item was selected.
+
+        @return: Gtk.TreeIter pointing to
+        the currently selected order
+        """
+        itr = self.tree_view.get_selected_iter()
+
+        if not itr:
+            message = 'Expected value for itr as selection.'+ \
+                      ' Instead got {}.'.format(type(itr))
+            raise NoSuchSelectionError(message)
+
+        return itr
 
     def add_order(self, order_name, current_order, has_priority=False):
         """Adds the given order to the UpcomingOrders
@@ -242,19 +284,31 @@ class UpcomingOrders(object):
         """Removes the selected order from the
         UpcomingOrders.
         """
-        itr = self.tree_view.get_selected_iter()
-        self.model.remove(itr)
+        itr = self._get_selected_iter()
+        name = self.model.remove(itr)
+        return name
     
     def remove_by_name(self, order_name):
         """Removes the name that is displayed by
-        order_name 
+        order_name
+
+        @param order_name: str representing the
+        order to be removed.
+
+        @return: str representing the name of the
+        order removed.
         """
         order_name = order_name.replace(TOGO_SEPARATOR, ' ')
         self.model.remove_by_name(order_name)
+        return order_name
     
     def confirm_priority(self):
         """Confirms the priority flag on the selected
         order.
+
+        @return: str representing the name of the
+        priority order confirmed.
         """
-        itr = self.tree_view.get_selected_iter()
-        self.model.update_priority(itr)
+        itr = self._get_selected_iter()
+        return self.model.update_priority(itr)
+
