@@ -45,6 +45,7 @@ class MenuItem(object):
         self._option_choices = option_choices
         self._locked = False
         self._price_scalar = 1.0
+        self.comp_message = None
         
         self.editable = bool(editable)
         self.stars = int(stars)
@@ -58,6 +59,43 @@ class MenuItem(object):
         true.
         """
         self._locked = not self._locked
+
+    def is_comped(self):
+        """Returns if this MenuItem object
+        is comped.
+
+        @return: bool value that represents
+        if this menu item has been comped or
+        not.
+        """
+        return self._price_scalar == 0.0 and self.comp_message
+
+    def get_comp_message(self):
+        """Gets the comp message associated
+        with this item.
+
+        @return: str representing the message
+        associated with the comp. None if there
+        is_comped returns false.
+        """
+        return self.comp_message
+
+    def comp(self, value, message):
+        """
+
+        @param value: bool if the menu item
+        should be comped, or not.
+
+        @param message: str representing the
+        message associated with this comp.
+        """
+        if value:
+            self._price_scalar = 0.0
+            self.comp_message = message
+        else:
+            self._price_scalar = 1.0
+            self.comp_messsage = None
+
     
     def is_locked(self):
         """Returns the value of the locked attribute.
@@ -80,7 +118,6 @@ class MenuItem(object):
         if self._price_scalar > 1.0:
             self._price_scalar = 1.0
 
-    
     def get_name(self):
         """Gets the name of the MenuItem.
         
