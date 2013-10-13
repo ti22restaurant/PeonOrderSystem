@@ -415,9 +415,7 @@ class OrderStore(Gtk.TreeStore):
             self.confirm_order(self.iter_next(tree_iter), priority_order)
 
     def _dump(self):
-        """Private Method.
-
-        Gives a 2-tuple of the associated MenuItems and
+        """Gives a 2-tuple of the associated MenuItems and
         current order. This is used for debugging and
         error checking purposes and should not be
         called otherwise.
@@ -722,9 +720,8 @@ class Orders(object):
         
         return None
 
-    def __dump__(self):
-        """Private Method.
-
+    def _dump(self):
+        """
         Dumps the information stored in this object into
         a dictionary and returns it. This is used mainly
         for debugging and error checking purposes.

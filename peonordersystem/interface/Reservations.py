@@ -366,6 +366,25 @@ class ReservationStore(Gtk.ListStore):
         for row, reserver in zip(self, self._reservation_list):
             row[3] = reserver.get_eta()
         return True
+
+    def _dump(self):
+        """Dumps the information stored in this
+        object. This is mainly used for debugging
+        purposes.
+
+        @return: 2-tuple where the first index
+        is a list of the Reserver objects that
+        are stored, and the second index is
+        a list of tuples, that represent the
+        rows that were being displayed.
+        """
+        reserver_dump = self._reservation_list
+        reserver_info = []
+
+        for row in self:
+            reserver_info.append(tuple(row))
+
+        return reserver_dump, reserver_info
     
     def __repr__(self):
         """Gets a string representation of the
@@ -470,3 +489,13 @@ class Reservations(object):
         """
         return str(self.__dict__)
 
+    def _dump(self):
+        """Dumps the information associated
+        with this object. This is used for
+        debugging purposes mainly.
+
+        @return: 2-tuple representing the
+        reservation objects, and reservation
+        information displayed respectively.
+        """
+        return self.model._dump()

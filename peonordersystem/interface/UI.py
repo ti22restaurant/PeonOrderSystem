@@ -508,3 +508,33 @@ class UI(object):
         if yes, false if no.
         """
         return self.builder.update_status(message, styles)
+
+    #==============================================================================
+    # This block contains methods that relate to the functioning of the
+    # error logging system for the GUI. This includes dumping, debugging and
+    # other logging methods.
+    #==============================================================================
+
+    def _dump(self):
+        """Dumps the information regarding the
+        associated objects into a dictionary and
+        returns it. This is used primarily for
+        debugging purposes.
+
+        @warning: This method could unintentionally
+        cause errors or loss of information if it
+        has been called and the objects are then
+        interacted with.
+
+        @return: dict where each entry represents
+        stored information at the exact time of
+        this call.
+        """
+        dump_site = {}
+
+        dump_site['orders'] = self.orders._dump()
+        dump_site['upcoming_orders'] = self.upcoming_orders._dump()
+        dump_site['reservations'] = self.reservations._dump()
+
+        return dump_site
+

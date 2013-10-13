@@ -25,6 +25,7 @@ from peonordersystem import ErrorLogger
 from peonordersystem.ConfirmationSystem import TOGO_SEPARATOR
 from peonordersystem.CustomExceptions import NoSuchSelectionError
 
+
 class UpcomingOrdersView(Gtk.TreeView):
     """UpcomingOrdersView provides the basic
     Gtk.TreeView that display the information on
@@ -92,6 +93,7 @@ class UpcomingOrdersView(Gtk.TreeView):
         tree_selection = self.get_selection()
         _, itr = tree_selection.get_selected()
         return itr
+
 
 class UpcomingOrderStore(Gtk.ListStore):
     """UpcomingOrderStore class creates and stores
@@ -183,6 +185,22 @@ class UpcomingOrderStore(Gtk.ListStore):
         self[itr][2] = ''
 
         return self[itr][0]
+
+    def _dump(self):
+        """Gets the information associated
+        with this object in its entirety. This
+        is used mainly for debugging purposes
+
+        @return: list that represents the rows
+        that are stored in this object.
+        """
+        info = []
+
+        for row in self:
+            info.append(tuple(row))
+
+        return info
+
 
 @ErrorLogger.error_logging
 class UpcomingOrders(object):
@@ -314,4 +332,15 @@ class UpcomingOrders(object):
         """
         itr = self._get_selected_iter()
         return self.model.update_priority(itr)
+
+    def _dump(self):
+        """Gets the information relating
+        to this object. This is used mainly
+        for debugging purposes.
+
+        @return: list of tuples that represents
+        the rows stored and displayed by this
+        object.
+        """
+        return self.model._dump()
 
