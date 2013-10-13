@@ -413,6 +413,29 @@ class OrderStore(Gtk.TreeStore):
 
                 self.update_item(tree_iter, has_priority=has_priority)
             self.confirm_order(self.iter_next(tree_iter), priority_order)
+
+    def _dump(self):
+        """Private Method.
+
+        Gives a 2-tuple of the associated MenuItems and
+        current order. This is used for debugging and
+        error checking purposes and should not be
+        called otherwise.
+
+        @return: 2-tuple where the first
+        index is a list of MenuItem objects associated
+        with the current order, and the second index is
+        a list of tuples that represent the associated
+        rows.
+        """
+        dump_menu_items = self.order_list
+
+        dump_row_info = []
+
+        for row in self:
+            dump_row_info.append(tuple(row))
+
+        return dump_menu_items, dump_row_info
     
     def __repr__(self):
         """Gets a string representation of
@@ -698,6 +721,28 @@ class Orders(object):
                     return key, order_list
         
         return None
+
+    def __dump__(self):
+        """Private Method.
+
+        Dumps the information stored in this object into
+        a dictionary and returns it. This is used mainly
+        for debugging and error checking purposes.
+
+        @return: dict representing the MenuItems and
+        information displayed in this object.
+        """
+
+        dump_dict = {}
+
+        info_dict = dict(self.orders_dict.items() + self.to_go_dict.items())
+
+        for key in info_dict:
+            curr_order = info_dict[key]
+            dump_dict[key] = curr_order._dump
+
+        return dump_dict
+
     
     def __repr__(self):
         """Gets a string representation of the

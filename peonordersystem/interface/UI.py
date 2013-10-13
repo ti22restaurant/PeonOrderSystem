@@ -78,7 +78,6 @@ def non_fatal_error_notification(func):
     return error_checker
 
 
-@ErrorLogger.error_logging
 class UI(object):
     """UI Object operates on higher level functions of the
     PeonOrderSystem GUI. Functionally it instantiates all
@@ -99,8 +98,8 @@ class UI(object):
     @var editor: Editor object that operates and displays
     dialog windows.
     """
-
     @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def __init__(self, title, load_data=None):
         """Initializes a new object. Generates the base GUI
         from XML file obtained from Path. Instantiates the
@@ -134,6 +133,7 @@ class UI(object):
     #===========================================================================
 
     @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def table_button_clicked(self, table_button, table):
         """Callback method called when a table button is clicked.
         This method sets the current order to be displayed as
@@ -150,6 +150,7 @@ class UI(object):
         self.update_status('Order set to {}'.format(table))
 
     @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def menu_button_clicked(self, menu_button, menu_item):
         """Callback method called when a menu button has been
         clicked. 
@@ -164,6 +165,7 @@ class UI(object):
         self.update_status('{} added to current order'.format(item_name))
 
     @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def remove_menu_item(self, *args):  # @IGNORE:W0613
         """Removes currently selected MenuItem
         from the order.
@@ -182,6 +184,7 @@ class UI(object):
     #===========================================================================
 
     @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def add_new_reservation(self, *args):  # @IGNORE:W0613
         """Callback method when reservation has been added.
         Calls dialog window to get new reservation information
@@ -200,6 +203,7 @@ class UI(object):
         self.update_status(message)
 
     @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def remove_selected_reservation(self, *args):  # @IGNORE:W0613
         """Callback method called when remove reservation
         has been clicked. Removes the selected reservation
@@ -214,6 +218,7 @@ class UI(object):
                                                                      arrival_time))
 
     @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def confirm_selected_upcoming_order(self, *args):
         """Callback method called when the confirm priority
         button for the upcoming orders tab is pressed.
@@ -225,6 +230,7 @@ class UI(object):
         self.update_status('Confirmed priority on {}'.format(name))
 
     @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def remove_selected_upcoming_order(self, *args):
         """Callback Method. Called when the remove
         order button for the upcoming orders tab is
@@ -246,6 +252,7 @@ class UI(object):
     #===========================================================================
 
     @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def edit_note(self, *args):  # @IGNORE:W0613
         """Callback method when edit note button has been
         clicked. This method instantiates a new dialog window
@@ -271,6 +278,7 @@ class UI(object):
         self.update_status(message)
 
     @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def edit_stars(self, *args):  # @IGNORE:W0613
         """Callback method when edit stars button has been
         clicked. This method instantiates a new dialog window
@@ -296,6 +304,7 @@ class UI(object):
         self.update_status(message)
 
     @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def edit_options(self, *args):  # @IGNORE:W0613
         """Callback method when edit options button has been
         clicked. This methods instantiates a new dialog window
@@ -326,6 +335,7 @@ class UI(object):
     #===========================================================================
 
     @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def confirm_order(self, *args):  # @IGNORE:W0613
         """Callback method when confirm order button has been
         clicked. This method instantiates a new dialog window
@@ -345,6 +355,7 @@ class UI(object):
             self.update_status("Cancelled sending order to kitchen")
 
     @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def confirm_checkout(self, *args):  # @IGNORE:W0613
         """Callback method when check order button has been
         clicked. This method instantiates a new dialog window
@@ -363,6 +374,7 @@ class UI(object):
         self.update_status(message)
 
     @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def select_misc_order(self, *args):
         """Callback method when the misc order button has been pressed.
         This instantiates a Dialog for the user to interact with.
@@ -382,6 +394,7 @@ class UI(object):
     #===========================================================================
 
     @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def order_confirmed(self, priority_order, *args):
         """Method called when the order has been
         confirmed as is to be sent to the kitchen.
@@ -402,6 +415,7 @@ class UI(object):
         return curr_name, curr_order
 
     @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def checkout_confirm(self, *args):
         """Callback method when the checkout window has been confirmed.
         
@@ -418,6 +432,7 @@ class UI(object):
         return curr_name, curr_order
 
     @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def order_selection_confirm_function(self, curr_order):
         """Callback method that is called when a given TOGO confirmation
         dialog has been confirmed. Sets the GUI for menu items to be
@@ -433,6 +448,7 @@ class UI(object):
             self.table_button_clicked(None, curr_order)
 
     @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def add_reservation_confirmed(self, new_reservation):
         """Callback method that is called when the new reservation
         has been added and confirmed.
@@ -457,6 +473,7 @@ class UI(object):
     #===========================================================================
 
     @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def get_order_info(self):
         """Gets the current information associated
         with the current order.
@@ -475,6 +492,7 @@ class UI(object):
     #===========================================================================
 
     @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def update_status(self, message, styles=[]):
         """Updates the status displayed in the main window
         to the message given with the style parameters.
