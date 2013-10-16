@@ -330,8 +330,7 @@ class UI(object):
 
     #===========================================================================
     # This block contains methods pertaining to dialog windows that
-    # are initiated by the user. These are all called via callback from
-    # buttons generated in builder
+    # are initiated by the user.
     #===========================================================================
 
     @non_fatal_error_notification
@@ -387,7 +386,30 @@ class UI(object):
                                                   self.order_selection_confirm_function)
         if not confirmed:
             self.update_status('Cancelled order selection')
-    
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def comp_selected_item(self, *args):
+        """Callback method when comp selection has been
+        clicked. This method instantiates a new dialog window
+        that allows the user to change the comp status of menu
+        items in the selected order.
+
+        @param args: wildcard catchall that represents the
+        button that called this method.
+
+        @return: None
+        """
+        self.update_status('Waiting for comp confirmation...')
+        current_order = self.orders.get_current_order()
+        confirmed = self.editor.comp_item_order(current_order, self.comp_confirm)
+
+        if confirmed:
+            message = 'Selected menu items comped. Retrieving order.. done'
+        else:
+            message = 'Cancelling comp selection. Restoring order... done'
+        self.update_status(message)
+
     #===========================================================================
     # This block contains methods that are called via callback only when a
     # dialog window has been confirmed.
@@ -464,7 +486,17 @@ class UI(object):
 
         self.reservations.add_reservation(name, number, arrival)
 
-    
+    def comp_confirm(self, comped_items_list):
+        """Callback Method that is called when the comp item
+        confirmation has been called and confirmed.
+
+        @param comped_items_list: list of MenuItem objects
+        that are to be comped and displayed.
+
+        @return: None
+        """
+        self.orders.comp_items(comped_items_list)
+
     #===========================================================================
     # This block contains methods that are used for obtaining information
     # about the current order, menu item, or other things the components

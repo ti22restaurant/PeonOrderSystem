@@ -33,19 +33,26 @@ class Editor(object):
         Expecting Gtk.Window
         """
         self.parent = parent
-    
+
+    #=============================================================================
+    # This block is what I refer to as the editor/confirmer section. This block
+    # contains highly generic methods that are utilized by other methods to
+    # perform standard operations. Editing methods in this block may cause
+    # errors.
+    #=============================================================================
+
     def edit(self, menu_item, entry_dialog):
         """Generates and runs the given EntryDialog with the
         given MenuItem as a parameter.
-        
+
         @param menu_item: Parameter passed into the dialog
-        window. This parameter is expected to be a 
+        window. This parameter is expected to be a
         MenuItem instance.
-        
+
         @param entry_dialog: function pointer representing
         the dialog to be called. this parameter is
         expected to be subclass instances of the EntryDialog
-        
+
         @return: value returned by the dialog windows run_dialog
         method.
         """
@@ -57,54 +64,20 @@ class Editor(object):
             return value == Gtk.ResponseType.ACCEPT
 
         return False
-    
-    def edit_stars(self, menu_item):
-        """Calls a dialog window on the given MenuItem
-        that edits its star content.
-        
-        @param menu_item: MenuItem object that is to
-        have the dialog initiated on it.
-        """
-        return self.edit(menu_item, Dialog.StarEntryDialog)
-    
-    def edit_note(self, menu_item):
-        """Calls a dialog window on the given MenuItem
-        that edits its note content.
-        
-        @param menu_item: MenuItem object that is to
-        have the dialog initiated on it.
-        """
-        return self.edit(menu_item, Dialog.NoteEntryDialog)
-    
-    def edit_options(self, menu_item):
-        """Calls a dialog window on the given MenuItem
-        that edits its chosen options from its options
-        choices.
-        
-        @param menu_item: MenuItem object that is to
-        have the dialog initiated on it.
-        """
-        if len(menu_item.get_option_choices()) <= 0:
-            message = 'No options are available to be edited ' + \
-                      'for this menu item.'
 
-            raise InvalidItemError(message)
-
-        return self.edit(menu_item, Dialog.OptionEntryDialog)
-    
     def confirm(self, order_list, confirm_dialog, confirm_function):
         """Generates and runs the given ConfirmationDialog with
         the given parameters as arguments.
-        
+
         @raise TypeError: If the given confirm_dialog is not a
         subclass instance of the ConfirmationDialog.
-        
-        @param order_list: list representing some information 
+
+        @param order_list: list representing some information
         passed to the confirmation window.
-        
+
         @param confirm_dialog: ConfirmationDialog subclass that
         is to be run.
-        
+
         @param confirm_function: function pointer that is executed
         when confirmation of the dialog occurs.
 
@@ -121,6 +94,57 @@ class Editor(object):
             return response
 
         return None
+
+    #==============================================================================
+    # This block contains methods that are performed on MenuItem objects. All
+    # methods expect to be given a menu item, and then make reference to the
+    # respective editor/confirmer method in the editor/confirmer section. All
+    # dialogs contained in this bock rely on the editor/confirmer to run and
+    # instantiate their respective dialog windows.
+    #==============================================================================
+    
+    def edit_stars(self, menu_item):
+        """Calls a dialog window on the given MenuItem
+        that edits its star content.
+        
+        @param menu_item: MenuItem object that is to
+        have the dialog initiated on it.
+
+        @return: bool representing if the dialog window was confirmed
+        or cancelled. True for confirmed, False for cancelled.
+        """
+        return self.edit(menu_item, Dialog.StarEntryDialog)
+    
+    def edit_note(self, menu_item):
+        """Calls a dialog window on the given MenuItem
+        that edits its note content.
+        
+        @param menu_item: MenuItem object that is to
+        have the dialog initiated on it.
+
+        @return: bool representing if the dialog window was confirmed
+        or cancelled. True for confirmed, False for cancelled.
+        """
+        return self.edit(menu_item, Dialog.NoteEntryDialog)
+    
+    def edit_options(self, menu_item):
+        """Calls a dialog window on the given MenuItem
+        that edits its chosen options from its options
+        choices.
+        
+        @param menu_item: MenuItem object that is to
+        have the dialog initiated on it.
+
+        @return: bool representing if the dialog window was confirmed
+        or cancelled. True for confirmed, False for cancelled.
+        """
+        if len(menu_item.get_option_choices()) <= 0:
+            message = 'No options are available to be edited ' + \
+                      'for this menu item.'
+
+            raise InvalidItemError(message)
+
+        return self.edit(menu_item, Dialog.OptionEntryDialog)
     
     def confirm_order(self, order_list, confirm_function):
         """Calls the confirm order dialog on the given
@@ -133,6 +157,9 @@ class Editor(object):
         
         @param confirm_func: function pointer that points
         to the function to be executed if the order is confirmed.
+
+        @return: bool representing if the dialog window was confirmed
+        or cancelled. True for confirmed, False for cancelled.
         """
 
         order_list = get_unconfirmed_order(order_list)
@@ -154,8 +181,10 @@ class Editor(object):
         
         @param confirm_function: function pointer that points to the
         function to be executed if the checkout is confirmed.
+
+        @return: bool representing if the dialog window was confirmed
+        or cancelled. True for confirmed, False for cancelled.
         """
-        print order_list
         response = self.confirm(order_list, Dialog.CheckoutConfirmationDialog,
                                 confirm_function)
 
@@ -164,6 +193,35 @@ class Editor(object):
             response = self.confirm(order_list, Dialog.SplitCheckConfirmationDialog,
                                     confirm_function)
         return response == Gtk.ResponseType.ACCEPT
+
+    def comp_item_order(self, order_list, confirm_function):
+        """Calls the comp item confirmation dialog on the
+        given order list. Only the locked menu items contained
+        in the given order list will be operated on. If confirmed
+        this dialog calls the given confirm function with the first
+        argument the comped menu items.
+
+        @param order_list: list of MenuItem objects that represents
+        the order to have the dialog performed on it.
+
+        @param confirm_function: function pointer that points to
+        the function to be called if the dialog is confirmed.
+
+        @return: bool representing if the dialog window was confirmed
+        or cancelled. True for confirmed, False for cancelled.
+        """
+        order_list = get_locked_item_order(order_list)
+
+        response = self.confirm(order_list, Dialog.CompItemsConfirmationDialog,
+                                confirm_function)
+
+        return response == Gtk.ResponseType.ACCEPT
+
+    #================================================================================
+    # Methods in this block require special considerations when instantiating their
+    # dialog windows and as such cannot be run with the generic editor/confirmer
+    # archetype utilized by most other dialogs.
+    #================================================================================
     
     def select_misc_order(self, name_list, confirm_function):
         """Calls the misc selection confirmation dialog on the
@@ -223,8 +281,6 @@ def menu_item_check(menu_item):
     return True
 
 
-
-
 def order_check(current_order):
     """Checks if the current order is a accessible, valid
     order.
@@ -263,6 +319,32 @@ def get_unconfirmed_order(current_order):
 
     if len(order_list) <= 0:
         message = 'Cannot confirm an empty order list'
+        raise InvalidOrderError(message)
+
+    return order_list
+
+
+def get_locked_item_order(current_order):
+    """Gets only the locked MenuItem objects
+    that are stored within the given order.
+
+    @param current_order: list of MenuItem
+    objects.
+
+    @raise InvalidOrderError: if the given
+    list contains no locked menu items.
+
+    @return: List of Locked MenuItem objects.
+    """
+
+    def is_locked(menu_item):
+        return menu_item.is_locked()
+
+    order_list = filter(is_locked, current_order)
+
+    if len(order_list) <= 0:
+        message = 'Expected to comp order with locked menu' + \
+                  ' items. None found.'
         raise InvalidOrderError(message)
 
     return order_list
