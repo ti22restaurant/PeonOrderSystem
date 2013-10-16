@@ -94,7 +94,7 @@ class MenuItem(object):
             self.comp_message = message
         else:
             self._price_scalar = 1.0
-            self.comp_messsage = None
+            self.comp_message = None
 
     
     def is_locked(self):

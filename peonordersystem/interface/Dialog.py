@@ -17,11 +17,17 @@ These are all classes that instantiate new object dialog windows.
 These differ from the EntryDialogs as they are simply confirmations
 of a current orders list and do not allow for adjustment
 
+@group OrderConfirmationDialog: This group represents all subclasses
+of the OrderConfirmationDialog. These are all classes that instantiate
+some form of the OrderConfirmationDialog windows. These differ from other
+types of dialog windows because they rely on the functionality from the
+group OrderConfirmationDialog and all of its sub related groups.
+
 @group CheckoutConfirmationDialog: This group represents all subclasses
 of the CheckoutConfirmationDialog. These are all classes that instantiate
 some form of the CheckoutConfirmationDialog windows. These differ from other
 types of dialog windows because they rely on functionality from the group
-CheckoutConfirmationDialog.
+CheckoutConfirmationDialog and all of its sub related groups.
 
 @group ReservationsDialog: This group represents all classes
 of the ReservationsDialog window. ReservationsDialog group are
@@ -40,7 +46,6 @@ import time
 import math
 
 from peonordersystem import CheckOperations
-from peonordersystem.CustomExceptions import InvalidOrderError
 
 STANDARD_TEXT = 500
 STANDARD_TEXT_BOLD = 850
@@ -719,6 +724,7 @@ class ConfirmationDialog(Dialog):
         the window that the Gtk.TreeView has been
         added too.
         """
+        frame = Gtk.Frame()
         scrolled_window = Gtk.ScrolledWindow()
         model = self.generate_model()
         
@@ -732,8 +738,9 @@ class ConfirmationDialog(Dialog):
 
         selection = self.tree_view.get_selection()
         selection.set_select_function(self._select_method, None)
+        frame.add(scrolled_window)
 
-        return scrolled_window
+        return frame
     
     @abstractmethod
     def generate_columns(self):
@@ -777,9 +784,8 @@ class ConfirmationDialog(Dialog):
         self.confirm_data()
         return super(ConfirmationDialog, self).confirm_button_clicked()
 
-    @abstractmethod
     def confirm_data(self):
-        """Abstract Method. Called to confirm the confirmation
+        """Called to confirm the confirmation
         function
 
         @return: None
@@ -798,7 +804,15 @@ class ConfirmationDialog(Dialog):
         @return: expected int that represents t
         he Gtk.ResponseType of the dialog.
         """
+        self.cancel_data()
         return super(ConfirmationDialog, self).cancel_button_clicked()
+
+    def cancel_data(self):
+        """Called to cancel the data submission.
+
+        @return: None
+        """
+        pass
 
     def set_selection_type(self, selection_mode):
         """Sets the selection type of the
@@ -907,14 +921,32 @@ class OrderConfirmationDialog(ConfirmationDialog):
         main_box.pack_start(scrolled_window, True, True, 5)
 
         button_box = Gtk.HBox()
-        priority_button = Gtk.Button('Add Priority')
-        priority_button.set_size_request(200, 50)
-        priority_button.connect('clicked', self._set_selected_priority)
-        button_box.pack_start(priority_button, False, False, 5)
+        widgets = self.generate_misc_widgets()
+
+        for widget in widgets:
+            button_box.pack_start(widget, False, False, 5)
 
         main_box.pack_start(button_box, False, False, 5)
 
         return main_box
+
+    def generate_misc_widgets(self):
+        """Generates the misc widgets associated
+        with this layout.
+
+        @return: list of Gtk.Widget that are to
+        be added to the content area's button
+        area.
+        """
+        widget_list = []
+
+        priority_button = Gtk.Button('Add Priority')
+        priority_button.set_size_request(200, 50)
+        priority_button.connect('clicked', self._set_selected_priority)
+
+        widget_list.append(priority_button)
+
+        return widget_list
 
     def generate_columns(self):
         """Generates the columns for the
@@ -932,8 +964,6 @@ class OrderConfirmationDialog(ConfirmationDialog):
         
         renderer = Gtk.CellRendererText()
         renderer.set_property('weight-set', True)
-        # Contingency: Absurdly long notes stored in a
-        # MenuItem object. Solution: wrap text
         renderer.set_property('wrap-width', horizontal)
         col1 = Gtk.TreeViewColumn('Menu Item', renderer,
                                   text=0, weight=2)
@@ -957,24 +987,39 @@ class OrderConfirmationDialog(ConfirmationDialog):
         into this objects constructor
         """
         tree_model = Gtk.TreeStore(str, str, int)
+        self.add_items_to_model(tree_model)
+        
+        return tree_model
 
+    def add_items_to_model(self, tree_model):
+        """Add the items associated with the
+        order being operated on to the given
+        model.
+
+        @param tree_model: Gtk.TreeModel
+        representing the model that will
+        display the information
+
+        @return: None
+        """
         for menu_item in self.order_list:
 
-            info = menu_item.get_name(), str(menu_item.stars), STANDARD_TEXT
-            treeiter = tree_model.append(None, info)
+            name = menu_item.get_name()
+            stars = str(menu_item.stars)
+            info = name, stars, STANDARD_TEXT
+
+            tree_iter = tree_model.append(None, info)
 
             if menu_item.has_options():
 
                 # Get string of options. Slice brackets from front and back
                 info = str(menu_item.options)[1:-1], None, STANDARD_TEXT
-                tree_model.append(treeiter, info)
+                tree_model.append(tree_iter, info)
 
             if menu_item.has_note():
 
                 info = menu_item.notes, None, STANDARD_TEXT
-                tree_model.append(treeiter, info)
-        
-        return tree_model
+                tree_model.append(tree_iter, info)
 
     def confirm_data(self, *args):
         """Override Method.
@@ -1944,6 +1989,255 @@ class SplitCheckConfirmationDialog(CheckoutConfirmationDialog):
             curr_order.append(self.check_dict[key])
 
         self.confirm_func(tuple(curr_order))
+
+
+class CompItemsConfirmationDialog(OrderConfirmationDialog):
+    """CompItemsConfirmationDialog window allows the user to
+    set the comp setting for any menu item in the given order
+    list. Confirmation leads to these changes being confirmed
+    and the confirmation function being called.
+
+    @group Dialog: subclass member of Dialog. Extends
+    or overrides functionality from superclass Dialog
+
+    @group ConfirmationDialog: subclass member of the
+    ConfirmationDialog. Extends or overrides functionality
+    from the superclass ConfirmationDialog
+
+    @group OrderConfirmationDialog: subclass member of the
+    OrderConfirmationDialog. Extends or overrides functionality
+    from the superclass OrderConfirmationDialog.
+
+    @var message_entry: Gtk.TextView that represents the area
+    that users enter messages to to added to comped items.
+
+    """
+
+    def __init__(self, parent, confirm_func, order_list, dialog=None,
+                 title='Comp Dialog Window'):
+        """Initializes the new CompItemsConfirmationDialog
+        window that can be interacted with by the user to
+        change the comp status of menu items.
+
+        @param parent: Gtk.Container that represents the parent
+        that called this dialog.
+
+        @param confirm_func: function pointer that is to be called
+        if/when this dialog window has been confirmed.
+
+        @param order_list: List of MenuItem objects that represent
+        the order being operated on.
+
+        @keyword dialog: Dialog window to be passed to superclass,
+        Default=None. This feature hasn't been fully implemented yet
+
+        @keyword title: Title of the dialog window that will be displayed.
+        Default = 'Comp Dialog Window'
+        """
+        self.message_entry = None
+        super(CompItemsConfirmationDialog, self).__init__(parent, confirm_func,
+                                                          order_list, title=title)
+
+    def generate_misc_widgets(self):
+        """Override Method.
+
+        Generates the widgets associated
+        with this layout.
+
+        @return: list of Gtk.Widget objects
+        that represent the buttons associated
+        with the given layout.
+        """
+        widget_list = []
+
+        main_box = Gtk.VBox()
+        main_box.pack_start(Gtk.Label('Message: '), True, True, 5.0)
+
+        sub_box = Gtk.HBox()
+
+        message_box = self.generate_message_entry()
+        sub_box.pack_start(message_box, True, True, 5)
+
+        main_box.pack_start(sub_box, True, True, 5.0)
+
+        button_sub_box = Gtk.HBox()
+
+        button = Gtk.Button('Toggle COMP w/ message')
+        button.connect('clicked', self.comp_selected_item)
+        button.set_size_request(200, 50)
+        button_sub_box.pack_start(button, True, True, 5.0)
+
+        for x in range(2):
+            sub_box.pack_end(Gtk.Fixed(), True, True, 5)
+            button_sub_box.pack_start(Gtk.Fixed(), True, True, 5.0)
+
+        main_box.pack_start(button_sub_box, False, False, 5.0)
+
+        widget_list.append(main_box)
+
+        return widget_list
+
+    def generate_message_entry(self):
+        """Generates the message entry
+        associated with this window.
+
+        @return: Gtk.Container that
+        holds the Gtk.TextView to be
+        displayed.
+        """
+        frame = Gtk.Frame()
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.set_size_request(400, 150)
+
+        self.message_entry = Gtk.TextView()
+        self.message_entry.set_justification(Gtk.Justification.LEFT)
+        self.message_entry.set_wrap_mode(Gtk.WrapMode.WORD)
+
+        scrolled_window.add(self.message_entry)
+        frame.add(scrolled_window)
+
+        return frame
+
+    def generate_model(self):
+        """Override Method.
+
+        Generates the model that will
+        store the information to be
+        displayed to your user.
+
+        @return: Gtk.TreeModel that
+        stores the data for displaying.
+        """
+        tree_model = Gtk.TreeStore(str, str, int, bool)
+        self.add_items_to_model(tree_model)
+
+        return tree_model
+
+    def add_items_to_model(self, tree_model):
+        """Override Method.
+
+        Adds items to the tree_model that
+        will be displaying information about
+        each menu item.
+
+        @param tree_model: Gtk.TreeModel that
+        represents the data to be displayed
+
+        @return: None
+        """
+        for menu_item in self.order_list:
+
+            name = menu_item.get_name()
+            stars = str(menu_item.stars)
+
+            if menu_item.is_comped():
+                name = '( ' + name + ' )'
+                stars = ''
+                info = name, stars, STANDARD_TEXT, True
+
+                itr = tree_model.append(None, info)
+
+                row = (menu_item.get_comp_message(),) + info[1:]
+
+                tree_model.append(itr, row)
+            else:
+                info = name, stars, STANDARD_TEXT, False
+
+                itr = tree_model.append(None, info)
+
+                if menu_item.has_options():
+                    options = str(menu_item.options)[1:-1]
+
+                    row = (options, ) + info[1]
+                    tree_model.append(itr, row)
+
+                if menu_item.has_note():
+                    note = menu_item.notes
+
+                    row = (note, ) + info[1]
+                    tree_model.append(itr, row)
+
+    def comp_selected_item(self, *args):
+        """Comps the selected menu item in the
+        order list. This removes all associated
+        cost from it.
+
+        @return:
+        """
+        text_buf = self.message_entry.get_buffer()
+        start_itr = text_buf.get_start_iter()
+        end_itr = text_buf.get_end_iter()
+        message = text_buf.get_text(start_itr, end_itr, False)
+        text_buf.delete(start_itr, end_itr)
+
+        if message and len(message) > 0:
+            model, itr = self.get_selected()
+
+            itr = ensure_top_level_item(model, itr)
+
+            row = model[itr]
+            path = model.get_path(itr)
+            index = path.get_indices()[0]
+
+            child_itr = model.iter_children(itr)
+            result = (child_itr != None)
+
+            while child_itr and result:
+                result = model.remove(child_itr)
+
+            if row[3]:
+                menu_item = self.order_list[index]
+
+                row[0] = row[0][1:-1]
+                row[1] = str(menu_item.stars)
+                row[3] = False
+
+                if menu_item.has_options():
+                    options = str(menu_item.options)[1:-1]
+                    model.append(itr, (options, '', STANDARD_TEXT, False))
+
+                if menu_item.has_note():
+                    note = menu_item.notes
+                    model.append(itr, (note, '', STANDARD_TEXT, False))
+
+            else:
+                row[0] = '( ' + row[0] + ' )'
+                row[1] = ''
+                row[3] = True
+
+                model.append(itr, (message, '', STANDARD_TEXT, True))
+
+    def confirm_data(self):
+        """Override Method.
+
+        Confirms the comped menu items
+
+        @return: None
+        """
+        comp_list = []
+
+        model = self.tree_view.get_model()
+        index = 0
+        for row in model:
+
+            is_comp = row[3]
+
+            menu_item = self.order_list[index]
+
+            child_itr = row.iterchildren()
+
+            if is_comp:
+                row_child = child_itr.next()
+                message = row_child[0]
+                menu_item.comp(True, message)
+                comp_list.append(menu_item)
+
+            elif menu_item.is_comped():
+                menu_item.comp(False, '')
+
+            index += 1
+
+        self.confirm_func(comp_list)
 
 
 class OrderSelectionConfirmationDialog(ConfirmationDialog):
