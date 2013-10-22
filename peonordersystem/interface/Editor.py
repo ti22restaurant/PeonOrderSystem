@@ -212,7 +212,7 @@ class Editor(object):
         """
         order_list = get_locked_item_order(order_list)
 
-        response = self.confirm(order_list, Dialog.CompItemsConfirmationDialog,
+        response = self.confirm(order_list, Dialog.CompItemsOrderConfirmationDialog,
                                 confirm_function)
 
         return response == Gtk.ResponseType.ACCEPT

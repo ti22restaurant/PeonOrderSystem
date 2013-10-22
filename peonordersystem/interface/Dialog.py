@@ -47,12 +47,34 @@ import math
 
 from peonordersystem import CheckOperations
 
+#========================================================
+# This block represents module wide constants that are
+# utilized inside and outside of this module to determine
+# the text weight and responses of the classes and other
+# information.
+#========================================================
+
 STANDARD_TEXT_LIGHT = 200
 STANDARD_TEXT = 500
 STANDARD_TEXT_BOLD = 850
 
 SPLIT_CHECK_DIALOG_RESPONSE = 99
 
+
+#=========================================================
+# This block represents windows that form the
+# Abstract Base Classes that cannot be instantiated.
+#
+# Classes contained in this block are represented as
+# top level group classes of other windows that can
+# be instantiated.
+#
+# Names follow a certain pattern. You can find out
+# which groups are the super classes by checking the
+# @group notation in the docstring of the class or
+# by their naming convention. Which will be the classes
+# name followed by its super classes.
+#=========================================================
 
 class Dialog(object):
     """Abstract Base Class. Provides the base functionality
@@ -335,6 +357,370 @@ class EntryDialog(Dialog):
         """
         pass
 
+
+class ConfirmationDialog(Dialog):
+    """Abstract Base Class. ConfirmationDialog provides
+    the base functionality for a ConfirmationDialog window.
+
+    @group Dialog: Subclass member of the Dialog group
+
+    @group ConfirmationDialog: Abstract Base Class of
+    the ConfirmationDialog group. This class is a super
+    class of all members of the ConfirmationDialog group
+
+    @requires Override generate_columns method that
+    returns a list of columns to be added to the
+    Gtk.TreeView that will be displayed as part of
+    the ConfirmationDialog
+
+    @var confirm_func: Pointer to the callback function
+    that is called when the dialog has been confirmed
+    """
+
+    __metaclass__ = ABCMeta
+
+    def __init__(self, parent, title, dialog=None,
+                 default_size=(600, 700)):
+        """Initializes the Abstract Base functionality
+        of the ConfirmationDialog.
+
+        @param title: str representing the title to be
+        displayed on the dialog window.
+
+        @param parent: Object representing the object
+        that the Gtk.Dialog was called on. Expected
+        Gtk.Window
+        """
+        self.tree_view = None
+        super(ConfirmationDialog, self).__init__(parent, title,
+                                                 dialog, default_size)
+
+    def generate_layout(self):
+        """Generates the basic layout of the
+        ConfirmationDialog. Generates a basic
+        Gtk.TreeView object to be added to
+        the main content area of the dialog
+        window.
+
+        @return: Gtk.ScrolledWindow representing
+        the window that the Gtk.TreeView has been
+        added too.
+        """
+        frame = Gtk.Frame()
+        scrolled_window = Gtk.ScrolledWindow()
+        model = self.generate_model()
+
+        self.tree_view = Gtk.TreeView(model)
+        column_list = self.generate_columns()
+
+        for column in column_list:
+            self.tree_view.append_column(column)
+
+        scrolled_window.add(self.tree_view)
+
+        selection = self.tree_view.get_selection()
+        selection.set_select_function(self._select_method, None)
+        frame.add(scrolled_window)
+
+        return frame
+
+    @abstractmethod
+    def generate_columns(self):
+        """Abstract Method. Generates
+        the columns to be displayed in
+        the generated Gtk.TreeView.
+        Called in the generate_layout
+        method.
+
+        @return: list of Gtk.TreeViewColumn
+        to be added to the Gtk.TreeView generated
+        in generate_layout.
+        """
+        pass
+
+    @abstractmethod
+    def generate_model(self):
+        """Abstract Method. Generates the
+        basic model that will store
+        the data that the Gtk.TreeView
+        will display.
+
+        @return: Gtk.TreeModel representing
+        the model that contains the data to
+        be displayed on the Gtk.TreeView
+        """
+        pass
+
+    def confirm_button_clicked(self, *args):
+        """Callback Method that is called when
+        the confirm button on the dialog window
+        is clicked.
+
+        @param *args: Gtk.Widget wildcard representing
+        the component or Gtk.Widget that emitted the
+        signal and called this method.
+
+        @return: expected int that represents
+        Gtk.ResponseType of the dialog
+        """
+        self.confirm_data()
+        return super(ConfirmationDialog, self).confirm_button_clicked()
+
+    def confirm_data(self):
+        """Called to confirm the confirmation
+        function
+
+        @return: None
+        """
+        pass
+
+    def cancel_button_clicked(self, *args):
+        """Callback Method that is called when
+        the cancel button is clicked. This method
+        calls on base functionality.
+
+        @param *args: Gtk.Widget wildcard that represents
+        the component or Gtk.Widget that emitted
+        this signal and called this method.
+
+        @return: expected int that represents t
+        he Gtk.ResponseType of the dialog.
+        """
+        self.cancel_data()
+        return super(ConfirmationDialog, self).cancel_button_clicked()
+
+    def cancel_data(self):
+        """Called to cancel the data submission.
+
+        @return: None
+        """
+        pass
+
+    def set_selection_type(self, selection_mode):
+        """Sets the selection type of the
+        current tree_view.
+
+        @param selection_mode: Gtk.SelectionMode that
+        represents the chosen mode for the view
+
+        @return: None
+        """
+        selection = self.tree_view.get_selection()
+        selection.set_mode(selection_mode)
+
+    def get_selected(self):
+        """ Gets the currently selected item
+        from the tree_view.
+
+        @return: 2-tuple (Gtk.TreeModel, Gtk.TreeIter)
+        representing the associated model and an iter
+        pointing to the selected row.
+        """
+        selection = self.tree_view.get_selection()
+        return selection.get_selected()
+
+    def _select_method(self, selection, model, path, is_selected, *args):
+        """Private Method.
+
+        Callback Method to be called when the an item is
+        selected in the self.tree_view object.
+
+        @param selection: Gtk.TreeSelection associated with
+        the selection made.
+
+        @param model: Gtk.TreeModel associated with the
+        model stored in the self.tree_view object.
+
+        @param path: Gtk.TreePath associated with the
+        path selected in the self.tree_view object.
+
+        @param is_selected: bool value representing if the
+        selected row is selected.
+
+        @param args: catchall wildcard used to catch the
+        object that called this method.
+
+        @return: bool, representing if the given row associated
+        with path can be selected. Default of True.
+        """
+        return True
+
+
+#=========================================================
+# This block represents windows that form the specific
+# classes that can be instantiated. All classes in this
+# block perform operations to obtain a new order.
+#
+# Upon confirmation each class in this block calls
+# a given confirmation function that has been passed
+# into the class at instantiation.
+#
+# Each class in this block belongs to the group of classes
+# that are subclasses of the Dialog window. Any changes to
+# their respective super classes will effect these classes
+# as well.
+#=========================================================
+
+class AddReservationsDialog(Dialog):
+    """AddResdervationsDialog prompts the user with
+    a dialog window to insert a new reservation into
+    the reservations list.
+
+    @group ReservationsDialog: This class is a member of
+    the Reservations Dialog group.
+
+    @var self.name_entry: Gtk.Entry representing the
+    area that the user inputs the name associated with
+    the new reservation.
+
+    @var self.number_entry: Gtk.Entry representing the
+    area that the user inputs the number associated with
+    the new reservation
+
+    @var hour_combo_box: Gtk.ComboBox representing an
+    integer of hours selection to be made by the user.
+
+    @var min_combo_box: Gtk.ComboBox representing an
+    integer of minutes selection to be made by the user.
+    """
+
+    def __init__(self, parent, confirm_func, *args):
+        """initializes a new AddReservationsDialog that
+        the user may interact with to add a new reservation
+        to the reservations list.
+
+        @param parent: Gtk.Window that the dialog will be
+        a child of
+
+        @param confirm_func: pointer to the function that
+        is to be called if the window has been confirmed.
+
+        @param *args: wildcard for unexpected parameters
+        """
+        self.confirm_func = confirm_func
+        self.name_entry = None
+        self.number_entry = None
+        self.hour_combo_box = None
+        self.min_combo_box = None
+        super(AddReservationsDialog, self).__init__(parent,
+                                                    'Add Reservations Dialog')
+
+    def generate_layout(self):
+        """Generates the layout to be added to the
+        content area of the dialog window.
+
+        @return: Gtk.VBox that is to be added to the
+        content area
+        """
+        t = time.localtime()
+        hour = t[3]
+
+        main_box = Gtk.VBox()
+
+        label = Gtk.Label('Name: ')
+        main_box.pack_start(label, False, False, 5)
+
+        self.name_entry = Gtk.Entry()
+        main_box.pack_start(self.name_entry, False, False, 5)
+
+        label = Gtk.Label('Number: ')
+        main_box.pack_start(label, False, False, 5)
+
+        self.number_entry = Gtk.Entry()
+        main_box.pack_start(self.number_entry, False, False, 5)
+
+        inner_box1 = Gtk.VBox()
+        label = Gtk.Label('Hour ')
+        inner_box1.pack_start(label, True, True, 5)
+
+        self.hour_combo_box = Gtk.ComboBoxText()
+
+        for number in range(hour, 24):
+            self.hour_combo_box.append_text(str(number))
+
+        inner_box1.pack_start(self.hour_combo_box, True, True, 5)
+
+        inner_box2 = Gtk.VBox()
+        label = Gtk.Label('Min ')
+        inner_box2.pack_start(label, True, True, 5)
+
+        self.min_combo_box = Gtk.ComboBoxText()
+
+        for number in range(0, 60, 15):
+            self.min_combo_box.append_text(str(number))
+
+        inner_box2.pack_start(self.min_combo_box, True, True, 5)
+
+        sub_box = Gtk.HBox()
+        sub_box.pack_start(inner_box1, True, True, 5)
+        sub_box.pack_start(inner_box2, True, True, 5)
+
+        main_box.pack_start(sub_box, False, False, 5)
+
+        main_box.show_all()
+
+        return main_box
+
+    def get_information(self):
+        """Gets the information entered by the
+        user and returns.
+
+        @return: 3-tuple of (str, str, float) representing
+        name, number, and time in secs since epoch, respectively.
+        """
+        name = self.name_entry.get_text()
+        number = self.number_entry.get_text()
+
+        hour = int(self.hour_combo_box.get_active_text())
+
+        minute = int(self.min_combo_box.get_active_text())
+
+        t = time.localtime()
+
+        while minute < t[4]:
+            minute += 30
+
+        t = time.mktime(t[:3] + (hour, minute, 0) + t[6:])
+
+        return name, number, t
+
+    def confirm_button_clicked(self, *args):
+        """Callback method called when the confirm button has been
+        clicked.
+
+        @param *args: wildcard that represents a catch all for the
+        widget that emitted the call.
+        """
+        has_hour = self.hour_combo_box.get_active() > -1
+        has_min = self.min_combo_box.get_active() > -1
+
+        if has_hour and has_min:
+            super(AddReservationsDialog, self).confirm_button_clicked()
+            self.confirm_func(self.get_information())
+
+    def cancel_button_clicked(self, *args):
+        """Callback method called when the cancel button
+        has been clicked.
+
+        @param *args: wildcard catch all that is used to catch
+        the widget that emitted this call.
+        """
+        super(AddReservationsDialog, self).cancel_button_clicked()
+
+
+#=========================================================
+# This block represents windows that form the specific
+# classes that can be instantiated. All classes in this
+# block perform operations on a single MenuItem object.
+#
+# Upon confirmation each class in this block edits the
+# given MenuItem object.
+#
+# Each class in this block belongs to the group of classes
+# that are sub classes of EntryDialog and Dialog. Any
+# changes in their respective super classes will effect
+# these classes as well.
+#=========================================================
 
 class OptionEntryDialog(EntryDialog):
     """ Creates, displays and runs an EntryDialog for editing the given
@@ -676,193 +1062,21 @@ class StarEntryDialog(EntryDialog):
         """
         return super(StarEntryDialog, self).cancel_data()
 
-
-class ConfirmationDialog(Dialog):
-    """Abstract Base Class. ConfirmationDialog provides
-    the base functionality for a ConfirmationDialog window.
-    
-    @group Dialog: Subclass member of the Dialog group
-    
-    @group ConfirmationDialog: Abstract Base Class of
-    the ConfirmationDialog group. This class is a super
-    class of all members of the ConfirmationDialog group
-    
-    @requires Override generate_columns method that
-    returns a list of columns to be added to the
-    Gtk.TreeView that will be displayed as part of
-    the ConfirmationDialog
-    
-    @var confirm_func: Pointer to the callback function
-    that is called when the dialog has been confirmed
-    """
-    
-    __metaclass__ = ABCMeta
-    
-    def __init__(self, parent, title, dialog=None,
-                 default_size=(600, 700)):
-        """Initializes the Abstract Base functionality
-        of the ConfirmationDialog.
-        
-        @param title: str representing the title to be
-        displayed on the dialog window.
-        
-        @param parent: Object representing the object
-        that the Gtk.Dialog was called on. Expected 
-        Gtk.Window
-        """
-        self.tree_view = None
-        super(ConfirmationDialog, self).__init__(parent, title,
-                                                 dialog, default_size)
-        
-    def generate_layout(self):
-        """Generates the basic layout of the
-        ConfirmationDialog. Generates a basic
-        Gtk.TreeView object to be added to
-        the main content area of the dialog
-        window.
-        
-        @return: Gtk.ScrolledWindow representing
-        the window that the Gtk.TreeView has been
-        added too.
-        """
-        frame = Gtk.Frame()
-        scrolled_window = Gtk.ScrolledWindow()
-        model = self.generate_model()
-        
-        self.tree_view = Gtk.TreeView(model)
-        column_list = self.generate_columns()
-        
-        for column in column_list:
-            self.tree_view.append_column(column)
-
-        scrolled_window.add(self.tree_view)
-
-        selection = self.tree_view.get_selection()
-        selection.set_select_function(self._select_method, None)
-        frame.add(scrolled_window)
-
-        return frame
-    
-    @abstractmethod
-    def generate_columns(self):
-        """Abstract Method. Generates
-        the columns to be displayed in
-        the generated Gtk.TreeView. 
-        Called in the generate_layout 
-        method.
-        
-        @return: list of Gtk.TreeViewColumn
-        to be added to the Gtk.TreeView generated
-        in generate_layout.
-        """
-        pass
-    
-    @abstractmethod
-    def generate_model(self):
-        """Abstract Method. Generates the 
-        basic model that will store
-        the data that the Gtk.TreeView
-        will display.
-        
-        @return: Gtk.TreeModel representing
-        the model that contains the data to
-        be displayed on the Gtk.TreeView
-        """
-        pass
-    
-    def confirm_button_clicked(self, *args):
-        """Callback Method that is called when
-        the confirm button on the dialog window
-        is clicked.
-        
-        @param *args: Gtk.Widget wildcard representing
-        the component or Gtk.Widget that emitted the
-        signal and called this method.
-
-        @return: expected int that represents
-        Gtk.ResponseType of the dialog
-        """
-        self.confirm_data()
-        return super(ConfirmationDialog, self).confirm_button_clicked()
-
-    def confirm_data(self):
-        """Called to confirm the confirmation
-        function
-
-        @return: None
-        """
-        pass
-    
-    def cancel_button_clicked(self, *args):
-        """Callback Method that is called when
-        the cancel button is clicked. This method
-        calls on base functionality.
-        
-        @param *args: Gtk.Widget wildcard that represents
-        the component or Gtk.Widget that emitted
-        this signal and called this method.
-
-        @return: expected int that represents t
-        he Gtk.ResponseType of the dialog.
-        """
-        self.cancel_data()
-        return super(ConfirmationDialog, self).cancel_button_clicked()
-
-    def cancel_data(self):
-        """Called to cancel the data submission.
-
-        @return: None
-        """
-        pass
-
-    def set_selection_type(self, selection_mode):
-        """Sets the selection type of the
-        current tree_view.
-
-        @param selection_mode: Gtk.SelectionMode that
-        represents the chosen mode for the view
-
-        @return: None
-        """
-        selection = self.tree_view.get_selection()
-        selection.set_mode(selection_mode)
-
-    def get_selected(self):
-        """ Gets the currently selected item
-        from the tree_view.
-
-        @return: 2-tuple (Gtk.TreeModel, Gtk.TreeIter)
-        representing the associated model and an iter
-        pointing to the selected row.
-        """
-        selection = self.tree_view.get_selection()
-        return selection.get_selected()
-
-    def _select_method(self, selection, model, path, is_selected, *args):
-        """Private Method.
-
-        Callback Method to be called when the an item is
-        selected in the self.tree_view object.
-
-        @param selection: Gtk.TreeSelection associated with
-        the selection made.
-
-        @param model: Gtk.TreeModel associated with the
-        model stored in the self.tree_view object.
-
-        @param path: Gtk.TreePath associated with the
-        path selected in the self.tree_view object.
-
-        @param is_selected: bool value representing if the
-        selected row is selected.
-
-        @param args: catchall wildcard used to catch the
-        object that called this method.
-
-        @return: bool, representing if the given row associated
-        with path can be selected. Default of True.
-        """
-        return True
+#=========================================================
+# This block represents windows that form the specific
+# classes that can be instantiated. All classes in this
+# block perform operations on an entire order, which is
+# expected to be represented as a list of MenuItem objects.
+#
+# Upon confirmation each class in this block calls a given
+# function that is passed into the class at instantiation
+# as its "confirm func".
+#
+# Each class in this block belongs to the group of classes
+# that are sub classes of ConfirmationDialog and Dialog.
+# Any changes in their respective super classes will
+# effect these classes as well.
+#=========================================================
 
 
 class OrderConfirmationDialog(ConfirmationDialog):
@@ -1341,6 +1555,288 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
         """
         selection = self.tree_view.get_selection()
         selection.select_all()
+
+
+class OrderSelectionConfirmationDialog(ConfirmationDialog):
+    """OrderSelectionConfirmation window displays the current
+    OrderSelection list for the user. The dialog is displayed
+    when the run_dialog method is invoked. This allows
+    for the user to select the OrderSelection order to be displayed.
+
+    @var name_list: list of 3-tuples that represents the
+    current OrderSelection orders
+
+    @var name_entry: Gtk.Entry that is the area for users
+    to input a new name to be added.
+
+    @var number_entry: Gtk.Entry that is the area for users
+    to input a new number associated with a name.
+
+    @var model: Gtk.TreeModel that represents the model
+    associated with the display.
+
+    @var confirm_func: external function pointer to be
+    called at confirmation.
+
+    @var order: The current order to be confirmed or
+    submitted.
+
+    @var NUM_OF_EXTERIOR_TABLES: int representing the number
+    of tables that are on the exterior, and are to be displayed.
+
+    @var NUM_OF_COUNTER_SPACES: int representing the number of
+    spaces that are on the counter, and are to be displayed.
+    """
+    def __init__(self, parent, confirm_func, name_list,
+                 num_of_exterior_tables=4, num_of_counter_spaces=4):
+        """Initializes a new OrderSelectionConfirmationDialog window.
+
+        @param parent: subclass of Gtk.Window that the
+        Dialog will be a child of.
+
+        @param confirm_func: function pointer that is to be
+        called when the dialog window has been confirmed.
+
+        @param name_list: list of 3-tuples representing the
+        names on the OrderSelection list. This tuple is of (str, str, str)
+        where each entry represents the (name, number, time) that
+        the order was placed.
+
+        @keyword num_of_exterior_tables: int representing the number
+        of tables in the exterior that are to be accounted for. Default
+        value is 4.
+
+        @keyword num_of_counter_spaces: int representing the number
+        of counter spaces that are to be accounted for. Default value
+        is 4.
+        """
+        self.NUM_OF_EXTERIOR_TABLES = int(num_of_exterior_tables)
+        self.NUM_OF_COUNTER_SPACES = int(num_of_counter_spaces)
+
+        self.order = None
+
+        self.confirm_func = confirm_func
+        self.name_list = name_list
+        self.name_entry = None
+        self.number_entry = None
+        self.model = None
+        super(OrderSelectionConfirmationDialog, self).__init__(parent,
+                                                     'To Go Selection')
+
+    def generate_layout(self):
+        """Generates the layout for the dialog window.
+
+        @return: Gtk.VBox representing the box to be
+        added to the content area of the dialog window.
+        """
+        main_box = Gtk.HBox()
+
+        table_box = Gtk.VBox()
+
+        table_sub_box1 = Gtk.VBox()
+
+        for x in range(0, self.NUM_OF_EXTERIOR_TABLES):
+            button = Gtk.Button("Ext Table " + str(x + 1))
+            button.set_size_request(100, 20)
+            button.connect("clicked", self.table_button_clicked,
+                            button.get_label())
+            button.set_focus_on_click(False)
+            button.set_can_focus(False)
+            table_sub_box1.pack_start(button, True, True, 0.5)
+
+        table_box.pack_start(table_sub_box1, True, True, 10)
+
+        table_sub_box2 = Gtk.VBox()
+
+        for x in range(0, self.NUM_OF_COUNTER_SPACES):
+            button = Gtk.Button("Counter " + str(x + 1))
+            button.set_size_request(100, 20)
+            button.connect("clicked", self.table_button_clicked,
+                           button.get_label())
+            button.set_focus_on_click(False)
+            button.set_can_focus(False)
+            table_sub_box2.pack_start(button, True, True, 0.5)
+
+        table_box.pack_start(table_sub_box2, True, True, 10)
+
+        main_box.pack_start(table_box, False, False, 10)
+
+        right_box = Gtk.VBox()
+        scrolled_window = super(OrderSelectionConfirmationDialog,
+                                self).generate_layout()
+        right_box.pack_start(scrolled_window, True, True, 5)
+
+        name_label = Gtk.Label('NAME: ')
+        number_label = Gtk.Label('NUMBER: ')
+
+        sub_box = Gtk.HBox()
+        sub_box.set_homogeneous(True)
+        sub_box.pack_start(name_label, True, True, 5)
+        sub_box.pack_start(number_label, True, True, 5)
+
+        right_box.pack_start(sub_box, False, False, 5)
+
+        self.name_entry = Gtk.Entry()
+        self.number_entry = Gtk.Entry()
+
+        sub_box = Gtk.HBox()
+        sub_box.set_homogeneous(True)
+        sub_box.pack_start(self.name_entry, True, True, 5)
+        sub_box.pack_start(self.number_entry, True, True, 5)
+
+        right_box.pack_start(sub_box, False, False, 5)
+
+        add_new_button = Gtk.Button('Add')
+        add_new_button.set_size_request(150, 50)
+        add_new_button.connect('clicked', self.add_new_order)
+
+        sub_box = Gtk.HBox()
+        sub_box.set_homogeneous(True)
+        sub_box.pack_start(add_new_button, True, True, 5)
+        sub_box.pack_start(Gtk.Fixed(), True, True, 5)
+        sub_box.pack_start(Gtk.Fixed(), True, True, 5)
+
+        right_box.pack_start(sub_box, False, False, 5)
+        main_box.pack_start(right_box, True, True, 5)
+
+        self.name_entry.grab_focus()
+
+        return main_box
+
+    def generate_columns(self):
+        """Generates the columns to be
+        displayed in the TreeView displayed in
+        the content area.
+
+        @return: list of Gtk.TreeViewColumns that
+        represents the columns to be added to the
+        TreeView displayed.
+        """
+        col_list = []
+
+        rend = Gtk.CellRendererText()
+        column1 = Gtk.TreeViewColumn('Name: ', rend, text=0)
+        col_list.append(column1)
+
+        column2 = Gtk.TreeViewColumn('Number: ', rend, text=1)
+        col_list.append(column2)
+
+        column3 = Gtk.TreeViewColumn('Time of Order: ', rend, text=2)
+        col_list.append(column3)
+
+        return col_list
+
+    def generate_model(self):
+        """Generates the model for the display. The
+        model stores 3 strings that are derived from
+        each entry in the name_list entries.
+
+        @return: Gtk.TreeModel representing the
+        store for the display.
+        """
+        self.model = Gtk.ListStore(str, str, str)
+
+        if self.name_list is not None:
+            for each in self.name_list:
+                self.model.append(each)
+
+        return self.model
+
+    def add_new_order(self, *args):
+        """Callback Method that is called when
+        the add new order button is clicked.
+
+        @param *args: wildcard that represents a
+        catch all. The first argument is the
+        widget that emitted the signal
+        """
+        name = self.name_entry.get_text()
+        number = self.number_entry.get_text()
+        if name is not '' and number is not '':
+            t = time.strftime('%X, %A, %m/%y')
+            new_order = (name, number, t)
+
+            self.confirm_button_clicked(None, order=new_order)
+
+    def table_button_clicked(self, button, table):
+        """Callback Method that is called when
+        a table button has been clicked. This
+        method closes the dialog
+
+        @param button: Gtk.widget that called this
+        method.
+
+        @param table: str representing the table
+        representing the button pressed.
+
+        @return: None
+        """
+        self.confirm_button_clicked(None, order=table)
+
+    def get_selected(self, *args):
+        """Gets the selected order in the standard
+        3-tuple form.
+
+        @param *args: wildcard that represents the
+        widget that called this method.
+
+        @return: 3-tuple of (str, str, str) representing
+        the (name, number, and time) of the order.
+        """
+        tree_selection = self.tree_view.get_selection()
+        model, itr = tree_selection.get_selected()
+
+        if itr:
+            return model.get(itr, 0, 1, 2)
+
+        return None
+
+    def confirm_button_clicked(self, widget, order=None):
+        """Override method
+
+        Callback method. Called when Confirm button
+        is clicked. This method confirms the
+        currently selected order.
+
+        @param args: wildcard catchall used to catch
+        the Gtk.Widget that called this method.
+
+        @return: None
+        """
+        if order:
+            self.order = order
+        else:
+            self.order = self.get_selected()
+
+        if self.order:
+            super(OrderSelectionConfirmationDialog, self).confirm_button_clicked()
+
+    def confirm_data(self):
+        """Override Method.
+
+        Callback Method that is called when the confirm
+        button is clicked.
+        """
+        self.confirm_func(self.order)
+
+#==========================================================
+# This block represents windows that form the specific
+# classes that can be instantiated. All classes in this
+# block perform operations on an entire order, but are
+# considered more complex operations that the simple
+# operations performed in the previous block.
+#
+# Upon confirmation each class in this block mimics the
+# previous block and calls a given function that is
+# passed into the class at instantiation as its
+# "confirm func"
+#
+# Each class in this block belongs to the group that relies
+# on the instantiable CheckoutConfirmationDialog or
+# OrderConfirmationDialog. Any changes in their respective
+# super classes will change the functionality of these
+# classes.
+#==========================================================
 
 
 class SplitCheckConfirmationDialog(CheckoutConfirmationDialog):
@@ -1992,7 +2488,7 @@ class SplitCheckConfirmationDialog(CheckoutConfirmationDialog):
         self.confirm_func(tuple(curr_order))
 
 
-class CompItemsConfirmationDialog(OrderConfirmationDialog):
+class CompItemsOrderConfirmationDialog(OrderConfirmationDialog):
     """CompItemsConfirmationDialog window allows the user to
     set the comp setting for any menu item in the given order
     list. Confirmation leads to these changes being confirmed
@@ -2036,8 +2532,8 @@ class CompItemsConfirmationDialog(OrderConfirmationDialog):
         Default = 'Comp Dialog Window'
         """
         self.message_entry = None
-        super(CompItemsConfirmationDialog, self).__init__(parent, confirm_func,
-                                                          order_list, title=title)
+        super(CompItemsOrderConfirmationDialog, self).__init__(parent, confirm_func,
+                                                               order_list, title=title)
 
     def generate_misc_widgets(self):
         """Override Method.
@@ -2241,415 +2737,11 @@ class CompItemsConfirmationDialog(OrderConfirmationDialog):
         self.confirm_func(comp_list)
 
 
-class OrderSelectionConfirmationDialog(ConfirmationDialog):
-    """OrderSelectionConfirmation window displays the current
-    OrderSelection list for the user. The dialog is displayed
-    when the run_dialog method is invoked. This allows
-    for the user to select the OrderSelection order to be displayed.
-    
-    @var name_list: list of 3-tuples that represents the
-    current OrderSelection orders
-    
-    @var name_entry: Gtk.Entry that is the area for users
-    to input a new name to be added.
-    
-    @var number_entry: Gtk.Entry that is the area for users
-    to input a new number associated with a name.
-    
-    @var model: Gtk.TreeModel that represents the model
-    associated with the display.
-
-    @var confirm_func: external function pointer to be
-    called at confirmation.
-
-    @var order: The current order to be confirmed or
-    submitted.
-
-    @var NUM_OF_EXTERIOR_TABLES: int representing the number
-    of tables that are on the exterior, and are to be displayed.
-
-    @var NUM_OF_COUNTER_SPACES: int representing the number of
-    spaces that are on the counter, and are to be displayed.
-    """
-    def __init__(self, parent, confirm_func, name_list,
-                 num_of_exterior_tables=4, num_of_counter_spaces=4):
-        """Initializes a new OrderSelectionConfirmationDialog window.
-        
-        @param parent: subclass of Gtk.Window that the 
-        Dialog will be a child of.
-        
-        @param confirm_func: function pointer that is to be
-        called when the dialog window has been confirmed.
-        
-        @param name_list: list of 3-tuples representing the
-        names on the OrderSelection list. This tuple is of (str, str, str)
-        where each entry represents the (name, number, time) that
-        the order was placed.
-
-        @keyword num_of_exterior_tables: int representing the number
-        of tables in the exterior that are to be accounted for. Default
-        value is 4.
-
-        @keyword num_of_counter_spaces: int representing the number
-        of counter spaces that are to be accounted for. Default value
-        is 4.
-        """
-        self.NUM_OF_EXTERIOR_TABLES = int(num_of_exterior_tables)
-        self.NUM_OF_COUNTER_SPACES = int(num_of_counter_spaces)
-
-        self.order = None
-
-        self.confirm_func = confirm_func
-        self.name_list = name_list
-        self.name_entry = None
-        self.number_entry = None
-        self.model = None
-        super(OrderSelectionConfirmationDialog, self).__init__(parent,
-                                                     'To Go Selection')
-    
-    def generate_layout(self):
-        """Generates the layout for the dialog window.
-        
-        @return: Gtk.VBox representing the box to be
-        added to the content area of the dialog window.
-        """
-        main_box = Gtk.HBox()
-
-        table_box = Gtk.VBox()
-
-        table_sub_box1 = Gtk.VBox()
-
-        for x in range(0, self.NUM_OF_EXTERIOR_TABLES):
-            button = Gtk.Button("Ext Table " + str(x + 1))
-            button.set_size_request(100, 20)
-            button.connect("clicked", self.table_button_clicked,
-                            button.get_label())
-            button.set_focus_on_click(False)
-            button.set_can_focus(False)
-            table_sub_box1.pack_start(button, True, True, 0.5)
-
-        table_box.pack_start(table_sub_box1, True, True, 10)
-
-        table_sub_box2 = Gtk.VBox()
-
-        for x in range(0, self.NUM_OF_COUNTER_SPACES):
-            button = Gtk.Button("Counter " + str(x + 1))
-            button.set_size_request(100, 20)
-            button.connect("clicked", self.table_button_clicked,
-                           button.get_label())
-            button.set_focus_on_click(False)
-            button.set_can_focus(False)
-            table_sub_box2.pack_start(button, True, True, 0.5)
-
-        table_box.pack_start(table_sub_box2, True, True, 10)
-
-        main_box.pack_start(table_box, False, False, 10)
-
-        right_box = Gtk.VBox()
-        scrolled_window = super(OrderSelectionConfirmationDialog,
-                                self).generate_layout()
-        right_box.pack_start(scrolled_window, True, True, 5)
-        
-        name_label = Gtk.Label('NAME: ')
-        number_label = Gtk.Label('NUMBER: ')
-        
-        sub_box = Gtk.HBox()
-        sub_box.set_homogeneous(True)
-        sub_box.pack_start(name_label, True, True, 5)
-        sub_box.pack_start(number_label, True, True, 5)
-        
-        right_box.pack_start(sub_box, False, False, 5)
-        
-        self.name_entry = Gtk.Entry()
-        self.number_entry = Gtk.Entry()
-        
-        sub_box = Gtk.HBox()
-        sub_box.set_homogeneous(True)
-        sub_box.pack_start(self.name_entry, True, True, 5)
-        sub_box.pack_start(self.number_entry, True, True, 5)
-        
-        right_box.pack_start(sub_box, False, False, 5)
-        
-        add_new_button = Gtk.Button('Add')
-        add_new_button.set_size_request(150, 50)
-        add_new_button.connect('clicked', self.add_new_order)
-        
-        sub_box = Gtk.HBox()
-        sub_box.set_homogeneous(True)
-        sub_box.pack_start(add_new_button, True, True, 5)
-        sub_box.pack_start(Gtk.Fixed(), True, True, 5)
-        sub_box.pack_start(Gtk.Fixed(), True, True, 5)
-        
-        right_box.pack_start(sub_box, False, False, 5)
-        main_box.pack_start(right_box, True, True, 5)
-
-        self.name_entry.grab_focus()
-
-        return main_box
-    
-    def generate_columns(self):
-        """Generates the columns to be
-        displayed in the TreeView displayed in
-        the content area.
-        
-        @return: list of Gtk.TreeViewColumns that
-        represents the columns to be added to the
-        TreeView displayed.
-        """
-        col_list = []
-        
-        rend = Gtk.CellRendererText()
-        column1 = Gtk.TreeViewColumn('Name: ', rend, text=0)
-        col_list.append(column1)
-        
-        column2 = Gtk.TreeViewColumn('Number: ', rend, text=1)
-        col_list.append(column2)
-        
-        column3 = Gtk.TreeViewColumn('Time of Order: ', rend, text=2)
-        col_list.append(column3)
-        
-        return col_list
-    
-    def generate_model(self):
-        """Generates the model for the display. The
-        model stores 3 strings that are derived from
-        each entry in the name_list entries.
-        
-        @return: Gtk.TreeModel representing the 
-        store for the display.
-        """
-        self.model = Gtk.ListStore(str, str, str)
-        
-        if self.name_list is not None:
-            for each in self.name_list:
-                self.model.append(each)
-        
-        return self.model
-    
-    def add_new_order(self, *args):
-        """Callback Method that is called when
-        the add new order button is clicked.
-        
-        @param *args: wildcard that represents a
-        catch all. The first argument is the
-        widget that emitted the signal
-        """
-        name = self.name_entry.get_text()
-        number = self.number_entry.get_text()
-        if name is not '' and number is not '':
-            t = time.strftime('%X, %A, %m/%y')
-            new_order = (name, number, t)
-
-            self.confirm_button_clicked(None, order=new_order)
-
-    def table_button_clicked(self, button, table):
-        """Callback Method that is called when
-        a table button has been clicked. This
-        method closes the dialog
-
-        @param button: Gtk.widget that called this
-        method.
-
-        @param table: str representing the table
-        representing the button pressed.
-
-        @return: None
-        """
-        self.confirm_button_clicked(None, order=table)
-
-    def get_selected(self, *args):
-        """Gets the selected order in the standard
-        3-tuple form.
-
-        @param *args: wildcard that represents the
-        widget that called this method.
-
-        @return: 3-tuple of (str, str, str) representing
-        the (name, number, and time) of the order.
-        """
-        tree_selection = self.tree_view.get_selection()
-        model, itr = tree_selection.get_selected()
-
-        if itr:
-            return model.get(itr, 0, 1, 2)
-
-        return None
-
-    def confirm_button_clicked(self, widget, order=None):
-        """Override method
-
-        Callback method. Called when Confirm button
-        is clicked. This method confirms the
-        currently selected order.
-
-        @param args: wildcard catchall used to catch
-        the Gtk.Widget that called this method.
-
-        @return: None
-        """
-        if order:
-            self.order = order
-        else:
-            self.order = self.get_selected()
-
-        if self.order:
-            super(OrderSelectionConfirmationDialog, self).confirm_button_clicked()
-
-    def confirm_data(self):
-        """Override Method.
-
-        Callback Method that is called when the confirm
-        button is clicked.
-        """
-        self.confirm_func(self.order)
-
-    
-class AddReservationsDialog(Dialog):
-    """AddResdervationsDialog prompts the user with
-    a dialog window to insert a new reservation into
-    the reservations list.
-    
-    @group ReservationsDialog: This class is a member of
-    the Reservations Dialog group.
-    
-    @var self.name_entry: Gtk.Entry representing the 
-    area that the user inputs the name associated with
-    the new reservation. 
-    
-    @var self.number_entry: Gtk.Entry representing the
-    area that the user inputs the number associated with
-    the new reservation
-    
-    @var hour_combo_box: Gtk.ComboBox representing an
-    integer of hours selection to be made by the user.
-    
-    @var min_combo_box: Gtk.ComboBox representing an
-    integer of minutes selection to be made by the user.
-    """
-    
-    def __init__(self, parent, confirm_func, *args):
-        """initializes a new AddReservationsDialog that
-        the user may interact with to add a new reservation
-        to the reservations list.
-        
-        @param parent: Gtk.Window that the dialog will be
-        a child of
-
-        @param confirm_func: pointer to the function that
-        is to be called if the window has been confirmed.
-        
-        @param *args: wildcard for unexpected parameters
-        """
-        self.confirm_func = confirm_func
-        self.name_entry = None
-        self.number_entry = None
-        self.hour_combo_box = None
-        self.min_combo_box = None
-        super(AddReservationsDialog, self).__init__(parent,
-                                                    'Add Reservations Dialog')
-    
-    def generate_layout(self):
-        """Generates the layout to be added to the
-        content area of the dialog window.
-        
-        @return: Gtk.VBox that is to be added to the
-        content area
-        """
-        t = time.localtime()
-        hour = t[3]
-        
-        main_box = Gtk.VBox()
-        
-        label = Gtk.Label('Name: ')
-        main_box.pack_start(label, False, False, 5)
-        
-        self.name_entry = Gtk.Entry()
-        main_box.pack_start(self.name_entry, False, False, 5)
-        
-        label = Gtk.Label('Number: ')
-        main_box.pack_start(label, False, False, 5)
-        
-        self.number_entry = Gtk.Entry()
-        main_box.pack_start(self.number_entry, False, False, 5)
-        
-        inner_box1 = Gtk.VBox()
-        label = Gtk.Label('Hour ')
-        inner_box1.pack_start(label, True, True, 5)
-        
-        self.hour_combo_box = Gtk.ComboBoxText()
-        
-        for number in range(hour, 24):
-            self.hour_combo_box.append_text(str(number))
-        
-        inner_box1.pack_start(self.hour_combo_box, True, True, 5)
-        
-        inner_box2 = Gtk.VBox()
-        label = Gtk.Label('Min ')
-        inner_box2.pack_start(label, True, True, 5)
-        
-        self.min_combo_box = Gtk.ComboBoxText()
-        
-        for number in range(0, 60, 15):
-            self.min_combo_box.append_text(str(number))
-        
-        inner_box2.pack_start(self.min_combo_box, True, True, 5)
-        
-        sub_box = Gtk.HBox()
-        sub_box.pack_start(inner_box1, True, True, 5)
-        sub_box.pack_start(inner_box2, True, True, 5)
-        
-        main_box.pack_start(sub_box, False, False, 5)
-        
-        main_box.show_all()
-        
-        return main_box
-
-    def get_information(self):
-        """Gets the information entered by the
-        user and returns.
-        
-        @return: 3-tuple of (str, str, float) representing
-        name, number, and time in secs since epoch, respectively.
-        """
-        name = self.name_entry.get_text()
-        number = self.number_entry.get_text()
-        
-        hour = int(self.hour_combo_box.get_active_text())
-        
-        minute = int(self.min_combo_box.get_active_text())
-        
-        t = time.localtime()
-        
-        while minute < t[4]:
-            minute += 30
-        
-        t = time.mktime(t[:3] + (hour, minute, 0) + t[6:])
-        
-        return name, number, t
-    
-    def confirm_button_clicked(self, *args):
-        """Callback method called when the confirm button has been
-        clicked.
-        
-        @param *args: wildcard that represents a catch all for the
-        widget that emitted the call.
-        """
-        has_hour = self.hour_combo_box.get_active() > -1
-        has_min = self.min_combo_box.get_active() > -1
-
-        if has_hour and has_min:
-            super(AddReservationsDialog, self).confirm_button_clicked()
-            self.confirm_func(self.get_information())
-        
-    def cancel_button_clicked(self, *args):
-        """Callback method called when the cancel button
-        has been clicked.
-        
-        @param *args: wildcard catch all that is used to catch
-        the widget that emitted this call.
-        """
-        super(AddReservationsDialog, self).cancel_button_clicked()
-
+#===========================================================
+# This block represents module wide functions that are
+# utilized in classes throughout this module to perform
+# general operations that are useful.
+#===========================================================
 
 def get_row_refs(model, paths):
     """Gets a list of Gtk.TreeRowReferences
