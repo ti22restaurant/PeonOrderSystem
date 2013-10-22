@@ -30,7 +30,7 @@ from peonordersystem.MenuItem import MenuItem
 from peonordersystem import ErrorLogger
 from peonordersystem.ConfirmationSystem import TOGO_SEPARATOR
 from peonordersystem import CustomExceptions
-from peonordersystem.interface.Dialog import STANDARD_TEXT, STANDARD_TEXT_BOLD
+from peonordersystem.interface.Dialog import STANDARD_TEXT, STANDARD_TEXT_BOLD, STANDARD_TEXT_LIGHT
 
 import time
 
@@ -161,6 +161,7 @@ class OrderStore(Gtk.TreeStore):
         # 2. image: str representing Gtk.STOCK_image to be used for note display
         # 3. color: str representing the hexadecimal color for the foreground
         # 4. has note: bool representing if the image should be displayed
+        # 5. weight: int representing the weight of the text to be displayed.
         
         super(OrderStore, self).__init__(str, str, str, str, bool, int)
         self.order_list = []
@@ -343,7 +344,7 @@ class OrderStore(Gtk.TreeStore):
             return self.order_list.pop(index)
 
         return None
-    
+
     def update_item(self, tree_iter, has_priority=False):
         """Updates the current item to accurately
         display any changed information. Options and
@@ -364,6 +365,11 @@ class OrderStore(Gtk.TreeStore):
         tree_iter = self._ensure_top_level_iter(tree_iter)
         
         menu_item = self.get_menu_item(tree_iter)
+
+        if has_priority:
+            is_priority = self._get_weight(has_priority)
+        else:
+            is_priority = self[tree_iter][5]
         
         # remove pre-update information
         while self.iter_has_child(tree_iter):
@@ -371,20 +377,34 @@ class OrderStore(Gtk.TreeStore):
             super(OrderStore, self).remove(itr)
         
         text_color = self._get_color(menu_item.confirmed)
+        is_comped = menu_item.is_comped()
         
         # add post-update information
-        if menu_item.has_note():
+        if menu_item.has_note() and not is_comped:
             super(OrderStore, self).append(tree_iter,
                                            (menu_item.notes,
-                                            '', None, text_color, False))
-        if menu_item.has_options():
+                                            '', None, text_color,
+                                            False, is_priority))
+        if menu_item.has_options() and not is_comped:
             super(OrderStore, self).append(tree_iter,
                                            (str(menu_item.options)[1:-1],
-                                            '', None, text_color, False))
-        self[tree_iter][1] = str(menu_item.stars)
+                                            '', None, text_color,
+                                            False, is_priority))
+
+        name = menu_item.get_name()
+        stars = str(menu_item.stars)
+        has_note = menu_item.has_note()
+
+        if is_comped:
+            name = '( ' + name + ' )'
+            stars = ''
+            has_note = False
+
+        self[tree_iter][0] = name
+        self[tree_iter][1] = stars
         self[tree_iter][3] = text_color
-        self[tree_iter][4] = menu_item.has_note()
-        self[tree_iter][5] = self._get_weight(has_priority)
+        self[tree_iter][4] = has_note
+        self[tree_iter][5] = is_priority
         
         return tree_iter
         
@@ -399,7 +419,7 @@ class OrderStore(Gtk.TreeStore):
         that represents the priority orders associated with
         the confirmed order.
         """
-        if tree_iter != None:
+        if tree_iter:
             menu_item = self.get_menu_item(tree_iter)
             if not menu_item.confirmed and not menu_item.is_locked():
                 menu_item.confirmed = True
@@ -413,6 +433,17 @@ class OrderStore(Gtk.TreeStore):
 
                 self.update_item(tree_iter, has_priority=has_priority)
             self.confirm_order(self.iter_next(tree_iter), priority_order)
+
+    def update_order(self):
+        """Updates the display for
+        every menu item stored in
+        the displayed order.
+        """
+        itr = self.get_iter_first()
+
+        while itr:
+            self.update_item(itr)
+            itr = self.iter_next(itr)
 
     def _dump(self):
         """Gives a 2-tuple of the associated MenuItems and
@@ -523,7 +554,8 @@ class Orders(object):
             self.current_order = self.orders_dict[table]
 
             for menu_item in table_orders[table]:
-                self.current_order.append(menu_item)
+                itr = self.current_order.append(menu_item)
+                self.current_order.update_item(itr)
         
         for togo_name in togo_orders:
 
@@ -650,7 +682,7 @@ class Orders(object):
             if _check_menu_item(menu_item):
                 return self.current_order.remove(itr)
     
-    def update(self):
+    def update_item(self):
         """Updates the currently selected MenuItem
         so that it displays updated information.
         """
@@ -687,7 +719,13 @@ class Orders(object):
 
             tree_iter = self.current_order.get_iter_first()
             self.current_order.confirm_order(tree_iter, priority_order)
-    
+
+    def update_order(self):
+        """Updates every item in the
+        currently selected order.
+        """
+        self.current_order.update_order()
+
     def clear_order(self):
         """Clears the current order.
         
@@ -739,7 +777,6 @@ class Orders(object):
             dump_dict[key] = curr_order._dump
 
         return dump_dict
-
     
     def __repr__(self):
         """Gets a string representation of the

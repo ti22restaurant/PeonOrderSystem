@@ -270,7 +270,7 @@ class UI(object):
         message = 'updated note on ' + name
 
         if confirmed:
-            self.orders.update()
+            self.orders.update_item()
             message = 'Confirmed ' + message
         else:
             message = 'Canceled ' + message
@@ -296,7 +296,7 @@ class UI(object):
         message = 'updated stars rating on ' + name
 
         if confirmed:
-            self.orders.update()
+            self.orders.update_item()
             message = 'Confirmed ' + message
         else:
             message = 'Canceled ' + message
@@ -322,7 +322,7 @@ class UI(object):
         message = 'updated options on ' + name
         if confirmed:
             message = 'Confirmed ' + message
-            self.orders.update()
+            self.orders.update_item()
         else:
             message = 'Canceled ' + message
 
@@ -389,7 +389,7 @@ class UI(object):
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
-    def comp_selected_item(self, *args):
+    def comp_order(self, *args):
         """Callback method when comp selection has been
         clicked. This method instantiates a new dialog window
         that allows the user to change the comp status of menu
@@ -495,7 +495,7 @@ class UI(object):
 
         @return: None
         """
-        self.orders.comp_items(comped_items_list)
+        self.orders.update_order()
 
     #===========================================================================
     # This block contains methods that are used for obtaining information

@@ -47,6 +47,7 @@ import math
 
 from peonordersystem import CheckOperations
 
+STANDARD_TEXT_LIGHT = 200
 STANDARD_TEXT = 500
 STANDARD_TEXT_BOLD = 850
 
