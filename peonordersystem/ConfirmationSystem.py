@@ -76,9 +76,9 @@ def standardize_confirm_file_name(order_name):
     order_name = order_name.replace(' ', '_')
     
     if TOGO_SEPARATOR in order_name:
-        order_name = order_name + '.togo'
+        order_name += '.togo'
     else:
-        order_name = order_name + '.table'
+        order_name += '.table'
     
     return order_name
 
@@ -172,6 +172,7 @@ def checkout_confirmed(order_name, orders, order_list):
 
     for order in orders:
         # TODO send order to checkout printer
+        print order
         pass
 
 
