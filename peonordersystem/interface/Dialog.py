@@ -46,6 +46,7 @@ import time
 import math
 
 from peonordersystem import CheckOperations
+from peonordersystem.MenuItem import MenuItem
 
 #========================================================
 # This block represents module wide constants that are
@@ -706,6 +707,283 @@ class AddReservationsDialog(Dialog):
         the widget that emitted this call.
         """
         super(AddReservationsDialog, self).cancel_button_clicked()
+
+
+class UpdateMenuItemsDialog(Dialog):
+    #TODO Docstring
+
+    def __init__(self, parent, menu_item_data, confirm_func,
+                 title='Update Menu Items Dialog'):
+        #TODO Docstring
+        self.menu_item_data = menu_item_data
+        self.confirm_func = confirm_func
+        self.model_data = None
+
+        self.categories_name_entry = None
+        self.item_name_entry = None
+        self.price_spin_button = None
+        self.stars_spin_button = None
+
+        self.is_editable_switch = None
+        self.is_confirmed_switch = None
+
+        self.categories_view = None
+        self.item_view = None
+
+        super(UpdateMenuItemsDialog, self).__init__(parent, title,
+                                                    default_size=(1100, 600))
+
+    def generate_layout(self):
+        #TODO Docstring
+        main_box = Gtk.HBox()
+
+        selection_sub_box = Gtk.HBox()
+        categories_display = self.generate_categories_display()
+        selection_sub_box.pack_start(categories_display, True, True, 5.0)
+
+        item_display = self.generate_item_display()
+        selection_sub_box.pack_start(item_display, True, True, 5.0)
+
+        main_box.pack_start(selection_sub_box, True, True, 5.0)
+
+        properties_display = self.generate_properties_display()
+        main_box.pack_start(properties_display, True, True, 5.0)
+
+        return main_box
+
+    def generate_properties_display(self):
+        #TODO Docstring
+        options_box = Gtk.VBox()
+
+        properties_frame = Gtk.Frame(label='Item Properties')
+        properties_box = Gtk.VBox()
+
+        name_box = Gtk.HBox()
+        name_box.pack_start(Gtk.Label("Name: "), False, False, 5.0)
+        self.item_name_entry = Gtk.Entry()
+        name_box.pack_start(self.item_name_entry, True, True, 5.0)
+        properties_box.pack_start(name_box, False, False, 5.0)
+
+        price_box = Gtk.HBox()
+        price_box.pack_start(Gtk.Label("Price: "), False, False, 5.0)
+        self.price_spin_button = Gtk.SpinButton()
+        self.price_spin_button.set_digits(2)
+        adjustment = Gtk.Adjustment(10.99, 0, 100**100, .01, 1, 1)
+        self.price_spin_button.set_adjustment(adjustment)
+        price_box.pack_start(self.price_spin_button, True, True, 5.0)
+        price_box.pack_start(Gtk.Fixed(), True, True, 5.0)
+        properties_box.pack_start(price_box, False, False, 5.0)
+
+        stars_box = Gtk.HBox()
+        stars_box.pack_start(Gtk.Label("Initial Stars\nValue:"), False, False, 5.0)
+        self.stars_spin_button = Gtk.SpinButton()
+        stars_box.pack_start(self.stars_spin_button, False, False, 5.0)
+        properties_box.pack_start(stars_box, False, False, 5.0)
+
+        editable_box = Gtk.HBox()
+        editable_box.pack_start(Gtk.Label('Can be\nedited: '), False, False, 5.0)
+        self.is_editable_switch = Gtk.Switch()
+        editable_box.pack_start(Gtk.Fixed(), False, False, 5.0)
+        editable_box.pack_start(self.is_editable_switch, False, False, 5.0)
+        properties_box.pack_start(editable_box, False, False, 5.0)
+
+        confirmed_box = Gtk.HBox()
+        confirmed_box.pack_start(Gtk.Label('Can be sent\nto kitchen: '), False, False, 5.0)
+        self.is_confirmed_switch = Gtk.Switch()
+        confirmed_box.pack_start(Gtk.Fixed(), False, False, 5.0)
+        confirmed_box.pack_start(self.is_confirmed_switch, False, False, 5.0)
+        properties_box.pack_start(confirmed_box, False, False, 5.0)
+
+        properties_frame.add(properties_box)
+        options_box.pack_start(properties_frame, False, False, 5.0)
+
+        option_choices_box = Gtk.VBox()
+
+        #TODO add option choices
+
+        options_box.pack_start(option_choices_box, True, True, 5.0)
+
+        return options_box
+
+    def generate_item_display(self):
+        #TODO Docstring
+        menu_items_display_box = Gtk.VBox()
+
+        view_frame = Gtk.Frame()
+        scroll_window = Gtk.ScrolledWindow()
+        self.item_view = self.generate_item_view()
+
+        scroll_window.add(self.item_view)
+        view_frame.add(scroll_window)
+
+        menu_items_display_box.pack_start(view_frame, True, True, 5.0)
+
+        menu_items_edit_frame = Gtk.Frame(label='Menu Item Editor')
+        menu_items_edit_box = Gtk.HBox()
+
+        add_menu_item_button = Gtk.Button('ADD NEW ITEM')
+        add_menu_item_button.connect('clicked', self.add_new_item)
+        add_menu_item_button.set_can_focus(False)
+        add_menu_item_button.set_size_request(100, 50)
+        menu_items_edit_box.pack_start(add_menu_item_button, False, False, 5.0)
+
+        remove_menu_item_button = Gtk.Button('REMOVE ITEM')
+        remove_menu_item_button.connect('clicked', self.remove_selected_item)
+        remove_menu_item_button.set_can_focus(False)
+        remove_menu_item_button.set_size_request(100, 50)
+        menu_items_edit_box.pack_end(remove_menu_item_button, False, False, 5.0)
+
+        menu_items_edit_frame.add(menu_items_edit_box)
+
+        menu_items_display_box.pack_start(menu_items_edit_frame, False, False, 5.0)
+
+
+        return menu_items_display_box
+
+    def generate_categories_display(self):
+        #TODO Docstring
+
+        # Generate information for displaying
+        # and editing categories
+        categories_box = Gtk.VBox()
+
+        # Generate categories tree view
+        view_frame = Gtk.Frame()
+        categories_display_box = Gtk.VBox()
+        scroll_window = Gtk.ScrolledWindow()
+
+        self.categories_view = self.generate_categories_view()
+        scroll_window.add(self.categories_view)
+        categories_display_box.pack_start(scroll_window, True, True, 5.0)
+
+        view_frame.add(categories_display_box)
+        categories_box.pack_start(view_frame, True, True, 5.0)
+
+        # Generate categories editing buttons
+        categories_frame = Gtk.Frame(label="Category Editor")
+        categories_edit_box = Gtk.VBox()
+
+        categories_edit_subbox1 = Gtk.HBox()
+
+        self.categories_name_entry = Gtk.Entry()
+        categories_edit_subbox1.pack_start(self.categories_name_entry, False, False, 5.0)
+        add_category_button = Gtk.Button("ADD")
+        add_category_button.connect('clicked', self.add_new_category)
+        add_category_button.set_can_focus(False)
+        add_category_button.set_size_request(70, 30)
+        categories_edit_subbox1.pack_start(add_category_button, False, False, 5.0)
+
+        categories_edit_box.pack_start(categories_edit_subbox1, False, False, 5.0)
+
+        categories_edit_subbox2 = Gtk.HBox()
+
+        remove_category_button = Gtk.Button("REMOVE SELECTED CATEGORY")
+        remove_category_button.connect('clicked', self.remove_selected_category)
+        remove_category_button.set_can_focus(False)
+        remove_category_button.set_size_request(150, 50)
+        categories_edit_subbox2.pack_start(remove_category_button, False, False, 5.0)
+
+        categories_edit_box.pack_start(categories_edit_subbox2, False, False, 5.0)
+        categories_frame.add(categories_edit_box)
+        categories_box.pack_start(categories_frame, False, False, 5.0)
+
+        return categories_box
+
+    def generate_categories_view(self):
+        #TODO Docstring
+
+        tree_view = Gtk.TreeView()
+        model = self.generate_categories_model()
+        tree_view.set_model(model)
+
+        col_list = self.generate_columns(('Category',))
+
+        for col in col_list:
+            tree_view.append_column(col)
+
+        return tree_view
+
+    def generate_item_view(self):
+        #TODO Docstring
+
+        tree_view = Gtk.TreeView()
+        self.generate_item_model()
+
+        col_list = self.generate_columns(('Menu Item',))
+
+        for col in col_list:
+            tree_view.append_column(col)
+
+        return tree_view
+
+    def generate_categories_model(self):
+        #TODO Docstring
+
+        model = Gtk.ListStore(str)
+
+        for category in self.menu_item_data:
+            model.append((str(category),))
+
+        return model
+
+    def generate_item_model(self):
+        #TODO Docstring
+
+        self.model_data = {}
+
+        for category in self.menu_item_data:
+            model = Gtk.ListStore(str, float, int, bool, bool)
+
+            for menu_item in self.menu_item_data[category]:
+
+                name = menu_item._name
+                price = menu_item._price
+                stars = menu_item.stars
+                editable = menu_item.editable
+                confirmed = menu_item.confirmed
+
+                values = name, price, stars, editable, confirmed
+
+                model.append(values)
+
+            self.model_data[category] = model
+
+    def generate_columns(self, col_names):
+        #TODO Docstring
+
+        col_list = []
+
+        for each in col_names:
+            rend = Gtk.CellRendererText()
+            col = Gtk.TreeViewColumn(each, rend, text=0)
+
+        col_list.append(col)
+
+        return col_list
+
+    def add_new_item(self, *args):
+        #TODO Docstring
+        pass
+
+    def remove_selected_item(self, *args):
+        #TODO Docstring
+        pass
+
+    def add_new_category(self, *args):
+        #TODO Docstring
+        pass
+
+    def remove_selected_category(self, *args):
+        #TODO Docstring
+        pass
+
+    def confirm_button_clicked(self, *args):
+        #TODO Docstring
+        pass
+
+    def cancel_button_clicked(self, *args):
+        #TODO Docstring
+        pass
 
 
 #=========================================================
@@ -2792,3 +3070,15 @@ def ensure_top_level_item(model, tree_iter):
     if parent_iter:
         return ensure_top_level_item(model, parent_iter)
     return tree_iter
+
+if __name__ == '__main__':
+
+    from peonordersystem.interface.Builder import load_menu_items
+
+    menu_data = load_menu_items()
+
+    def confirm_func(*args):
+        print args
+
+    dialog = UpdateMenuItemsDialog(None, menu_data, confirm_func)
+    dialog.run_dialog()

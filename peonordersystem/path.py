@@ -3,7 +3,9 @@ for generating the UI and its components.
 """
 import os
 
-SYSTEM_DIRECTORY_PATH = os.getcwd() 
+#SYSTEM_DIRECTORY_PATH = os.getcwd()
+
+SYSTEM_DIRECTORY_PATH = '/home/carl-m/workspace/PeonOrderSystem/PeonOrderSystem'
 
 SYSTEM_DATA_PATH = SYSTEM_DIRECTORY_PATH + '/data/'
 

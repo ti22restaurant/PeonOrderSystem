@@ -18,6 +18,7 @@ from collections import deque
 
 from xml.etree.cElementTree import ElementTree
 
+
 class Builder(Gtk.Builder):
     """ Generates and builds the UI from XML file passed into
 objects add_from_file. Generates MenuItems in the UI from
@@ -395,11 +396,18 @@ def load_menu_items():
                             curr['stars'], curr['editable'],
                             curr['confirmed'], options)
         return curr
-    
-    
+
     # Generate MenuItem's from JSON file
     return json.load(menu, object_hook=generate_menu)
-    
+
+
+def update_menu_items(updated_menu_items):
+    #TODO Docstring
+
+    menu = open(path.MENU_DATA, 'w')
+    json.dump(updated_menu_items, menu, indent=4)
+
+
 def generate_menu_layout(main_box, num_of_cols=2):
     """ Generates the menu layout for any given menu box.
     
