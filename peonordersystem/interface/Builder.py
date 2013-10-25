@@ -401,7 +401,7 @@ def load_menu_items():
     return json.load(menu, object_hook=generate_menu)
 
 
-def update_menu_items(updated_menu_items):
+def update_menu_items_data(updated_menu_items):
     #TODO Docstring
 
     menu = open(path.MENU_DATA, 'w')

@@ -272,7 +272,7 @@ class Editor(object):
         """
         dialog = Dialog.UpdateMenuItemsDialog(self.parent, menu_data,
                                               confirm_func)
-        return dialog.run_dialog()
+        return dialog.run_dialog() == Gtk.ResponseType.ACCEPT
 
 #===========================================================================
 # This block contains functions that are called as conditionals to
