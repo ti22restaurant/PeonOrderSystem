@@ -11,7 +11,7 @@ from peonordersystem.path import MAIN_UI_PATH
 
 import copy
 
-from peonordersystem.interface.Builder import Builder
+from peonordersystem.interface import Builder
 from peonordersystem.interface.Orders import Orders
 from peonordersystem.interface.Reservations import Reservations
 from peonordersystem.interface.Editor import Editor
@@ -108,7 +108,7 @@ class UI(object):
         @param title: str representing the current title to
         be displayed on the GUI
         """
-        self.builder = Builder()
+        self.builder = Builder.Builder()
         
         self.builder.add_from_file(MAIN_UI_PATH, title)
         self.builder.connect_signals(self)
@@ -561,10 +561,11 @@ class UI(object):
 
         @return: None
         """
-        menu_data = self.builder.load_menu_items()
+        menu_data = Builder.load_menu_items()
 
         self.update_status('Awaiting editing of raw MenuItem data...')
-        response = self.editor.update_menu_items_data(menu_data)
+        response = self.editor.update_menu_items_data(menu_data,
+                                                      self.dump_updated_menu_data)
 
         if response:
             self.update_status('Edited MenuItem data. Restart to see updates')
@@ -586,7 +587,7 @@ class UI(object):
 
         @return: None
         """
-        self.builder.update_menu_items_data(updated_menu_data)
+        Builder.update_menu_items_data(updated_menu_data)
 
     def _dump(self):
         """Dumps the information regarding the
