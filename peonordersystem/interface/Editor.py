@@ -253,6 +253,27 @@ class Editor(object):
         dialog = Dialog.AddReservationsDialog(self.parent, confirm_function)
         return dialog.run_dialog() == Gtk.ResponseType.ACCEPT
 
+    def update_menu_items_data(self, menu_data, confirm_func):
+        """Calls a dialog window that allows the user to edit
+        the stored menu item data file that the UI uses to
+        generate the menu items from. Runs dialog via this
+        method.
+
+        @param menu_data: dict of str key to list of MenuItem
+        object values. Each key represents a category in the
+        dict, and each list represents the MenuItems associated
+        with that category.
+
+        @param confirm_func: function to be called if or when
+        the dialog window has been confirmed.
+
+        @return: bool value representing if the data was updated
+        or not.
+        """
+        dialog = Dialog.UpdateMenuItemsDialog(self.parent, menu_data,
+                                              confirm_func)
+        return dialog.run_dialog()
+
 #===========================================================================
 # This block contains functions that are called as conditionals to
 # ensure that specific conditions are met with given items. These functions
