@@ -389,10 +389,10 @@ def load_menu_items():
         dict.
         """
         options = {}
-        if '__MenuItem__' in curr:
-            if 'options' in curr:
-                options = curr['options']
-            return MenuItem(curr['__MenuItem__'], curr['price'],
+        if '_name' in curr:
+            if '_option_choices' in curr:
+                options = curr['_option_choices']
+            return MenuItem(curr['_name'], curr['_price'],
                             curr['stars'], curr['editable'],
                             curr['confirmed'], options)
         return curr
