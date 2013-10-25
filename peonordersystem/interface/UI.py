@@ -486,6 +486,8 @@ class UI(object):
 
         self.reservations.add_reservation(name, number, arrival)
 
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def comp_confirm(self, comped_items_list):
         """Callback Method that is called when the comp item
         confirmation has been called and confirmed.
@@ -546,6 +548,45 @@ class UI(object):
     # error logging system for the GUI. This includes dumping, debugging and
     # other logging methods.
     #==============================================================================
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def update_menu_items(self, *args):
+        """This method is called when an associated Gtk.Widget
+        is clicked. This method calls the Editor object to initiate
+        the update menu items procedure.
+
+        @param args: wildcard catchall that is used to catch
+        the Gtk.Widget that called this method.
+
+        @return: None
+        """
+        menu_data = self.builder.load_menu_items()
+
+        self.update_status('Awaiting editing of raw MenuItem data...')
+        response = self.editor.update_menu_items_data(menu_data)
+
+        if response:
+            self.update_status('Edited MenuItem data. Restart to see updates')
+        else:
+            self.update_status('Cancelled updating MenuItem data.')
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def dump_updated_menu_data(self, updated_menu_data):
+        """Callback Method.
+
+        Called when the menu data has been updated. This
+        method is used to call the associated methods to
+        dump the updated MenuItem data.
+
+        @param updated_menu_data: dict of str key to list
+        of MenuItem object value pairs. Each str key represents
+        the category and has an associated list of MenuItems.
+
+        @return: None
+        """
+        self.builder.update_menu_items_data(updated_menu_data)
 
     def _dump(self):
         """Dumps the information regarding the
