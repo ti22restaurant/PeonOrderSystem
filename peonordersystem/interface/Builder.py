@@ -9,13 +9,10 @@
 from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 
 from peonordersystem import path
-
-import json
-
-from peonordersystem.MenuItem import MenuItem
-
 from collections import deque
 
+import jsonpickle
+jsonpickle.set_encoder_options('simplejson', sort_keys=True, indent=4)
 from xml.etree.cElementTree import ElementTree
 
 
@@ -82,7 +79,7 @@ stored on table box. Last index is the 'TOGO' button.
         
         menu_file = open(path.OPTIONS_DATA, 'r')
         
-        option_choices = json.load(menu_file)
+        option_choices = jsonpickle.decode(menu_file.read())
         
         tree = ElementTree()
         tree.parse(filename)
@@ -373,39 +370,18 @@ def load_menu_items():
     """
     # Open JSON file
     menu = open(path.MENU_DATA, 'r')
-    
-    # object_hook function utilized to generate MenuItems in
-    #   JSON load.
-    def generate_menu(curr) :
-        """Returns a menu item associated with the given
-        dict passed in.
-        
-        @param curr: dict generated from JSON file which has
-        the str keys of '__MenuItem__', 'price', 'stars', 
-        'confirmed', 'editable' and could have 'options' with
-        values that match each.
-        
-        @return: new MenuItem object that represents the given
-        dict.
-        """
-        options = {}
-        if '_name' in curr:
-            if '_option_choices' in curr:
-                options = curr['_option_choices']
-            return MenuItem(curr['_name'], curr['_price'],
-                            curr['stars'], curr['editable'],
-                            curr['confirmed'], options)
-        return curr
 
     # Generate MenuItem's from JSON file
-    return json.load(menu, object_hook=generate_menu)
+    return jsonpickle.decode(menu.read())
 
 
 def update_menu_items_data(updated_menu_items):
     #TODO Docstring
 
     menu = open(path.MENU_DATA, 'w')
-    json.dump(updated_menu_items, menu, indent=4)
+    item_info = jsonpickle.encode(updated_menu_items)
+    menu.write(item_info)
+
 
 
 def generate_menu_layout(main_box, num_of_cols=2):

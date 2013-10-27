@@ -38,7 +38,7 @@ class MenuItem(object):
     """
     
     def __init__(self, name, price, stars=0, editable=True,
-        confirmed=False, option_choices={}):
+                 confirmed=False, option_choices={}):
         
         self._name = name
         self._price = price
@@ -95,7 +95,6 @@ class MenuItem(object):
         else:
             self._price_scalar = 1.0
             self.comp_message = None
-
     
     def is_locked(self):
         """Returns the value of the locked attribute.

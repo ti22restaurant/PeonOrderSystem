@@ -14,11 +14,11 @@ or day changes it instantiates a new directory.
 @version: 1.0
 """
 import os
-import cPickle
+import jsonpickle
+jsonpickle.set_encoder_options('simplejson', sort_keys=True, indent=4)
 import time
 
 from peonordersystem import path
-from peonordersystem import MenuItem
 
 
 directory = path.SYSTEM_ORDERS_PATH
@@ -125,8 +125,9 @@ def order_confirmed(order_name, priority_list,
     order_name = standardize_confirm_file_name(order_name)
     
     curr_file = open(curr_directory + order_name, 'w')
-    
-    cPickle.dump(full_order, curr_file)
+
+    obj_info = jsonpickle.encode(full_order)
+    curr_file.write(obj_info)
 
 
 def remove_order_confirmed_file(order_name):
@@ -168,7 +169,8 @@ def checkout_confirmed(order_name, orders, order_list):
     curr_directory = directory + 'checkout/'
     order_name = standardize_checkout_file_name(order_name)
     curr_file = open(curr_directory + order_name, 'w')
-    cPickle.dump(order_list, curr_file)
+    obj_info = jsonpickle.encode(order_list)
+    curr_file.write(obj_info)
 
     for order in orders:
         # TODO send order to checkout printer
@@ -208,8 +210,8 @@ def unpack_information(curr_directory):
 
         data = open(dirpath + curr_filename)
 
-        unpickler = cPickle.Unpickler(data)
+        loaded_data = jsonpickle.decode(data.read())
 
-        current_orders[filename] = unpickler.load()
+        current_orders[filename] = loaded_data
 
     return table_orders, togo_orders
