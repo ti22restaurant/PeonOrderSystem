@@ -44,9 +44,11 @@ from abc import ABCMeta, abstractmethod
 from copy import copy, deepcopy
 import time
 import math
+import jsonpickle
 
 from peonordersystem import CheckOperations
 from peonordersystem.MenuItem import MenuItem
+from peonordersystem.path import DISCOUNT_DATA
 
 #========================================================
 # This block represents module wide constants that are
@@ -75,6 +77,7 @@ SPLIT_CHECK_DIALOG_RESPONSE = 99
 # by their naming convention. Which will be the classes
 # name followed by its super classes.
 #=========================================================
+
 
 class Dialog(object):
     """Abstract Base Class. Provides the base functionality
@@ -2064,13 +2067,13 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
         scroll_window = super(CheckoutConfirmationDialog, self).generate_layout()
         main_box.pack_start(scroll_window, True, True, 5)
 
-        sub_box = self.generate_related_buttons()
+        sub_box = self.generate_related_area()
 
         main_box.pack_start(sub_box, False, False, 5)
 
         return main_box
 
-    def generate_related_buttons(self):
+    def generate_related_area(self):
         """Generates the related buttons to
         be displayed beneath the generated layout
         that are associated with the functionality
@@ -2679,7 +2682,7 @@ class SplitCheckConfirmationDialog(CheckoutConfirmationDialog):
         
         return main_box
 
-    def generate_related_buttons(self):
+    def generate_related_area(self):
         """Override Method.
 
         Generates the buttons associated
@@ -3451,6 +3454,306 @@ class CompItemsOrderConfirmationDialog(OrderConfirmationDialog):
         self.confirm_func(comp_list)
 
 
+class AddDiscountCheckoutConfirmationDialog(CheckoutConfirmationDialog):
+    """AddDiscountCheckoutConfirmationDialog window is utilized by
+    the user to display and edit discounts associated with a given
+    order. This window instantiates a new dialog window and upon
+    confirmation calls the confirm_func that will adjust the order
+    so that the associated discount is added to the associated order.
+
+    @group CheckoutConfirmationDialog: This class is a subclass member
+    of the CheckoutConfirmationDialog group, and as such it inherits
+    functionality from its superclass. Any changes to the superclass
+    could change the functionality for this class.
+
+    @var discount_button_group: tuple of Gtk.RadioButtons that represents
+    the toggle group. This allows for access to the associated radio buttons
+    at any time.
+
+    @var discount_input_areas: list of Gtk.Widgets that represent the respective
+    input areas for discount information.
+
+    @var message_entry: Gtk.TextView object that is used to display and edit the
+    message that will be associated with a specific discount.
+
+    @var discount_view: Gtk.TreeView for displaying a list of template discounts
+    that the user may choose from the apply standard often used discounts.
+    """
+
+    def __init__(self, parent, confirm_func, order_list, dialog=None,
+                 title='Add Discount Dialog Window'):
+        """ Initializes a new AddDiscountCheckoutConfirmationDialog window.
+
+        @param parent: Gtk.Object that will be used as the parent of this
+        dialog window. All interactions with the parent object will be
+        frozen until this dialog is confirmed.
+
+        @param confirm_func: function that will be called upon confirmation
+        of this dialog.
+
+        @param order_list: list of MenuItem objects that represents the
+        current order to have a discount added to it.
+
+        @param dialog: Unused argument. Leave as default.
+
+        @param title: str representing the title to be displayed by the
+        dialog window.
+        """
+        self.discount_button_group = None
+        self.discount_input_areas = []
+        self.message_entry = None
+        self.discount_view = None
+        super(AddDiscountCheckoutConfirmationDialog, self).__init__(parent, confirm_func,
+                                                                    order_list, title=title)
+
+    def generate_layout(self):
+        """Override Method.
+
+        Generates the layout for the
+        AddDiscountOrderConfirmationDialog
+        this method relies heavily on super
+        class generate_layouts before it.
+
+        @return: Gtk.Container that holds
+        the widgets to be displayed.
+        """
+        main_box = Gtk.HBox()
+
+        checkout_order_box = super(AddDiscountCheckoutConfirmationDialog,
+                                   self).generate_layout()
+        main_box.pack_start(checkout_order_box, True, True, 5.0)
+
+        discount_properties_box = self.generate_properties_panel()
+        main_box.pack_start(discount_properties_box, False, False, 5.0)
+
+        return main_box
+
+    def generate_properties_panel(self):
+        """Generates the properties panel
+        area which lies to the right of
+        the tree view and is used to display
+        and edit property information associated
+        with the discount properties of this
+        class.
+
+        @return: Gtk.Container that holds
+        the widgets to be displayed.
+        """
+        main_box = Gtk.VBox()
+        properties_selection_area = self.generate_properties_selection_area()
+        main_box.pack_start(properties_selection_area, True, True, 5.0)
+
+        confirmation_selection_area = self.generate_confirmation_selection_area()
+
+        main_box.pack_start(confirmation_selection_area, False, False, 5.0)
+
+        return main_box
+
+    def generate_confirmation_selection_area(self):
+        """Generate the confirmation selection area.
+        This area will display widgets that are to
+        be added to the bottom right hand side, which
+        is designated at the confirmation selection
+        area. This area provides the widgets that
+        allow the user to add new discounts to the
+        order.
+
+        @return: Gtk.Container that holds all the
+        necessary widgets that will display the
+        information for the area.
+        """
+        border = Gtk.Frame(label='Confirm Discount Properties')
+
+        discount_message_box = Gtk.VBox()
+
+        discount_message_box.pack_start(Gtk.Label('Message: '), False, False, 0.0)
+        text_view_frame = Gtk.Frame()
+        self.message_entry = Gtk.TextView()
+        self.message_entry.set_size_request(250, 150)
+        self.message_entry.set_wrap_mode(Gtk.WrapMode.WORD)
+        text_view_frame.add(self.message_entry)
+        discount_message_box.pack_start(text_view_frame, False, False, 0.0)
+
+        add_discount_button = Gtk.Button('Add Discount To Order')
+        add_discount_button.set_size_request(200, 50)
+        add_discount_button.connect('clicked', self.add_discount_to_order)
+        add_discount_button.set_can_focus(False)
+        discount_message_box.pack_start(add_discount_button, False, False, 5.0)
+
+        border.add(discount_message_box)
+
+        return border
+
+    def generate_properties_selection_area(self):
+        """Generates the properties selection area.
+        This area contains all widgets that are used
+        to edit specific properties associated with
+        the discount. This is where the user may
+        edit properties of a discount, or select
+        the necessary information that will allow
+        for a new discount to be placed on the order.
+
+        @return: Gtk.Container that holds all the
+        widgets that will be displayed for editing
+        properties of discounts.
+        """
+        border = Gtk.Frame(label='Discount Properties')
+
+        sub_box1 = Gtk.VBox()
+
+        #Generate items to be displayed
+        adjustment = Gtk.Adjustment(0.00, -100.00 * 1000.00, 1000.00 * 100.00, 0.01, 1.00, 0)
+        discount_select_dollars = Gtk.SpinButton(adjustment=adjustment)
+        discount_select_dollars.set_digits(2)
+
+        discount_by_number_button = Gtk.RadioButton.new_with_label_from_widget(None, 'By Dollar Amount')
+        discount_by_number_button.connect('toggled', self.update_property_display, discount_select_dollars)
+
+        #generate containers and layout for items.
+        discount_by_number_box = Gtk.VBox()
+        discount_by_number_box.pack_start(discount_by_number_button, False, False, 0.0)
+        discount_by_number_edit_box = Gtk.HBox()
+        discount_by_number_edit_box.pack_start(Gtk.Label('Discount Total:     $'), False, False, 0.0)
+
+        discount_by_number_edit_box.pack_start(discount_select_dollars, False, False, 0.0)
+        self.discount_input_areas.append(discount_select_dollars)
+
+        discount_by_number_box.pack_start(discount_by_number_edit_box, True, True, 5.0)
+
+        sub_box1.pack_start(discount_by_number_box, False, False, 5.0)
+
+        #generate items to be displayed
+        adjustment = Gtk.Adjustment(0.00, -100.00, 100.00, 0.01, 1.00, 0)
+        discount_from_total = Gtk.SpinButton(adjustment=adjustment)
+        discount_from_total.set_digits(2)
+        discount_from_total.set_sensitive(False)
+        self.discount_input_areas.append(discount_from_total)
+
+        discount_by_total_button = Gtk.RadioButton.new_with_label_from_widget(discount_by_number_button,
+                                                                              'By Order Total')
+        discount_by_total_button.connect('toggled', self.update_property_display, discount_from_total)
+        discount_by_total_button.set_active(False)
+        self.discount_button_group = discount_by_total_button.get_group()
+
+        discount_display = self.generate_template_view()
+        self.discount_view.set_sensitive(False)
+
+        add_from_templates_button = Gtk.RadioButton.new_with_label_from_widget(discount_by_number_button,
+                                                                               'Discount From Template')
+        add_from_templates_button.connect('toggled', self.update_property_display, self.discount_view)
+
+        #generate containers and layout for items
+        discount_by_total_box = Gtk.VBox()
+        discount_by_total_box.pack_start(discount_by_total_button, False, False, 0.0)
+
+        discount_by_total_edit_box = Gtk.HBox()
+        discount_by_total_edit_box.pack_start(Gtk.Label('Discount Total:   '), False, False, 0.0)
+        discount_by_total_edit_box.pack_start(discount_from_total, False, False, 0.0)
+        discount_by_total_edit_box.pack_start(Gtk.Label(' %'), False, False, 0.0)
+        discount_by_total_box.pack_start(discount_by_total_edit_box, False, False, 0.0)
+        sub_box1.pack_start(discount_by_total_box, False, False, 5.0)
+
+        sub_box1.pack_start(add_from_templates_button, False, False, 0.0)
+
+        sub_box1.pack_start(discount_display, True, True, 5.0)
+
+        border.add(sub_box1)
+
+        return border
+
+    def generate_template_view(self):
+        """Generates the treeview to display
+        and select discount templates.
+
+        @return: Gtk.TreeView that has been
+        generated by this method.
+        """
+        scroll_window = Gtk.ScrolledWindow()
+        self.discount_view = Gtk.TreeView()
+
+        rend = Gtk.CellRendererText()
+        col1 = Gtk.TreeViewColumn('Discount Name', rend, text=0)
+        self.discount_view.append_column(col1)
+
+        col2 = Gtk.TreeViewColumn('Price', rend, text=1)
+        self.discount_view.append_column(col2)
+
+        model = Gtk.ListStore(str, str, float, bool)
+
+        encoded_template_data = open(DISCOUNT_DATA, 'r').read()
+
+        model_info = jsonpickle.decode(encoded_template_data)
+
+        for row in model_info:
+            model.append(row)
+
+        self.discount_view.set_model(model)
+        scroll_window.add(self.discount_view)
+
+        return scroll_window
+
+    def update_property_display(self, widget, *args):
+        """Updates the displayed property
+        information.
+
+        @param widget: Gtk.ToggleButton that called
+        this method.
+
+        @param args: list of Gtk.Widget objects that
+        are to be set to sensitive dependent on the
+        toggled state of the widget passed in.
+
+        @return: None
+        """
+
+        set_sensitive = widget.get_active()
+
+        for items in args:
+            items.set_sensitive(set_sensitive)
+
+    def add_discount_to_order(self, *args):
+        """Adds the selected discount to the
+        order.
+
+        @param args: wildcard catchall to catch
+        the widget that called this method.
+
+        @return:None
+        """
+        msg_buffer = self.message_entry.get_buffer()
+        start = msg_buffer.get_start_iter()
+        end = msg_buffer.get_end_iter()
+        message = msg_buffer.get_text(start, end, True)
+        message = message.strip()
+
+        if len(message) > 0:
+            counter = 0
+
+            #TODO Add selected discount
+
+    def generate_related_area(self):
+        """Override Method.
+
+        Generates the related area to be
+        displayed underneath the the main
+        view for displaying the order.
+
+        @note: This class is overwritten
+        so that the related area buttons
+        are not populated. As such this
+        method is simply an override.
+
+        This is to prevent the Checkout
+        confirmation dialog from
+        displaying the split check button
+        which is not helpful here.
+
+        @return: Gtk.Container that is
+        empty.
+        """
+        return Gtk.VBox()
+
+
 #===========================================================
 # This block represents module wide functions that are
 # utilized in classes throughout this module to perform
@@ -3506,3 +3809,19 @@ def ensure_top_level_item(model, tree_iter):
     if parent_iter:
         return ensure_top_level_item(model, parent_iter)
     return tree_iter
+
+
+if __name__ == '__main__':
+    from peonordersystem.MenuItem import MenuItem
+
+    names = ['Carl','Lora','Mike','Fabian']
+    order = []
+
+    for name in names:
+        order.append(MenuItem(name, 10.0))
+
+    def confirm_func(d):
+        print d
+
+    dialog = AddDiscountCheckoutConfirmationDialog(None, confirm_func, order)
+    dialog.run_dialog()
