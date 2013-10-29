@@ -199,7 +199,8 @@ class Editor(object):
         given order list. Only the locked menu items contained
         in the given order list will be operated on. If confirmed
         this dialog calls the given confirm function with the first
-        argument the comped menu items.
+        argument as a list of MenuItem objects that represents the
+        edited order.
 
         @param order_list: list of MenuItem objects that represents
         the order to have the dialog performed on it.
@@ -216,6 +217,26 @@ class Editor(object):
                                 confirm_function)
 
         return response == Gtk.ResponseType.ACCEPT
+
+    def discount_item_order(self, order_list, confirm_function):
+        """Calls the discount item confirmation dialog on the
+        given order list. This confirmation dialog allows the
+        user to edit the given order by opening a new dialog
+        window through which the user may add 'discount' MenuItems
+        and apply them to the order via confirmation. If confirmed
+        this dialog calls the given confirm function with the
+        first argument as a list fo MenuItems that represents the
+        newly adjusted order list.
+
+        @param order_list:
+
+        @param confirm_function:
+
+        @return:
+        """
+        order_list = order_list
+        response = self.confirm(order_list, Dialog.AddDiscountCheckoutConfirmationDialog,
+                                confirm_function)
 
     #================================================================================
     # Methods in this block require special considerations when instantiating their
