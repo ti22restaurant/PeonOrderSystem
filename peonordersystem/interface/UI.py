@@ -427,7 +427,7 @@ class UI(object):
         self.update_status('Waiting for discount confirmation...')
         current_order = self.orders.get_current_order()
         print current_order
-        confirmed = self.editor.discount_item_order(current_order, self.update_order)
+        confirmed = self.editor.discount_item_order(current_order, self.edit_order)
 
         if confirmed:
             message = 'Applying Discounts... done'
@@ -513,18 +513,36 @@ class UI(object):
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
-    def update_order(self, updated_order):
+    def update_order(self, updated_order=None):
         """Callback Method that is called to update the
         order with the given updated order.
 
         @keyword updated_order: list of MenuItem objects
-        that is the edited list. Default value is None
+        that is the updated data. Default value is None
         if the order is to be updated from currently
         stored order.
 
         @return: None
         """
-        self.orders.update_order(updated_order)
+        #updated_order may be used to display information
+        # at later time. order class doesn't require an
+        # argument to update it's order.
+        self.orders.update_order()
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def edit_order(self, edited_order):
+        """Callback Method that is called to edit
+        the order with the given edited order.
+
+        @param edited_order: list of MenuItem objects
+        that is the edited order. This list will replace
+        the currently stored information in the order
+        object.
+
+        @return: None
+        """
+        self.orders.edit_order(edited_order)
 
     #===========================================================================
     # This block contains methods that are used for obtaining information
