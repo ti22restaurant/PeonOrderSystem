@@ -26,6 +26,7 @@ where changes are made that would
 
 from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 
+from copy import deepcopy, copy
 from peonordersystem.MenuItem import MenuItem
 from peonordersystem import ErrorLogger
 from peonordersystem.ConfirmationSystem import TOGO_SEPARATOR
@@ -400,6 +401,9 @@ class OrderStore(Gtk.TreeStore):
             stars = ''
             has_note = False
 
+        elif not menu_item.is_locked() and menu_item.confirmed:
+            stars = ''
+
         self[tree_iter][0] = name
         self[tree_iter][1] = stars
         self[tree_iter][3] = text_color
@@ -428,21 +432,69 @@ class OrderStore(Gtk.TreeStore):
 
                 if menu_item in priority_order:
                     has_priority = True
+                    priority_order.remove(menu_item)
                 else:
                     has_priority = False
 
                 self.update_item(tree_iter, has_priority=has_priority)
             self.confirm_order(self.iter_next(tree_iter), priority_order)
 
+    def edit_order(self, updated_order):
+        """Edits the displayed order to
+        the updated_order given.
+
+        @param updated_order: list of MenuItem
+        objects that is to be the new updated
+        order to display.
+
+        @return: None
+        """
+        update_index = 0
+        display_index = 0
+
+        while update_index < len(updated_order):
+            updated_item = updated_order[update_index]
+
+            if display_index < len(self.order_list):
+                displayed_item = self.order_list[display_index]
+
+                row = self[display_index]
+                is_priority = row[5] is self._get_weight(True)
+
+                if updated_item == displayed_item:
+                    self.order_list[display_index] = updated_item
+                    self.update_item(row.iter, has_priority=is_priority)
+                    display_index += 1
+                    update_index += 1
+                else:
+                    self.remove(row.iter)
+
+            else:
+                itr = self.append(updated_item)
+                self.update_item(itr)
+                update_index += 1
+                display_index += 1
+
+        while display_index < len(self.order_list):
+                self.remove(self[display_index].iter)
+
     def update_order(self):
-        """Updates the display for
-        every menu item stored in
-        the displayed order.
+        """Updates each entry of the
+        displayed order to accurately
+        display the proper information
+        for each menu_item.
+
+        @note: This is akin to preforming
+        update_item for every item in the
+        entire order.
+
+        @return: None
         """
         itr = self.get_iter_first()
 
         while itr:
-            self.update_item(itr)
+            priority = self[itr][5] is self._get_weight(True)
+            self.update_item(itr, has_priority=priority)
             itr = self.iter_next(itr)
 
     def _dump(self):
@@ -646,7 +698,7 @@ class Orders(object):
         """
         if _check_order(self.current_order):
             order_list = self.current_order.order_list
-            return order_list
+            return copy(order_list)
     
     def get_selected(self):
         """Gets the selected MenuItem.
@@ -704,11 +756,17 @@ class Orders(object):
         if order_list is self.to_go_dict:
             key = key[0] + TOGO_SEPARATOR + key[1]
         
-        return key, self.current_order.order_list
+        return key, self.get_current_order()
 
     def confirm_order(self, priority_order=[]):
         """Set all MenuItems in the current order to
         confirmed
+
+        @keyword priority_order: list of MenuItem objects
+        that represents the priority order associated
+        with this confirmation.
+
+        @return: None
         """
         if _check_order(self.current_order):
 
@@ -718,13 +776,35 @@ class Orders(object):
                 raise RuntimeError(message)
 
             tree_iter = self.current_order.get_iter_first()
-            self.current_order.confirm_order(tree_iter, priority_order)
+            self.current_order.confirm_order(tree_iter, priority_order[:])
 
     def update_order(self):
         """Updates every item in the
         currently selected order.
+
+        @return: None
         """
         self.current_order.update_order()
+
+    def edit_order(self, edited_order):
+        """Edits the order so that the given
+        edited order is displayed in lieu of
+        the currently stored order.
+
+        Any attributes that are shared between
+        the edited order and current order will
+        remain. i,e. menu_item priority, or
+        same menu items displayed.
+
+        @param edited_order: list of MenuItem
+        objects that represents the order to
+        be updated. This order will replace the
+        currently stored order.
+
+        @return: None
+        """
+        order = self.current_order
+        order.edit_order(edited_order)
 
     def clear_order(self):
         """Clears the current order.
@@ -754,7 +834,7 @@ class Orders(object):
             
             for key, value in itr:
                 if value is self.current_order:
-                    return key, order_list
+                    return key, self.get_current_order()
         
         return None
 

@@ -39,7 +39,6 @@ class MenuItem(object):
     
     def __init__(self, name, price, stars=0, editable=True,
                  confirmed=False, option_choices={}):
-        
         self._name = name
         self._price = price
         self._option_choices = option_choices
@@ -183,3 +182,31 @@ class MenuItem(object):
         stored in the MenuItem
         """
         return str(self.__dict__)
+
+    def __eq__(self, other):
+        """Gets a bool representation of whether
+        this MenuItem is equal to another MenuItem
+        given
+
+        @param other: MenuItem object that is to
+        be checked if equal.
+
+        @return: bool value representing True if
+        the two items are considered equal, false
+        otherwise.
+        """
+        share_name = self._name is other._name
+        share_price = self._price is other._price
+        share_options = (self.options == other.options)
+        share_option_choices = (self.get_option_choices() == other.get_option_choices())
+        share_notes = self.notes is other.notes
+        share_stars = self.stars is other.stars
+        share_locked = self._locked is other._locked
+        share_editable = self.editable is other.editable
+        share_confirmed = self.confirmed is other.confirmed
+
+        equality_value = (share_name and share_price and share_options
+                          and share_option_choices and share_notes and share_stars
+                          and share_locked and share_editable and share_confirmed)
+
+        return equality_value

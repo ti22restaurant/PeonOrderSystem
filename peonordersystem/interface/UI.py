@@ -396,18 +396,43 @@ class UI(object):
         items in the selected order.
 
         @param args: wildcard catchall that represents the
-        button that called this method.
+        Gtk.Widget that called this method.
 
         @return: None
         """
         self.update_status('Waiting for comp confirmation...')
         current_order = self.orders.get_current_order()
-        confirmed = self.editor.comp_item_order(current_order, self.comp_confirm)
+        print current_order
+        confirmed = self.editor.comp_item_order(current_order, self.update_order)
 
         if confirmed:
             message = 'Selected menu items comped. Retrieving order.. done'
         else:
             message = 'Cancelling comp selection. Restoring order... done'
+        self.update_status(message)
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def discount_order(self, *args):
+        """Callback method when discount selection has been
+        clicked. This method instantiates a new dialog window
+        that allows the user to add and remove discount MenuItem
+        objects to the selected order.
+
+        @param args: wildcard catchall that is used to catch the
+        Gtk.Widget that called this method.
+
+        @return: None
+        """
+        self.update_status('Waiting for discount confirmation...')
+        current_order = self.orders.get_current_order()
+        print current_order
+        confirmed = self.editor.discount_item_order(current_order, self.edit_order)
+
+        if confirmed:
+            message = 'Applying Discounts... done'
+        else:
+            message = 'Cancelling discount selection. Restoring order... done'
         self.update_status(message)
 
     #===========================================================================
@@ -488,16 +513,36 @@ class UI(object):
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
-    def comp_confirm(self, comped_items_list):
-        """Callback Method that is called when the comp item
-        confirmation has been called and confirmed.
+    def update_order(self, updated_order=None):
+        """Callback Method that is called to update the
+        order with the given updated order.
 
-        @param comped_items_list: list of MenuItem objects
-        that are to be comped and displayed.
+        @keyword updated_order: list of MenuItem objects
+        that is the updated data. Default value is None
+        if the order is to be updated from currently
+        stored order.
 
         @return: None
         """
+        #updated_order may be used to display information
+        # at later time. order class doesn't require an
+        # argument to update it's order.
         self.orders.update_order()
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def edit_order(self, edited_order):
+        """Callback Method that is called to edit
+        the order with the given edited order.
+
+        @param edited_order: list of MenuItem objects
+        that is the edited order. This list will replace
+        the currently stored information in the order
+        object.
+
+        @return: None
+        """
+        self.orders.edit_order(edited_order)
 
     #===========================================================================
     # This block contains methods that are used for obtaining information
