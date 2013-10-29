@@ -2656,7 +2656,6 @@ class SplitCheckConfirmationDialog(CheckoutConfirmationDialog):
         order_copy = []
         for menu_item in order_list:
             menu_item = copy(menu_item)
-            menu_item.hash = hash(menu_item)
             order_copy.append(menu_item)
 
         self.checks_view = None
@@ -3101,11 +3100,11 @@ class SplitCheckConfirmationDialog(CheckoutConfirmationDialog):
         stored hash values.
 
         @param curr_list: list of MenuItem objects that
-        all contain values for MenuItem.hash
+        all contain values for MenuItem._hash
 
         @return: list of MenuItem objects that have been
-        sorted according to their MenuItem.hash values.
-        If two items shared the same MenuItem.hash value
+        sorted according to their MenuItem._hash values.
+        If two items shared the same MenuItem._hash value
         then they are combined. Increasing the price of
         that MenuItem by adding the two prices together.
         """
@@ -3156,14 +3155,14 @@ class SplitCheckConfirmationDialog(CheckoutConfirmationDialog):
                 first_item = list_one[first_index]
                 second_item = list_two[second_index]
 
-                if first_item.hash == second_item.hash:
+                if first_item._hash == second_item._hash:
                     first_item.edit_price(first_item.get_price() + second_item.get_price())
                     result.append(first_item)
                     first_index += 1
                     second_index += 1
                 else:
 
-                    if first_item.hash < second_item.hash:
+                    if first_item._hash < second_item._hash:
                         result.append(first_item)
                         first_index += 1
                     else:
@@ -3474,8 +3473,6 @@ class CompItemsOrderConfirmationDialog(OrderConfirmationDialog):
 
         @return: None
         """
-        comp_list = []
-
         model = self.tree_view.get_model()
         index = 0
         for row in model:
@@ -3490,19 +3487,14 @@ class CompItemsOrderConfirmationDialog(OrderConfirmationDialog):
                 row_child = child_itr.next()
                 message = row_child[0]
                 menu_item.comp(True, message)
-                comp_list.append(menu_item)
+                self.order_list[index] = menu_item
 
             elif menu_item.is_comped():
                 menu_item.comp(False, '')
 
             index += 1
 
-        #this is the potential return value that
-        # represents the menu items. This isnt
-        # necessary since the MenuItems themselves
-        # have been updated.
-        return_value = comp_list
-        self.confirm_func()
+        self.confirm_func(self.order_list)
 
 
 class AddDiscountCheckoutConfirmationDialog(CheckoutConfirmationDialog):
@@ -3779,7 +3771,7 @@ class AddDiscountCheckoutConfirmationDialog(CheckoutConfirmationDialog):
         order.
 
         @param args: wildcard catchall to catch
-        the widget that called this method.
+        the Gtk.Widget that called this method.
 
         @return:None
         """
@@ -3854,9 +3846,13 @@ class AddDiscountCheckoutConfirmationDialog(CheckoutConfirmationDialog):
         return Gtk.VBox()
 
     def confirm_data(self):
-        """
+        """Override Method.
 
-        @return:
+        Confirms the updated order list that
+        has has discount MenuItems added or
+        removed.
+
+        @return: None
         """
         self.confirm_func(self.order_list)
 
