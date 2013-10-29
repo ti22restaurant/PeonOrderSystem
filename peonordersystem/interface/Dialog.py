@@ -3791,6 +3791,7 @@ class AddDiscountCheckoutConfirmationDialog(CheckoutConfirmationDialog):
 
                 row = model[itr]
 
+                name = row[0] + ' '
                 data = round(row[2], 2)
                 is_percentage = row[3]
 
