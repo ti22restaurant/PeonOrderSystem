@@ -565,7 +565,7 @@ class ConfirmationDialog(Dialog):
 #=========================================================
 
 class AddReservationsDialog(Dialog):
-    """AddResdervationsDialog prompts the user with
+    """AddReservationsDialog prompts the user with
     a dialog window to insert a new reservation into
     the reservations list.
 
@@ -2129,6 +2129,45 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
         self.update_items(self.order_list, model=tree_model)
         return tree_model
 
+    def remove_selected_item(self, *args):
+        """Removes the selected MenuItem
+        from the display and the list.
+
+        @param args: wildcard catchall that is
+        used to catch the Gtk.Widget that called
+        this method.
+
+        @return: MenuItem object that was removed.
+        """
+        model, itr = self.get_selected()
+        path = model.get_path(itr)
+        index = path.get_indices()[0]
+        menu_item = self.order_list[index]
+
+        if not path == self.total_row_reference.get_path() and not menu_item.is_locked():
+            model.remove(itr)
+            self.order_list.pop(index)
+            self._update_check_total(-1 * menu_item.get_price())
+
+    def add_new_menu_item(self, menu_item):
+        """Adds the given MenuItem object to
+        the stored order_list and the checkout
+        display.
+
+        @param menu_item: MenuItem object that
+        is to be added to the order and display.
+
+        @return: None
+        """
+        self.order_list.append(menu_item)
+
+        name = menu_item.get_name()
+        price = menu_item.get_price()
+
+        model = self.tree_view.get_model()
+        added_itr = model.append(None, (name, str(price), True))
+        self._check_row_changed(added_itr)
+
     def _split_check_dialog(self, *args):
         """Private Method.
 
@@ -2165,12 +2204,14 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
         @return: None
         """
         model = self.tree_view.get_model()
-        total = CheckOperations.get_total(self.order_list)
+        total = CheckOperations.get_order_subtotal(self.order_list)
         
         path = self.total_row_reference.get_path()
         itr = model.get_iter(path)
         
         model[itr][1] = str(total)
+
+        print CheckOperations.get_order_subtotal(self.order_list)
         
         if added_itr != None:
             model.swap(added_itr, itr)
@@ -2210,15 +2251,20 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
         the tree_view and the Gtk.TreePaths are the paths that
         were selected.
         """
+
         selection = self.tree_view.get_selection()
-        model, paths = selection.get_selected_rows()
 
-        total_path = self.total_row_reference.get_path()
+        if selection.get_mode() == Gtk.SelectionMode.MULTIPLE:
+            model, paths = selection.get_selected_rows()
 
-        if total_path in paths:
-            paths.remove(total_path)
+            total_path = self.total_row_reference.get_path()
 
-        return model, paths
+            if total_path in paths:
+                paths.remove(total_path)
+
+            return model, paths
+        else:
+            return super(CheckoutConfirmationDialog, self).get_selected()
 
     def update_items(self, order_list, model=None):
         """Clears and populates the associated model
@@ -3362,13 +3408,13 @@ class CompItemsOrderConfirmationDialog(OrderConfirmationDialog):
                 if menu_item.has_options():
                     options = str(menu_item.options)[1:-1]
 
-                    row = (options, ) + info[1]
+                    row = (options, ) + info[1:]
                     tree_model.append(itr, row)
 
                 if menu_item.has_note():
                     note = menu_item.notes
 
-                    row = (note, ) + info[1]
+                    row = (note, ) + info[1:]
                     tree_model.append(itr, row)
 
     def comp_selected_item(self, *args):
@@ -3451,7 +3497,12 @@ class CompItemsOrderConfirmationDialog(OrderConfirmationDialog):
 
             index += 1
 
-        self.confirm_func(comp_list)
+        #this is the potential return value that
+        # represents the menu items. This isnt
+        # necessary since the MenuItems themselves
+        # have been updated.
+        return_value = comp_list
+        self.confirm_func()
 
 
 class AddDiscountCheckoutConfirmationDialog(CheckoutConfirmationDialog):
@@ -3519,9 +3570,19 @@ class AddDiscountCheckoutConfirmationDialog(CheckoutConfirmationDialog):
         """
         main_box = Gtk.HBox()
 
+        view_display_box = Gtk.VBox()
         checkout_order_box = super(AddDiscountCheckoutConfirmationDialog,
                                    self).generate_layout()
-        main_box.pack_start(checkout_order_box, True, True, 5.0)
+        view_display_box.pack_start(checkout_order_box, True, True, 5.0)
+        button_box = Gtk.HBox()
+        remove_button = Gtk.Button('Remove Item')
+        remove_button.connect('clicked', self.remove_selected_item)
+        remove_button.set_size_request(200, 50)
+        remove_button.set_can_focus(False)
+        button_box.pack_start(remove_button, False, False, 0.0)
+
+        view_display_box.pack_start(button_box, False, False, 0.0)
+        main_box.pack_start(view_display_box, True, True, 5.0)
 
         discount_properties_box = self.generate_properties_panel()
         main_box.pack_start(discount_properties_box, False, False, 5.0)
@@ -3604,6 +3665,7 @@ class AddDiscountCheckoutConfirmationDialog(CheckoutConfirmationDialog):
         #Generate items to be displayed
         adjustment = Gtk.Adjustment(0.00, -100.00 * 1000.00, 1000.00 * 100.00, 0.01, 1.00, 0)
         discount_select_dollars = Gtk.SpinButton(adjustment=adjustment)
+        discount_select_dollars.is_percentage = False
         discount_select_dollars.set_digits(2)
 
         discount_by_number_button = Gtk.RadioButton.new_with_label_from_widget(None, 'By Dollar Amount')
@@ -3625,6 +3687,7 @@ class AddDiscountCheckoutConfirmationDialog(CheckoutConfirmationDialog):
         #generate items to be displayed
         adjustment = Gtk.Adjustment(0.00, -100.00, 100.00, 0.01, 1.00, 0)
         discount_from_total = Gtk.SpinButton(adjustment=adjustment)
+        discount_from_total.is_percentage = True
         discount_from_total.set_digits(2)
         discount_from_total.set_sensitive(False)
         self.discount_input_areas.append(discount_from_total)
@@ -3727,9 +3790,46 @@ class AddDiscountCheckoutConfirmationDialog(CheckoutConfirmationDialog):
         message = message.strip()
 
         if len(message) > 0:
-            counter = 0
 
-            #TODO Add selected discount
+            data = None
+            is_percentage = None
+            name = 'Discount '
+
+            if self.discount_view.is_sensitive():
+                selection = self.discount_view.get_selection()
+
+                model, itr = selection.get_selected()
+
+                row = model[itr]
+
+                data = round(row[2], 2)
+                is_percentage = row[3]
+
+            else:
+                counter = 0
+                while not data and counter < len(self.discount_input_areas):
+                    display = self.discount_input_areas[counter]
+                    if display.is_sensitive():
+
+                        data = round(display.get_value(), 2)
+                        is_percentage = display.is_percentage
+                    print data
+                    counter += 1
+
+            if is_percentage:
+                price = round(CheckOperations.get_order_subtotal(self.order_list) * data / 100, 2)
+
+                name += str(data) + '%'
+            else:
+                price = data
+                name += '$' + str(price)
+
+            discount_item = MenuItem(name, -1 * price)
+            discount_item.editable = False
+            discount_item.confirmed = True
+            discount_item.notes = message
+
+            self.add_new_menu_item(discount_item)
 
     def generate_related_area(self):
         """Override Method.
@@ -3752,6 +3852,13 @@ class AddDiscountCheckoutConfirmationDialog(CheckoutConfirmationDialog):
         empty.
         """
         return Gtk.VBox()
+
+    def confirm_data(self):
+        """
+
+        @return:
+        """
+        self.confirm_func(self.order_list)
 
 
 #===========================================================
@@ -3814,11 +3921,13 @@ def ensure_top_level_item(model, tree_iter):
 if __name__ == '__main__':
     from peonordersystem.MenuItem import MenuItem
 
-    names = ['Carl','Lora','Mike','Fabian']
+    names = ['Carl', 'Lora', 'Mike', 'Fabian']
     order = []
 
     for name in names:
-        order.append(MenuItem(name, 10.0))
+        menu_item = MenuItem(name, 10.0)
+        menu_item.toggle_lock_menu_item()
+        order.append(menu_item)
 
     def confirm_func(d):
         print d
