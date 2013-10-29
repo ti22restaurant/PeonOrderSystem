@@ -232,11 +232,13 @@ class Editor(object):
 
         @param confirm_function:
 
-        @return:
+        @return: bool representing if the discount dialog window was
+        confirmed. True if the dialog was confirmed, False otherwise.
         """
         order_list = order_list
         response = self.confirm(order_list, Dialog.AddDiscountCheckoutConfirmationDialog,
                                 confirm_function)
+        return response
 
     #================================================================================
     # Methods in this block require special considerations when instantiating their

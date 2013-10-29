@@ -740,6 +740,12 @@ class Orders(object):
     def confirm_order(self, priority_order=[]):
         """Set all MenuItems in the current order to
         confirmed
+
+        @keyword priority_order: list of MenuItem objects
+        that represents the priority order associated
+        with this confirmation.
+
+        @return: None
         """
         if _check_order(self.current_order):
 
@@ -755,7 +761,10 @@ class Orders(object):
         """Updates every item in the
         currently selected order.
 
-        @keyword edited_order:
+        @param edited_order: list of MenuItem
+        objects that represents the order to
+        be updated. This order will replace the
+        currently stored order.
         """
         self.current_order.update_order(edited_order)
 

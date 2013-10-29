@@ -2210,8 +2210,6 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
         itr = model.get_iter(path)
         
         model[itr][1] = str(total)
-
-        print CheckOperations.get_order_subtotal(self.order_list)
         
         if added_itr != None:
             model.swap(added_itr, itr)
@@ -3080,7 +3078,6 @@ class SplitCheckConfirmationDialog(CheckoutConfirmationDialog):
 
                     current_check = self.check_dict[key]
                     curr_menu_item = current_check.pop(index)
-                    print curr_menu_item
 
                     menu_items.append(curr_menu_item)
                     check_model.remove(itr)
@@ -3805,7 +3802,6 @@ class AddDiscountCheckoutConfirmationDialog(CheckoutConfirmationDialog):
 
                         data = round(display.get_value(), 2)
                         is_percentage = display.is_percentage
-                    print data
                     counter += 1
 
             if is_percentage:
@@ -3912,21 +3908,3 @@ def ensure_top_level_item(model, tree_iter):
     if parent_iter:
         return ensure_top_level_item(model, parent_iter)
     return tree_iter
-
-
-if __name__ == '__main__':
-    from peonordersystem.MenuItem import MenuItem
-
-    names = ['Carl', 'Lora', 'Mike', 'Fabian']
-    order = []
-
-    for name in names:
-        menu_item = MenuItem(name, 10.0)
-        menu_item.toggle_lock_menu_item()
-        order.append(menu_item)
-
-    def confirm_func(d):
-        print d
-
-    dialog = AddDiscountCheckoutConfirmationDialog(None, confirm_func, order)
-    dialog.run_dialog()

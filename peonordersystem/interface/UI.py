@@ -524,7 +524,6 @@ class UI(object):
 
         @return: None
         """
-        print updated_order
         self.orders.update_order(updated_order)
 
     #===========================================================================
