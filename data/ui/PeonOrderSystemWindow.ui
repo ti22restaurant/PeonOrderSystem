@@ -50,6 +50,18 @@
                                 <signal name="activate" handler="update_menu_items" swapped="no"/>
                               </object>
                             </child>
+                            <child>
+                              <object class="GtkImageMenuItem" id="menuitem7">
+                                <property name="label" translatable="yes">Update Discount Templates</property>
+                                <property name="use_action_appearance">False</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="image">image6</property>
+                                <property name="use_stock">False</property>
+                                <property name="always_show_image">True</property>
+                                <signal name="activate" handler="update_discount_templates" swapped="no"/>
+                              </object>
+                            </child>
                           </object>
                         </child>
                       </object>
@@ -894,5 +906,11 @@ the selected menu item.</property>
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-fullscreen</property>
+  </object>
+  <object class="GtkImage" id="image6">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-fullscreen</property>
+    <property name="icon-size">5</property>
   </object>
 </interface>
