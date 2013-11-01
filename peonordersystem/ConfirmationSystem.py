@@ -119,7 +119,8 @@ def order_confirmed(order_name, priority_list,
     is included for purposes of printing and retrieving
     accurate data.
     """
-    # TODO send priority_list, order_list to kitchen
+    print_order(order_name, non_priority_list,
+                priority_list=priority_list)
 
     curr_directory = directory + 'confirmed/'
     order_name = standardize_confirm_file_name(order_name)
@@ -172,10 +173,32 @@ def checkout_confirmed(order_name, orders, order_list):
     obj_info = jsonpickle.encode(order_list)
     curr_file.write(obj_info)
 
+    counter = 0
     for order in orders:
-        # TODO send order to checkout printer
-        print order
-        pass
+        counter += 1
+        print_check(order_name + str(counter), order)
+
+
+def print_order(order_name, order_list, priority_list=[]):
+    """
+
+    @param order_name:
+    @param order_list:
+    @return:
+    """
+    #TODO print order to order printer
+    pass
+
+
+def print_check(order_name, order_list):
+    """
+
+    @param order_name:
+    @param order_list:
+    @return:
+    """
+    #TODO send order to checkout printer
+    pass
 
 
 def unpack_information(curr_directory):
