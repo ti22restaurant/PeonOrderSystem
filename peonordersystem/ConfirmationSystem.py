@@ -179,23 +179,41 @@ def checkout_confirmed(order_name, orders, order_list):
         print_check(order_name + str(counter), order)
 
 
-def print_order(order_name, order_list, priority_list=[]):
-    """
+def print_order(order_name, order_list, priority_list=None):
+    """Send the given order to the order
+    printer. If given a priority order the
+    priority order is given special priority
+    status and printed first. The remaining
+    order is printed last.
 
-    @param order_name:
-    @param order_list:
-    @return:
+    @param order_name: str representation of
+    the order.
+
+    @param order_list: list of MenuItem objects
+    that represents the order to be sent to the
+    order printer.
+
+    @keyword priority_list: list of MenuItem
+    objects that represents the priority order to
+    be sent to the order printer.
+
+    @return: None
     """
     #TODO print order to order printer
     pass
 
 
 def print_check(order_name, order_list):
-    """
+    """Send the given order to the check
+    printer.
 
-    @param order_name:
-    @param order_list:
-    @return:
+    @param order_name: str representation
+    of the orders name
+
+    @param order_list: list of MenuItem objects
+    that is to be printed to the check printer.
+
+    @return: None
     """
     #TODO send order to checkout printer
     pass

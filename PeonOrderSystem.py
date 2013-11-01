@@ -80,8 +80,13 @@ class PeonOrderSystem(UI):
     def initiate_response_dialog(self, response_type):
         """Override Method
 
-        @param response_type:
-        @return:
+        initiates the appropriate response
+        to the dialog response_type emitted.
+
+        @param response_type: int constants
+        that are defined in the Editor module.
+
+        @return: None
         """
         if response_type == Editor.PRINT_RESPONSE:
             self.print_check_info()
