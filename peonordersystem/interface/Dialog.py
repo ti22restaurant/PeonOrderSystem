@@ -2138,14 +2138,15 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
         @return: MenuItem object that was removed.
         """
         model, itr = self.get_selected()
-        path = model.get_path(itr)
-        index = path.get_indices()[0]
-        menu_item = self.order_list[index]
+        if itr:
+            path = model.get_path(itr)
+            index = path.get_indices()[0]
+            menu_item = self.order_list[index]
 
-        if not path == self.total_row_reference.get_path() and not menu_item.is_locked():
-            model.remove(itr)
-            self.order_list.pop(index)
-            self._update_check_total(-1 * menu_item.get_price())
+            if not path == self.total_row_reference.get_path() and not menu_item.is_locked():
+                model.remove(itr)
+                self.order_list.pop(index)
+                self._update_check_total(-1 * menu_item.get_price())
 
     def add_new_menu_item(self, menu_item):
         """Adds the given MenuItem object to
@@ -4030,7 +4031,9 @@ class UpdateTemplateDiscountCheckoutConfirmationDialog(DiscountCheckoutConfirmat
         @return: None
         """
         model, itr = self.get_selected()
-        model.remove(itr)
+
+        if itr:
+            model.remove(itr)
 
     def confirm_data(self):
         """Override Method.
