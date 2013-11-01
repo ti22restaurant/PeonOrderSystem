@@ -426,8 +426,10 @@ class UI(object):
         """
         self.update_status('Waiting for discount confirmation...')
         current_order = self.orders.get_current_order()
-        print current_order
-        confirmed = self.editor.discount_item_order(current_order, self.edit_order)
+        discount_templates = Builder.get_discount_templates_data()
+        print discount_templates
+        confirmed = self.editor.discount_item_order(current_order, self.edit_order,
+                                                    discount_templates)
 
         if confirmed:
             message = 'Applying Discounts... done'
@@ -619,6 +621,29 @@ class UI(object):
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
+    def update_discount_templates(self, *args):
+        """This method is called when the associated
+        widget is pressed. This method displays a dialog
+        window that the user can interact with to update
+        the stored discount templates.
+
+        @param args: wildcard catchall that is used to
+        catch the Gtk.Widget that called this method.
+
+        @return: None
+        """
+        discount_templates = Builder.get_discount_templates_data()
+
+        self.update_status('Awaiting editing of raw Discount Templates...')
+        response = self.editor.update_discount_templates(self.dump_discount_templates,
+                                                         discount_templates)
+        if response:
+            self.update_status('Edited Discount templates.')
+        else:
+            self.update_status('Cancelled Discount templates update.')
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def dump_updated_menu_data(self, updated_menu_data):
         """Callback Method.
 
@@ -633,6 +658,22 @@ class UI(object):
         @return: None
         """
         Builder.update_menu_items_data(updated_menu_data)
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def dump_discount_templates(self, updated_discount_templates):
+        """Callback Method.
+
+        Called when the discount template data has been updated.
+        This method is used to call the associated methods to
+        dump the updated discount templates.
+
+        @param updated_discount_templates: list fo tuples that
+        represents discount templates.
+
+        @return: None
+        """
+        Builder.update_discount_templates_data(updated_discount_templates)
 
     def _dump(self):
         """Dumps the information regarding the

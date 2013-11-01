@@ -218,28 +218,6 @@ class Editor(object):
 
         return response == Gtk.ResponseType.ACCEPT
 
-    def discount_item_order(self, order_list, confirm_function):
-        """Calls the discount item confirmation dialog on the
-        given order list. This confirmation dialog allows the
-        user to edit the given order by opening a new dialog
-        window through which the user may add 'discount' MenuItems
-        and apply them to the order via confirmation. If confirmed
-        this dialog calls the given confirm function with the
-        first argument as a list fo MenuItems that represents the
-        newly adjusted order list.
-
-        @param order_list:
-
-        @param confirm_function:
-
-        @return: bool representing if the discount dialog window was
-        confirmed. True if the dialog was confirmed, False otherwise.
-        """
-        order_list = order_list
-        response = self.confirm(order_list, Dialog.AddDiscountCheckoutConfirmationDialog,
-                                confirm_function)
-        return response
-
     #================================================================================
     # Methods in this block require special considerations when instantiating their
     # dialog windows and as such cannot be run with the generic editor/confirmer
@@ -260,6 +238,37 @@ class Editor(object):
         dialog = Dialog.OrderSelectionConfirmationDialog(self.parent, confirm_function,
                                                          name_list)
         return dialog.run_dialog() == Gtk.ResponseType.ACCEPT
+
+    def discount_item_order(self, order_list, confirm_function, discount_templates):
+        """Calls the discount item confirmation dialog on the
+        given order list. This confirmation dialog allows the
+        user to edit the given order by opening a new dialog
+        window through which the user may add 'discount' MenuItems
+        and apply them to the order via confirmation. If confirmed
+        this dialog calls the given confirm function with the
+        first argument as a list fo MenuItems that represents the
+        newly adjusted order list.
+
+        @param order_list: list of MenuItem objects that represents
+        the order to be operated on.
+
+        @param confirm_function: function that is to be called if
+        the dialog window receives confirmation.
+
+        @param discount_templates: list of tuple that represents
+        the stored discount template information.
+
+        @return: bool representing if the discount dialog window was
+        confirmed. True if the dialog was confirmed, False otherwise.
+        """
+        if order_check(order_list):
+
+            dialog = Dialog.DiscountCheckoutConfirmationDialog(self.parent, confirm_function,
+                                                               order_list, discount_templates)
+            response = dialog.run_dialog()
+            return response == Gtk.ResponseType.ACCEPT
+
+        return False
     
     def add_new_reservation(self, confirm_function):
         """Calls a dialog window to add a new reservation to
@@ -296,6 +305,28 @@ class Editor(object):
         dialog = Dialog.UpdateMenuItemsDialog(self.parent, menu_data,
                                               confirm_func)
         return dialog.run_dialog() == Gtk.ResponseType.ACCEPT
+
+    def update_discount_templates(self, confirm_function, discount_templates):
+        """Calls a dialog window that allows the user to edit
+        the stored discount templates data file that the UI
+        uses to generate the discount templates available during
+        the discount selection dialog. Runs dialog via this method.
+
+        @param confirm_function: function that is to be called upon
+        confirmation of the dialog window.
+
+        @param discount_templates: list of tuple that represents the
+        discount templates that is stored and to be updated.
+
+        @return: bool value representing if the templates updating was
+        confirmed or not.
+        """
+        dialog = Dialog.UpdateTemplateDiscountCheckoutConfirmationDialog(self.parent,
+                                                                         confirm_function,
+                                                                         discount_templates)
+        response = dialog.run_dialog()
+        return response == Gtk.ResponseType.ACCEPT
+
 
 #===========================================================================
 # This block contains functions that are called as conditionals to
