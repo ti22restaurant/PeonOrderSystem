@@ -13,6 +13,14 @@ from peonordersystem.interface import Dialog
 from peonordersystem import ErrorLogger
 from peonordersystem.CustomExceptions import InvalidItemError, InvalidOrderError
 
+PRINT_RESPONSE = Dialog.PRINT_DIALOG_RESPONSE
+COMP_RESPONSE = Dialog.COMP_DIALOG_RESPONSE
+DISCOUNT_RESPONSE = Dialog.DISCOUNT_DIALOG_RESPONSE
+SPLIT_CHECK_RESPONSE = Dialog.SPLIT_CHECK_DIALOG_RESPONSE
+
+ACCEPT_RESPONSE = Gtk.ResponseType.ACCEPT
+REJECT_RESPONSE = Gtk.ResponseType.REJECT
+
 @ErrorLogger.error_logging
 class Editor(object):
     """Editor performs the control functionality
@@ -187,11 +195,25 @@ class Editor(object):
         """
         response = self.confirm(order_list, Dialog.CheckoutConfirmationDialog,
                                 confirm_function)
+        print response
+        return response
 
-        if response == Dialog.SPLIT_CHECK_DIALOG_RESPONSE:
+    def split_check_order(self, order_list, confirm_function):
+        """Calls the split confirmation dialog on the given
+        order list. If confirmed this dialog calls the given
+        confirmation function.
 
-            response = self.confirm(order_list, Dialog.SplitCheckConfirmationDialog,
-                                    confirm_function)
+        @param order_list: list of MenuItem objects that represents
+        the MenuItems to be split.
+
+        @param confirm_function: function that is to be called when
+        the split check confirmation occurs.
+
+        @return: bool representing of the dialog window was confirmed
+        or cancelled. True for confirmed, False for cancelled.
+        """
+        response = self.confirm(order_list, Dialog.SplitCheckConfirmationDialog,
+                                confirm_function)
         return response == Gtk.ResponseType.ACCEPT
 
     def comp_item_order(self, order_list, confirm_function):
