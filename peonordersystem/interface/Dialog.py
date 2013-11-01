@@ -60,6 +60,9 @@ STANDARD_TEXT = 500
 STANDARD_TEXT_BOLD = 850
 
 SPLIT_CHECK_DIALOG_RESPONSE = 99
+PRINT_DIALOG_RESPONSE = 98
+COMP_DIALOG_RESPONSE = 97
+DISCOUNT_DIALOG_RESPONSE = 96
 
 #=========================================================
 # This block represents windows that form the
@@ -2081,14 +2084,36 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
         buttons associated with the functionality
         for this dialog.
         """
-        sub_box = Gtk.HBox()
+        button_box = Gtk.HBox()
 
+        left_side_box = Gtk.VBox()
         button = Gtk.Button("SPLIT CHECK")
-        button.set_size_request(200, 20)
-        button.connect('clicked', self._split_check_dialog)
-        sub_box.pack_start(button, False, False, 0)
+        button.set_size_request(200, 35)
+        button.connect('clicked', self._emit_dialog_response, SPLIT_CHECK_DIALOG_RESPONSE)
+        left_side_box.pack_start(button, False, False, 5.0)
 
-        return sub_box
+        button = Gtk.Button("COMP ITEM")
+        button.set_size_request(200, 35)
+        button.connect('clicked', self._emit_dialog_response, COMP_DIALOG_RESPONSE)
+        left_side_box.pack_start(button, False, False, 5.0)
+
+        button = Gtk.Button("ADD DISCOUNT")
+        button.set_size_request(200, 35)
+        button.connect('clicked', self._emit_dialog_response, DISCOUNT_DIALOG_RESPONSE)
+        left_side_box.pack_start(button, False, False, 5.0)
+
+        button_box.pack_start(left_side_box, False, False, 5.0)
+
+        right_side_box = Gtk.VBox()
+
+        button = Gtk.Button('Print Check')
+        button.set_size_request(200, 35)
+        button.connect('clicked', self._emit_dialog_response, PRINT_DIALOG_RESPONSE)
+        right_side_box.pack_start(button, False, False, 0)
+
+        button_box.pack_end(right_side_box, False, False, 0.0)
+
+        return button_box
 
     def generate_columns(self):
         """Generates the columns used to
@@ -2167,20 +2192,26 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
         added_itr = model.append(None, (name, str(price), True))
         self._check_row_changed(added_itr)
 
-    def _split_check_dialog(self, *args):
+    def _emit_dialog_response(self, widget, response_type):
         """Private Method.
 
-        Called when the split check button has
-        been pressed. This method eliminates
-        the current dialog and emits the
-        appropriate response.
+        Called when a button is pressed that
+        causes a new dialog window to be opened.
+        This method emits the signal to notify
+        whatever program called this dialog that
+        it requires a different type of dialog window.
 
-        @param args: wildcard catchall to catch
-        the Gtk.Widget that called this method.
+        @param widget: Gtk.Widget that called this
+        method.
+
+        @param response_type: int representing
+        the associated response type constant that
+        is associated with which dialog response
+        should be emitted.
 
         @return: None
         """
-        self.dialog.response(SPLIT_CHECK_DIALOG_RESPONSE)
+        self.dialog.response(response_type)
         self.dialog.destroy()
 
     def confirm_data(self):

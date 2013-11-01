@@ -14,7 +14,7 @@ import copy
 from peonordersystem.interface import Builder
 from peonordersystem.interface.Orders import Orders
 from peonordersystem.interface.Reservations import Reservations
-from peonordersystem.interface.Editor import Editor
+from peonordersystem.interface import Editor
 from peonordersystem.interface.UpcomingOrders import UpcomingOrders
 from peonordersystem import ErrorLogger
 from peonordersystem import CustomExceptions
@@ -123,7 +123,7 @@ class UI(object):
                                               load_data=load_data)
         
         # These objects control dialog windows.
-        self.editor = Editor(self.builder.window)
+        self.editor = Editor.Editor(self.builder.window)
         self.update_status('Awaiting input...')
     
     #===========================================================================
@@ -335,6 +335,26 @@ class UI(object):
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
+    def initiate_response_dialog(self, response_type):
+        """Initiates a new dialog window based on the
+        response type provided.
+
+        @param response_type: int representing a
+        ResponseType defined as a constant in the
+        Editor module
+
+        @return: None
+        """
+        if response_type == Editor.COMP_RESPONSE:
+            self.comp_order()
+        elif response_type == Editor.SPLIT_CHECK_RESPONSE:
+            self.split_check_order()
+        elif response_type == Editor.DISCOUNT_RESPONSE:
+            self.discount_order()
+
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def confirm_order(self, *args):  # @IGNORE:W0613
         """Callback method when confirm order button has been
         clicked. This method instantiates a new dialog window
@@ -364,13 +384,36 @@ class UI(object):
         """
         self.update_status('Waiting for checkout confirmation...')
         current_order = self.orders.get_current_order()
-        confirmed = self.editor.checkout_order(current_order, self.checkout_confirm)
+        response = self.editor.checkout_order(current_order, self.checkout_confirm)
+
+        if response == Editor.ACCEPT_RESPONSE:
+            self.update_status('Checking out table. Clearing order... done')
+        elif response == Editor.REJECT_RESPONSE:
+            self.update_status('Cancelling checkout. Restoring order... done')
+        else:
+            self.initiate_response_dialog(response)
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def split_check_order(self, *args):
+        """Calls the split check order method to
+        allow the user to perform a split check order.
+        Upon confirmation performs a checkout of the order.
+
+        @param args: wildcard catchall used to catch the
+        Gtk.Widget that called this method.
+
+        @return: None
+        """
+        self.update_status('Waiting for split check confirmation...')
+        current_order = self.orders.get_current_order()
+        confirmed = self.editor.split_check_order(current_order,
+                                                  self.checkout_confirm)
 
         if confirmed:
-            message = 'Checking out table. Clearing order... done'
+            self.update_status('Splitting Checking... Clearing order')
         else:
-            message = 'Cancelling checkout. Restoring order... done'
-        self.update_status(message)
+            self.update_status('Cancelled checkout... Retrieving order')
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
@@ -402,7 +445,6 @@ class UI(object):
         """
         self.update_status('Waiting for comp confirmation...')
         current_order = self.orders.get_current_order()
-        print current_order
         confirmed = self.editor.comp_item_order(current_order, self.update_order)
 
         if confirmed:
@@ -427,7 +469,6 @@ class UI(object):
         self.update_status('Waiting for discount confirmation...')
         current_order = self.orders.get_current_order()
         discount_templates = Builder.get_discount_templates_data()
-        print discount_templates
         confirmed = self.editor.discount_item_order(current_order, self.edit_order,
                                                     discount_templates)
 

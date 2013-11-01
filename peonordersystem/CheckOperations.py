@@ -50,4 +50,3 @@ def get_total(order_list):
     """
     sub_total = get_order_subtotal(order_list)
     return sub_total + get_total_tax(sub_total)
-    

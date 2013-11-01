@@ -19,6 +19,7 @@ from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 # as the one that PeonOrderSystem object is placed in.
 
 from peonordersystem import path  # IGNORE:W0611
+from peonordersystem.interface import Editor
 from peonordersystem.interface.UI import UI
 from peonordersystem import ConfirmationSystem
 from peonordersystem import ErrorLogger
@@ -75,6 +76,36 @@ class PeonOrderSystem(UI):
         """
         order_name, order_list = super(PeonOrderSystem, self).checkout_confirm()
         ConfirmationSystem.checkout_confirmed(order_name, order, order_list)
+
+    def initiate_response_dialog(self, response_type):
+        """Override Method
+
+        initiates the appropriate response
+        to the dialog response_type emitted.
+
+        @param response_type: int constants
+        that are defined in the Editor module.
+
+        @return: None
+        """
+        if response_type == Editor.PRINT_RESPONSE:
+            self.print_check_info()
+        else:
+            super(PeonOrderSystem, self).initiate_response_dialog(response_type)
+
+    def print_check_info(self):
+        """Calls the ConfirmationSystem function that
+        prints the check information associated with
+        the given order.
+
+        This performs the same operation as checking
+        out the check, except it doesn't clear the checks
+        data. This is so that it can be accessed again.
+
+        @return: None
+        """
+        order_name, order_list = self.get_order_info()
+        ConfirmationSystem.print_check(order_name, order_list)
     
 if __name__ == '__main__':
     
