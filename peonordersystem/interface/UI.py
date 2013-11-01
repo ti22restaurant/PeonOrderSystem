@@ -385,7 +385,6 @@ class UI(object):
         self.update_status('Waiting for checkout confirmation...')
         current_order = self.orders.get_current_order()
         response = self.editor.checkout_order(current_order, self.checkout_confirm)
-        print response
 
         if response == Editor.ACCEPT_RESPONSE:
             self.update_status('Checking out table. Clearing order... done')
@@ -446,7 +445,6 @@ class UI(object):
         """
         self.update_status('Waiting for comp confirmation...')
         current_order = self.orders.get_current_order()
-        print current_order
         confirmed = self.editor.comp_item_order(current_order, self.update_order)
 
         if confirmed:
@@ -471,7 +469,6 @@ class UI(object):
         self.update_status('Waiting for discount confirmation...')
         current_order = self.orders.get_current_order()
         discount_templates = Builder.get_discount_templates_data()
-        print discount_templates
         confirmed = self.editor.discount_item_order(current_order, self.edit_order,
                                                     discount_templates)
 

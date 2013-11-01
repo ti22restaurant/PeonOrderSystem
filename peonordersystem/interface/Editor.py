@@ -169,7 +169,6 @@ class Editor(object):
         @return: bool representing if the dialog window was confirmed
         or cancelled. True for confirmed, False for cancelled.
         """
-
         order_list = get_unconfirmed_order(order_list)
 
         response = self.confirm(order_list, Dialog.OrderConfirmationDialog,
@@ -195,7 +194,6 @@ class Editor(object):
         """
         response = self.confirm(order_list, Dialog.CheckoutConfirmationDialog,
                                 confirm_function)
-        print response
         return response
 
     def split_check_order(self, order_list, confirm_function):

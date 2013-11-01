@@ -142,9 +142,11 @@ def remove_order_confirmed_file(order_name):
     """
     curr_directory = directory + 'confirmed/'
     order_name = standardize_confirm_file_name(order_name)
-    
-    os.remove(curr_directory + order_name)
 
+    f_name = curr_directory + order_name
+
+    if os.path.isfile(f_name):
+        os.remove(curr_directory + order_name)
 
 def checkout_confirmed(order_name, orders, order_list):
     """Generates the necessary checkout files
@@ -173,10 +175,8 @@ def checkout_confirmed(order_name, orders, order_list):
     obj_info = jsonpickle.encode(order_list)
     curr_file.write(obj_info)
 
-    counter = 0
     for order in orders:
-        counter += 1
-        print_check(order_name + str(counter), order)
+        print_check(order_name, order)
 
 
 def print_order(order_name, order_list, priority_list=None):
@@ -200,6 +200,13 @@ def print_order(order_name, order_list, priority_list=None):
     @return: None
     """
     #TODO print order to order printer
+    print 'TO ORDER'
+    print order_name
+    if priority_list:
+        print priority_list
+
+    print order_list
+    print ''
     pass
 
 
@@ -216,6 +223,10 @@ def print_check(order_name, order_list):
     @return: None
     """
     #TODO send order to checkout printer
+    print 'TO CHECK'
+    print order_name
+    print order_list
+    print''
     pass
 
 
