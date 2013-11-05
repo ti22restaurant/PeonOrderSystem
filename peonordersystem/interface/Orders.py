@@ -753,7 +753,7 @@ class Orders(object):
         """
         key, order_list = self._get_order_key()
         
-        if order_list is self.to_go_dict:
+        if key in self.to_go_dict:
             key = key[0] + TOGO_SEPARATOR + key[1]
         
         return key, self.get_current_order()
