@@ -77,6 +77,27 @@ class PeonOrderSystem(UI):
         order_name, order_list = super(PeonOrderSystem, self).checkout_confirm()
         ConfirmationSystem.checkout_confirmed(order_name, order, order_list)
 
+    def undo_checkout_order(self, *args):
+        """Override Method
+
+        This method is called whenever the
+        associated widget is clicked. This method
+        obtains the stored checked out order data
+        and initiates the requisite dialog window
+        that allows the user to interact with, and
+        retrieve stored orders that were previously
+        checked out.
+
+        @param args: wildcard catchall that is used
+        to catch the Gtk.Widget that called this
+        method.
+
+        @return: None
+        """
+        load_data = ConfirmationSystem.unpack_checkout_data()
+        print load_data
+        super(PeonOrderSystem, self).undo_checkout_order(load_data)
+
     def initiate_response_dialog(self, response_type):
         """Override Method
 
