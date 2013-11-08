@@ -26,12 +26,14 @@ where changes are made that would
 
 from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 
-from copy import deepcopy, copy
+from copy import copy
 from peonordersystem.MenuItem import MenuItem
 from peonordersystem import ErrorLogger
 from peonordersystem.ConfirmationSystem import TOGO_SEPARATOR
 from peonordersystem import CustomExceptions
-from peonordersystem.interface.Dialog import STANDARD_TEXT, STANDARD_TEXT_BOLD, STANDARD_TEXT_LIGHT
+from peonordersystem.Settings import STANDARD_TEXT, STANDARD_TEXT_BOLD, \
+    STANDARD_TEXT_LIGHT, MENU_ITEM_CONFIRMED_COLOR_HEXADECIMAL, \
+    MENU_ITEM_NON_CONFIRMED_COLOR_HEXADECIMAL
 
 import time
 
@@ -47,7 +49,7 @@ class OrderTreeView(Gtk.TreeView):
     """
     
     def __init__(self):  # @IGNORE:E1002
-        """Initalizes a new OrderTreeView
+        """Initializes a new OrderTreeView
         object. All columns are generated and added
         to the OrderTreeView object via this method.
         
@@ -63,7 +65,7 @@ class OrderTreeView(Gtk.TreeView):
     
     def _generate_columns(self, wrap_width=250,
                          col_names=('Menu Items', 'Stars', 'Notes')):
-        """Genertes the columns to be stored in the OrderTreeView
+        """Generates the columns to be stored in the OrderTreeView
         object.
         
         @param wrap_width: keyword argument that represents the
@@ -251,9 +253,9 @@ class OrderStore(Gtk.TreeStore):
         """
         if is_confirmed:
             # Hexadecimal GRAY
-            return '#999999'
+            return MENU_ITEM_CONFIRMED_COLOR_HEXADECIMAL
         # Hexadecimal BLACK
-        return '#000000'
+        return MENU_ITEM_NON_CONFIRMED_COLOR_HEXADECIMAL
 
     def _get_weight(self, has_priority):
         """Private Method.
@@ -555,11 +557,8 @@ class Orders(object):
     order.
     """
     
-    def __init__(self, parent, load_data=None, num_of_tables=10):
+    def __init__(self, load_data=None, num_of_tables=10):
         """Initializes and creates the Orders object.
-        
-        @param parent: Gtk.Container subclass from
-        which the TreeView will be displayed.
         
         @keyword load_data: represents the data that the
         orders should be loaded from. This is either None
@@ -571,7 +570,6 @@ class Orders(object):
         of tables for orders to be generated for.
         """
         self.tree_view = OrderTreeView()
-        parent.add(self.tree_view)
         
         self.orders_dict = {}
         for num in range(num_of_tables):
@@ -585,6 +583,16 @@ class Orders(object):
         
         if load_data is not None and type(load_data) is tuple:
             self._load_data(load_data)
+
+    def get_display_view(self):
+        """ Gets the display_view associated
+        with the Orders object.
+
+        @return: Gtk.TreeView that is used
+        by the Orders object to display the
+        information stored.
+        """
+        return self.tree_view
 
     def _load_data(self, load_data):
         """Loads the data from the files, and
@@ -600,14 +608,8 @@ class Orders(object):
         
         for table in table_orders:
 
-            if table not in self.orders_dict:
-                self.orders_dict[table] = OrderStore()
-                
-            self.current_order = self.orders_dict[table]
-
-            for menu_item in table_orders[table]:
-                itr = self.current_order.append(menu_item)
-                self.current_order.update_item(itr)
+            self.load_new_order(table, table_orders[table],
+                                is_table=True)
         
         for togo_name in togo_orders:
 
@@ -617,15 +619,42 @@ class Orders(object):
             curr_time = time.strftime('%X, %A, %m/%y')
             
             key = (name, number, curr_time)
-            
-            self.select_togo_order(key)
-            load_order = togo_orders[togo_name]
-            
-            for menu_item in load_order:
-                self.current_order.append(menu_item)
+
+            self.load_new_order(key, togo_orders[togo_name],
+                                is_table=False)
         
         self.current_order = None
         self._set_model()
+
+    def load_new_order(self, key, order_info, is_table=False):
+        """Loads the given order into the object under the given
+        key. Replaces the key if it already exists.
+
+        @param key: str or tuple that represents the table if
+        the is_table keyword is True, tuple expected for key
+        if is_table keyword is False
+
+        @param order_info: list of MenuItem objecs that
+        represents the order to be added.
+
+        @keyword is_table: bool value representing if
+        the order should be displayed as a table or as
+        a togo order.
+
+        @return: None
+        """
+        if is_table:
+            order_dict = self.orders_dict
+            key = str(key)
+        else:
+            order_dict = self.to_go_dict
+
+        order_dict[key] = OrderStore()
+        order = order_dict[key]
+
+        for menu_item in order_info:
+            itr = order.append(menu_item)
+            order.update_item(itr)
 
     def _get_selected_iter(self):
         """Private Method.
@@ -648,14 +677,23 @@ class Orders(object):
 
         return itr
         
-    def get_togo_orders(self):
-        """Gets a list of the current togo orders.
+    def get_togo_orders_keys(self):
+        """Gets a list of the current togo
+        orders keys.
         
         @return: list of 3-tuples where each entry
         represents a togo order. Each 3-tuple is
         of the form (str, str, str) = (name, number, time)
         """
         return self.to_go_dict.keys()
+
+    def get_orders_keys(self):
+        """Get a list of current orders keys.
+
+        @return: list of str where each entry
+        represents a order.
+        """
+        return self.orders_dict.keys()
     
     def select_togo_order(self, key):
         """Selects the given 3-tuple which represents
@@ -814,8 +852,8 @@ class Orders(object):
         """
         if _check_order(self.current_order):
             found_key, order_list = self._get_order_key()
-            if order_list is self.to_go_dict:
-                del order_list[found_key]
+            if found_key in self.to_go_dict:
+                del self.to_go_dict[found_key]
             self.current_order.clear()
             self.current_order = None
             self._set_model()
