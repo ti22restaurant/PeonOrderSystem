@@ -613,12 +613,15 @@ class Orders(object):
         
         for togo_name in togo_orders:
 
-            name, number = togo_name.split(TOGO_SEPARATOR)
+            if TOGO_SEPARATOR in togo_name:
+                name, number = togo_name.split(TOGO_SEPARATOR)
 
-            # standard Dialog generated time format.
-            curr_time = time.strftime('%X, %A, %m/%y')
-            
-            key = (name, number, curr_time)
+                # standard Dialog generated time format.
+                curr_time = time.strftime('%X, %A, %m/%y')
+
+                key = (name, number, curr_time)
+            else:
+                key = togo_name
 
             self.load_new_order(key, togo_orders[togo_name],
                                 is_table=False)
@@ -645,7 +648,7 @@ class Orders(object):
         """
         if is_table:
             order_dict = self.orders_dict
-            key = str(key)
+            key = key
         else:
             order_dict = self.to_go_dict
 
@@ -677,7 +680,7 @@ class Orders(object):
 
         return itr
         
-    def get_togo_orders_keys(self):
+    def get_togo_orders_list(self):
         """Gets a list of the current togo
         orders keys.
         
@@ -687,7 +690,7 @@ class Orders(object):
         """
         return self.to_go_dict.keys()
 
-    def get_orders_keys(self):
+    def get_orders_list(self):
         """Get a list of current orders keys.
 
         @return: list of str where each entry
@@ -718,7 +721,7 @@ class Orders(object):
         """Sets the current table and order considered
         to the given value.
         
-        @param num: int value representing the selected
+        @param table: int value representing the selected
         table
         """
         if table not in self.orders_dict:

@@ -1538,7 +1538,7 @@ class UndoCheckoutDialog(Dialog):
         selection = self.orders_view.get_selection()
         selection.set_select_function(self.update_item_view, None)
 
-        for key in self.orders.get_orders_keys():
+        for key in self.orders.get_orders_list():
             model.append((key[0], key[1]))
 
         rend = Gtk.CellRendererText()
@@ -1744,6 +1744,9 @@ class UndoCheckoutDialog(Dialog):
 
         if len(name) > 0:
             curr_name, curr_order = self.orders.get_order_info()
+            print curr_name
+            print curr_order
+            print type(curr_name)
 
             model = self.imported_view.get_model()
             has_entry = False
