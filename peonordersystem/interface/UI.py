@@ -114,8 +114,8 @@ class UI(object):
         self.builder.connect_signals(self)
         
         # These objects control the main orders and their displays
-        self.orders = Orders(self.builder.order_window,
-                             load_data=load_data)
+        self.orders = Orders(load_data=load_data)
+        self.builder.set_menu_item_view(self.orders.get_display_view())
         
         # These objects control secondary displays
         self.reservations = Reservations(self.builder.reservation_window)
@@ -352,7 +352,6 @@ class UI(object):
         elif response_type == Editor.DISCOUNT_RESPONSE:
             self.discount_order()
 
-
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
     def confirm_order(self, *args):  # @IGNORE:W0613
@@ -424,7 +423,7 @@ class UI(object):
         @param *args: wild card that represents a catch all.
         """
         self.update_status('Waiting for order selection...')
-        current_names = self.orders.get_togo_orders()
+        current_names = self.orders.get_togo_orders_list()
         confirmed = self.editor.select_misc_order(current_names,
                                                   self.order_selection_confirm_function)
         if not confirmed:
@@ -477,6 +476,31 @@ class UI(object):
         else:
             message = 'Cancelling discount selection. Restoring order... done'
         self.update_status(message)
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def undo_checkout_order(self, checkout_data):
+        """Called when the associated Gtk.Widget
+        has been clicked. Allows user to interact
+        with a window that will undo previously
+        checked out orders and return them to the UI.
+
+        @param checkout_data: dict where each key is represented
+        by a tuple of (str, str) -> (name, date), and each value
+        mapped is a list of MenuItem objects.
+
+        @return: None
+        """
+        self.update_status('Waiting for Undo Checkout confirmation...')
+        confirmed = self.editor.undo_checkout_order(checkout_data,
+                                                    self.add_checkout_order)
+
+        if confirmed:
+            message = 'Adding undone checkout order to togo list... done'
+        else:
+            message = 'Cancelling undo checkout dialog.'
+        self.update_status(message)
+
 
     #===========================================================================
     # This block contains methods that are called via callback only when a
@@ -586,6 +610,17 @@ class UI(object):
         @return: None
         """
         self.orders.edit_order(edited_order)
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def add_checkout_order(self, imported_order):
+        """
+
+        @param imported_order:
+        @return:
+        """
+        for key in imported_order:
+            self.orders.load_new_order(key, imported_order[key])
 
     #===========================================================================
     # This block contains methods that are used for obtaining information

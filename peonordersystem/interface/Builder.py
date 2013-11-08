@@ -317,6 +317,20 @@ stored on table box. Last index is the 'TOGO' button.
         """
         self.update_status("Setting Table to {}".format(string))
         self.widgets['orderListLabel'].set_text(string)
+
+    def set_menu_item_view(self, order_view):
+        """Sets the MenuItem view area to display
+        the given order view.
+
+        @param order_view: Gtk.TreeView that will
+        display the associated MenuItems.
+
+        @return: None
+        """
+        for widget in self.order_window.get_children():
+            self.order_window.remove(widget)
+
+        self.order_window.add(order_view)
     
     def set_accessible_buttons(self, menu_item):
         """Sets the menu buttons associated with editing a given
