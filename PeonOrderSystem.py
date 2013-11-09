@@ -95,7 +95,6 @@ class PeonOrderSystem(UI):
         @return: None
         """
         load_data = ConfirmationSystem.unpack_checkout_data()
-        print load_data
         super(PeonOrderSystem, self).undo_checkout_order(load_data)
 
     def initiate_response_dialog(self, response_type):

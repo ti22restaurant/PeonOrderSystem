@@ -1744,9 +1744,6 @@ class UndoCheckoutDialog(Dialog):
 
         if len(name) > 0:
             curr_name, curr_order = self.orders.get_order_info()
-            print curr_name
-            print curr_order
-            print type(curr_name)
 
             model = self.imported_view.get_model()
             has_entry = False

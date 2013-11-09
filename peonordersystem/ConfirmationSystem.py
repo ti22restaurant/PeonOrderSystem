@@ -294,8 +294,8 @@ def unpack_checkout_data(load_date=current_date):
     curr_directory += str(load_date[0]) + '/' + str(load_date[1]) +\
                       '/' + str(load_date[2]) + '/'
     curr_directory += 'checkout/'
-    itr = os.walk(curr_directory)
 
+    itr = os.walk(curr_directory)
     dirpath, dirnames, filenames = itr.next()
 
     for curr_filename in filenames:
@@ -303,9 +303,17 @@ def unpack_checkout_data(load_date=current_date):
         filename, filetype = curr_filename.split('.')
         filetime, filename = filename.split(CHECKOUT_SEPARATOR)
 
+        separator = None
+        if TOGO_SEPARATOR in filename:
+            separator = TOGO_SEPARATOR
+        else:
+            separator = '_'
+
+        filename = filename.replace(separator, ' ')
+
+
         data = open(dirpath + curr_filename)
         loaded_data = jsonpickle.decode(data.read())
-        print filename
 
         key = (filename, filetime + ', ' + str(current_date[1]) +
                          '/' + str(current_date[2]))
