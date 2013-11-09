@@ -347,6 +347,33 @@ class Editor(object):
         response = dialog.run_dialog()
         return response == Gtk.ResponseType.ACCEPT
 
+    def undo_checkout_order(self, checked_out_data, confirm_function):
+        """Calls a dialog window that allows the user to retrieve
+        previously checked out orders and return them to UI for editing
+        or adjustment. Calls the confirm function upon confirmation.
+        Runs the dialog window via this method.
+
+        @param checked_out_data: dict of tuple keys, represented as
+        (str, str) -> (name, date). Keys are mapped to values
+        representing the associated order as a list of MenuItem
+        objects.
+
+        @param confirm_function: Function that is to be called upon
+        confirmation. This function will be called with a dict of
+        key tuple (str, str, str) -> (name, _, date) to lists of
+        MenuItem objects.
+
+        @return: bool value representing if the dialog window
+        was confirmed or not. True representing if the dialog
+        was confirmed. False if it was cancelled.
+        """
+        dialog = Dialog.UndoCheckoutDialog(self.parent, checked_out_data,
+                                           confirm_function)
+        response = dialog.run_dialog()
+
+        return response == Gtk.ResponseType.ACCEPT
+
+
 
 #===========================================================================
 # This block contains functions that are called as conditionals to

@@ -26,7 +26,6 @@ def generate_logger(log_type=logging.DEBUG, file_name='debug.log'):
     @return: logging.Logger object that represents the newly
     created logger.
     """
-    print 'generating'
     fmt = '%(asctime)s | %(levelname)s: %(message)s'
     date_fmt = "%Y-%m-%d, %H:%M:%S"
     formatter = logging.Formatter(fmt=fmt, datefmt=date_fmt)
