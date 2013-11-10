@@ -9,14 +9,12 @@
 from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 
 from peonordersystem import path
-
-import json
-
-from peonordersystem.MenuItem import MenuItem
-
 from collections import deque
 
+import jsonpickle
+jsonpickle.set_encoder_options('simplejson', sort_keys=True, indent=4)
 from xml.etree.cElementTree import ElementTree
+
 
 class Builder(Gtk.Builder):
     """ Generates and builds the UI from XML file passed into
@@ -59,6 +57,10 @@ stored on table box. Last index is the 'TOGO' button.
         self.reservation_window = None
         self.order_window = None
         self.upcoming_orders_window = None
+        self.status_label = None
+
+        self.remove_upcoming_orders_button = None
+        self.upcoming_orders_confirm_priority_button = None
         
     def add_from_file(self, filename, title):  # @IGNORE:E1002
         """ Generates the GUI from the given XML file utilizing 
@@ -77,12 +79,12 @@ stored on table box. Last index is the 'TOGO' button.
         
         menu_file = open(path.OPTIONS_DATA, 'r')
         
-        option_choices = json.load(menu_file)
+        option_choices = jsonpickle.decode(menu_file.read())
         
         tree = ElementTree()
         tree.parse(filename)
 
-        elements = tree.getiterator('object')
+        elements = tree.iter('object')
         
         # Populate this objects attributes
         for current_widget in elements:
@@ -94,7 +96,10 @@ stored on table box. Last index is the 'TOGO' button.
             
             if name == 'POS_main_window':
                 self.window = widget
-                self.window.connect('delete_event', Gtk.main_quit)
+                self.window.connect('delete_event', self.quit)
+
+            if name == 'quitImageMenuItem':
+                widget.connect('activate', self.quit)
             
             # find order window
             if name == 'orderView':
@@ -110,12 +115,18 @@ stored on table box. Last index is the 'TOGO' button.
             if name == ('editstarsButton' or 
                 'editnoteButton' or 'edititemButton'):
                 self.order_buttons.append(widget)
+
+            if name == 'removeUpcomingOrdersButton':
+                self.remove_upcoming_orders_button = widget
             
-            if name == 'upcomingOrdersRemoveButton':
-                self.upcoming_orders_remove_button = widget
+            if name == 'upcomingOrdersConfirmPriorityButton':
+                self.upcoming_orders_confirm_priority_button = widget
             
             if name == 'upcomingOrdersScrollWindow':
                 self.upcoming_orders_window = widget
+
+            if name == 'statusLabel':
+                self.status_label = widget
                 
         # Populate menu tabs
         for each in option_choices.values():
@@ -140,11 +151,13 @@ stored on table box. Last index is the 'TOGO' button.
         """
         for i in range(1, num_of_tables + 1):
             button = Gtk.Button('TABLE ' + str(i))
+            button.set_focus_on_click(False)
             tables_box.pack_start(button, True, True, 2.5)
             self.generated_table_buttons.append(button)
         
         # additional TOGO button
         button = Gtk.Button('MISC ORDERS')
+        button.set_focus_on_click(False)
         tables_box.pack_start(button, True, True, 2.5)
         self.generated_table_buttons.append(button)
             
@@ -214,9 +227,10 @@ stored on table box. Last index is the 'TOGO' button.
                 sub_box2 = Gtk.HBox()
                 sub_box2.set_homogeneous(True)
                 box.pack_start(sub_box2, True, True, 5)
-                
+
                 # generate queues for boxes and add them to list
-                temp.append(generate_menu_layout(sub_box2))
+                temp.append(generate_menu_layout(sub_box2,
+                                                 num_of_cols=len(option_list)))
                 
         self._generate_menu_buttons(temp,
             option_list, load_menu_items())
@@ -255,6 +269,7 @@ stored on table box. Last index is the 'TOGO' button.
                 
                 # Store MenuItem in button
                 button.MenuItem = item
+                button.set_focus_on_click(False)
                 box.pack_start(button, True, True, 5)
                 
                 # Cycle queue of boxes for evenly distributed
@@ -286,10 +301,12 @@ stored on table box. Last index is the 'TOGO' button.
             if label == 'MISC ORDERS':
                 function = parent.select_misc_order
             button.connect('clicked', function, label)
-        
-        
+
+        function = parent.confirm_selected_upcoming_order
+        self.upcoming_orders_confirm_priority_button.connect('clicked', function)
+
         function = parent.remove_selected_upcoming_order
-        self.upcoming_orders_remove_button.connect('clicked', function)
+        self.remove_upcoming_orders_button.connect('clicked', function)
         
     def set_table(self, string):
         """Sets the current table display label to the given str
@@ -298,13 +315,63 @@ stored on table box. Last index is the 'TOGO' button.
         table choice. This string is set directly to display the
         given str in its label
         """
+        self.update_status("Setting Table to {}".format(string))
         self.widgets['orderListLabel'].set_text(string)
+
+    def set_menu_item_view(self, order_view):
+        """Sets the MenuItem view area to display
+        the given order view.
+
+        @param order_view: Gtk.TreeView that will
+        display the associated MenuItems.
+
+        @return: None
+        """
+        for widget in self.order_window.get_children():
+            self.order_window.remove(widget)
+
+        self.order_window.add(order_view)
     
     def set_accessible_buttons(self, menu_item):
         """Sets the menu buttons associated with editing a given
         menu_option to either be sensitive or not.
         """   
         pass
+
+    def update_status(self, message,
+                      styles=[]):
+        """Updates the status message of
+        the GUI.
+
+        @param message: str representing
+        the status message to be displayed.
+
+        @return: bool if the status was
+        successfully updated.
+        """
+        for style in styles:
+            if style == 'error':
+                message = '<span foreground="red">' + \
+                          message + "</span>"
+                style = 'bold'
+            if style == 'bold':
+                message = '<b>' + message + '</b>'
+            if style == 'italic':
+                message = '<i>' + message + '</i>'
+
+        self.status_label.set_markup(message)
+
+        return self.status_label.get_text() == message
+
+    def quit(self, *args):
+        """Callback Method used to end Gtk loop.
+
+        @param args: wildcard catchall used to
+        catch the widget that called this method.
+
+        @return: None
+        """
+        Gtk.main_quit()
 
 
 def load_menu_items():
@@ -317,35 +384,49 @@ def load_menu_items():
     """
     # Open JSON file
     menu = open(path.MENU_DATA, 'r')
-    
-    # object_hook function utilized to generate MenuItems in
-    #   JSON load.
-    def generate_menu(curr) :
-        """Returns a menu item associated with the given
-        dict passed in.
-        
-        @param curr: dict generated from JSON file which has
-        the str keys of '__MenuItem__', 'price', 'stars', 
-        'confirmed', 'editable' and could have 'options' with
-        values that match each.
-        
-        @return: new MenuItem object that represents the given
-        dict.
-        """
-        options = None
-        if '__MenuItem__' in curr:
-            if 'options' in curr:
-                options = curr['options']
-            return MenuItem(curr['__MenuItem__'], curr['price'],
-                            curr['stars'], curr['editable'],
-                            curr['confirmed'], options)
-        return curr
-    
-    
+
     # Generate MenuItem's from JSON file
-    return json.load(menu, object_hook=generate_menu)
-    
-def generate_menu_layout(main_box):
+    return jsonpickle.decode(menu.read())
+
+
+def update_menu_items_data(updated_menu_items):
+    #TODO Docstring
+
+    menu = open(path.MENU_DATA, 'w')
+    item_info = jsonpickle.encode(updated_menu_items)
+    menu.write(item_info)
+
+
+def get_discount_templates_data():
+    """Gets the discount templates data
+    and returns the information.
+
+    @return: list of tuple where each entry
+    represents an associated discounts str as name,
+    str representation of discount, float as discount,
+    and bool representing if it is a percentage.
+    """
+    data_file = open(path.DISCOUNT_DATA, 'r')
+    data_as_str = data_file.read()
+    return jsonpickle.decode(data_as_str)
+
+
+def update_discount_templates_data(discount_templates):
+    """Updates the discount templates data.
+
+    @param discount_templates: list of tuple objects
+    where each entry represents a discount. Specifically
+    as str name, str discount string representing, float
+    discount, bool if it is a percentage.
+
+    @return: None
+    """
+    data_file = open(path.DISCOUNT_DATA, 'w')
+    data_as_str = jsonpickle.encode(discount_templates)
+    data_file.write(data_as_str)
+
+
+def generate_menu_layout(main_box, num_of_cols=2):
     """ Generates the menu layout for any given menu box.
     
     This is a helper method called from inside of
@@ -361,7 +442,7 @@ def generate_menu_layout(main_box):
     # deque is convenient for evenly distributing boxes
     box_queue = deque()
     # subdivide box
-    for _ in range(2):
+    for _ in range(num_of_cols):
         box = Gtk.VBox()
         # box.set_homogeneous(True)
         box_queue.append(box)

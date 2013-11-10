@@ -6,6 +6,9 @@ information about MenuItems.
 @version: 1.0
 """
 
+from copy import copy
+
+
 class MenuItem(object):
     """ This object stores information regarding a MenuItem.
     
@@ -17,6 +20,9 @@ class MenuItem(object):
     
     @var _editable: private attribute. bool representing if
     the item is editable
+    
+    @var _locked: private attribute. bool representing if the
+    item has been locked and shouldn't be editable.
     
     @var star: int representing the value of the items stars
     
@@ -32,12 +38,13 @@ class MenuItem(object):
     """
     
     def __init__(self, name, price, stars=0, editable=True,
-        confirmed=False, option_choices=None):
-        
+                 confirmed=False, option_choices={}):
         self._name = name
         self._price = price
         self._option_choices = option_choices
         self._locked = False
+        self._price_scalar = 1.0
+        self.comp_message = None
         
         self.editable = bool(editable)
         self.stars = int(stars)
@@ -51,6 +58,42 @@ class MenuItem(object):
         true.
         """
         self._locked = not self._locked
+
+    def is_comped(self):
+        """Returns if this MenuItem object
+        is comped.
+
+        @return: bool value that represents
+        if this menu item has been comped or
+        not.
+        """
+        return self._price_scalar == 0.0 and self.comp_message
+
+    def get_comp_message(self):
+        """Gets the comp message associated
+        with this item.
+
+        @return: str representing the message
+        associated with the comp. None if there
+        is_comped returns false.
+        """
+        return self.comp_message
+
+    def comp(self, value, message):
+        """
+
+        @param value: bool if the menu item
+        should be comped, or not.
+
+        @param message: str representing the
+        message associated with this comp.
+        """
+        if value:
+            self._price_scalar = 0.0
+            self.comp_message = message
+        else:
+            self._price_scalar = 1.0
+            self.comp_message = None
     
     def is_locked(self):
         """Returns the value of the locked attribute.
@@ -60,6 +103,19 @@ class MenuItem(object):
         """
         return self._locked
     
+    def edit_price(self, value):
+        """Sets the MenuItem's price to the given amount.
+        """
+        price = self._price
+
+        for key in self.options:
+            price += self._option_choices[key]
+
+        self._price_scalar = value / price
+
+        if self._price_scalar > 1.0:
+            self._price_scalar = 1.0
+
     def get_name(self):
         """Gets the name of the MenuItem.
         
@@ -74,7 +130,11 @@ class MenuItem(object):
         
         @return: float representing the price.
         """
-        return self._price
+        price = self._price
+        for key in self.options:
+            price += self._option_choices[key]
+
+        return self._price_scalar * price
     
     def is_editable(self):
         """Checks if the item is editable.
@@ -82,17 +142,22 @@ class MenuItem(object):
         @return: bool, True if the item is editable,
         false otherwise.
         """
-        return self.editable
+        return self.editable and not self._locked
     
     def get_option_choices(self):
-        """Gets the available option choices for the item
+        """Gets a copy of the current options choices dict.
         
         @return: dict where each key is a str that represents
         an option, and each value is a float that represents
-        the cost
+        the cost.
         """
-        return self._option_choices
-    
+        options_copy = copy(self._option_choices)
+
+        for key in options_copy:
+            options_copy[key] *= self._price_scalar
+
+        return options_copy
+
     def has_note(self):
         """Checks if the item as a note associated with it.
         
@@ -117,5 +182,31 @@ class MenuItem(object):
         stored in the MenuItem
         """
         return str(self.__dict__)
-        
-    
+
+    def __eq__(self, other):
+        """Gets a bool representation of whether
+        this MenuItem is equal to another MenuItem
+        given
+
+        @param other: MenuItem object that is to
+        be checked if equal.
+
+        @return: bool value representing True if
+        the two items are considered equal, false
+        otherwise.
+        """
+        share_name = self._name is other._name
+        share_price = self._price is other._price
+        share_options = (self.options == other.options)
+        share_option_choices = (self.get_option_choices() == other.get_option_choices())
+        share_notes = self.notes is other.notes
+        share_stars = self.stars is other.stars
+        share_locked = self._locked is other._locked
+        share_editable = self.editable is other.editable
+        share_confirmed = self.confirmed is other.confirmed
+
+        equality_value = (share_name and share_price and share_options
+                          and share_option_choices and share_notes and share_stars
+                          and share_locked and share_editable and share_confirmed)
+
+        return equality_value

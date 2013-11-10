@@ -23,6 +23,8 @@ import time
 
 from peonordersystem import ErrorLogger
 from peonordersystem.ConfirmationSystem import TOGO_SEPARATOR
+from peonordersystem.CustomExceptions import NoSuchSelectionError
+
 
 class UpcomingOrdersView(Gtk.TreeView):
     """UpcomingOrdersView provides the basic
@@ -60,9 +62,9 @@ class UpcomingOrdersView(Gtk.TreeView):
         """
         col_list = []
         
-        # ListStore will store (str, str, str) representing
-        # the name, and confirmation time, and if the order
-        # has a priority item attached to it.
+        # ListStore will store (str, str, str, bool) representing
+        # the name, and confirmation time, image used for the priorty display
+        # and if the order has a priority item attached to it.
         
         rend = Gtk.CellRendererText()
         col = Gtk.TreeViewColumn(column_names[0],
@@ -74,9 +76,9 @@ class UpcomingOrdersView(Gtk.TreeView):
                                  rend, text=1)
         col_list.append(col)
         
-        rend = Gtk.CellRendererPixbuf()
+        rend = Gtk.CellRendererText()
         col = Gtk.TreeViewColumn(column_names[2],
-                                 rend, stock_id=2)
+                                 rend, text=2)
         col_list.append(col)
         
         return col_list
@@ -84,13 +86,14 @@ class UpcomingOrdersView(Gtk.TreeView):
     def get_selected_iter(self):
         """Gets a Gtk.TreeIter represent the currently
         selected item in the UpcomingOrdersView.
-        
+
         @return: Gtk.TreeIter representing the currently
         selected order.
         """
         tree_selection = self.get_selection()
         _, itr = tree_selection.get_selected()
         return itr
+
 
 class UpcomingOrderStore(Gtk.ListStore):
     """UpcomingOrderStore class creates and stores
@@ -109,48 +112,43 @@ class UpcomingOrderStore(Gtk.ListStore):
         3 str types.
         """
         super(UpcomingOrderStore, self).__init__(str, str, str)
-    
-    def append(self, order_name, current_order):
+
+    def remove(self, itr):
+        """Removes the selected item from
+        the UpcomingOrderStore
+
+        @param itr: Gtk.TreeIter pointing to
+        the item to be removed.
+
+        @return: str representing the name of
+        the UpcomingOrder removed.
+        """
+        name = self[itr][0]
+        super(UpcomingOrderStore, self).remove(itr)
+        return name
+
+    def append(self, order_name, priority_info):
         """Appends the given order_name, and current_order
         to the UpcomingOrderStore.
         
         @param order_name: str representing the given name
         of the order that is being confirmed.
-        
-        @param current_order: list of MenuItem objects that
-        represents the current order being confirmed.
+
+        @param priority_info: str representing the current
+        list of selected MenuItems that represent the
+        priority order associated with this order. None if
+        there were no items.
         
         @return: Gtk.TreeIter pointing at the added item
         """
-        priority_icon = self._get_icon(current_order)
         curr_time = time.asctime()
         
         order_name = order_name.replace('_', ' ')
         
-        order = (order_name, curr_time, priority_icon)
+        order = (order_name, curr_time, priority_info)
         
         return super(UpcomingOrderStore, self).append(order)
-        
-    
-    def _order_has_priority(self, current_order):
-        """Private Method.
-        
-        Checks if the given order list has any
-        menu items that are of priority.
-        
-        @param current_order: list of MenuItem objects
-        
-        @return: bool True if the given order list has
-        a MenuItem that has priority. False otherwise.
-        """
-        priority = False
-        
-        for menu_item in current_order:
-            # TODO check if MenuItem has priorty
-            pass
-        
-        return priority
-    
+
     def remove_by_name(self, order_name):
         """Searches for and removes the given
         order from the UpcomingOrderStore, if the
@@ -161,65 +159,48 @@ class UpcomingOrderStore(Gtk.ListStore):
         be replaced with whitespace.
         """
         order_name = order_name.replace('_', ' ')
-        itr = self.get_iter_first()
-        if itr != None and self.iter_is_valid(itr):
-            itr = self._search_for_order(order_name, itr)
-        
-        if itr != None:
-            value = self.remove(itr)
-        
-    
+
+        index = 0
+
+        while index < len(self):
+            value = self[index]
+
+            if value[0] == order_name:
+                itr = value.iter
+                self.remove(itr)
+
+            else:
+                index += 1
+
     def update_priority(self, itr):
         """Updates the priority of the given
         item stored at itr.
         
         @param itr: Gtk.TreeIter pointing to the
         object to be updated.
+
+        @return: str representing the name of the
+        priority order confirmed.
         """
-        if self.iter_is_valid(itr):
-            self[itr][2] = Gtk.STOCK_NO
-    
-    def _search_for_order(self, order_name, itr):
-        """Private Method.
-        
-        Searches the given itr by calling the next on
-        this store.
-        
-        @param order_name: str representing the displayed
-        order_name. This object should have all underscores
-        replaced with whitespace
-        
-        @param itr: Gtk.TreeIter that represents the given
-        itr to search from.
-        
-        @return: Gtk.TreeIter pointing to the given value,
-        or None if the value didn't exist in the Store.
+        self[itr][2] = ''
+
+        return self[itr][0]
+
+    def _dump(self):
+        """Gets the information associated
+        with this object in its entirety. This
+        is used mainly for debugging purposes
+
+        @return: list that represents the rows
+        that are stored in this object.
         """
-        if itr != None:
-            curr_name = self.get_value(itr, 0)
-            
-            if curr_name == order_name:
-                return itr
-            else:
-                itr = self.iter_next(itr)
-                return self._search_for_order(order_name, itr)
-        
-        return None
-    
-    def _get_icon(self, current_order):
-        """Private Method.
-        
-        Gets the icon associated with the given
-        order list.
-        
-        @param current_order: list of MenuItem objects
-        
-        @return: str representing the Gtk.STOCK item that
-        was associated with the given order_list.
-        """
-        if self._order_has_priority(current_order):
-            return Gtk.STOCK_YES
-        return Gtk.STOCK_NO
+        info = []
+
+        for row in self:
+            info.append(tuple(row))
+
+        return info
+
 
 @ErrorLogger.error_logging
 class UpcomingOrders(object):
@@ -261,7 +242,9 @@ class UpcomingOrders(object):
             self._load_data(load_data)
     
     def _load_data(self, load_data):
-        """Loads the data from a previous
+        """Private Method.
+
+        Loads the data from a previous
         session.
         
         @param load_data: 2-tuple of dicts.
@@ -274,9 +257,28 @@ class UpcomingOrders(object):
         for order in load_data:
             for key, value in order.items():
                 self.add_order(key, value)
-            
-    
-    def add_order(self, order_name, current_order):
+
+    def _get_selected_iter(self):
+        """Private method.
+
+        Gets the currently selected order.
+
+        @raise InvalidOrderError: if no
+        item was selected.
+
+        @return: Gtk.TreeIter pointing to
+        the currently selected order
+        """
+        itr = self.tree_view.get_selected_iter()
+
+        if not itr:
+            message = 'Expected value for itr as selection.'+ \
+                      ' Instead got {}.'.format(type(itr))
+            raise NoSuchSelectionError(message)
+
+        return itr
+
+    def add_order(self, order_name, current_order, priority_order=[]):
         """Adds the given order to the UpcomingOrders
         display and stores it under the given order_name
         
@@ -286,27 +288,59 @@ class UpcomingOrders(object):
         
         @param current_order: list of MenuItem objects that
         is the current order list being confirmed
+
+        @keyword priority_order: list of MenuItem objects that
+        represent the priority order associated with the
+        current order. By default this value is an empty list.
         """
         order_name = order_name.replace(TOGO_SEPARATOR, ' ')
-        self.model.append(order_name, current_order)
+        priority_info = ''
+
+        for menu_item in priority_order:
+            priority_info += menu_item.get_name() + ', '
+
+        self.model.append(order_name, priority_info[:-2])
     
     def remove_selected_order(self):
         """Removes the selected order from the
         UpcomingOrders.
         """
-        itr = self.tree_view.get_selected_iter()
-        self.model.remove(itr)
+        itr = self._get_selected_iter()
+        name = self.model.remove(itr)
+        return name
     
     def remove_by_name(self, order_name):
         """Removes the name that is displayed by
-        order_name 
+        order_name
+
+        @param order_name: str representing the
+        order to be removed.
+
+        @return: str representing the name of the
+        order removed.
         """
         order_name = order_name.replace(TOGO_SEPARATOR, ' ')
         self.model.remove_by_name(order_name)
+        return order_name
     
     def confirm_priority(self):
         """Confirms the priority flag on the selected
         order.
+
+        @return: str representing the name of the
+        priority order confirmed.
         """
-        itr = self.tree_view.get_selected_iter()
-        self.model.update_priority(itr)
+        itr = self._get_selected_iter()
+        return self.model.update_priority(itr)
+
+    def _dump(self):
+        """Gets the information relating
+        to this object. This is used mainly
+        for debugging purposes.
+
+        @return: list of tuples that represents
+        the rows stored and displayed by this
+        object.
+        """
+        return self.model._dump()
+

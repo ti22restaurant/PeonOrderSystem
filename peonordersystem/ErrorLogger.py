@@ -3,8 +3,10 @@
 @contact: cjmcgraw.u.washington.edu
 @version: 1.0
 '''
-from peonordersystem.path import SYSTEM_LOG_PATH
 
+from peonordersystem.path import SYSTEM_LOG_PATH
+from peonordersystem.CustomExceptions import NoSuchSelectionError,\
+    InvalidReservationError, InvalidOrderError, InvalidItemError
 
 import traceback
 
@@ -24,7 +26,6 @@ def generate_logger(log_type=logging.DEBUG, file_name='debug.log'):
     @return: logging.Logger object that represents the newly
     created logger.
     """
-    print 'generating'
     fmt = '%(asctime)s | %(levelname)s: %(message)s'
     date_fmt = "%Y-%m-%d, %H:%M:%S"
     formatter = logging.Formatter(fmt=fmt, datefmt=date_fmt)
@@ -73,10 +74,14 @@ def log_func_data(func):
     @return: func representing the interior wrapper
     class that will wrap the function.
     """
-    function_info = func.im_class.__module__ + '.'
-    function_info = function_info + func.im_class.__name__ + '.'
-    function_info = function_info + func.__name__ + ' : '
-    
+
+    function_info = ''
+    if 'im_class' in dir(func):
+        function_info += func.im_class.__module__ + '.'
+        function_info += func.im_class.__name__ + '.'
+
+    function_info += func.__name__ + ' : '
+
     def log_wrapper(*args, **kwargs):
         """Wrapper sub function that is used to
         wrap the method when it is called.
@@ -101,7 +106,15 @@ def log_func_data(func):
                 
             try:
                 return func(*args, **kwargs)
-            
+
+            except (NoSuchSelectionError, InvalidItemError,
+                    InvalidOrderError, InvalidReservationError) as e:
+                logger.info('')
+                logger.info('NON-FATAL-ERROR: ' + str(type(e)))
+                logger.info(e)
+                logger.info('')
+                raise
+
             except Exception as e:
                 logger.error(e)
                 spaces = '   '
@@ -111,7 +124,7 @@ def log_func_data(func):
                 logger.error('')
                 logger.error(spaces + 'Parameters: ')
                 
-                spaces = spaces * 2
+                spaces *= 2
                 if len(args) > 0 or len(kwargs) > 0:
                     for param_set in (args, kwargs):
                         for arg in param_set:
