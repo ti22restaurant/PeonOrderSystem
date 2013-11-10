@@ -14,5 +14,13 @@
             100.0,
             true
         ]
+    },
+    {
+        "py/tuple": [
+            "Fabian's Discount",
+            "$0.17",
+            0.17,
+            false
+        ]
     }
 ]

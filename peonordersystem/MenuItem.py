@@ -6,7 +6,7 @@ information about MenuItems.
 @version: 1.0
 """
 
-from copy import copy
+from copy import deepcopy as copy
 
 
 class MenuItem(object):
@@ -38,7 +38,8 @@ class MenuItem(object):
     """
     
     def __init__(self, name, price, stars=0, editable=True,
-                 confirmed=False, option_choices={}):
+                 confirmed=False, option_choices=[]):
+
         self._name = name
         self._price = price
         self._option_choices = option_choices
@@ -108,8 +109,8 @@ class MenuItem(object):
         """
         price = self._price
 
-        for key in self.options:
-            price += self._option_choices[key]
+        for option in self.options:
+            price += option.get_price()
 
         self._price_scalar = value / price
 
@@ -120,7 +121,7 @@ class MenuItem(object):
         """Gets the name of the MenuItem.
         
         @return: str representing the associated
-        name of the Menuitem
+        name of the MenuItem
         """
         return self._name
     
@@ -131,8 +132,8 @@ class MenuItem(object):
         @return: float representing the price.
         """
         price = self._price
-        for key in self.options:
-            price += self._option_choices[key]
+        for option in self.options:
+            price += option.get_price()
 
         return self._price_scalar * price
     
@@ -153,8 +154,9 @@ class MenuItem(object):
         """
         options_copy = copy(self._option_choices)
 
-        for key in options_copy:
-            options_copy[key] *= self._price_scalar
+        for option in options_copy:
+            if option._price_scalar is not 0.0:
+                option._price_scalar = self._price_scalar
 
         return options_copy
 
@@ -210,3 +212,118 @@ class MenuItem(object):
                           and share_locked and share_editable and share_confirmed)
 
         return equality_value
+
+
+class OptionItem(object):
+    """OptionItem stores information about
+    an option.
+
+    @var _name: private field. str representing
+    the name associated with this option.
+
+    @var _price: private field. double representing
+    the price associated with this option.
+
+    @var _price_scalar: private field. double representing
+    the multiplicative price associated with this item. This
+    field is used to adjust dependent on the relation value.
+
+    @var _relation: str representing "ADD" if the relation is
+    additive and thus when options are combined with MenuItems,
+    "NO" if the relation is removal and thus signifies the removal
+    the this option from a MenuItem, or "SUB" and thus signifies a
+    substitution made on this MenuItem
+
+    """
+    def __init__(self, name, price):
+        """Initializes a new OptionItem
+        object.
+
+        @param name: str representing
+        the name associated with this
+        option
+
+        @param price: float representing
+        the cost associated with this option
+        """
+        self._name = name
+        self._price = price
+        self._price_scalar = 1.0
+        self._relation = None
+
+    def get_name(self):
+        """Gets the name associated
+        with this option.
+
+        @return: str representing
+        the name associated with
+        this option.
+        """
+        return self._name
+
+    def get_price(self):
+        """Gets the price associated
+        with this option.
+
+        @return: double representing
+        the price associated with this
+        option.
+        """
+        return self._price * self._price_scalar
+
+    def set_option_relation(self, relationship):
+        """Sets the relation of this option.
+        This relation effects how this option
+        will act with other options or MenuItem
+        objects.
+
+        Three possible conditions exist:
+
+            ADD: relation > 0
+            NO: relation = 0
+            SUB: relation < 0
+
+        @param relationship: int representing the
+        relationship the option will hold to
+        MenuItems and other options. Positive
+        will cause the relationship to be additive,
+        Zero will cause the relationship to be void
+        and the option should be considered removed,
+        negative will cause the relationship to be
+        a substitution.
+
+        @return: str representing the associated
+        relationship. "ADD", "NO", or "SUB"
+        respectively
+        """
+        relation = 'NO'
+        price_scalar = 0.0
+
+        if relationship > 0:
+            relation = 'ADD'
+            price_scalar = 1.0
+        elif relationship < 0:
+            relation = 'SUB'
+
+        self._relation = relation
+        self._price_scalar = price_scalar
+        return relation
+
+    def get_option_relation(self):
+        """Gets the relation of this option.
+        This relation effects how this option
+        interacts with other options or MenuItems.
+
+        @return: str representing if the relation
+        is additive and thus "ADD", removal and thus
+        "NO" or substitution and thus "SUB".
+        """
+        return self.relation
+
+    def __repr__(self):
+        """Get a string representation of this
+        OptionItem.
+
+        @return: str representing the option
+        """
+        return self.get_name()

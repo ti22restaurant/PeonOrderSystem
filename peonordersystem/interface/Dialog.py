@@ -1846,11 +1846,12 @@ class OptionEntryDialog(EntryDialog):
 
         @return: None
         """
-        for option in self.menu_item.get_option_choices():
+        for option_item in self.menu_item.get_option_choices():
             button_box = content_boxes.pop(0)
-            option_toggle = Gtk.ToggleButton(option)
+            option_toggle = Gtk.ToggleButton(option_item.get_name())
+            option_toggle.option_item = option_item
             
-            if option in self.menu_item.options:
+            if option_item in self.menu_item.options:
                 option_toggle.set_active(True)
             
             # connect signals to add_option for dynamic adds
@@ -1871,10 +1872,10 @@ class OptionEntryDialog(EntryDialog):
         # Button has been pressed (therefore is now toggled)
         # case 1: Button is active (therefore was not toggled)
         if button.get_active():
-            self.options.append(button.get_label())
+            self.options.append(button.option_item)
         # case 2: Button is inactive (therefore was toggled)
         else:
-            self.options.remove(button.get_label())
+            self.options.remove(button.option_item)
     
     def cancel_data(self):
         """Cancel's selected options, and reverts to
@@ -2675,10 +2676,12 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
             location = model.append(None, (name, str(price), True))
 
             if menu_item.has_options():
-                option_dict = menu_item.get_option_choices()
-                for key in option_dict:
-                    option_price = option_dict[key]
-                    model.append(location, (key, str(option_price), True))
+                for option in menu_item.options:
+                    option_name = option.get_name()
+                    option_price = option.get_price()
+                    data = option_name, str(option_price), True
+
+                    model.append(location, data)
 
         itr = model.append(None, ('Sub-Total',
                             str(CheckOperations.get_order_subtotal(order_list)), False))
