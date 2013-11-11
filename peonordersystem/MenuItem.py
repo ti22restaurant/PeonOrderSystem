@@ -1,5 +1,6 @@
 """ This module contains the MenuItem class that stores
-information about MenuItems.
+information about MenuItems, and the OptionItem class that
+stores information about OptionItems
 
 @author: Carl McGraw
 @contact: cjmcgraw@u.washington.edu
@@ -235,7 +236,7 @@ class OptionItem(object):
     substitution made on this MenuItem
 
     """
-    def __init__(self, name, price):
+    def __init__(self, name, category, price):
         """Initializes a new OptionItem
         object.
 
@@ -248,6 +249,8 @@ class OptionItem(object):
         """
         self._name = name
         self._price = price
+        self._category = category
+
         self._price_scalar = 1.0
         self._relation = None
 
@@ -259,7 +262,7 @@ class OptionItem(object):
         the name associated with
         this option.
         """
-        return self._name
+        return self.get_category() + ': ' + self._name
 
     def get_price(self):
         """Gets the price associated
@@ -270,6 +273,15 @@ class OptionItem(object):
         option.
         """
         return self._price * self._price_scalar
+
+    def get_category(self):
+        """Gets the category that this
+        option is associated with.
+
+        @return: str representing the
+        category in all caps.
+        """
+        return self._category
 
     def set_option_relation(self, relationship):
         """Sets the relation of this option.
@@ -327,3 +339,22 @@ class OptionItem(object):
         @return: str representing the option
         """
         return self.get_name()
+
+    def __eq__(self, other):
+        """Compares this option item to
+        the given option item.
+
+        @param other: OptionItem object that
+        is to be compared to this OptionItem
+
+        @return: bool value that is True if the
+        two OptionItems are equal, False otherwise.
+        """
+        share_name = self._name is other._name
+        share_price = self._price is other._price
+        share_category = self._category is other._category
+        share_scalar = self._price_scalar is other._price_scalar
+        share_relation = self._relation is other._relation
+
+        return (share_name and share_price and share_category and
+                share_scalar and share_relation)
