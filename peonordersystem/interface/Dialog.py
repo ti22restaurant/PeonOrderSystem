@@ -1964,9 +1964,77 @@ class OptionEntryDialog(EntryDialog):
         self.options = copy(menu_item.options)
         self.menu_item = menu_item
         super(OptionEntryDialog, self).__init__(parent, title, dialog)
+
+    def generate_layout(self):
+        """Override Method
+
+        Generates the layout to be
+        displayed in the content area
+        of the dialog window.
+
+        @return: Gtk.Container that holds
+        the Gtk.Widgets that will be displayed
+        in the content area.
+        """
+        main_box = Gtk.VBox()
+
+        if len(self.menu_item.get_option_choices()) > 0:
+            content_area = super(OptionEntryDialog, self).generate_layout()
+        else:
+            content_area = self.generate_empty_option_choices_area()
+
+        main_box.pack_start(content_area, True, True, 5.0)
+
+        additional_options_area = self.generate_additional_options_area()
+        main_box.pack_end(additional_options_area, False, False, 5.0)
+
+        return main_box
+
+    def generate_additional_options_area(self):
+        """Generates the additional options
+        area for this dialog window. This
+        options area holds Gtk.Widgets
+        associated with additional options
+        beyond the designated storage area
+        of the super class.
+
+        @return: Gtk.Container that holds
+        the Gtk.Widgets that will be displayed
+        in the additional options area.
+        """
+        main_box = Gtk.HBox()
+
+        general_options_button = Gtk.Button('Open General Options')
+        general_options_button.set_can_focus(False)
+        general_options_button.set_size_request(200, 50)
+        general_options_button.connect('clicked', self.general_option_dialog)
+        main_box.pack_start(general_options_button, False, False, 5.0)
+        main_box.pack_start(Gtk.Fixed(), True, True, 5.0)
+
+        return main_box
+
+    def generate_empty_option_choices_area(self):
+        """Generates the option choices area if the
+        given MenuItem had an empty options choices
+        stored. This occurs so that the general option
+        choices can be instantiated.
+
+        @return: Gtk.Container that holds the Gtk.Widgets
+        that will be displayed in the empty option_choices
+        area.
+        """
+        main_box = Gtk.HBox()
+
+        label = Gtk.Label("NO AVAILABLE FREQUENT OPTION CHOICES")
+        main_box.pack_start(label, False, False, 5.0)
+        main_box.pack_start(Gtk.Fixed(), True, True, 5.0)
+
+        return main_box
     
     def set_layout(self, content_boxes):
-        """Sets the layout for the OptionsEntryDialog. Each
+        """Override Method.
+
+        Sets the layout for the OptionsEntryDialog. Each
         content box in the content_area of the dialog window
         is set to store option toggles in groups of three
         distributed among the three given content boxes stored
@@ -2008,6 +2076,21 @@ class OptionEntryDialog(EntryDialog):
         # case 2: Button is inactive (therefore was toggled)
         else:
             self.options.remove(button.option_item)
+
+    def general_option_dialog(self, *args):
+        """Cancels the selected options, and
+        emits the appropriate response for a
+        new ADDITIONAL_OPTOINS_DIALOG to be
+        opened.
+
+        @param args: wildcard catchall that is
+        used to catch the Gtk.Widget that called
+        this method.
+
+        @return: None
+        """
+        self.dialog.response(ADDITIONAL_OPTIONS_DIALOG_RESPONSE)
+        self.dialog.destroy()
     
     def cancel_data(self):
         """Cancel's selected options, and reverts to
