@@ -17,6 +17,7 @@ PRINT_RESPONSE = Dialog.PRINT_DIALOG_RESPONSE
 COMP_RESPONSE = Dialog.COMP_DIALOG_RESPONSE
 DISCOUNT_RESPONSE = Dialog.DISCOUNT_DIALOG_RESPONSE
 SPLIT_CHECK_RESPONSE = Dialog.SPLIT_CHECK_DIALOG_RESPONSE
+GENERAL_OPTIONS_RESPONSE = Dialog.GENERAL_OPTIONS_DIALOG_RESPONSE
 
 ACCEPT_RESPONSE = Gtk.ResponseType.ACCEPT
 REJECT_RESPONSE = Gtk.ResponseType.REJECT
@@ -42,12 +43,12 @@ class Editor(object):
         """
         self.parent = parent
 
-    #=============================================================================
+    #==========================================================================
     # This block is what I refer to as the editor/confirmer section. This block
     # contains highly generic methods that are utilized by other methods to
     # perform standard operations. Editing methods in this block may cause
     # errors.
-    #=============================================================================
+    #==========================================================================
 
     def edit(self, menu_item, entry_dialog):
         """Generates and runs the given EntryDialog with the
@@ -61,17 +62,15 @@ class Editor(object):
         the dialog to be called. this parameter is
         expected to be subclass instances of the EntryDialog
 
-        @return: value returned by the dialog windows run_dialog
-        method.
+        @return: int representing the Gtk.ResponseType emitted
+        by this dialog window.
         """
         if menu_item_check(menu_item):
             dialog_window = entry_dialog(self.parent, menu_item)
             value = dialog_window.run_dialog()
             del dialog_window
 
-            return value == Gtk.ResponseType.ACCEPT
-
-        return False
+            return value
 
     def confirm(self, order_list, confirm_dialog, confirm_function):
         """Generates and runs the given ConfirmationDialog with
@@ -103,13 +102,13 @@ class Editor(object):
 
         return None
 
-    #==============================================================================
+    #=========================================================================
     # This block contains methods that are performed on MenuItem objects. All
     # methods expect to be given a menu item, and then make reference to the
     # respective editor/confirmer method in the editor/confirmer section. All
     # dialogs contained in this bock rely on the editor/confirmer to run and
     # instantiate their respective dialog windows.
-    #==============================================================================
+    #=========================================================================
     
     def edit_stars(self, menu_item):
         """Calls a dialog window on the given MenuItem
@@ -121,7 +120,8 @@ class Editor(object):
         @return: bool representing if the dialog window was confirmed
         or cancelled. True for confirmed, False for cancelled.
         """
-        return self.edit(menu_item, Dialog.StarEntryDialog)
+        value = self.edit(menu_item, Dialog.StarEntryDialog)
+        return value == Gtk.ResponseType.ACCEPT
     
     def edit_note(self, menu_item):
         """Calls a dialog window on the given MenuItem
@@ -133,7 +133,8 @@ class Editor(object):
         @return: bool representing if the dialog window was confirmed
         or cancelled. True for confirmed, False for cancelled.
         """
-        return self.edit(menu_item, Dialog.NoteEntryDialog)
+        value = self.edit(menu_item, Dialog.NoteEntryDialog)
+        return value == Gtk.ResponseType.ACCEPT
     
     def edit_options(self, menu_item):
         """Calls a dialog window on the given MenuItem
@@ -143,15 +144,9 @@ class Editor(object):
         @param menu_item: MenuItem object that is to
         have the dialog initiated on it.
 
-        @return: bool representing if the dialog window was confirmed
-        or cancelled. True for confirmed, False for cancelled.
+        @return: int representing the response type emitted
+        by the dialog window.
         """
-        if len(menu_item.get_option_choices()) <= 0:
-            message = 'No options are available to be edited ' + \
-                      'for this menu item.'
-
-            raise InvalidItemError(message)
-
         return self.edit(menu_item, Dialog.OptionEntryDialog)
     
     def confirm_order(self, order_list, confirm_function):
@@ -174,7 +169,7 @@ class Editor(object):
         response = self.confirm(order_list, Dialog.OrderConfirmationDialog,
                                 confirm_function)
 
-        return response == Gtk.ResponseType.ACCEPT
+        return response == ACCEPT_RESPONSE
     
     def checkout_order(self, order_list, confirm_function):
         """Calls the checkout confirmation dialog on the given
@@ -212,7 +207,7 @@ class Editor(object):
         """
         response = self.confirm(order_list, Dialog.SplitCheckConfirmationDialog,
                                 confirm_function)
-        return response == Gtk.ResponseType.ACCEPT
+        return response == ACCEPT_RESPONSE
 
     def comp_item_order(self, order_list, confirm_function):
         """Calls the comp item confirmation dialog on the
@@ -233,16 +228,17 @@ class Editor(object):
         """
         order_list = get_locked_item_order(order_list)
 
-        response = self.confirm(order_list, Dialog.CompItemsOrderConfirmationDialog,
+        response = self.confirm(order_list,
+                                Dialog.CompItemsOrderConfirmationDialog,
                                 confirm_function)
 
-        return response == Gtk.ResponseType.ACCEPT
+        return response == ACCEPT_RESPONSE
 
-    #================================================================================
-    # Methods in this block require special considerations when instantiating their
-    # dialog windows and as such cannot be run with the generic editor/confirmer
-    # archetype utilized by most other dialogs.
-    #================================================================================
+    #======================================================================
+    # Methods in this block require special considerations when
+    # instantiating their dialog windows and as such cannot be run with the
+    # generic editor/confirmer archetype utilized by most other dialogs.
+    #======================================================================
     
     def select_misc_order(self, name_list, confirm_function):
         """Calls the misc selection confirmation dialog on the
@@ -257,7 +253,7 @@ class Editor(object):
         """
         dialog = Dialog.OrderSelectionConfirmationDialog(self.parent, confirm_function,
                                                          name_list)
-        return dialog.run_dialog() == Gtk.ResponseType.ACCEPT
+        return dialog.run_dialog() == ACCEPT_RESPONSE
 
     def discount_item_order(self, order_list, confirm_function, discount_templates):
         """Calls the discount item confirmation dialog on the
@@ -283,10 +279,12 @@ class Editor(object):
         """
         if order_check(order_list):
 
-            dialog = Dialog.DiscountCheckoutConfirmationDialog(self.parent, confirm_function,
-                                                               order_list, discount_templates)
+            dialog = Dialog.DiscountCheckoutConfirmationDialog(self.parent,
+                                                               confirm_function,
+                                                               order_list,
+                                                               discount_templates)
             response = dialog.run_dialog()
-            return response == Gtk.ResponseType.ACCEPT
+            return response == ACCEPT_RESPONSE
 
         return False
     
@@ -303,7 +301,7 @@ class Editor(object):
         respectively.
         """
         dialog = Dialog.AddReservationsDialog(self.parent, confirm_function)
-        return dialog.run_dialog() == Gtk.ResponseType.ACCEPT
+        return dialog.run_dialog() == ACCEPT_RESPONSE
 
     def update_menu_items_data(self, menu_data, confirm_func):
         """Calls a dialog window that allows the user to edit
@@ -324,7 +322,7 @@ class Editor(object):
         """
         dialog = Dialog.UpdateMenuItemsDialog(self.parent, menu_data,
                                               confirm_func)
-        return dialog.run_dialog() == Gtk.ResponseType.ACCEPT
+        return dialog.run_dialog() == ACCEPT_RESPONSE
 
     def update_discount_templates(self, confirm_function, discount_templates):
         """Calls a dialog window that allows the user to edit
@@ -345,7 +343,7 @@ class Editor(object):
                                                                          confirm_function,
                                                                          discount_templates)
         response = dialog.run_dialog()
-        return response == Gtk.ResponseType.ACCEPT
+        return response == ACCEPT_RESPONSE
 
     def undo_checkout_order(self, checked_out_data, confirm_function):
         """Calls a dialog window that allows the user to retrieve
@@ -371,8 +369,30 @@ class Editor(object):
                                            confirm_function)
         response = dialog.run_dialog()
 
-        return response == Gtk.ResponseType.ACCEPT
+        return response == ACCEPT_RESPONSE
 
+    def edit_general_options(self, option_data, menu_item):
+        """Calls a dialog window that allows the user to
+        edit/remove options from the given MenuItem object
+        with reference to all possible options available for
+        any MenuItem.
+
+        @param option_data: dict of str keys representing the
+        categories to values list of OptionItems that represent
+        the options available under that specific category.
+
+        @param menu_item: MenuItem object that is to be edited
+        by this dialog window.
+
+        @return: int representing the response type associated
+        with the dialog window.
+        """
+        if menu_item_check(menu_item):
+            dialog = Dialog.GeneralOptionSelectionDialog(self.parent,
+                                                         option_data,
+                                                         menu_item)
+            response = dialog.run_dialog()
+            return response
 
 
 #===========================================================================
