@@ -334,6 +334,8 @@ class UI(object):
 
         self.update_status(message)
 
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def edit_general_options(self, *args):
         """Calls a general edit dialog window
         to be opened on the currently selected
@@ -351,13 +353,18 @@ class UI(object):
         name = menu_item.get_name()
         self.update_status('Opening general options to edit ' +
                            '{}'.format(name))
-
         option_data = Builder.get_options_item_data()
-
         response = self.editor.edit_general_options(option_data, menu_item)
 
         if response == Editor.ACCEPT_RESPONSE:
             self.orders.update_item()
+
+            message = 'Adding options to {}... done'.format(name)
+
+        else:
+            messsage = 'Cancelling options add to {}.'.format(name)
+
+        self.update_status(message)
 
 
     #===========================================================================
