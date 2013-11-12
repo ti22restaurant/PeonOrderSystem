@@ -5463,6 +5463,7 @@ class UpdateGeneralOptionSelectionDialog(GeneralOptionSelectionDialog):
         name = name.strip().upper()
 
         price = self.price_display.get_value()
+        price = float(price)
 
         model, itr = self.get_option_view_selected()
 
@@ -5479,10 +5480,10 @@ class UpdateGeneralOptionSelectionDialog(GeneralOptionSelectionDialog):
             option_item = option_list[index]
 
             option_item._name = name
-            option_item._price = str(price)
+            option_item._price = price
 
             model[itr][0] = option_item._name
-            model[itr][1] = option_item._price
+            model[itr][1] = str(option_item._price)
 
             return option_item
 
