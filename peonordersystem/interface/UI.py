@@ -762,6 +762,29 @@ class UI(object):
         else:
             self.update_status('Cancelled Discount templates update.')
 
+    def update_option_items(self, *args):
+        """This method is called when the associated
+        widget is pressed. This method displays a dialog
+        window that the user can interact with to update
+        the stored general OptionItem data.
+
+        @param args: wildcard catchall that is used to
+        catch the Gtk.Widget that called this method.
+
+        @return: None
+        """
+        option_data = Builder.get_option_item_data()
+
+        self.update_status('Awaiting editing of raw OptionItem data...')
+        response = self.editor.update_option_items_Data(option_data,
+                                                self.dump_updated_option_data)
+        if response:
+            message = 'Edited stored General OptionItem data.'
+        else:
+            message = 'Cancelled updating stored General OptionItem data.'
+
+        self.update_status(message)
+
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
     def dump_updated_menu_data(self, updated_menu_data):
@@ -794,6 +817,20 @@ class UI(object):
         @return: None
         """
         Builder.update_discount_templates_data(updated_discount_templates)
+
+    def dump_updated_option_data(self, updated_option_data):
+        """Called when the update option items has been
+        updated. This method is used to call the associated
+        methods necessary to dump the General OptionItem
+        data into its associated file.
+
+        @param update_option_data: str of keys representing
+        the OptionItem categories, mapped to list of OptionItems
+        that represent the options associated with that category.
+
+        @return: None
+        """
+        Builder.update_options_item_data(updated_option_data)
 
     def _dump(self):
         """Dumps the information regarding the
