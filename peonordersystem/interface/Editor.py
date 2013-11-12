@@ -343,7 +343,7 @@ class Editor(object):
                                                                          confirm_function,
                                                                          discount_templates)
         response = dialog.run_dialog()
-        dialog.destroy()
+        del dialog
         return response == ACCEPT_RESPONSE
 
     def update_option_items_data(self, options_data, confirm_func):
@@ -368,7 +368,7 @@ class Editor(object):
                                                            confirm_func,
                                                            options_data)
         response = dialog.run_dialog()
-        dialog.destroy()
+        del dialog
         return response == ACCEPT_RESPONSE
 
     def undo_checkout_order(self, checked_out_data, confirm_function):
