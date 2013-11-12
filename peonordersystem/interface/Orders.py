@@ -384,15 +384,19 @@ class OrderStore(Gtk.TreeStore):
         
         # add post-update information
         if menu_item.has_note() and not is_comped:
-            super(OrderStore, self).append(tree_iter,
-                                           (menu_item.notes,
-                                            '', None, text_color,
-                                            False, is_priority))
+            data = menu_item.notes, '', None, text_color, False, is_priority
+
+            super(OrderStore, self).append(tree_iter, data)
+
         if menu_item.has_options() and not is_comped:
-            super(OrderStore, self).append(tree_iter,
-                                           (str(menu_item.options)[1:-1],
-                                            '', None, text_color,
-                                            False, is_priority))
+
+            option_data = ''
+
+            for option in menu_item.options:
+                option_data += option.get_name() + ', '
+
+            data = (option_data, '', None, text_color, False, is_priority)
+            super(OrderStore, self).append(tree_iter, data)
 
         name = menu_item.get_name()
         stars = str(menu_item.stars)
@@ -528,6 +532,7 @@ class OrderStore(Gtk.TreeStore):
         of MenuItem objects stored in this object.
         """
         return str(self.order_list)
+
 
 @ErrorLogger.error_logging
 class Orders(object):

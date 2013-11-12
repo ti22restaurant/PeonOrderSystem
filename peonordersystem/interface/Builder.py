@@ -77,7 +77,7 @@ stored on table box. Last index is the 'TOGO' button.
         
         self.widgets = {}
         
-        menu_file = open(path.OPTIONS_DATA, 'r')
+        menu_file = open(path.CATEGORIES_DISPLAY_DATA, 'r')
         
         option_choices = jsonpickle.decode(menu_file.read())
         
@@ -390,8 +390,16 @@ def load_menu_items():
 
 
 def update_menu_items_data(updated_menu_items):
-    #TODO Docstring
+    """Updates the stored menu items data to
+    the given argument.
 
+    @param updated_menu_items: dict of str keys
+    representing the categories to value of list
+    of MenuItem objects representing the MenuItems
+    associated with that category.
+
+    @return: None
+    """
     menu = open(path.MENU_DATA, 'w')
     item_info = jsonpickle.encode(updated_menu_items)
     menu.write(item_info)
@@ -423,6 +431,33 @@ def update_discount_templates_data(discount_templates):
     """
     data_file = open(path.DISCOUNT_DATA, 'w')
     data_as_str = jsonpickle.encode(discount_templates)
+    data_file.write(data_as_str)
+
+
+def get_options_item_data():
+    """Gets the OptionItem data that
+    is stored and returns the information.
+
+    @return: dict of str that represent the
+    category mapped to a list of OptionItems
+    that represent the values of the category.
+    """
+    data_file = open(path.OPTION_DATA, 'r')
+    data_as_str = data_file.read()
+    return jsonpickle.decode(data_as_str)
+
+
+def update_options_item_data(options_data):
+    """Updates the options item data stored.
+
+    @param options_data: dict of str key that
+    represents the categories and maps to list
+    of OptionItem that represent the values.
+
+    @return: None
+    """
+    data_file = open(path.OPTION_DATA, 'w')
+    data_as_str = jsonpickle.encode(options_data)
     data_file.write(data_as_str)
 
 

@@ -305,28 +305,67 @@ class UI(object):
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
-    def edit_options(self, *args):  # @IGNORE:W0613
+    def edit_options(self, *args):
         """Callback method when edit options button has been
         clicked. This methods instantiates a new dialog window
         in which the user may perform the desired actions. Upon
         closing the dialog window is deleted.
         
-        @param *args: wildcard representing the button clicked
+        @param args: wildcard representing the button clicked
+
+        @return: None
         """
         menu_item = self.orders.get_selected()
         name = menu_item.get_name()
         self.update_status('Waiting for options to be ' +
                            'selected on {}...'.format(name))
-        confirmed = self.editor.edit_options(menu_item)
+        response = self.editor.edit_options(menu_item)
 
         message = 'updated options on ' + name
-        if confirmed:
+        if response == Editor.ACCEPT_RESPONSE:
             message = 'Confirmed ' + message
             self.orders.update_item()
+
+        elif response == Editor.GENERAL_OPTIONS_RESPONSE:
+            self.edit_general_options()
+
         else:
             message = 'Canceled ' + message
 
         self.update_status(message)
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def edit_general_options(self, *args):
+        """Calls a general edit dialog window
+        to be opened on the currently selected
+        MenuItem object. This dialog window
+        allows for options to be added to a MenuItem
+        object from the total, general options
+        data that contains all possible option choices.
+
+        @param args: wildcard catchall that is used to
+        catch the Gtk.Widget that called this method.
+
+        @return:
+        """
+        menu_item = self.orders.get_selected()
+        name = menu_item.get_name()
+        self.update_status('Opening general options to edit ' +
+                           '{}'.format(name))
+        option_data = Builder.get_options_item_data()
+        response = self.editor.edit_general_options(option_data, menu_item)
+
+        if response == Editor.ACCEPT_RESPONSE:
+            self.orders.update_item()
+
+            message = 'Adding options to {}... done'.format(name)
+
+        else:
+            messsage = 'Cancelling options add to {}.'.format(name)
+
+        self.update_status(message)
+
 
     #===========================================================================
     # This block contains methods pertaining to dialog windows that
@@ -614,10 +653,15 @@ class UI(object):
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
     def add_checkout_order(self, imported_order):
-        """
+        """Adds the given, previously checked out
+        order to the current orders displayed.
 
-        @param imported_order:
-        @return:
+        @param imported_order: list of MenuItem
+        objects that represents an order that
+        was previously checked out and is being
+        imported.
+
+        @return: None
         """
         for key in imported_order:
             self.orders.load_new_order(key, imported_order[key])
