@@ -330,7 +330,7 @@ class OptionItem(object):
         is additive and thus "ADD", removal and thus
         "NO" or substitution and thus "SUB".
         """
-        return self.relation
+        return self._relation
 
     def __repr__(self):
         """Get a string representation of this

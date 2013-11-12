@@ -67,7 +67,7 @@ SPLIT_CHECK_DIALOG_RESPONSE = 99
 PRINT_DIALOG_RESPONSE = SPLIT_CHECK_DIALOG_RESPONSE - 1
 COMP_DIALOG_RESPONSE = PRINT_DIALOG_RESPONSE - 1
 DISCOUNT_DIALOG_RESPONSE = COMP_DIALOG_RESPONSE - 1
-ADDITIONAL_OPTIONS_DIALOG_RESPONSE = DISCOUNT_DIALOG_RESPONSE - 1
+GENERAL_OPTIONS_DIALOG_RESPONSE = DISCOUNT_DIALOG_RESPONSE - 1
 
 #=========================================================
 # This block represents windows that form the
@@ -2089,7 +2089,7 @@ class OptionEntryDialog(EntryDialog):
 
         @return: None
         """
-        self.dialog.response(ADDITIONAL_OPTIONS_DIALOG_RESPONSE)
+        self.dialog.response(GENERAL_OPTIONS_DIALOG_RESPONSE)
         self.dialog.destroy()
     
     def cancel_data(self):
@@ -3442,7 +3442,7 @@ class GeneralOptionSelectionDialog(SelectionDialog):
         add_button = Gtk.Button('ADD OPTION')
         add_button.set_can_focus(False)
         add_button.set_size_request(150, 50)
-        add_button.connect('clicked', self.add_new_option, 'ADD')
+        add_button.connect('clicked', self.add_new_option, 1)
         sub_box.pack_start(add_button, False, False, 5.0)
         add_box.pack_start(sub_box, False, False, 5.0)
 
@@ -3450,7 +3450,7 @@ class GeneralOptionSelectionDialog(SelectionDialog):
         sub_button = Gtk.Button('SUB OPTION')
         sub_button.set_can_focus(False)
         sub_button.set_size_request(150, 50)
-        sub_button.connect('clicked', self.add_new_option, 'SUB')
+        sub_button.connect('clicked', self.add_new_option, -1)
         sub_box.pack_start(sub_button, False, False, 5.0)
         add_box.pack_start(sub_box, False, False, 5.0)
 
@@ -3458,7 +3458,7 @@ class GeneralOptionSelectionDialog(SelectionDialog):
         no_button = Gtk.Button('NO OPTION')
         no_button.set_can_focus(False)
         no_button.set_size_request(150, 50)
-        no_button.connect('clicked', self.add_new_option, 'NO')
+        no_button.connect('clicked', self.add_new_option, 0)
         sub_box.pack_start(no_button, False, False, 5.0)
         add_box.pack_start(sub_box, False, False, 5.0)
 
@@ -3547,13 +3547,10 @@ class GeneralOptionSelectionDialog(SelectionDialog):
             item_model = self.item_view.get_model()
 
             name = option_model[itr][0]
-            if option_relation is 'ADD':
+            if option_relation == 1:
                 price = option_model[itr][1]
             else:
                 price = str(0.0)
-
-            data = option_relation, name, price
-            item_model.append(data)
 
             option_list = self.option_data[category]
             path = option_model.get_path(itr)
@@ -3563,6 +3560,11 @@ class GeneralOptionSelectionDialog(SelectionDialog):
             option_item.set_option_relation(option_relation)
 
             self.new_option_list.append(option_item)
+
+            relation = option_item.get_option_relation()
+
+            option_data = relation, name, price
+            item_model.append(option_data)
 
     def remove_selected_option(self, *args):
         """Removes the currently selected item
@@ -3594,6 +3596,10 @@ class GeneralOptionSelectionDialog(SelectionDialog):
 
         @return: None
         """
+        for option in self.new_option_list:
+            print option.get_name()
+            print option.get_price()
+            print option.get_option_relation()
         self.menu_item.options = self.new_option_list
 
 #==========================================================
