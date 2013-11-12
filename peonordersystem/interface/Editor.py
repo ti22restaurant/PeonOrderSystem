@@ -343,6 +343,32 @@ class Editor(object):
                                                                          confirm_function,
                                                                          discount_templates)
         response = dialog.run_dialog()
+        dialog.destroy()
+        return response == ACCEPT_RESPONSE
+
+    def update_option_items_data(self, options_data, confirm_func):
+        """Calls a dialog window that allows the user to edit
+        the stored general OptionItems data file that the UI
+        uses to generate the general OptionItems from. Runs dialog
+        via this method. Upon confirmation the given confirm
+        func is called with the new option data.
+
+        @param options_data: dict of str keys representing the
+        option categories mapped to list of OptionItem objects
+        that represents the associated options.
+
+        @param confirm_func: Function that is to be called
+        with the given updated options data in the same format,
+        upon confirmation.
+
+        @return: bool value representing if the data updating
+        was confirmed or not.
+        """
+        dialog = Dialog.UpdateGeneralOptionSelectionDialog(self.parent,
+                                                           confirm_func,
+                                                           options_data)
+        response = dialog.run_dialog()
+        dialog.destroy()
         return response == ACCEPT_RESPONSE
 
     def undo_checkout_order(self, checked_out_data, confirm_function):
