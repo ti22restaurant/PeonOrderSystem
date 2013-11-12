@@ -773,10 +773,10 @@ class UI(object):
 
         @return: None
         """
-        option_data = Builder.get_option_item_data()
+        option_data = Builder.get_options_item_data()
 
         self.update_status('Awaiting editing of raw OptionItem data...')
-        response = self.editor.update_option_items_Data(option_data,
+        response = self.editor.update_option_items_data(option_data,
                                                 self.dump_updated_option_data)
         if response:
             message = 'Edited stored General OptionItem data.'
