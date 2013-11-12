@@ -18,6 +18,6 @@ MAIN_UI_PATH = SYSTEM_UI_PATH + 'PeonOrderSystemWindow.ui'
 MENU_DATA = SYSTEM_FILE_PATH + 'menu_document.json'
 OPTION_DATA = SYSTEM_FILE_PATH + 'options_document.json'
 DISCOUNT_DATA = SYSTEM_FILE_PATH + 'discount_template_data.json'
-OPTIONS_DATA = SYSTEM_UI_PATH + 'option_choices.json'
+CATEGORIES_DISPLAY_DATA = SYSTEM_UI_PATH + 'option_choices.json'
 NON_FATAL_ERROR_MESSAGES_DATA = SYSTEM_LOG_PATH + \
                                 'non_fatal_error_messages.json'
