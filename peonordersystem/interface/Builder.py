@@ -390,8 +390,16 @@ def load_menu_items():
 
 
 def update_menu_items_data(updated_menu_items):
-    #TODO Docstring
+    """Updates the stored menu items data to
+    the given argument.
 
+    @param updated_menu_items: dict of str keys
+    representing the categories to value of list
+    of MenuItem objects representing the MenuItems
+    associated with that category.
+
+    @return: None
+    """
     menu = open(path.MENU_DATA, 'w')
     item_info = jsonpickle.encode(updated_menu_items)
     menu.write(item_info)

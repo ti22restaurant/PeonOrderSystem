@@ -3596,10 +3596,6 @@ class GeneralOptionSelectionDialog(SelectionDialog):
 
         @return: None
         """
-        for option in self.new_option_list:
-            print option.get_name()
-            print option.get_price()
-            print option.get_option_relation()
         self.menu_item.options = self.new_option_list
 
 #==========================================================
@@ -5135,23 +5131,3 @@ def ensure_top_level_item(model, tree_iter):
     if parent_iter:
         return ensure_top_level_item(model, parent_iter)
     return tree_iter
-
-if __name__ == '__main__':
-
-    def confirm_func(*args):
-        print args
-
-    from peonordersystem.path import OPTION_DATA
-    import jsonpickle
-
-    jsonpickle.set_encoder_options('simplejson', sort_keys=True, indent=4)
-    f = open(OPTION_DATA, 'r')
-    data = jsonpickle.decode(f.read())
-    print data
-
-    menu_item = MenuItem("Carl's Item", 18.40)
-
-    dialog = GeneralOptionSelectionDialog(None, copy(data), menu_item)
-    dialog.run_dialog()
-
-    print menu_item.options
