@@ -272,10 +272,6 @@ class OptionItem(object):
         the price associated with this
         option.
         """
-        print type(self._price)
-        print self._price
-        print type(self._price_scalar)
-        print self._price_scalar
         return self._price * self._price_scalar
 
     def get_category(self):
