@@ -5603,15 +5603,3 @@ def run_warning_dialog(parent, title, message):
     warning_dialog.destroy()
 
     return response == Gtk.ResponseType.YES
-
-if __name__ == '__main__':
-
-    from peonordersystem.interface import Builder
-
-    def confirm_func(*args):
-        print args
-
-    data = Builder.get_options_item_data()
-
-    dialog = UpdateGeneralOptionSelectionDialog(None, confirm_func, data)
-    dialog.run_dialog()
