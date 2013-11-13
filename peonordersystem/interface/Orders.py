@@ -26,11 +26,14 @@ where changes are made that would
 
 from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 
+from copy import copy
 from peonordersystem.MenuItem import MenuItem
 from peonordersystem import ErrorLogger
 from peonordersystem.ConfirmationSystem import TOGO_SEPARATOR
 from peonordersystem import CustomExceptions
-from peonordersystem.interface.Dialog import STANDARD_TEXT, STANDARD_TEXT_BOLD, STANDARD_TEXT_LIGHT
+from peonordersystem.Settings import STANDARD_TEXT, STANDARD_TEXT_BOLD, \
+    STANDARD_TEXT_LIGHT, MENU_ITEM_CONFIRMED_COLOR_HEXADECIMAL, \
+    MENU_ITEM_NON_CONFIRMED_COLOR_HEXADECIMAL
 
 import time
 
@@ -46,7 +49,7 @@ class OrderTreeView(Gtk.TreeView):
     """
     
     def __init__(self):  # @IGNORE:E1002
-        """Initalizes a new OrderTreeView
+        """Initializes a new OrderTreeView
         object. All columns are generated and added
         to the OrderTreeView object via this method.
         
@@ -62,7 +65,7 @@ class OrderTreeView(Gtk.TreeView):
     
     def _generate_columns(self, wrap_width=250,
                          col_names=('Menu Items', 'Stars', 'Notes')):
-        """Genertes the columns to be stored in the OrderTreeView
+        """Generates the columns to be stored in the OrderTreeView
         object.
         
         @param wrap_width: keyword argument that represents the
@@ -250,9 +253,9 @@ class OrderStore(Gtk.TreeStore):
         """
         if is_confirmed:
             # Hexadecimal GRAY
-            return '#999999'
+            return MENU_ITEM_CONFIRMED_COLOR_HEXADECIMAL
         # Hexadecimal BLACK
-        return '#000000'
+        return MENU_ITEM_NON_CONFIRMED_COLOR_HEXADECIMAL
 
     def _get_weight(self, has_priority):
         """Private Method.
@@ -381,15 +384,20 @@ class OrderStore(Gtk.TreeStore):
         
         # add post-update information
         if menu_item.has_note() and not is_comped:
-            super(OrderStore, self).append(tree_iter,
-                                           (menu_item.notes,
-                                            '', None, text_color,
-                                            False, is_priority))
+            data = menu_item.notes, '', None, text_color, False, is_priority
+
+            super(OrderStore, self).append(tree_iter, data)
+
         if menu_item.has_options() and not is_comped:
-            super(OrderStore, self).append(tree_iter,
-                                           (str(menu_item.options)[1:-1],
-                                            '', None, text_color,
-                                            False, is_priority))
+
+            option_data = ''
+
+            for option in menu_item.options:
+                option_data += option.get_option_relation() + ': '
+                option_data += option.get_name() + ', '
+
+            data = (option_data, '', None, text_color, False, is_priority)
+            super(OrderStore, self).append(tree_iter, data)
 
         name = menu_item.get_name()
         stars = str(menu_item.stars)
@@ -399,6 +407,9 @@ class OrderStore(Gtk.TreeStore):
             name = '( ' + name + ' )'
             stars = ''
             has_note = False
+
+        elif not menu_item.is_locked() and menu_item.confirmed:
+            stars = ''
 
         self[tree_iter][0] = name
         self[tree_iter][1] = stars
@@ -428,21 +439,69 @@ class OrderStore(Gtk.TreeStore):
 
                 if menu_item in priority_order:
                     has_priority = True
+                    priority_order.remove(menu_item)
                 else:
                     has_priority = False
 
                 self.update_item(tree_iter, has_priority=has_priority)
             self.confirm_order(self.iter_next(tree_iter), priority_order)
 
+    def edit_order(self, updated_order):
+        """Edits the displayed order to
+        the updated_order given.
+
+        @param updated_order: list of MenuItem
+        objects that is to be the new updated
+        order to display.
+
+        @return: None
+        """
+        update_index = 0
+        display_index = 0
+
+        while update_index < len(updated_order):
+            updated_item = updated_order[update_index]
+
+            if display_index < len(self.order_list):
+                displayed_item = self.order_list[display_index]
+
+                row = self[display_index]
+                is_priority = row[5] is self._get_weight(True)
+
+                if updated_item == displayed_item:
+                    self.order_list[display_index] = updated_item
+                    self.update_item(row.iter, has_priority=is_priority)
+                    display_index += 1
+                    update_index += 1
+                else:
+                    self.remove(row.iter)
+
+            else:
+                itr = self.append(updated_item)
+                self.update_item(itr)
+                update_index += 1
+                display_index += 1
+
+        while display_index < len(self.order_list):
+                self.remove(self[display_index].iter)
+
     def update_order(self):
-        """Updates the display for
-        every menu item stored in
-        the displayed order.
+        """Updates each entry of the
+        displayed order to accurately
+        display the proper information
+        for each menu_item.
+
+        @note: This is akin to preforming
+        update_item for every item in the
+        entire order.
+
+        @return: None
         """
         itr = self.get_iter_first()
 
         while itr:
-            self.update_item(itr)
+            priority = self[itr][5] is self._get_weight(True)
+            self.update_item(itr, has_priority=priority)
             itr = self.iter_next(itr)
 
     def _dump(self):
@@ -475,6 +534,7 @@ class OrderStore(Gtk.TreeStore):
         """
         return str(self.order_list)
 
+
 @ErrorLogger.error_logging
 class Orders(object):
     """Orders represents the main interactions with
@@ -503,11 +563,8 @@ class Orders(object):
     order.
     """
     
-    def __init__(self, parent, load_data=None, num_of_tables=10):
+    def __init__(self, load_data=None, num_of_tables=10):
         """Initializes and creates the Orders object.
-        
-        @param parent: Gtk.Container subclass from
-        which the TreeView will be displayed.
         
         @keyword load_data: represents the data that the
         orders should be loaded from. This is either None
@@ -519,7 +576,6 @@ class Orders(object):
         of tables for orders to be generated for.
         """
         self.tree_view = OrderTreeView()
-        parent.add(self.tree_view)
         
         self.orders_dict = {}
         for num in range(num_of_tables):
@@ -533,6 +589,16 @@ class Orders(object):
         
         if load_data is not None and type(load_data) is tuple:
             self._load_data(load_data)
+
+    def get_display_view(self):
+        """ Gets the display_view associated
+        with the Orders object.
+
+        @return: Gtk.TreeView that is used
+        by the Orders object to display the
+        information stored.
+        """
+        return self.tree_view
 
     def _load_data(self, load_data):
         """Loads the data from the files, and
@@ -548,32 +614,56 @@ class Orders(object):
         
         for table in table_orders:
 
-            if table not in self.orders_dict:
-                self.orders_dict[table] = OrderStore()
-                
-            self.current_order = self.orders_dict[table]
-
-            for menu_item in table_orders[table]:
-                itr = self.current_order.append(menu_item)
-                self.current_order.update_item(itr)
+            self.load_new_order(table, table_orders[table],
+                                is_table=True)
         
         for togo_name in togo_orders:
 
-            name, number = togo_name.split(TOGO_SEPARATOR)
+            if TOGO_SEPARATOR in togo_name:
+                name, number = togo_name.split(TOGO_SEPARATOR)
 
-            # standard Dialog generated time format.
-            curr_time = time.strftime('%X, %A, %m/%y')
-            
-            key = (name, number, curr_time)
-            
-            self.select_togo_order(key)
-            load_order = togo_orders[togo_name]
-            
-            for menu_item in load_order:
-                self.current_order.append(menu_item)
+                # standard Dialog generated time format.
+                curr_time = time.strftime('%X, %A, %m/%y')
+
+                key = (name, number, curr_time)
+            else:
+                key = togo_name
+
+            self.load_new_order(key, togo_orders[togo_name],
+                                is_table=False)
         
         self.current_order = None
         self._set_model()
+
+    def load_new_order(self, key, order_info, is_table=False):
+        """Loads the given order into the object under the given
+        key. Replaces the key if it already exists.
+
+        @param key: str or tuple that represents the table if
+        the is_table keyword is True, tuple expected for key
+        if is_table keyword is False
+
+        @param order_info: list of MenuItem objecs that
+        represents the order to be added.
+
+        @keyword is_table: bool value representing if
+        the order should be displayed as a table or as
+        a togo order.
+
+        @return: None
+        """
+        if is_table:
+            order_dict = self.orders_dict
+            key = key
+        else:
+            order_dict = self.to_go_dict
+
+        order_dict[key] = OrderStore()
+        order = order_dict[key]
+
+        for menu_item in order_info:
+            itr = order.append(menu_item)
+            order.update_item(itr)
 
     def _get_selected_iter(self):
         """Private Method.
@@ -596,14 +686,23 @@ class Orders(object):
 
         return itr
         
-    def get_togo_orders(self):
-        """Gets a list of the current togo orders.
+    def get_togo_orders_list(self):
+        """Gets a list of the current togo
+        orders keys.
         
         @return: list of 3-tuples where each entry
         represents a togo order. Each 3-tuple is
         of the form (str, str, str) = (name, number, time)
         """
         return self.to_go_dict.keys()
+
+    def get_orders_list(self):
+        """Get a list of current orders keys.
+
+        @return: list of str where each entry
+        represents a order.
+        """
+        return self.orders_dict.keys()
     
     def select_togo_order(self, key):
         """Selects the given 3-tuple which represents
@@ -628,7 +727,7 @@ class Orders(object):
         """Sets the current table and order considered
         to the given value.
         
-        @param num: int value representing the selected
+        @param table: int value representing the selected
         table
         """
         if table not in self.orders_dict:
@@ -646,7 +745,7 @@ class Orders(object):
         """
         if _check_order(self.current_order):
             order_list = self.current_order.order_list
-            return order_list
+            return copy(order_list)
     
     def get_selected(self):
         """Gets the selected MenuItem.
@@ -701,14 +800,20 @@ class Orders(object):
         """
         key, order_list = self._get_order_key()
         
-        if order_list is self.to_go_dict:
+        if key in self.to_go_dict:
             key = key[0] + TOGO_SEPARATOR + key[1]
         
-        return key, self.current_order.order_list
+        return key, self.get_current_order()
 
     def confirm_order(self, priority_order=[]):
         """Set all MenuItems in the current order to
         confirmed
+
+        @keyword priority_order: list of MenuItem objects
+        that represents the priority order associated
+        with this confirmation.
+
+        @return: None
         """
         if _check_order(self.current_order):
 
@@ -718,13 +823,35 @@ class Orders(object):
                 raise RuntimeError(message)
 
             tree_iter = self.current_order.get_iter_first()
-            self.current_order.confirm_order(tree_iter, priority_order)
+            self.current_order.confirm_order(tree_iter, priority_order[:])
 
     def update_order(self):
         """Updates every item in the
         currently selected order.
+
+        @return: None
         """
         self.current_order.update_order()
+
+    def edit_order(self, edited_order):
+        """Edits the order so that the given
+        edited order is displayed in lieu of
+        the currently stored order.
+
+        Any attributes that are shared between
+        the edited order and current order will
+        remain. i,e. menu_item priority, or
+        same menu items displayed.
+
+        @param edited_order: list of MenuItem
+        objects that represents the order to
+        be updated. This order will replace the
+        currently stored order.
+
+        @return: None
+        """
+        order = self.current_order
+        order.edit_order(edited_order)
 
     def clear_order(self):
         """Clears the current order.
@@ -734,8 +861,8 @@ class Orders(object):
         """
         if _check_order(self.current_order):
             found_key, order_list = self._get_order_key()
-            if order_list is self.to_go_dict:
-                del order_list[found_key]
+            if found_key in self.to_go_dict:
+                del self.to_go_dict[found_key]
             self.current_order.clear()
             self.current_order = None
             self._set_model()
@@ -754,7 +881,7 @@ class Orders(object):
             
             for key, value in itr:
                 if value is self.current_order:
-                    return key, order_list
+                    return key, self.get_current_order()
         
         return None
 

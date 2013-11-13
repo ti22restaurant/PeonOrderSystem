@@ -35,6 +35,7 @@ for value in current_date:
         os.mkdir(directory)
 
 TOGO_SEPARATOR = '::@::'
+CHECKOUT_SEPARATOR = '::=::'
 
 
 def generate_files():
@@ -56,7 +57,7 @@ def generate_files():
         os.mkdir(curr_directory)
         os.mkdir(directory + 'checkout/')
     else:
-        return unpack_information(curr_directory)
+        return unpack_order_data(curr_directory)
 
     return {}, {}
 
@@ -96,7 +97,7 @@ def standardize_checkout_file_name(order_name):
     """
     order_name = order_name.replace(' ', '_')
     curr_time = time.strftime('%H-%M-%S')
-    return order_name + '_' + curr_time + '.checkout'
+    return curr_time + CHECKOUT_SEPARATOR + order_name + '.checkout'
 
 
 def order_confirmed(order_name, priority_list,
@@ -119,7 +120,8 @@ def order_confirmed(order_name, priority_list,
     is included for purposes of printing and retrieving
     accurate data.
     """
-    # TODO send priority_list, order_list to kitchen
+    print_order(order_name, non_priority_list,
+                priority_list=priority_list)
 
     curr_directory = directory + 'confirmed/'
     order_name = standardize_confirm_file_name(order_name)
@@ -141,8 +143,11 @@ def remove_order_confirmed_file(order_name):
     """
     curr_directory = directory + 'confirmed/'
     order_name = standardize_confirm_file_name(order_name)
-    
-    os.remove(curr_directory + order_name)
+
+    f_name = curr_directory + order_name
+
+    if os.path.isfile(f_name):
+        os.remove(curr_directory + order_name)
 
 
 def checkout_confirmed(order_name, orders, order_list):
@@ -173,12 +178,61 @@ def checkout_confirmed(order_name, orders, order_list):
     curr_file.write(obj_info)
 
     for order in orders:
-        # TODO send order to checkout printer
-        print order
-        pass
+        print_check(order_name, order)
 
 
-def unpack_information(curr_directory):
+def print_order(order_name, order_list, priority_list=None):
+    """Send the given order to the order
+    printer. If given a priority order the
+    priority order is given special priority
+    status and printed first. The remaining
+    order is printed last.
+
+    @param order_name: str representation of
+    the order.
+
+    @param order_list: list of MenuItem objects
+    that represents the order to be sent to the
+    order printer.
+
+    @keyword priority_list: list of MenuItem
+    objects that represents the priority order to
+    be sent to the order printer.
+
+    @return: None
+    """
+    #TODO print order to order printer
+    print 'TO ORDER'
+    print order_name
+    if priority_list:
+        print priority_list
+
+    print order_list
+    print ''
+    pass
+
+
+def print_check(order_name, order_list):
+    """Send the given order to the check
+    printer.
+
+    @param order_name: str representation
+    of the orders name
+
+    @param order_list: list of MenuItem objects
+    that is to be printed to the check printer.
+
+    @return: None
+    """
+    #TODO send order to checkout printer
+    print 'TO CHECK'
+    print order_name
+    print order_list
+    print''
+    pass
+
+
+def unpack_order_data(curr_directory):
     """Unpacks the information stored in
     the given directory and returns
     that information.
@@ -215,3 +269,55 @@ def unpack_information(curr_directory):
         current_orders[filename] = loaded_data
 
     return table_orders, togo_orders
+
+
+def unpack_checkout_data(load_date=current_date):
+    """Unpacks the information stored
+    in the checkout area, of the date
+    designated
+
+    @keyword load_date: tuple of 3 str
+    indexes represent (YYYY, MM, DD).
+    The given information will be loaded
+    from that date.
+
+    @return: dict of key tuples, with
+    each index a str. Representing
+    (name, time). Mapped to values
+    representing a list of MenuItem
+    objects that represents the checked
+    out order
+    """
+    checkout_data = {}
+
+    curr_directory = path.SYSTEM_ORDERS_PATH
+    curr_directory += str(load_date[0]) + '/' + str(load_date[1]) +\
+                      '/' + str(load_date[2]) + '/'
+    curr_directory += 'checkout/'
+
+    itr = os.walk(curr_directory)
+    dirpath, dirnames, filenames = itr.next()
+
+    for curr_filename in filenames:
+
+        filename, filetype = curr_filename.split('.')
+        filetime, filename = filename.split(CHECKOUT_SEPARATOR)
+
+        separator = None
+        if TOGO_SEPARATOR in filename:
+            separator = TOGO_SEPARATOR
+        else:
+            separator = '_'
+
+        filename = filename.replace(separator, ' ')
+
+
+        data = open(dirpath + curr_filename)
+        loaded_data = jsonpickle.decode(data.read())
+
+        key = (filename, filetime + ', ' + str(current_date[1]) +
+                         '/' + str(current_date[2]))
+
+        checkout_data[key] = loaded_data
+
+    return checkout_data

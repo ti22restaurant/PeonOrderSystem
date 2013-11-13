@@ -14,7 +14,7 @@ import copy
 from peonordersystem.interface import Builder
 from peonordersystem.interface.Orders import Orders
 from peonordersystem.interface.Reservations import Reservations
-from peonordersystem.interface.Editor import Editor
+from peonordersystem.interface import Editor
 from peonordersystem.interface.UpcomingOrders import UpcomingOrders
 from peonordersystem import ErrorLogger
 from peonordersystem import CustomExceptions
@@ -114,8 +114,8 @@ class UI(object):
         self.builder.connect_signals(self)
         
         # These objects control the main orders and their displays
-        self.orders = Orders(self.builder.order_window,
-                             load_data=load_data)
+        self.orders = Orders(load_data=load_data)
+        self.builder.set_menu_item_view(self.orders.get_display_view())
         
         # These objects control secondary displays
         self.reservations = Reservations(self.builder.reservation_window)
@@ -123,7 +123,7 @@ class UI(object):
                                               load_data=load_data)
         
         # These objects control dialog windows.
-        self.editor = Editor(self.builder.window)
+        self.editor = Editor.Editor(self.builder.window)
         self.update_status('Awaiting input...')
     
     #===========================================================================
@@ -305,33 +305,91 @@ class UI(object):
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
-    def edit_options(self, *args):  # @IGNORE:W0613
+    def edit_options(self, *args):
         """Callback method when edit options button has been
         clicked. This methods instantiates a new dialog window
         in which the user may perform the desired actions. Upon
         closing the dialog window is deleted.
         
-        @param *args: wildcard representing the button clicked
+        @param args: wildcard representing the button clicked
+
+        @return: None
         """
         menu_item = self.orders.get_selected()
         name = menu_item.get_name()
         self.update_status('Waiting for options to be ' +
                            'selected on {}...'.format(name))
-        confirmed = self.editor.edit_options(menu_item)
+        response = self.editor.edit_options(menu_item)
 
         message = 'updated options on ' + name
-        if confirmed:
+        if response == Editor.ACCEPT_RESPONSE:
             message = 'Confirmed ' + message
             self.orders.update_item()
+
+        elif response == Editor.GENERAL_OPTIONS_RESPONSE:
+            self.edit_general_options()
+
         else:
             message = 'Canceled ' + message
 
         self.update_status(message)
 
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def edit_general_options(self, *args):
+        """Calls a general edit dialog window
+        to be opened on the currently selected
+        MenuItem object. This dialog window
+        allows for options to be added to a MenuItem
+        object from the total, general options
+        data that contains all possible option choices.
+
+        @param args: wildcard catchall that is used to
+        catch the Gtk.Widget that called this method.
+
+        @return:
+        """
+        menu_item = self.orders.get_selected()
+        name = menu_item.get_name()
+        self.update_status('Opening general options to edit ' +
+                           '{}'.format(name))
+        option_data = Builder.get_options_item_data()
+        response = self.editor.edit_general_options(option_data, menu_item)
+
+        if response == Editor.ACCEPT_RESPONSE:
+            self.orders.update_item()
+
+            message = 'Adding options to {}... done'.format(name)
+
+        else:
+            messsage = 'Cancelling options add to {}.'.format(name)
+
+        self.update_status(message)
+
+
     #===========================================================================
     # This block contains methods pertaining to dialog windows that
     # are initiated by the user.
     #===========================================================================
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def initiate_response_dialog(self, response_type):
+        """Initiates a new dialog window based on the
+        response type provided.
+
+        @param response_type: int representing a
+        ResponseType defined as a constant in the
+        Editor module
+
+        @return: None
+        """
+        if response_type == Editor.COMP_RESPONSE:
+            self.comp_order()
+        elif response_type == Editor.SPLIT_CHECK_RESPONSE:
+            self.split_check_order()
+        elif response_type == Editor.DISCOUNT_RESPONSE:
+            self.discount_order()
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
@@ -364,13 +422,36 @@ class UI(object):
         """
         self.update_status('Waiting for checkout confirmation...')
         current_order = self.orders.get_current_order()
-        confirmed = self.editor.checkout_order(current_order, self.checkout_confirm)
+        response = self.editor.checkout_order(current_order, self.checkout_confirm)
+
+        if response == Editor.ACCEPT_RESPONSE:
+            self.update_status('Checking out table. Clearing order... done')
+        elif response == Editor.REJECT_RESPONSE:
+            self.update_status('Cancelling checkout. Restoring order... done')
+        else:
+            self.initiate_response_dialog(response)
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def split_check_order(self, *args):
+        """Calls the split check order method to
+        allow the user to perform a split check order.
+        Upon confirmation performs a checkout of the order.
+
+        @param args: wildcard catchall used to catch the
+        Gtk.Widget that called this method.
+
+        @return: None
+        """
+        self.update_status('Waiting for split check confirmation...')
+        current_order = self.orders.get_current_order()
+        confirmed = self.editor.split_check_order(current_order,
+                                                  self.checkout_confirm)
 
         if confirmed:
-            message = 'Checking out table. Clearing order... done'
+            self.update_status('Splitting Checking... Clearing order')
         else:
-            message = 'Cancelling checkout. Restoring order... done'
-        self.update_status(message)
+            self.update_status('Cancelled checkout... Retrieving order')
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
@@ -381,7 +462,7 @@ class UI(object):
         @param *args: wild card that represents a catch all.
         """
         self.update_status('Waiting for order selection...')
-        current_names = self.orders.get_togo_orders()
+        current_names = self.orders.get_togo_orders_list()
         confirmed = self.editor.select_misc_order(current_names,
                                                   self.order_selection_confirm_function)
         if not confirmed:
@@ -396,19 +477,69 @@ class UI(object):
         items in the selected order.
 
         @param args: wildcard catchall that represents the
-        button that called this method.
+        Gtk.Widget that called this method.
 
         @return: None
         """
         self.update_status('Waiting for comp confirmation...')
         current_order = self.orders.get_current_order()
-        confirmed = self.editor.comp_item_order(current_order, self.comp_confirm)
+        confirmed = self.editor.comp_item_order(current_order, self.update_order)
 
         if confirmed:
             message = 'Selected menu items comped. Retrieving order.. done'
         else:
             message = 'Cancelling comp selection. Restoring order... done'
         self.update_status(message)
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def discount_order(self, *args):
+        """Callback method when discount selection has been
+        clicked. This method instantiates a new dialog window
+        that allows the user to add and remove discount MenuItem
+        objects to the selected order.
+
+        @param args: wildcard catchall that is used to catch the
+        Gtk.Widget that called this method.
+
+        @return: None
+        """
+        self.update_status('Waiting for discount confirmation...')
+        current_order = self.orders.get_current_order()
+        discount_templates = Builder.get_discount_templates_data()
+        confirmed = self.editor.discount_item_order(current_order, self.edit_order,
+                                                    discount_templates)
+
+        if confirmed:
+            message = 'Applying Discounts... done'
+        else:
+            message = 'Cancelling discount selection. Restoring order... done'
+        self.update_status(message)
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def undo_checkout_order(self, checkout_data):
+        """Called when the associated Gtk.Widget
+        has been clicked. Allows user to interact
+        with a window that will undo previously
+        checked out orders and return them to the UI.
+
+        @param checkout_data: dict where each key is represented
+        by a tuple of (str, str) -> (name, date), and each value
+        mapped is a list of MenuItem objects.
+
+        @return: None
+        """
+        self.update_status('Waiting for Undo Checkout confirmation...')
+        confirmed = self.editor.undo_checkout_order(checkout_data,
+                                                    self.add_checkout_order)
+
+        if confirmed:
+            message = 'Adding undone checkout order to togo list... done'
+        else:
+            message = 'Cancelling undo checkout dialog.'
+        self.update_status(message)
+
 
     #===========================================================================
     # This block contains methods that are called via callback only when a
@@ -488,16 +619,52 @@ class UI(object):
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
-    def comp_confirm(self, comped_items_list):
-        """Callback Method that is called when the comp item
-        confirmation has been called and confirmed.
+    def update_order(self, updated_order=None):
+        """Callback Method that is called to update the
+        order with the given updated order.
 
-        @param comped_items_list: list of MenuItem objects
-        that are to be comped and displayed.
+        @keyword updated_order: list of MenuItem objects
+        that is the updated data. Default value is None
+        if the order is to be updated from currently
+        stored order.
 
         @return: None
         """
+        #updated_order may be used to display information
+        # at later time. order class doesn't require an
+        # argument to update it's order.
         self.orders.update_order()
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def edit_order(self, edited_order):
+        """Callback Method that is called to edit
+        the order with the given edited order.
+
+        @param edited_order: list of MenuItem objects
+        that is the edited order. This list will replace
+        the currently stored information in the order
+        object.
+
+        @return: None
+        """
+        self.orders.edit_order(edited_order)
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def add_checkout_order(self, imported_order):
+        """Adds the given, previously checked out
+        order to the current orders displayed.
+
+        @param imported_order: list of MenuItem
+        objects that represents an order that
+        was previously checked out and is being
+        imported.
+
+        @return: None
+        """
+        for key in imported_order:
+            self.orders.load_new_order(key, imported_order[key])
 
     #===========================================================================
     # This block contains methods that are used for obtaining information
@@ -574,6 +741,52 @@ class UI(object):
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
+    def update_discount_templates(self, *args):
+        """This method is called when the associated
+        widget is pressed. This method displays a dialog
+        window that the user can interact with to update
+        the stored discount templates.
+
+        @param args: wildcard catchall that is used to
+        catch the Gtk.Widget that called this method.
+
+        @return: None
+        """
+        discount_templates = Builder.get_discount_templates_data()
+
+        self.update_status('Awaiting editing of raw Discount Templates...')
+        response = self.editor.update_discount_templates(self.dump_discount_templates,
+                                                         discount_templates)
+        if response:
+            self.update_status('Edited Discount templates.')
+        else:
+            self.update_status('Cancelled Discount templates update.')
+
+    def update_option_items(self, *args):
+        """This method is called when the associated
+        widget is pressed. This method displays a dialog
+        window that the user can interact with to update
+        the stored general OptionItem data.
+
+        @param args: wildcard catchall that is used to
+        catch the Gtk.Widget that called this method.
+
+        @return: None
+        """
+        option_data = Builder.get_options_item_data()
+
+        self.update_status('Awaiting editing of raw OptionItem data...')
+        response = self.editor.update_option_items_data(option_data,
+                                                self.dump_updated_option_data)
+        if response:
+            message = 'Edited stored General OptionItem data.'
+        else:
+            message = 'Cancelled updating stored General OptionItem data.'
+
+        self.update_status(message)
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def dump_updated_menu_data(self, updated_menu_data):
         """Callback Method.
 
@@ -588,6 +801,36 @@ class UI(object):
         @return: None
         """
         Builder.update_menu_items_data(updated_menu_data)
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def dump_discount_templates(self, updated_discount_templates):
+        """Callback Method.
+
+        Called when the discount template data has been updated.
+        This method is used to call the associated methods to
+        dump the updated discount templates.
+
+        @param updated_discount_templates: list fo tuples that
+        represents discount templates.
+
+        @return: None
+        """
+        Builder.update_discount_templates_data(updated_discount_templates)
+
+    def dump_updated_option_data(self, updated_option_data):
+        """Called when the update option items has been
+        updated. This method is used to call the associated
+        methods necessary to dump the General OptionItem
+        data into its associated file.
+
+        @param update_option_data: str of keys representing
+        the OptionItem categories, mapped to list of OptionItems
+        that represent the options associated with that category.
+
+        @return: None
+        """
+        Builder.update_options_item_data(updated_option_data)
 
     def _dump(self):
         """Dumps the information regarding the

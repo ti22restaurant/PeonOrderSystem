@@ -17,6 +17,12 @@ These are all classes that instantiate new object dialog windows.
 These differ from the EntryDialogs as they are simply confirmations
 of a current orders list and do not allow for adjustment
 
+@group SelectionDialog: This group represents all subclasses of the
+SelectionDialog window. Windows of this type generate three separate
+boxes that are editable by the user and must be instantiated. Any
+confirmation of these windows calls the confirm function passed in
+at instantiation.
+
 @group OrderConfirmationDialog: This group represents all subclasses
 of the OrderConfirmationDialog. These are all classes that instantiate
 some form of the OrderConfirmationDialog windows. These differ from other
@@ -47,19 +53,22 @@ import math
 
 from peonordersystem import CheckOperations
 from peonordersystem.MenuItem import MenuItem
+from peonordersystem.MenuItem import OptionItem
+from peonordersystem.interface.Orders import Orders
+from peonordersystem.Settings import STANDARD_TEXT, STANDARD_TEXT_BOLD,\
+    STANDARD_TEXT_LIGHT
 
 #========================================================
 # This block represents module wide constants that are
 # utilized inside and outside of this module to determine
-# the text weight and responses of the classes and other
-# information.
+# the responses of the classes and other information.
 #========================================================
 
-STANDARD_TEXT_LIGHT = 200
-STANDARD_TEXT = 500
-STANDARD_TEXT_BOLD = 850
-
 SPLIT_CHECK_DIALOG_RESPONSE = 99
+PRINT_DIALOG_RESPONSE = SPLIT_CHECK_DIALOG_RESPONSE - 1
+COMP_DIALOG_RESPONSE = PRINT_DIALOG_RESPONSE - 1
+DISCOUNT_DIALOG_RESPONSE = COMP_DIALOG_RESPONSE - 1
+GENERAL_OPTIONS_DIALOG_RESPONSE = DISCOUNT_DIALOG_RESPONSE - 1
 
 #=========================================================
 # This block represents windows that form the
@@ -75,6 +84,7 @@ SPLIT_CHECK_DIALOG_RESPONSE = 99
 # by their naming convention. Which will be the classes
 # name followed by its super classes.
 #=========================================================
+
 
 class Dialog(object):
     """Abstract Base Class. Provides the base functionality
@@ -178,7 +188,7 @@ class Dialog(object):
     
     @abstractmethod
     def confirm_button_clicked(self, *args):
-        """ Abstract Method. Represents the callback
+        """ Abstract Method. Represents the
         method called when the Gtk.Dialog's confirm
         button is clicked in the action_area.
 
@@ -546,6 +556,142 @@ class ConfirmationDialog(Dialog):
         return True
 
 
+class SelectionDialog(Dialog):
+    """Abstract Base Class. Extends the basic
+    functionality from the Dialog window.
+
+    This window builds three containers in
+    the content area of the dialog window.
+
+    Upon confirmation this class calls the
+    given confirm function.
+
+    @group Dialog: This class is a subclass
+    member of the Dialog class. Any changes
+    in the parents functionality could effect
+    the functionality in this class.
+
+    @var confirm_func: Function that is called
+    when the dialog window is confirmed.
+    """
+    __metaclass__ = ABCMeta
+
+    def __init__(self, parent, title, default_size=(950, 500)):
+        """Initializes a new SelectionDialog.
+
+        @param parent: Gtk.Object that this dialog
+        is to be called on.
+
+
+
+        @param title: str representing the title
+        to be displayed of this dialog window.
+        """
+        super(SelectionDialog, self).__init__(parent, title,
+                                              default_size=default_size)
+
+    def generate_layout(self):
+        """Override Method.
+
+        Generates the layout of the
+        content area to be displayed
+        in the dialog box.
+
+        @return: Gtk.Container that
+        holds all the widgets to be
+        displayed in the content area.
+        """
+        main_box = Gtk.HBox()
+
+        main_selection_area = self.generate_main_selection_area()
+        main_box.pack_start(main_selection_area, True, True, 5.0)
+
+        secondary_selection_area = self.generate_secondary_selection_area()
+        main_box.pack_start(secondary_selection_area, True, True, 5.0)
+
+        item_selection_area = self.generate_item_selection_area()
+        main_box.pack_start(item_selection_area, True, True, 5.0)
+
+        return main_box
+
+    @abstractmethod
+    def generate_main_selection_area(self):
+        """Abstract Method.
+
+        Generates the main selection area
+        of the SelectionDialog.
+
+        @return: gtk.Container that holds all
+        the widgets for the main selection area.
+        """
+        pass
+
+    @abstractmethod
+    def generate_secondary_selection_area(self):
+        """Abstract Method.
+
+        Generates the secondary selection area
+        of the SelectionDialog
+
+        @return: gtk.Container that holds all the
+        widgets for the secondary selection area.
+        """
+        pass
+
+    @abstractmethod
+    def generate_item_selection_area(self):
+        """Abstract Method.
+
+        Generates the item selection area
+        of the SelectionDialog
+
+        @return: gtk.Container that holds all
+        the widgets for the item selection area.
+        """
+        pass
+
+    @abstractmethod
+    def confirm_data(self, *args):
+        """Abstract Method.
+
+        Confirms the data.
+
+        @param args: wildcard catchall
+        used to catch the arguments
+        passed to this from confirm button
+        clicked method.
+
+        @return: None
+        """
+
+    def confirm_button_clicked(self, *args):
+        """Override Method.
+
+        Confirms the dialog window, calls the
+        confirm data method with the given
+        arguments
+
+        @param args: wildcard arguments that are
+        passed into the confirm function.
+
+        @return: None
+        """
+        self.confirm_data(*args)
+        super(SelectionDialog, self).confirm_button_clicked()
+
+    def cancel_button_clicked(self, *args):
+        """Override Method.
+
+        Cancels the dialog window.
+
+        @param args: wildcard catchall for the widget
+        that called this method.
+
+        @return: None
+        """
+        super(SelectionDialog, self).cancel_button_clicked()
+
+
 #=========================================================
 # This block represents windows that form the specific
 # classes that can be instantiated. All classes in this
@@ -562,7 +708,7 @@ class ConfirmationDialog(Dialog):
 #=========================================================
 
 class AddReservationsDialog(Dialog):
-    """AddResdervationsDialog prompts the user with
+    """AddReservationsDialog prompts the user with
     a dialog window to insert a new reservation into
     the reservations list.
 
@@ -1304,22 +1450,21 @@ class UpdateMenuItemsDialog(Dialog):
         model, itr = selection.get_selected()
         key = model[itr][0]
 
-        response = True
+        if itr:
+            response = True
 
-        if len(self.model_data[key]) > 0:
-            message_title = 'Removing ' + key + ' will delete all associated Menu Items'
-            message = 'If you remove the category ' + key + ' all Menu Items contained' + \
-                      ' within this category will also be deleted. ' + \
-                      ' This cannot be undone!\n\nDo you want to continue?'
-            warning_dialog = Gtk.MessageDialog(self.dialog, 0, Gtk.MessageType.WARNING,
-                                               Gtk.ButtonsType.YES_NO, message_title)
-            warning_dialog.format_secondary_text(message)
-            response = warning_dialog.run() == Gtk.ResponseType.YES
-            warning_dialog.destroy()
+            if len(self.model_data[key]) > 0:
+                title = 'Removing ' + key + \
+                        ' will delete all associated Menu Items'
+                message = 'If you remove the category ' + key + \
+                          ' all Menu Items contained' + \
+                          ' within this category will also be deleted. ' + \
+                          ' This cannot be undone!\n\nDo you want to continue?'
+                response = run_warning_dialog(self.dialog, title, message)
 
-        if response:
-            model.remove(itr)
-            del self.model_data[key]
+            if response:
+                model.remove(itr)
+                del self.model_data[key]
 
     def update_item(self, *args):
         """Updates the item that has been
@@ -1422,6 +1567,358 @@ class UpdateMenuItemsDialog(Dialog):
         super(UpdateMenuItemsDialog, self).cancel_button_clicked()
 
 
+class UndoCheckoutDialog(Dialog):
+    """UndoCheckoutDialog window allows for the user to
+    access previously checked out orders and return them to the
+    main GUI for user interactions.
+
+    @group Dialog: This class is a subclass member of the Dialog
+    group. As such it inherits functionality from the Dialog super
+    class. Any changes in the Dialog class could effect the
+    functionality of this class.
+
+    @var name_entry: Gtk.Entry object that allows for entry of
+    a name to be displayed when the checked out order is undone.
+
+    @var orders: Orders object that allows for displaying and
+    editing the associated MenuItems with an order.
+
+    @var orders_view: Gtk.TreeView object that displays the orders
+    that had previously been checked out.
+
+    @var imported_view: Gtk.TreeView object that displays the imported
+    orders that will be passed back to the UI for user interaction.
+
+    @var confirm_func: Function that will be called upon confirmation.
+    """
+
+    def __init__(self, parent, checkout_information, confirm_func,
+                 title='Undo Checkout Dialog Window'):
+        """Initializes a new UndoCheckoutDialog window that allows
+        the user to retrieve previously checked out orders.
+
+        @param parent: Gtk.Object that this dialog window will be
+        called upon. The parent will be frozen and unable to be
+        interacted with until this dialog window is confirmed or
+        canceled.
+
+        @param checkout_information: dict where each key is a str
+        representing an order previously checked out, and each
+        value is a list of MenuItem objects that is associated
+        with the order that was checked out.
+
+        @param confirm_func: function that is to be called upon
+        confirmation of this dialog window.
+
+        @param title: str representing the
+        """
+        load_data = (checkout_information, {})
+
+        self.name_entry = None
+        self.orders = Orders(load_data=load_data, num_of_tables=0)
+
+        self.orders_view = None
+        self.imported_view = None
+
+        self.update_label = None
+
+        self.confirm_func = confirm_func
+
+        super(UndoCheckoutDialog, self).__init__(parent, title, default_size=(700, 800))
+
+    def generate_layout(self):
+        """Override Method.
+
+        Generates the main layout to
+        be displayed in the content area.
+
+        @return: Gtk.Container that contains
+        the widget that should be displayed in
+        the content area of the dialog window.
+        """
+        main_box = Gtk.HBox()
+
+        order_selection_area = self.generate_order_selection()
+        main_box.pack_start(order_selection_area, True, True, 5.0)
+
+        properties_area = self.generate_properties_area()
+        main_box.pack_start(properties_area, True, True, 5.0)
+
+        return main_box
+
+    def generate_order_selection(self):
+        """Generates the order selection
+        area. This area is expected to be
+        able to generate the names of each
+        previously checked out order that
+        can be imported.
+
+        @return: Gtk.Container that holds the
+        widgets to be displayed in this area.
+        """
+        order_frame = Gtk.Frame(label='Order Selection')
+        main_box = Gtk.VBox()
+
+        order_display_area = self.generate_order_display()
+        main_box.pack_start(order_display_area, True, True, 0.0)
+
+        order_frame.add(main_box)
+        return order_frame
+
+    def generate_order_display(self):
+        """Generates the order display
+        that will display the orders
+        for selection.
+
+        @return: Gtk.Container that
+        contains the order display
+        widgets.
+        """
+        scroll_window = Gtk.ScrolledWindow()
+        model = Gtk.ListStore(str, str)
+
+        self.orders_view = Gtk.TreeView(model)
+        selection = self.orders_view.get_selection()
+        selection.set_select_function(self.update_item_view, None)
+
+        for key in self.orders.get_orders_list():
+            model.append((key[0], key[1]))
+
+        rend = Gtk.CellRendererText()
+        col1 = Gtk.TreeViewColumn('Order Name', rend, text=0)
+        self.orders_view.append_column(col1)
+        col2 = Gtk.TreeViewColumn('Checkout Time', rend, text=1)
+        self.orders_view.append_column(col2)
+
+        scroll_window.add(self.orders_view)
+
+        return scroll_window
+
+    def generate_properties_area(self):
+        """Generates the properties area
+        that displays the property options
+        associated with a selected order.
+        These options include displaying
+        menu items of the associated order
+        and the import buttons.
+
+        @return: Gtk.Container that holds
+        the widgets that will be used to
+        interact with the properties of
+        a specific order.
+        """
+        main_box = Gtk.VBox()
+
+        properties_frame = Gtk.Frame(label='Order Properties')
+        properties_box = Gtk.VBox()
+
+        menu_items_display = self.generate_menu_items_display()
+        properties_box.pack_start(menu_items_display, True, True, 0.0)
+
+        self.update_label = Gtk.Label()
+        properties_box.pack_start(self.update_label, False, False, 0.0)
+        properties_sub_box = Gtk.HBox()
+        properties_sub_box.pack_start(Gtk.Label("Name: "), False, False, 0.0)
+        self.name_entry = Gtk.Entry()
+        properties_sub_box.pack_start(self.name_entry, True, True, 5.0)
+        properties_box.pack_start(properties_sub_box, False, False, 5.0)
+
+        button_box = Gtk.HBox()
+
+        button_box.pack_start(Gtk.Fixed(), True, True, 5.0)
+
+        import_button = Gtk.Button("Import Selected Order")
+        import_button.connect('clicked', self.import_selected_order)
+        import_button.set_size_request(200, 50)
+        import_button.set_can_focus(False)
+        button_box.pack_start(import_button, False, False, 0.0)
+
+        properties_box.pack_start(button_box, False, False, 0.0)
+
+        properties_frame.add(properties_box)
+
+        main_box.pack_start(properties_frame, True, True, 5.0)
+
+        import_frame = Gtk.Frame(label="Imported Orders")
+        import_box = Gtk.VBox()
+
+        scroll_window = Gtk.ScrolledWindow()
+        self.imported_view = Gtk.TreeView(Gtk.ListStore(str, str, str))
+        scroll_window.add(self.imported_view)
+
+        import_box.pack_start(scroll_window, True, True, 0.0)
+
+        rend = Gtk.CellRendererText()
+        col1 = Gtk.TreeViewColumn('Order Name', rend, text=0)
+        self.imported_view.append_column(col1)
+
+        col2 = Gtk.TreeViewColumn('Import As', rend, text=2)
+        self.imported_view.append_column(col2)
+
+        button_box = Gtk.HBox()
+        button_box.pack_start(Gtk.Fixed(), True, True, 0.0)
+        remove_button = Gtk.Button("Remove Import")
+        remove_button.set_size_request(200, 50)
+        remove_button.set_can_focus(False)
+        remove_button.connect('clicked', self.remove_selected_import)
+        button_box.pack_start(remove_button, False, False, 0.0)
+
+        import_box.pack_start(button_box, False, False, 0.0)
+
+        import_frame.add(import_box)
+
+        main_box.pack_start(import_frame, True, True, 0.0)
+
+        return main_box
+
+    def generate_menu_items_display(self):
+        """Generates the area that displays
+        the menu items of a selected order.
+
+        @return: Gtk.Container that holds
+        the widgets associated with displaying
+        the menu items from a selected order.
+        """
+        scroll_window = Gtk.ScrolledWindow()
+
+        display_view = self.orders.get_display_view()
+        scroll_window.add(display_view)
+
+        return scroll_window
+
+    def update_item_view(self, selection, model, path, is_selected, user_data=None):
+        """Updates the item view when an order is selected.
+
+        @param selection: Gtk.Selection that represents the selection
+        associated with the Gtk.TreeView that displays the order.
+
+        @param model: Gtk.TreeModel that represents the model that
+        displays the order data.
+
+        @param path: Gtk.TreePath that points to the row that was
+        selected.
+
+        @param is_selected: bool value that represents if the
+        row was selected prior to the selection that initiated
+        this method.
+
+        @keyword user_data: keyword argument that allows for
+        user data to be passed in. Default is None
+
+        @return: bool value representing if the selection is
+        ok to be made. Default always returns True.
+        """
+        if not is_selected:
+            itr = model.get_iter(path)
+            path_data = model[itr]
+            key = path_data[0], path_data[1]
+            self.orders.set_current_table(key)
+
+            self.update_label.set_text("")
+
+        return True
+
+    def confirm_button_clicked(self, *args):
+        """Override Method.
+
+        Confirms the dialog window.
+
+        @param args: wildcard catchall that is
+        used to catch the Gtk.Widget that called
+        this method.
+
+        @return: None
+        """
+        self.confirm_data(self, *args)
+        super(UndoCheckoutDialog, self).confirm_button_clicked()
+
+    def cancel_button_clicked(self, *args):
+        """Override Method.
+
+        Cancels the dialog window.
+
+        @param args: wildcard catchall that
+        is used to catch the Gtk.Widget that
+        called this method.
+
+        @return: None
+        """
+        super(UndoCheckoutDialog, self).cancel_button_clicked()
+
+    def confirm_data(self, *args):
+        """Confirms the information
+        stored in the dialog window
+        and calls the confirm function
+        with the parameter of a dict,
+        representing the orders to be
+        added.
+
+        @param args: wildcard catchall that
+        is used to catch additional parameters
+
+        @return: None
+        """
+        import_list = {}
+
+        for row in self.imported_view.get_model():
+            import_name = row[2], "***Undone Checkout***", row[1]
+            import_stored_name = row[0], row[1]
+
+            self.orders.set_current_table(import_stored_name)
+            import_info = self.orders.get_current_order()
+
+            import_list[import_name] = import_info
+
+        self.confirm_func(import_list)
+
+    def import_selected_order(self, *args):
+        """Adds the currently selected order to
+        the import list that will be sent to the
+        confirm function.
+
+        @param args: wildcard catchall that catches
+        the Gtk.Widget that called this method.
+
+        @return: None
+        """
+        name = self.name_entry.get_text()
+        self.name_entry.set_text("")
+        name = name.strip()
+
+        if len(name) > 0:
+            curr_name, curr_order = self.orders.get_order_info()
+
+            model = self.imported_view.get_model()
+            has_entry = False
+
+            for row in model:
+                if row[2] == name:
+                    has_entry = True
+
+            if not has_entry:
+                model.append((curr_name[0], curr_name[1], name))
+                self.update_label.set_markup('')
+            else:
+                self.update_label.set_markup('<span foreground="red">Name already '
+                                             'present!</span>')
+
+    def remove_selected_import(self, *args):
+        """Removes the selected import from the
+        import list that will be sent to the confirm
+        function.
+
+        @param args: wildcard catchall that catches
+        the Gtk.Widget that called this method.
+
+        @return: None
+        """
+        selection = self.imported_view.get_selection()
+        model, itr = selection.get_selected()
+
+        if itr:
+            model.remove(itr)
+
+
 #=========================================================
 # This block represents windows that form the specific
 # classes that can be instantiated. All classes in this
@@ -1478,9 +1975,77 @@ class OptionEntryDialog(EntryDialog):
         self.options = copy(menu_item.options)
         self.menu_item = menu_item
         super(OptionEntryDialog, self).__init__(parent, title, dialog)
+
+    def generate_layout(self):
+        """Override Method
+
+        Generates the layout to be
+        displayed in the content area
+        of the dialog window.
+
+        @return: Gtk.Container that holds
+        the Gtk.Widgets that will be displayed
+        in the content area.
+        """
+        main_box = Gtk.VBox()
+
+        if len(self.menu_item.get_option_choices()) > 0:
+            content_area = super(OptionEntryDialog, self).generate_layout()
+        else:
+            content_area = self.generate_empty_option_choices_area()
+
+        main_box.pack_start(content_area, True, True, 5.0)
+
+        additional_options_area = self.generate_additional_options_area()
+        main_box.pack_end(additional_options_area, False, False, 5.0)
+
+        return main_box
+
+    def generate_additional_options_area(self):
+        """Generates the additional options
+        area for this dialog window. This
+        options area holds Gtk.Widgets
+        associated with additional options
+        beyond the designated storage area
+        of the super class.
+
+        @return: Gtk.Container that holds
+        the Gtk.Widgets that will be displayed
+        in the additional options area.
+        """
+        main_box = Gtk.HBox()
+
+        general_options_button = Gtk.Button('Open General Options')
+        general_options_button.set_can_focus(False)
+        general_options_button.set_size_request(200, 50)
+        general_options_button.connect('clicked', self.general_option_dialog)
+        main_box.pack_start(general_options_button, False, False, 5.0)
+        main_box.pack_start(Gtk.Fixed(), True, True, 5.0)
+
+        return main_box
+
+    def generate_empty_option_choices_area(self):
+        """Generates the option choices area if the
+        given MenuItem had an empty options choices
+        stored. This occurs so that the general option
+        choices can be instantiated.
+
+        @return: Gtk.Container that holds the Gtk.Widgets
+        that will be displayed in the empty option_choices
+        area.
+        """
+        main_box = Gtk.HBox()
+
+        label = Gtk.Label("NO AVAILABLE FREQUENT OPTION CHOICES")
+        main_box.pack_start(label, False, False, 5.0)
+        main_box.pack_start(Gtk.Fixed(), True, True, 5.0)
+
+        return main_box
     
     def set_layout(self, content_boxes):
-        """Sets the layout for the OptionsEntryDialog. Each
+        """Override Method.
+
+        Sets the layout for the OptionsEntryDialog. Each
         content box in the content_area of the dialog window
         is set to store option toggles in groups of three
         distributed among the three given content boxes stored
@@ -1492,11 +2057,12 @@ class OptionEntryDialog(EntryDialog):
 
         @return: None
         """
-        for option in self.menu_item.get_option_choices():
+        for option_item in self.menu_item.get_option_choices():
             button_box = content_boxes.pop(0)
-            option_toggle = Gtk.ToggleButton(option)
+            option_toggle = Gtk.ToggleButton(option_item.get_name())
+            option_toggle.option_item = option_item
             
-            if option in self.menu_item.options:
+            if option_item in self.menu_item.options:
                 option_toggle.set_active(True)
             
             # connect signals to add_option for dynamic adds
@@ -1517,10 +2083,25 @@ class OptionEntryDialog(EntryDialog):
         # Button has been pressed (therefore is now toggled)
         # case 1: Button is active (therefore was not toggled)
         if button.get_active():
-            self.options.append(button.get_label())
+            self.options.append(button.option_item)
         # case 2: Button is inactive (therefore was toggled)
         else:
-            self.options.remove(button.get_label())
+            self.options.remove(button.option_item)
+
+    def general_option_dialog(self, *args):
+        """Cancels the selected options, and
+        emits the appropriate response for a
+        new ADDITIONAL_OPTOINS_DIALOG to be
+        opened.
+
+        @param args: wildcard catchall that is
+        used to catch the Gtk.Widget that called
+        this method.
+
+        @return: None
+        """
+        self.dialog.response(GENERAL_OPTIONS_DIALOG_RESPONSE)
+        self.dialog.destroy()
     
     def cancel_data(self):
         """Cancel's selected options, and reverts to
@@ -2064,13 +2645,13 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
         scroll_window = super(CheckoutConfirmationDialog, self).generate_layout()
         main_box.pack_start(scroll_window, True, True, 5)
 
-        sub_box = self.generate_related_buttons()
+        sub_box = self.generate_related_area()
 
         main_box.pack_start(sub_box, False, False, 5)
 
         return main_box
 
-    def generate_related_buttons(self):
+    def generate_related_area(self):
         """Generates the related buttons to
         be displayed beneath the generated layout
         that are associated with the functionality
@@ -2080,14 +2661,36 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
         buttons associated with the functionality
         for this dialog.
         """
-        sub_box = Gtk.HBox()
+        button_box = Gtk.HBox()
 
+        left_side_box = Gtk.VBox()
         button = Gtk.Button("SPLIT CHECK")
-        button.set_size_request(200, 20)
-        button.connect('clicked', self._split_check_dialog)
-        sub_box.pack_start(button, False, False, 0)
+        button.set_size_request(200, 35)
+        button.connect('clicked', self._emit_dialog_response, SPLIT_CHECK_DIALOG_RESPONSE)
+        left_side_box.pack_start(button, False, False, 5.0)
 
-        return sub_box
+        button = Gtk.Button("COMP ITEM")
+        button.set_size_request(200, 35)
+        button.connect('clicked', self._emit_dialog_response, COMP_DIALOG_RESPONSE)
+        left_side_box.pack_start(button, False, False, 5.0)
+
+        button = Gtk.Button("ADD DISCOUNT")
+        button.set_size_request(200, 35)
+        button.connect('clicked', self._emit_dialog_response, DISCOUNT_DIALOG_RESPONSE)
+        left_side_box.pack_start(button, False, False, 5.0)
+
+        button_box.pack_start(left_side_box, False, False, 5.0)
+
+        right_side_box = Gtk.VBox()
+
+        button = Gtk.Button('Print Check')
+        button.set_size_request(200, 35)
+        button.connect('clicked', self._emit_dialog_response, PRINT_DIALOG_RESPONSE)
+        right_side_box.pack_start(button, False, False, 0)
+
+        button_box.pack_end(right_side_box, False, False, 0.0)
+
+        return button_box
 
     def generate_columns(self):
         """Generates the columns used to
@@ -2126,20 +2729,66 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
         self.update_items(self.order_list, model=tree_model)
         return tree_model
 
-    def _split_check_dialog(self, *args):
-        """Private Method.
+    def remove_selected_item(self, *args):
+        """Removes the selected MenuItem
+        from the display and the list.
 
-        Called when the split check button has
-        been pressed. This method eliminates
-        the current dialog and emits the
-        appropriate response.
+        @param args: wildcard catchall that is
+        used to catch the Gtk.Widget that called
+        this method.
 
-        @param args: wildcard catchall to catch
-        the Gtk.Widget that called this method.
+        @return: MenuItem object that was removed.
+        """
+        model, itr = self.get_selected()
+        if itr:
+            path = model.get_path(itr)
+            index = path.get_indices()[0]
+            menu_item = self.order_list[index]
+
+            if not path == self.total_row_reference.get_path() and not menu_item.is_locked():
+                model.remove(itr)
+                self.order_list.pop(index)
+                self._update_check_total(-1 * menu_item.get_price())
+
+    def add_new_menu_item(self, menu_item):
+        """Adds the given MenuItem object to
+        the stored order_list and the checkout
+        display.
+
+        @param menu_item: MenuItem object that
+        is to be added to the order and display.
 
         @return: None
         """
-        self.dialog.response(SPLIT_CHECK_DIALOG_RESPONSE)
+        self.order_list.append(menu_item)
+
+        name = menu_item.get_name()
+        price = menu_item.get_price()
+
+        model = self.tree_view.get_model()
+        added_itr = model.append(None, (name, str(price), True))
+        self._check_row_changed(added_itr)
+
+    def _emit_dialog_response(self, widget, response_type):
+        """Private Method.
+
+        Called when a button is pressed that
+        causes a new dialog window to be opened.
+        This method emits the signal to notify
+        whatever program called this dialog that
+        it requires a different type of dialog window.
+
+        @param widget: Gtk.Widget that called this
+        method.
+
+        @param response_type: int representing
+        the associated response type constant that
+        is associated with which dialog response
+        should be emitted.
+
+        @return: None
+        """
+        self.dialog.response(response_type)
         self.dialog.destroy()
 
     def confirm_data(self):
@@ -2162,7 +2811,7 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
         @return: None
         """
         model = self.tree_view.get_model()
-        total = CheckOperations.get_total(self.order_list)
+        total = CheckOperations.get_order_subtotal(self.order_list)
         
         path = self.total_row_reference.get_path()
         itr = model.get_iter(path)
@@ -2207,15 +2856,20 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
         the tree_view and the Gtk.TreePaths are the paths that
         were selected.
         """
+
         selection = self.tree_view.get_selection()
-        model, paths = selection.get_selected_rows()
 
-        total_path = self.total_row_reference.get_path()
+        if selection.get_mode() == Gtk.SelectionMode.MULTIPLE:
+            model, paths = selection.get_selected_rows()
 
-        if total_path in paths:
-            paths.remove(total_path)
+            total_path = self.total_row_reference.get_path()
 
-        return model, paths
+            if total_path in paths:
+                paths.remove(total_path)
+
+            return model, paths
+        else:
+            return super(CheckoutConfirmationDialog, self).get_selected()
 
     def update_items(self, order_list, model=None):
         """Clears and populates the associated model
@@ -2248,10 +2902,12 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
             location = model.append(None, (name, str(price), True))
 
             if menu_item.has_options():
-                option_dict = menu_item.get_option_choices()
-                for key in option_dict:
-                    option_price = option_dict[key]
-                    model.append(location, (key, str(option_price), True))
+                for option in menu_item.options:
+                    option_name = option.get_name()
+                    option_price = option.get_price()
+                    data = option_name, str(option_price), True
+
+                    model.append(location, data)
 
         itr = model.append(None, ('Sub-Total',
                             str(CheckOperations.get_order_subtotal(order_list)), False))
@@ -2533,6 +3189,426 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
         """
         self.confirm_func(self.order)
 
+
+#=========================================================
+# This block represents windows that form the specific
+# classes that can be instantiated. All classes in this
+# block represent selections that can be made.
+#
+# Upon confirmation each class in this block calls a
+# given function that is passed into the class at
+# instantiation as its "confirm func".
+#
+# Each class inherits from the SelectionDialog abstract
+# class. SelectionDialog has three main areas, a left most
+# box that is the "main_selection_area", a center box that
+# is the "secondary_selection_area" and a right most box
+# that is the "item_selection_area".
+#=========================================================
+
+class GeneralOptionSelectionDialog(SelectionDialog):
+    """GeneralOptionSelectionDialog allows the user to
+    select from the total list of possible option items
+    available and apply them to the order corresponding
+    to an "ADD", "SUB", or "NO" relation.
+
+    @group SelectionDialog: This class is a subclass member
+    of the SelectionDialog group and as such it inherits
+    some of its functionality from SelectionDialog class.
+    Any changes in the SelectionDialog class may effect
+    the functionality of this class.
+
+    @var menu_item: MenuItem object that is being interacted
+    with.
+
+    @var option_data: dict of str keys that represent the
+    categories of the options, to list of OptionItem values
+    that represent the associated OptionItems with the
+    category.
+
+    @var display_data: dict of str keys that represent the
+    associated categories mapped to Gtk.ListStore that
+    store the represented data in displayable model form.
+
+    @var new_option_list: list of OptionItem objects that
+    represents the list associated with the MenuItem.
+
+    @var category_view: Gtk.TreeView that displays the
+    categories and allows for user selection.
+
+    @var option_view: Gtk.TreeView that displays the
+    OptionItem information and allows for user selection.
+
+    @var item_view: Gtk.TreeView that displays the current
+    MenuItems selected OptionItems. Allows for user selection
+    and manipulation.
+    """
+
+    def __init__(self, parent, option_data, menu_item,
+                 title='General Option Selection'):
+        """Initializes a new GeneralOptionSelectionDialog.
+
+        @param parent: Gtk.Object that called this Dialog window.
+
+        @param option_data: dict of key strs that represent each
+        category. The values are lists of OptionItem objects that
+        represent the available options under that category.
+
+        @param menu_item: MenuItem object that is to have the
+        dialog called on.
+
+        @keyword title: str representing the title to be used
+        on this Dialog window.
+        """
+        self.menu_item = menu_item
+        self.option_data = option_data
+        self.display_data = {}
+        self.new_option_list = copy(menu_item.options)
+
+        self.category_view = None
+        self.option_view = None
+        self.item_view = None
+
+        super(GeneralOptionSelectionDialog, self).__init__(parent, title)
+
+    def generate_main_selection_area(self):
+        """Override Method.
+
+        Generates the display for the main
+        selection area.
+
+        @return: Gtk.Container that displays
+        the widgets associated with the main
+        selection area.
+        """
+        main_box = Gtk.VBox()
+
+        category_display = self.generate_category_view()
+        main_box.pack_start(category_display, True, True, 5.0)
+
+        return main_box
+
+    def generate_category_view(self):
+        """Generates the view to display
+        the categories associated with
+        the options.
+
+        @return: Gtk.Container that holds
+        the view to display the categories.
+        """
+        category_frame = Gtk.Frame(label='Categories Selection')
+        scroll_window = Gtk.ScrolledWindow()
+
+        model = Gtk.ListStore(str)
+
+        for category in self.option_data:
+            model.append((category,))
+
+        self.category_view = Gtk.TreeView(model)
+        selection = self.category_view.get_selection()
+        selection.set_select_function(self.update_category_select, None)
+
+        rend = Gtk.CellRendererText()
+        col1 = Gtk.TreeViewColumn('Category', rend, text=0)
+        self.category_view.append_column(col1)
+
+        scroll_window.add(self.category_view)
+        category_frame.add(scroll_window)
+
+        return category_frame
+
+    def get_category_view_selected(self):
+        """Gets the selected model and data
+        that is selected in the category view.
+
+        @return: tuple (Gtk.TreeModel, Gtk.TreeIter),
+        representing the model that stores the data
+        and the iter pointing to the row selected.
+        """
+        selection = self.category_view.get_selection()
+        return selection.get_selected()
+
+    def update_category_select(self, selection, model, path, is_selected,
+                               user_data=None):
+        """Called when a row on the categories view has
+        been selected.
+
+        @param selection: Gtk.Selection that represents
+        the selection associated with the categories
+        view.
+
+        @param model: Gtk.TreeModel that represents the
+        model that stores the data associated with the
+        categories view.
+
+        @param path: Gtk.TreePath pointing to the row
+        that was selected.
+
+        @param is_selected: bool value that represents
+        if the order was selected prior to current
+        selection.
+
+        @keyword user_data: Default user data passed
+        to this method. By default is None.
+
+        @return: bool value representing if the selection
+        can be made. Default True
+        """
+        if not is_selected:
+            itr = model.get_iter(path)
+            key = model[itr][0]
+
+            option_model = self.display_data[key]
+            self.option_view.set_model(option_model)
+
+        return True
+
+    def generate_secondary_selection_area(self):
+        """Override Method.
+
+        Generates the display for the secondary
+        selection area.
+
+        @return: Gtk.Container that displays the
+        widgets associated with the secondary
+        selection area.
+        """
+        main_box = Gtk.VBox()
+
+        option_display = self.generate_option_view()
+        main_box.pack_start(option_display, True, True, 5.0)
+
+        return main_box
+
+    def generate_option_view(self):
+        """Generates the view to display
+        the selectable options.
+
+        @return: Gtk.Container that holds
+        the view to display the options.
+        """
+        option_frame = Gtk.Frame(label='Options Selection')
+        scroll_window = Gtk.ScrolledWindow()
+
+        for category in self.option_data:
+            options_list = self.option_data[category]
+            model = Gtk.ListStore(str, str)
+
+            for option in options_list:
+                name = option._name
+                price = option.get_price()
+
+                option_data = name, str(price)
+                model.append(option_data)
+
+            self.display_data[category] = model
+
+        self.option_view = Gtk.TreeView()
+
+        rend = Gtk.CellRendererText()
+        col1 = Gtk.TreeViewColumn('Option Name', rend, text=0)
+        self.option_view.append_column(col1)
+
+        col2 = Gtk.TreeViewColumn('Add Cost', rend, text=1)
+        self.option_view.append_column(col2)
+
+        scroll_window.add(self.option_view)
+        option_frame.add(scroll_window)
+
+        return option_frame
+
+    def get_option_view_selected(self):
+        """Gets the selected model and data
+        that is selected in the option view.
+
+        @return: tuple (Gtk.TreeModel, Gtk.TreeIter),
+        representing the model that stores the data
+        and the iter pointing to the row selected.
+        """
+        selection = self.option_view.get_selection()
+        return selection.get_selected()
+
+    def generate_item_selection_area(self):
+        """Override Method.
+
+        Generates the display for the item
+        selection area.
+
+        @return: Gtk.Container that displays
+        the widgets associated with the item
+        selection area.
+        """
+        main_box = Gtk.VBox()
+
+        item_display = self.generate_item_view()
+        main_box.pack_start(item_display, True, True, 0.0)
+
+        button_box = Gtk.HBox()
+
+        add_box = Gtk.VBox()
+
+        sub_box = Gtk.HBox()
+        add_button = Gtk.Button('ADD OPTION')
+        add_button.set_can_focus(False)
+        add_button.set_size_request(150, 50)
+        add_button.connect('clicked', self.add_new_option, 1)
+        sub_box.pack_start(add_button, False, False, 5.0)
+        add_box.pack_start(sub_box, False, False, 5.0)
+
+        sub_box = Gtk.HBox()
+        sub_button = Gtk.Button('SUB OPTION')
+        sub_button.set_can_focus(False)
+        sub_button.set_size_request(150, 50)
+        sub_button.connect('clicked', self.add_new_option, -1)
+        sub_box.pack_start(sub_button, False, False, 5.0)
+        add_box.pack_start(sub_box, False, False, 5.0)
+
+        sub_box = Gtk.HBox()
+        no_button = Gtk.Button('NO OPTION')
+        no_button.set_can_focus(False)
+        no_button.set_size_request(150, 50)
+        no_button.connect('clicked', self.add_new_option, 0)
+        sub_box.pack_start(no_button, False, False, 5.0)
+        add_box.pack_start(sub_box, False, False, 5.0)
+
+        button_box.pack_start(add_box, False, False, 5.0)
+
+        remove_button_box = Gtk.VBox()
+
+        remove_button = Gtk.Button('REMOVE OPTION')
+        remove_button.connect('clicked', self.remove_selected_option)
+        remove_button.set_can_focus(False)
+        remove_button.set_size_request(150, 50)
+        remove_button_box.pack_start(remove_button, False, False, 5.0)
+
+        button_box.pack_end(remove_button_box, False, False, 5.0)
+
+        main_box.pack_start(button_box, False, False, 5.0)
+
+        return main_box
+
+    def generate_item_view(self):
+        """Generates the display view
+        that displays the items associated
+        with the current
+
+        @return:
+        """
+        item_frame = Gtk.Frame()
+        scroll_window = Gtk.ScrolledWindow()
+
+        model = Gtk.ListStore(str, str, str)
+
+        for option in self.new_option_list:
+            relation = option.get_option_relation()
+            name = option.get_name()
+            price = option.get_price()
+
+            option_data = relation, name, str(price)
+            model.append(option_data)
+
+        self.item_view = Gtk.TreeView(model)
+
+        rend = Gtk.CellRendererText()
+        col0 = Gtk.TreeViewColumn('Relation', rend, text=0)
+        self.item_view.append_column(col0)
+
+        col1 = Gtk.TreeViewColumn('Option Name', rend, text=1)
+        self.item_view.append_column(col1)
+
+        col2 = Gtk.TreeViewColumn('Price', rend, text=2)
+        self.item_view.append_column(col2)
+
+        scroll_window.add(self.item_view)
+
+        item_frame.add(scroll_window)
+        return item_frame
+
+    def get_item_view_selected(self):
+        """Gets the selected model and data
+        that is selected in the item view.
+
+        @return: tuple (Gtk.TreeModel, Gtk.TreeIter),
+        representing the model that stores the data
+        and the iter pointing to the row selected.
+        """
+        selection = self.item_view.get_selection()
+        return selection.get_selected()
+
+    def add_new_option(self, widget, option_relation):
+        """Adds a new option to the MenuItem area,
+        with the given relation.
+
+        @param widget: Gtk.Widget that called this
+        method.
+
+        @param option_relation: str representing the
+        relation that this option will share with the
+        MenuItem.
+
+        @return: None
+        """
+        option_model, itr = self.get_option_view_selected()
+        category_model, category_itr = self.get_category_view_selected()
+        category = category_model[category_itr][0]
+
+        if itr:
+            item_model = self.item_view.get_model()
+
+            name = option_model[itr][0]
+            if option_relation == 1:
+                price = option_model[itr][1]
+            else:
+                price = str(0.0)
+
+            option_list = self.option_data[category]
+            path = option_model.get_path(itr)
+            index = path.get_indices()[0]
+
+            option_item = option_list[index]
+            option_item.set_option_relation(option_relation)
+
+            self.new_option_list.append(option_item)
+
+            relation = option_item.get_option_relation()
+
+            option_data = relation, name, price
+            item_model.append(option_data)
+
+    def remove_selected_option(self, *args):
+        """Removes the currently selected item
+        in the
+
+        @param args: wildcard catchall that is
+        used to catch the Gtk.Widget that called
+        this method.
+
+        @return: None
+        """
+        item_model, itr = self.get_item_view_selected()
+
+        if itr:
+            path = item_model.get_path(itr)
+            index = path.get_indices()[0]
+
+            item_model.remove(itr)
+            self.new_option_list.pop(index)
+
+    def confirm_data(self, *args):
+        """Override Method.
+
+        Confirms the data stored as
+        the new_option_list by inserting
+        it in to the given MenuItem object.
+
+        @param args: wildcard catchall that is
+        used to catch the Gtk.Widget that called
+        this method.
+
+        @return: None
+        """
+        self.menu_item.options = self.new_option_list
+
 #==========================================================
 # This block represents windows that form the specific
 # classes that can be instantiated. All classes in this
@@ -2607,7 +3683,7 @@ class SplitCheckConfirmationDialog(CheckoutConfirmationDialog):
         order_copy = []
         for menu_item in order_list:
             menu_item = copy(menu_item)
-            menu_item.hash = hash(menu_item)
+            menu_item._hash = hash(menu_item)
             order_copy.append(menu_item)
 
         self.checks_view = None
@@ -2679,7 +3755,7 @@ class SplitCheckConfirmationDialog(CheckoutConfirmationDialog):
         
         return main_box
 
-    def generate_related_buttons(self):
+    def generate_related_area(self):
         """Override Method.
 
         Generates the buttons associated
@@ -3032,7 +4108,6 @@ class SplitCheckConfirmationDialog(CheckoutConfirmationDialog):
 
                     current_check = self.check_dict[key]
                     curr_menu_item = current_check.pop(index)
-                    print curr_menu_item
 
                     menu_items.append(curr_menu_item)
                     check_model.remove(itr)
@@ -3052,11 +4127,11 @@ class SplitCheckConfirmationDialog(CheckoutConfirmationDialog):
         stored hash values.
 
         @param curr_list: list of MenuItem objects that
-        all contain values for MenuItem.hash
+        all contain values for MenuItem._hash
 
         @return: list of MenuItem objects that have been
-        sorted according to their MenuItem.hash values.
-        If two items shared the same MenuItem.hash value
+        sorted according to their MenuItem._hash values.
+        If two items shared the same MenuItem._hash value
         then they are combined. Increasing the price of
         that MenuItem by adding the two prices together.
         """
@@ -3107,14 +4182,14 @@ class SplitCheckConfirmationDialog(CheckoutConfirmationDialog):
                 first_item = list_one[first_index]
                 second_item = list_two[second_index]
 
-                if first_item.hash == second_item.hash:
+                if first_item._hash == second_item._hash:
                     first_item.edit_price(first_item.get_price() + second_item.get_price())
                     result.append(first_item)
                     first_index += 1
                     second_index += 1
                 else:
 
-                    if first_item.hash < second_item.hash:
+                    if first_item._hash < second_item._hash:
                         result.append(first_item)
                         first_index += 1
                     else:
@@ -3359,13 +4434,13 @@ class CompItemsOrderConfirmationDialog(OrderConfirmationDialog):
                 if menu_item.has_options():
                     options = str(menu_item.options)[1:-1]
 
-                    row = (options, ) + info[1]
+                    row = (options, ) + info[1:]
                     tree_model.append(itr, row)
 
                 if menu_item.has_note():
                     note = menu_item.notes
 
-                    row = (note, ) + info[1]
+                    row = (note, ) + info[1:]
                     tree_model.append(itr, row)
 
     def comp_selected_item(self, *args):
@@ -3425,8 +4500,6 @@ class CompItemsOrderConfirmationDialog(OrderConfirmationDialog):
 
         @return: None
         """
-        comp_list = []
-
         model = self.tree_view.get_model()
         index = 0
         for row in model:
@@ -3441,14 +4514,1005 @@ class CompItemsOrderConfirmationDialog(OrderConfirmationDialog):
                 row_child = child_itr.next()
                 message = row_child[0]
                 menu_item.comp(True, message)
-                comp_list.append(menu_item)
+                self.order_list[index] = menu_item
 
             elif menu_item.is_comped():
                 menu_item.comp(False, '')
 
             index += 1
 
-        self.confirm_func(comp_list)
+        self.confirm_func(self.order_list)
+
+
+class DiscountCheckoutConfirmationDialog(CheckoutConfirmationDialog):
+    """DiscountCheckoutConfirmationDialog window is utilized by
+    the user to display and edit discounts associated with a given
+    order. This window instantiates a new dialog window and upon
+    confirmation calls the confirm_func that will adjust the order
+    so that the associated discount is added to the associated order.
+
+    @group CheckoutConfirmationDialog: This class is a subclass member
+    of the CheckoutConfirmationDialog group, and as such it inherits
+    functionality from its superclass. Any changes to the superclass
+    could change the functionality for this class.
+
+    @var discount_button_group: tuple of Gtk.RadioButtons that represents
+    the toggle group. This allows for access to the associated radio buttons
+    at any time.
+
+    @var discount_input_areas: list of Gtk.Widgets that represent the respective
+    input areas for discount information.
+
+    @var message_entry: Gtk.TextView object that is used to display and edit the
+    message that will be associated with a specific discount.
+
+    @var discount_view: Gtk.TreeView for displaying a list of template discounts
+    that the user may choose from the apply standard often used discounts.
+    """
+
+    def __init__(self, parent, confirm_func, order_list, discount_templates,
+                 dialog=None,title='Add Discount Dialog Window'):
+        """ Initializes a new DiscountCheckoutConfirmationDialog window.
+
+        @param parent: Gtk.Object that will be used as the parent of this
+        dialog window. All interactions with the parent object will be
+        frozen until this dialog is confirmed.
+
+        @param confirm_func: function that will be called upon confirmation
+        of this dialog.
+
+        @param order_list: list of MenuItem objects that represents the
+        current order to have a discount added to it.
+
+        @param discount_templates: list of tuples that represents the
+        discount template data.
+
+        @param dialog: Unused argument. Leave as default.
+
+        @param title: str representing the title to be displayed by the
+        dialog window.
+        """
+        self.discount_templates = discount_templates
+        self.discount_button_group = None
+        self.discount_input_areas = []
+        self.message_entry = None
+        self.discount_view = None
+        super(DiscountCheckoutConfirmationDialog, self).__init__(parent, confirm_func,
+                                                                 order_list, title=title)
+
+    def generate_layout(self):
+        """Override Method.
+
+        Generates the layout for the
+        DiscountOrderConfirmationDialog
+        this method relies heavily on super
+        class generate_layouts before it.
+
+        @return: Gtk.Container that holds
+        the widgets to be displayed.
+        """
+        main_box = Gtk.HBox()
+
+        view_display_box = Gtk.VBox()
+        checkout_order_box = super(DiscountCheckoutConfirmationDialog,
+                                   self).generate_layout()
+        view_display_box.pack_start(checkout_order_box, True, True, 5.0)
+        button_box = Gtk.HBox()
+        remove_button = Gtk.Button('Remove Item')
+        remove_button.connect('clicked', self.remove_selected_item)
+        remove_button.set_size_request(200, 50)
+        remove_button.set_can_focus(False)
+        button_box.pack_start(remove_button, False, False, 0.0)
+
+        view_display_box.pack_start(button_box, False, False, 0.0)
+        main_box.pack_start(view_display_box, True, True, 5.0)
+
+        discount_properties_box = self.generate_properties_panel()
+        main_box.pack_start(discount_properties_box, False, False, 5.0)
+
+        return main_box
+
+    def generate_properties_panel(self):
+        """Generates the properties panel
+        area which lies to the right of
+        the tree view and is used to display
+        and edit property information associated
+        with the discount properties of this
+        class.
+
+        @return: Gtk.Container that holds
+        the widgets to be displayed.
+        """
+        main_box = Gtk.VBox()
+        properties_selection_area = self.generate_properties_selection_area()
+        main_box.pack_start(properties_selection_area, True, True, 5.0)
+
+        confirmation_selection_area = self.generate_confirmation_selection_area()
+
+        main_box.pack_start(confirmation_selection_area, False, False, 5.0)
+
+        return main_box
+
+    def generate_confirmation_selection_area(self):
+        """Generate the confirmation selection area.
+        This area will display widgets that are to
+        be added to the bottom right hand side, which
+        is designated at the confirmation selection
+        area. This area provides the widgets that
+        allow the user to add new discounts to the
+        order.
+
+        @return: Gtk.Container that holds all the
+        necessary widgets that will display the
+        information for the area.
+        """
+        border = Gtk.Frame(label='Confirm Discount Properties')
+
+        discount_message_box = Gtk.VBox()
+
+        discount_message_box.pack_start(Gtk.Label('Message: '), False, False, 0.0)
+        text_view_frame = Gtk.Frame()
+        self.message_entry = Gtk.TextView()
+        self.message_entry.set_size_request(250, 150)
+        self.message_entry.set_wrap_mode(Gtk.WrapMode.WORD)
+        text_view_frame.add(self.message_entry)
+        discount_message_box.pack_start(text_view_frame, False, False, 0.0)
+
+        add_discount_button = Gtk.Button('Add Discount To Order')
+        add_discount_button.set_size_request(200, 50)
+        add_discount_button.connect('clicked', self.add_discount_to_order)
+        add_discount_button.set_can_focus(False)
+        discount_message_box.pack_start(add_discount_button, False, False, 5.0)
+
+        border.add(discount_message_box)
+
+        return border
+
+    def generate_properties_selection_area(self):
+        """Generates the properties selection area.
+        This area contains all widgets that are used
+        to edit specific properties associated with
+        the discount. This is where the user may
+        edit properties of a discount, or select
+        the necessary information that will allow
+        for a new discount to be placed on the order.
+
+        @return: Gtk.Container that holds all the
+        widgets that will be displayed for editing
+        properties of discounts.
+        """
+        border = Gtk.Frame(label='Discount Properties')
+
+        sub_box1 = Gtk.VBox()
+
+        #Generate items to be displayed
+        adjustment = Gtk.Adjustment(0.00, -100.00 * 1000.00, 1000.00 * 100.00, 0.01, 1.00, 0)
+        discount_select_dollars = Gtk.SpinButton(adjustment=adjustment)
+        discount_select_dollars.is_percentage = False
+        discount_select_dollars.set_digits(2)
+
+        discount_by_number_button = Gtk.RadioButton.new_with_label_from_widget(None, 'By Dollar Amount')
+        discount_by_number_button.connect('toggled', self.update_property_display, discount_select_dollars)
+
+        #generate containers and layout for items.
+        discount_by_number_box = Gtk.VBox()
+        discount_by_number_box.pack_start(discount_by_number_button, False, False, 0.0)
+        discount_by_number_edit_box = Gtk.HBox()
+        discount_by_number_edit_box.pack_start(Gtk.Label('Discount Total:     $'), False, False, 0.0)
+
+        discount_by_number_edit_box.pack_start(discount_select_dollars, False, False, 0.0)
+        self.discount_input_areas.append(discount_select_dollars)
+
+        discount_by_number_box.pack_start(discount_by_number_edit_box, True, True, 5.0)
+
+        sub_box1.pack_start(discount_by_number_box, False, False, 5.0)
+
+        #generate items to be displayed
+        adjustment = Gtk.Adjustment(0.00, -100.00, 100.00, 0.01, 1.00, 0)
+        discount_from_total = Gtk.SpinButton(adjustment=adjustment)
+        discount_from_total.is_percentage = True
+        discount_from_total.set_digits(2)
+        discount_from_total.set_sensitive(False)
+        self.discount_input_areas.append(discount_from_total)
+
+        discount_by_total_button = Gtk.RadioButton.new_with_label_from_widget(discount_by_number_button,
+                                                                              'By Order Total')
+        discount_by_total_button.connect('toggled', self.update_property_display, discount_from_total)
+        discount_by_total_button.set_active(False)
+        self.discount_button_group = discount_by_total_button.get_group()
+
+        discount_display = self.generate_template_view()
+        self.discount_view.set_sensitive(False)
+
+        #generate containers and layout for items
+        discount_by_total_box = Gtk.VBox()
+        discount_by_total_box.pack_start(discount_by_total_button, False, False, 0.0)
+
+        discount_by_total_edit_box = Gtk.HBox()
+        discount_by_total_edit_box.pack_start(Gtk.Label('Discount Total:   '), False, False, 0.0)
+        discount_by_total_edit_box.pack_start(discount_from_total, False, False, 0.0)
+        discount_by_total_edit_box.pack_start(Gtk.Label(' %'), False, False, 0.0)
+        discount_by_total_box.pack_start(discount_by_total_edit_box, False, False, 0.0)
+        sub_box1.pack_start(discount_by_total_box, False, False, 5.0)
+
+        sub_box1.pack_start(discount_display, True, True, 5.0)
+
+        border.add(sub_box1)
+
+        return border
+
+    def generate_template_view(self):
+        """Generates the treeview to display
+        and select discount templates.
+
+        @return: Gtk.TreeView that has been
+        generated by this method.
+        """
+        main_box = Gtk.VBox()
+
+        self.discount_view = Gtk.TreeView()
+
+        add_from_templates_button = Gtk.RadioButton.new_with_label_from_widget(self.discount_button_group[0],
+                                                                               'Discount From Template')
+        add_from_templates_button.connect('toggled', self.update_property_display, self.discount_view)
+
+        main_box.pack_start(add_from_templates_button, False, False, 5.0)
+
+        scroll_window = Gtk.ScrolledWindow()
+
+        rend = Gtk.CellRendererText()
+        col1 = Gtk.TreeViewColumn('Discount Name', rend, text=0)
+        self.discount_view.append_column(col1)
+
+        col2 = Gtk.TreeViewColumn('Price', rend, text=1)
+        self.discount_view.append_column(col2)
+
+        model = Gtk.ListStore(str, str, float, bool)
+
+        for row in self.discount_templates:
+            model.append(row)
+
+        self.discount_view.set_model(model)
+        scroll_window.add(self.discount_view)
+
+        main_box.pack_start(scroll_window, True, True, 5.0)
+
+        return main_box
+
+    def update_property_display(self, widget, *args):
+        """Updates the displayed property
+        information.
+
+        @param widget: Gtk.ToggleButton that called
+        this method.
+
+        @param args: list of Gtk.Widget objects that
+        are to be set to sensitive dependent on the
+        toggled state of the widget passed in.
+
+        @return: None
+        """
+
+        set_sensitive = widget.get_active()
+
+        for items in args:
+            items.set_sensitive(set_sensitive)
+
+    def add_discount_to_order(self, *args):
+        """Adds the selected discount to the
+        order.
+
+        @param args: wildcard catchall to catch
+        the Gtk.Widget that called this method.
+
+        @return:None
+        """
+        msg_buffer = self.message_entry.get_buffer()
+        start = msg_buffer.get_start_iter()
+        end = msg_buffer.get_end_iter()
+        message = msg_buffer.get_text(start, end, True)
+        message = message.strip()
+
+        msg_buffer.set_text('')
+
+        if len(message) > 0:
+            name = 'Discount '
+
+            data, is_percentage = self.parse_discount_data()
+
+            if is_percentage:
+                price = round(CheckOperations.get_order_subtotal(self.order_list) * data / 100, 2)
+
+                name += str(data) + '%'
+            else:
+                price = data
+                name += '$' + str(price)
+
+            discount_item = MenuItem(name, -1 * price)
+            discount_item.editable = False
+            discount_item.confirmed = True
+            discount_item.notes = message
+
+            self.add_new_menu_item(discount_item)
+
+    def parse_discount_data(self):
+        """Parses the discount data
+        that was selected by the user.
+
+        @return: 2 tuple representing the
+        value selected by the user and if
+        that value should be interpreted as
+        a percentage.
+        """
+        data = None
+        is_percentage = None
+
+        if self.discount_view.is_sensitive():
+            selection = self.discount_view.get_selection()
+
+            model, itr = selection.get_selected()
+
+            row = model[itr]
+
+            name = row[0] + ' '
+            data = round(row[2], 2)
+            is_percentage = row[3]
+
+        else:
+            counter = 0
+            while not data and counter < len(self.discount_input_areas):
+                display = self.discount_input_areas[counter]
+                if display.is_sensitive():
+
+                    data = round(display.get_value(), 2)
+                    is_percentage = display.is_percentage
+                counter += 1
+
+        return data, is_percentage
+
+    def generate_related_area(self):
+        """Override Method.
+
+        Generates the related area to be
+        displayed underneath the the main
+        view for displaying the order.
+
+        @note: This class is overwritten
+        so that the related area buttons
+        are not populated. As such this
+        method is simply an override.
+
+        This is to prevent the Checkout
+        confirmation dialog from
+        displaying the split check button
+        which is not helpful here.
+
+        @return: Gtk.Container that is
+        empty.
+        """
+        return Gtk.VBox()
+
+    def confirm_data(self):
+        """Override Method.
+
+        Confirms the updated order list that
+        has has discount MenuItems added or
+        removed.
+
+        @return: None
+        """
+        self.confirm_func(self.order_list)
+
+
+#==========================================================
+# This block represents windows that have used inheritance
+# through multiple classes. All classes in this block have
+# highly specific purposes that rely heavily on multiple
+# classes from other groups. As such it is not recommended
+# to inherit from these classes, as their inheritance tree
+# could cause eventual problems by being excessively robust.
+#==========================================================
+
+class UpdateTemplateDiscountCheckoutConfirmationDialog(DiscountCheckoutConfirmationDialog):
+    """UpdateTemplateDiscountCheckoutConfirmationDialog is a window
+    that allows the user to update the templates stored and accessed by the
+    DiscountCheckoutConfirmationDialog
+    window.
+
+    @warning: This class is not intended to be inherited from.
+    This class instantiates all of its functionality primarily
+    from its super classes. As well its inheritance tree is
+    considered large enough that it would be unwise to continue
+    inheritance.
+
+    @var name_entry: Gtk.Entry that represents the area where the name
+    if the new discount template will be stored.
+    """
+    def __init__(self, parent, confirm_func, discount_templates,
+                 dialog=None, title='Discount Template Editor dialog'):
+        """Initializes a new UpdateTemplateDiscountCheckoutConfirmationDialog
+        window.
+
+        @param parent: Gtk.Object that this dialog window will be called on.
+        The parent will be unable to function until this dialog window closes.
+
+        @param confirm_func: function that will be called upon confirmation
+        of the dialog window.
+
+        @keyword dialog: unimplemented keyword parameter. Usage has no effect,
+        default is None.
+
+        @param title: str representing the title that will be displayed on the
+        dialog window.
+        """
+        self.name_entry = None
+        super(UpdateTemplateDiscountCheckoutConfirmationDialog, self).__init__(parent, confirm_func,
+                                                                               [], discount_templates)
+        self.tree_view.set_model(self.discount_view.get_model())
+
+    def generate_columns(self):
+        """Override Method
+
+        Generates the columns
+        to be displayed in the given
+        order list.
+
+        @return: list of Gtk.TreeViewColumn
+        objects that are used to display the
+        information in the associated view.
+        """
+        col_list = []
+
+        rend = Gtk.CellRendererText()
+        col1 = Gtk.TreeViewColumn('Template Name', rend,
+                                  text=0)
+        col_list.append(col1)
+
+        rend = Gtk.CellRendererText()
+        col2 = Gtk.TreeViewColumn('Discount', rend,
+                                  text=1)
+        col_list.append(col2)
+
+        return col_list
+
+    def generate_model(self):
+        """Override Method.
+
+        Generates the model that will
+        be used to store and display the
+        information.
+
+        @note: This method is used to
+        eliminate the model display,
+        which will be added after the
+        discount view's model has been
+        adjusted.
+
+        @return: None
+        """
+        return None
+
+    def generate_confirmation_selection_area(self):
+        """Override Method.
+
+        Generates the selection confirmation area that
+        can be interacted with by the user to confirm
+        a new template.
+
+        @return: Gtk.Container that holds the widgets
+        for confirmation window.
+        """
+        border = Gtk.Frame(label='Confirmation Area')
+        main_box = Gtk.VBox()
+
+        label_box = Gtk.HBox()
+        label_box.pack_start(Gtk.Label('Name: '), False, False, 0.0)
+
+        main_box.pack_start(label_box, False, False, 0.0)
+
+        self.name_entry = Gtk.Entry()
+        main_box.pack_start(self.name_entry, False, False, 5.0)
+
+        add_discount_button = Gtk.Button('Add Discount Template')
+        add_discount_button.connect('clicked', self.add_discount_to_order,
+                                    self.tree_view.get_model())
+        add_discount_button.set_size_request(150, 50)
+        main_box.pack_start(add_discount_button, False, False, 0.0)
+
+        border.add(main_box)
+        return border
+
+    def add_discount_to_order(self, *args):
+        """Override Method
+
+        Adds the selected discount information
+        to the templates list.
+
+        @param args: wildcard catchall that is
+        used to catch the Gtk.Widget that called
+        this method.
+
+        @return: None
+        """
+        name = self.name_entry.get_text()
+        name = name.strip()
+
+        self.name_entry.set_text('')
+        if len(name) > 0:
+            value, is_percentage = self.parse_discount_data()
+
+            value_str = str(value)
+
+            if is_percentage:
+                value_str += '%'
+            else:
+                value_str = '$' + value_str
+
+            data = name, value_str, value, is_percentage
+
+            tree_model = self.tree_view.get_model()
+            tree_model.append(data)
+
+    def remove_selected_item(self, *args):
+        """Override Method.
+
+        Removes the selected discount template
+        from the stored discount template information.
+
+        @param args: wildcard catchall that is used
+        to catch the Gtk.Widget that called this method.
+
+        @return: None
+        """
+        model, itr = self.get_selected()
+
+        if itr:
+            model.remove(itr)
+
+    def confirm_data(self):
+        """Override Method.
+
+        Confirms the updated discount
+        templates and calls the confirm
+        func field.
+
+        information is generated directly
+        from the stored model in the discount
+        template display.
+
+        @return: None
+        """
+        discount_templates = []
+        model = self.tree_view.get_model()
+        for row in model:
+            discount_templates.append(tuple(row))
+
+        self.confirm_func(discount_templates)
+
+
+class UpdateGeneralOptionSelectionDialog(GeneralOptionSelectionDialog):
+    """UpdateGeneralOptionSelectionDialog allows the user to interact
+    with the stored OptionItems data that may be accessed through
+    the GeneralOptionSelectionDialog. This includes adding/editing
+    OptionItems and categories.
+
+    @warning: This class is not intended to be inherited from.
+    This class instantiates all of its functionality primarily
+    from its super classes. As well its inheritance tree is
+    considered large enough that it would be unwise to continue
+    inheritance.
+
+    @var confirm_func: Function that is to be called upon
+    confirmation of the data.
+
+    @var category_entry: Gtk.Entry that allows the user to
+    input a new category name when adding a category.
+
+    @var name_entry: Gtk.Entry that allows the user to input
+    a new option name when editing option properties.
+
+    @var price_display: Gtk.SpinButton that allows the user
+    to edit price data associated with an option.
+
+    """
+
+    def __init__(self, parent, confirm_func, option_data,
+                 title='Update Options Dialog'):
+        """Initializes a new UpdateGeneleratOptionSelectionDialog
+
+        @param parent: Gtk.Object that represent the parent that
+        this dialog window will be called on.
+
+        @param confirm_func: Function that is to be called upon
+        confirmation of the data.
+
+        @param option_data: dict of str keys that represent the
+        category, mapped to value list of OptionItems that
+        represents the associated OptionItems.
+
+        @keyword title: str representing the title to be displayed.
+        Default 'Update Options Dialog'
+        """
+        self.confirm_func = confirm_func
+
+        self.category_entry = None
+        self.name_entry = None
+        self.price_display = None
+
+        menu_item = MenuItem('', 0.0)
+        super(UpdateGeneralOptionSelectionDialog, self).__init__(parent,
+                                                                 option_data,
+                                                                 menu_item,
+                                                                 title=title)
+
+    def generate_main_selection_area(self):
+        """Override Method
+
+        Generates the main selection area
+        to be displayed.
+
+        @return: Gtk.Container that holds all
+        the widgets to be displayed in the
+        main selection area.
+        """
+        main_box = Gtk.VBox()
+
+        category_display = super(UpdateGeneralOptionSelectionDialog,
+                                 self).generate_main_selection_area()
+        main_box.pack_start(category_display, True, True, 5.0)
+
+        add_button_box = Gtk.HBox()
+
+        self.category_entry = Gtk.Entry()
+        add_button_box.pack_start(self.category_entry, False, False, 5.0)
+
+        add_button = Gtk.Button('ADD CATEGORY')
+        add_button.set_can_focus(False)
+        add_button.connect('clicked', self.add_category)
+        add_button.set_size_request(150, 30)
+        add_button_box.pack_end(add_button, False, False, 5.0)
+
+        main_box.pack_start(add_button_box, False, False, 5.0)
+
+        remove_button_box = Gtk.HBox()
+
+        remove_button = Gtk.Button('REMOVE CATEGORY')
+        remove_button.set_can_focus(False)
+        remove_button.connect('clicked', self.remove_category)
+        remove_button.set_size_request(150, 30)
+        remove_button_box.pack_end(remove_button, False, False, 5.0)
+
+        main_box.pack_start(remove_button_box, False, False, 5.0)
+
+        return main_box
+
+    def generate_secondary_selection_area(self):
+        """Override Method.
+
+        Generates all the widgets to be displayed
+        in the secondary selection area.
+
+        @return: Gtk.Container that holds all
+        widgets that are to be displayed in the
+        secondary select area.
+        """
+        main_box = Gtk.VBox()
+
+        option_display = super(UpdateGeneralOptionSelectionDialog,
+                               self).generate_secondary_selection_area()
+        main_box.pack_start(option_display, True, True, 5.0)
+
+        selection = self.option_view.get_selection()
+        selection.set_select_function(self.update_option_selection, None)
+
+        add_button_box = Gtk.HBox()
+
+        add_button = Gtk.Button('ADD NEW OPTION')
+        add_button.set_can_focus(False)
+        add_button.connect('clicked', self.add_new_option)
+        add_button.set_size_request(150, 30)
+        add_button_box.pack_start(add_button, False, False, 5.0)
+
+        main_box.pack_start(add_button_box, False, False, 5.0)
+
+        remove_button_box = Gtk.HBox()
+
+        remove_button = Gtk.Button('REMOVE OPTION')
+        remove_button.set_can_focus(False)
+        remove_button.connect('clicked', self.remove_selected_option)
+        remove_button.set_size_request(150, 30)
+        remove_button_box.pack_start(remove_button, False, False, 5.0)
+
+        main_box.pack_start(remove_button_box, False, False, 5.0)
+
+        return main_box
+
+    def generate_item_selection_area(self):
+        """Override Method.
+
+        Generates the widgets to be displayed
+        in the item selection area.
+
+        @return: Gtk.Container that holds all
+        widgets to be displayed in the item
+        selection area.
+        """
+        frame = Gtk.Frame(label='Properties')
+        main_box = Gtk.VBox()
+
+        properties_box = Gtk.VBox()
+
+        name_entry_box = Gtk.HBox()
+        name_entry_box.pack_start(Gtk.Label('Name: '), False, False, 5.0)
+
+        self.name_entry = Gtk.Entry()
+        name_entry_box.pack_start(self.name_entry, True, True, 5.0)
+
+        properties_box.pack_start(name_entry_box, False, False, 5.0)
+
+        price_entry_box = Gtk.HBox()
+        price_entry_box.pack_start(Gtk.Label('Add Price: '), False, False, 5.0)
+
+        self.price_display = Gtk.SpinButton()
+        adjustment = Gtk.Adjustment(0.0, 0.0, 100 * 100.0, 0.01, 1, 0)
+        self.price_display.set_adjustment(adjustment)
+        self.price_display.set_digits(2)
+
+        price_entry_box.pack_start(self.price_display, False, False, 5.0)
+        price_entry_box.pack_start(Gtk.Fixed(), False, False, 5.0)
+
+        properties_box.pack_start(price_entry_box, False, False, 5.0)
+        main_box.pack_start(properties_box, False, False, 5.0)
+
+        update_button_box = Gtk.HBox()
+
+        update_button = Gtk.Button('UPDATE OPTION')
+        update_button.set_can_focus(False)
+        update_button.connect('clicked', self.update_option)
+        update_button.set_size_request(150, 30)
+
+        update_button_box.pack_end(update_button, False, False, 5.0)
+        update_button_box.pack_start(Gtk.Fixed(), False, False, 5.0)
+        main_box.pack_start(update_button_box, False, False, 5.0)
+
+        main_box.pack_start(Gtk.Fixed(), False, False, 5.0)
+
+        frame.add(main_box)
+
+        return frame
+
+    def update_category_select(self, selection, model, path, is_selected,
+                               user_data=None):
+        """Override Method
+
+        Called when a row on the categories view has
+        been selected.
+
+        @param selection: Gtk.Selection that represents
+        the selection associated with the categories
+        view.
+
+        @param model: Gtk.TreeModel that represents the
+        model that stores the data associated with the
+        categories view.
+
+        @param path: Gtk.TreePath pointing to the row
+        that was selected.
+
+        @param is_selected: bool value that represents
+        if the order was selected prior to current
+        selection.
+
+        @keyword user_data: Default user data passed
+        to this method. By default is None.
+
+        @return: bool value representing if the selection
+        can be made. Default True
+        """
+        self.clear_entries()
+        return super(UpdateGeneralOptionSelectionDialog,
+                     self).update_category_select(selection, model, path,
+                                                  is_selected, user_data=user_data)
+
+    def update_option_selection(self, selection, model, path, is_selected,
+                                user_data=None):
+        """Method called when the option selection area
+        has had a selection made. Updates the name and
+        price displays for editing.
+
+        @param selection: Gtk.Selection that represents
+        the selection associated with the display.
+
+        @param model: Gtk.TreeModel that represents the
+        data storage associated with the display
+
+        @param path: Gtk.TreePath pointing to the row
+        that was selected.
+
+        @param is_selected: bool value representing if
+        the row was selected prior to this current
+        selection check.
+
+        @keyword user_data: User data passed to this
+        method. Default is None.
+
+        @return: bool value representing if the current
+        row can be selected. By default True.
+        """
+        if not is_selected:
+            itr = model.get_iter(path)
+
+            name = model[itr][0]
+            price = float(model[itr][1])
+
+            self.name_entry.set_text(name)
+            self.price_display.set_value(price)
+
+        return True
+
+    def get_selected_category(self):
+        """Get the currently selected category.
+
+        @return: str representing the category
+        that has been selected.
+        """
+        model, itr = self.get_category_view_selected()
+        category = model[itr][0]
+        return category
+
+    def add_category(self, *args):
+        """Adds a new category by with
+        the name stored in the category
+        entry area.
+
+        @return: str representing the
+        category added.
+        """
+        name = self.category_entry.get_text()
+        self.clear_entries()
+        name = name.strip().upper()
+
+        if len(name) > 0 and not name in self.option_data:
+            self.option_data[name] = []
+            self.display_data[name] = Gtk.ListStore(str, str)
+
+            model = self.category_view.get_model()
+            model.append((name,))
+
+            return name
+
+        return None
+
+    def remove_category(self, *args):
+        """Removes the selected category
+        from the category list.
+
+        @return: str representing the
+        category removed.
+        """
+        model, itr = self.get_category_view_selected()
+
+        if itr:
+            key = model[itr][0]
+            option_data = self.option_data[key]
+
+            response = True
+
+            if len(option_data) > 0:
+                title = 'Delete ' + key + ' Confirmation?'
+                message = 'Deleting ' + key + ' will also remove all' + \
+                          ' associated Option Items. Do you want to continue?'
+                response = run_warning_dialog(self.dialog, title, message)
+
+            if response:
+                del self.option_data[key]
+                del self.display_data[key]
+
+                model.remove(itr)
+
+            return key
+
+        return None
+
+    def add_new_option(self, *args):
+        """Adds a new option to the
+        option data with the generated
+        title "NEW OPTION'.
+
+        @return: Gtk.TreeIter pointing to
+        the option that was added.
+        """
+        key = self.get_selected_category()
+        option_list = self.option_data[key]
+
+        option_model = self.option_view.get_model()
+        option_model.append(('NEW OPTION', str(0.0)))
+
+        option_item = OptionItem('NEW OPTION', key, 0.0)
+        return option_list.append(option_item)
+
+    def remove_selected_option(self, *args):
+        """Removes the selected option from the
+        option data.
+
+        @return: OptionItem that represents
+        the selected, removed OptionItem
+        """
+        key = self.get_selected_category()
+        option_list = self.option_data[key]
+
+        model, itr = self.get_option_view_selected()
+        if itr:
+            path = model.get_path(itr)
+            index = path.get_indices()[0]
+
+            model.remove(itr)
+            return option_list.pop(index)
+
+        return None
+
+    def update_option(self, *args):
+        """Updates the selected option to
+        the adjusted name and adjusted price
+        generated from the respective entries.
+
+        @return: OptionItem that has been
+        updated.
+        """
+        name = self.name_entry.get_text()
+        name = name.strip().upper()
+
+        price = self.price_display.get_value()
+        price = float(price)
+
+        model, itr = self.get_option_view_selected()
+
+        self.clear_entries()
+
+        if itr and len(name) > 0 and price >= 0.0:
+            key = self.get_selected_category()
+
+            option_list = self.option_data[key]
+
+            path = model.get_path(itr)
+            index = path.get_indices()[0]
+
+            option_item = option_list[index]
+
+            option_item._name = name
+            option_item._price = price
+
+            model[itr][0] = option_item._name
+            model[itr][1] = str(option_item._price)
+
+            return option_item
+
+        return None
+
+    def clear_entries(self):
+        """Clears the current text
+        displayed in all entries.
+
+        @return: None
+        """
+        self.category_entry.set_text('')
+        self.name_entry.set_text('')
+        self.price_display.set_value(0.0)
+
+    def confirm_data(self, *args):
+        """Override Method
+
+        Confirms the updated data
+        by calling the given
+        confirm func.
+
+        @param args: wildcard catchall
+        that is used to catch the
+        parameters given to this method.
+
+        @return: None
+        """
+        self.confirm_func(self.option_data)
 
 
 #===========================================================
@@ -3506,3 +5570,36 @@ def ensure_top_level_item(model, tree_iter):
     if parent_iter:
         return ensure_top_level_item(model, parent_iter)
     return tree_iter
+
+
+def run_warning_dialog(parent, title, message):
+    """Runs a warning dialog window on the given
+    parent, with the given title and the given
+    message. This warning dialog window allows
+    for two possible selections, Yes or No.
+
+    @param parent: Gtk.Object that this warning
+    window is being called on.
+
+    @param title: str representing the title to
+    be displayed. This title should be a brief
+    informative description of the error.
+
+    @param message: str representing the message
+    to be displayed warning the user.
+
+    @return: bool value representing True if the
+    Yes response was given from the dialog, or
+    False if the No response was given.
+    """
+
+    buttons = Gtk.ButtonsType.YES_NO
+    message_type = Gtk.MessageType.WARNING
+
+    warning_dialog = Gtk.MessageDialog(parent, 0, message_type, buttons, title)
+    warning_dialog.format_secondary_text(message)
+
+    response = warning_dialog.run()
+    warning_dialog.destroy()
+
+    return response == Gtk.ResponseType.YES
