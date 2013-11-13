@@ -609,7 +609,7 @@ class SelectionDialog(Dialog):
         secondary_selection_area = self.generate_secondary_selection_area()
         main_box.pack_start(secondary_selection_area, True, True, 5.0)
 
-        item_selection_area = self.generate_item_selection_area()
+        item_selection_area = self.generate_properties_selection_area()
         main_box.pack_start(item_selection_area, True, True, 5.0)
 
         return main_box
@@ -639,14 +639,14 @@ class SelectionDialog(Dialog):
         pass
 
     @abstractmethod
-    def generate_item_selection_area(self):
+    def generate_properties_selection_area(self):
         """Abstract Method.
 
-        Generates the item selection area
+        Generates the properties selection area
         of the SelectionDialog
 
         @return: gtk.Container that holds all
-        the widgets for the item selection area.
+        the widgets for the properties selection area.
         """
         pass
 
@@ -852,719 +852,6 @@ class AddReservationsDialog(Dialog):
         the widget that emitted this call.
         """
         super(AddReservationsDialog, self).cancel_button_clicked()
-
-
-class UpdateMenuItemsDialog(Dialog):
-    """UpdateMenuItemDialog interacts with the user
-    to display information and receive information to
-    update the stored menu item data for the PeonOrderSystem
-    UI.
-
-    This window expects menu item data to be in a specific
-    form. It then operates on that menu item data, finally
-    calling the given confirm func upon confirmation from
-    the user.
-
-    @group Dialog: This window is a subclass member of the
-    Dialog group. Any changes to the Dialog class could effect
-    the functionality of this window.
-
-    @var menu_item_data: dict of str key to list of MenuItem object
-    values. Each key represents a category and each list is a
-    list of MenuItem objects that represents that category.
-
-    @var confirm_func: function that is to be called if or when
-    the dialog window has been confirmed by the user.
-
-    @var model_data: dict of str key to list of Gtk.TreeModel
-    objects. This represents the associated MenuItems to be
-    displayed for any given category. This information will
-    be edited throughout the classes function, and if confirmation
-    occurs this dict will be changed to MenuItem objects and
-    then passed to the confirm_func.
-
-    @var categories_name_entry: Gtk.Entry that represents the
-    text entry that is used to add a new category with the
-    entered name.
-
-    @var item_name_entry: Gtk.Entry that represents the text
-    entry that is used to edit the name associated with
-    a specific MenuItem object.
-
-    @var price_spin_button: Gtk.SpinButton that represents
-    the edited price associated with a specific MenuItem object.
-
-    @var stars_spin_button: Gtk.SpinButton that represents
-    the edited stars associated with a specific MenuItem object.
-
-    @var is_editable_switch: Gtk.Switch that is associated with
-    editing the associated MenuItem's editable bool value.
-
-    @var is_confirmed_switch: Gtk.Switch that is associated with
-    editing the associated MenuItem's confirmed bool value.
-
-    @var categories_view: Gtk.TreeView object that displays
-    the information of the categories to be selected and
-    edited by the user.
-
-    @var item_view: Gtk.TreeView object that is used to
-    display the information of the MenuItem objects to
-    be selected and editing by the user.
-    """
-
-    def __init__(self, parent, menu_item_data, confirm_func,
-                 title='Update Menu Items Dialog'):
-        """ Initializes a new UpdateMenuItemsDialog window
-        that will allow the user to interact with the stored
-        menu data and alter it as necessary.
-
-        @param parent: Gtk.Object that represents the parent
-        on which this dialog object was called.
-
-        @param menu_item_data: dict of str keys that map to
-        list values. Each key is a category that stores a list
-        of MenuItem objects associated with menu data that is
-        stored.
-
-        @param confirm_func: function that is to be called upon
-        confirmation.
-
-        @param title: str representing the title to be displayed
-        by this dialog window.
-        """
-        self.menu_item_data = menu_item_data
-        self.confirm_func = confirm_func
-        self.model_data = None
-
-        self.categories_name_entry = None
-        self.item_name_entry = None
-        self.price_spin_button = None
-        self.stars_spin_button = None
-
-        self.is_editable_switch = None
-        self.is_confirmed_switch = None
-
-        self.categories_view = None
-        self.item_view = None
-
-        super(UpdateMenuItemsDialog, self).__init__(parent, title,
-                                                    default_size=(1100, 600))
-
-    def generate_layout(self):
-        """Override Method.
-
-        Generates the layout that is to be
-        added to the content area of the main
-        dialog window.
-
-        @return: Gtk.Container that holds all
-        associated widgets to be displayed in
-        the dialog's content area.
-        """
-        main_box = Gtk.HBox()
-
-        selection_sub_box = Gtk.HBox()
-        categories_display = self.generate_categories_display()
-        selection_sub_box.pack_start(categories_display, True, True, 5.0)
-
-        item_display = self.generate_item_display()
-        selection_sub_box.pack_start(item_display, True, True, 5.0)
-
-        main_box.pack_start(selection_sub_box, True, True, 5.0)
-
-        properties_display = self.generate_properties_display()
-        main_box.pack_start(properties_display, True, True, 5.0)
-
-        return main_box
-
-    def generate_properties_display(self):
-        """Generates the display associated
-        with the properties editing area.
-
-        @return: Gtk.Container that holds
-        all Gtk.Widgets that are associated
-        with the properties area display.
-        """
-        options_box = Gtk.VBox()
-
-        properties_frame = Gtk.Frame(label='Item Properties')
-        properties_box = Gtk.VBox()
-
-        name_box = Gtk.HBox()
-        name_box.pack_start(Gtk.Label("Name: "), False, False, 5.0)
-        self.item_name_entry = Gtk.Entry()
-        name_box.pack_start(self.item_name_entry, True, True, 5.0)
-        properties_box.pack_start(name_box, False, False, 5.0)
-
-        price_box = Gtk.HBox()
-        price_box.pack_start(Gtk.Label("Price: "), False, False, 5.0)
-        self.price_spin_button = Gtk.SpinButton()
-        self.price_spin_button.set_digits(2)
-        adjustment = Gtk.Adjustment(0.0, 0, 100**100, .01, 1, 1)
-        self.price_spin_button.set_adjustment(adjustment)
-        price_box.pack_start(self.price_spin_button, True, True, 5.0)
-        price_box.pack_start(Gtk.Fixed(), True, True, 5.0)
-        properties_box.pack_start(price_box, False, False, 5.0)
-
-        stars_box = Gtk.HBox()
-        stars_box.pack_start(Gtk.Label("Initial Stars\nValue:"), False, False, 5.0)
-        self.stars_spin_button = Gtk.SpinButton()
-        adjustment = Gtk.Adjustment(0, -100, 100, 1, 1, 1)
-        self.stars_spin_button.set_adjustment(adjustment)
-        stars_box.pack_start(self.stars_spin_button, False, False, 5.0)
-        properties_box.pack_start(stars_box, False, False, 5.0)
-
-        editable_box = Gtk.HBox()
-        editable_box.pack_start(Gtk.Label('Can be\nedited: '), False, False, 5.0)
-        self.is_editable_switch = Gtk.Switch()
-        self.is_editable_switch.connect('button-press-event', self.toggle_stars_editable_display)
-        editable_box.pack_start(Gtk.Fixed(), False, False, 5.0)
-        editable_box.pack_start(self.is_editable_switch, False, False, 5.0)
-        properties_box.pack_start(editable_box, False, False, 5.0)
-
-        confirmed_box = Gtk.HBox()
-        confirmed_box.pack_start(Gtk.Label('Can be sent\nto kitchen: '), False, False, 5.0)
-        self.is_confirmed_switch = Gtk.Switch()
-        confirmed_box.pack_start(Gtk.Fixed(), False, False, 5.0)
-        confirmed_box.pack_start(self.is_confirmed_switch, False, False, 5.0)
-        properties_box.pack_start(confirmed_box, False, False, 5.0)
-
-        update_changes_box = Gtk.HBox()
-        update_changes_button = Gtk.Button('Update Item')
-        update_changes_button.connect('clicked', self.update_item)
-        update_changes_button.set_size_request(150, 35)
-        update_changes_button.set_can_focus(False)
-        update_changes_box.pack_end(update_changes_button, False, False, 5.0)
-        properties_box.pack_end(update_changes_box, False, False, 5.0)
-
-        properties_frame.add(properties_box)
-        options_box.pack_start(properties_frame, False, False, 5.0)
-
-        option_choices_box = Gtk.VBox()
-
-        #TODO add option choices
-
-        options_box.pack_start(option_choices_box, True, True, 5.0)
-
-        return options_box
-
-    def toggle_stars_editable_display(self, switch_widget, *args):
-        """Toggles if the stars editable display should become
-        interactive or not, based on if the editable switch
-        has been toggled.
-
-        @param switch_widget: Gtk.Switch that called this
-        method.
-
-        @param *args: wildcard catchall used to catch
-        any user defined arguments
-
-        @return: None
-        """
-        # Since this method is called before the action is
-        # performed. We have negated the returned boolean.
-        switch_will_be_on = not switch_widget.get_active()
-        self.stars_spin_button.set_sensitive(switch_will_be_on)
-
-    def generate_item_display(self):
-        """Generates the display associated
-        with the items section.
-
-        @return: Gtk.Container that holds all
-        the associated Gtk.Widgets that are
-        associated with the items section
-        display.
-        """
-        menu_items_display_box = Gtk.VBox()
-
-        view_frame = Gtk.Frame()
-        scroll_window = Gtk.ScrolledWindow()
-        self.item_view = self.generate_item_view()
-
-        scroll_window.add(self.item_view)
-        view_frame.add(scroll_window)
-
-        menu_items_display_box.pack_start(view_frame, True, True, 5.0)
-
-        menu_items_edit_frame = Gtk.Frame(label='Menu Item Editor')
-        menu_items_edit_box = Gtk.HBox()
-
-        add_menu_item_button = Gtk.Button('ADD NEW ITEM')
-        add_menu_item_button.connect('clicked', self.add_new_item)
-        add_menu_item_button.set_can_focus(False)
-        add_menu_item_button.set_size_request(100, 50)
-        menu_items_edit_box.pack_start(add_menu_item_button, False, False, 5.0)
-
-        remove_menu_item_button = Gtk.Button('REMOVE ITEM')
-        remove_menu_item_button.connect('clicked', self.remove_selected_item)
-        remove_menu_item_button.set_can_focus(False)
-        remove_menu_item_button.set_size_request(100, 50)
-        menu_items_edit_box.pack_end(remove_menu_item_button, False, False, 5.0)
-
-        menu_items_edit_frame.add(menu_items_edit_box)
-
-        menu_items_display_box.pack_start(menu_items_edit_frame, False, False, 5.0)
-
-        return menu_items_display_box
-
-    def generate_categories_display(self):
-        """Generates the display associated
-        with the categories section.
-
-        @return: Gtk.Container that holds all the
-        associated Gtk.Widgets that are to be
-        displayed.
-        """
-
-        # Generate information for displaying
-        # and editing categories
-        categories_box = Gtk.VBox()
-
-        # Generate categories tree view
-        view_frame = Gtk.Frame()
-        categories_display_box = Gtk.VBox()
-        scroll_window = Gtk.ScrolledWindow()
-
-        self.categories_view = self.generate_categories_view()
-        scroll_window.add(self.categories_view)
-        categories_display_box.pack_start(scroll_window, True, True, 5.0)
-
-        view_frame.add(categories_display_box)
-        categories_box.pack_start(view_frame, True, True, 5.0)
-
-        # Generate categories editing buttons
-        categories_frame = Gtk.Frame(label="Category Editor")
-        categories_edit_box = Gtk.VBox()
-
-        categories_edit_subbox1 = Gtk.HBox()
-
-        self.categories_name_entry = Gtk.Entry()
-        categories_edit_subbox1.pack_start(self.categories_name_entry, False, False, 5.0)
-        add_category_button = Gtk.Button("ADD")
-        add_category_button.connect('clicked', self.add_new_category)
-        add_category_button.set_can_focus(False)
-        add_category_button.set_size_request(70, 30)
-        categories_edit_subbox1.pack_start(add_category_button, False, False, 5.0)
-
-        categories_edit_box.pack_start(categories_edit_subbox1, False, False, 5.0)
-
-        categories_edit_subbox2 = Gtk.HBox()
-
-        remove_category_button = Gtk.Button("REMOVE SELECTED CATEGORY")
-        remove_category_button.connect('clicked', self.remove_selected_category)
-        remove_category_button.set_can_focus(False)
-        remove_category_button.set_size_request(150, 50)
-        categories_edit_subbox2.pack_start(remove_category_button, False, False, 5.0)
-
-        categories_edit_box.pack_start(categories_edit_subbox2, False, False, 5.0)
-        categories_frame.add(categories_edit_box)
-        categories_box.pack_start(categories_frame, False, False, 5.0)
-
-        return categories_box
-
-    def generate_categories_view(self):
-        """Generates the categories view associated
-        with displaying the data of categories in
-        menu data.
-
-        @return: Gtk.TreeView that represents the
-        view that will display the category data.
-        """
-        tree_view = Gtk.TreeView()
-        model = self.generate_categories_model()
-        tree_view.set_model(model)
-
-        col_list = self.generate_columns(('Category',))
-
-        for col in col_list:
-            tree_view.append_column(col)
-
-        selection = tree_view.get_selection()
-        selection.set_select_function(self.category_selected, None)
-
-        return tree_view
-
-    def category_selected(self, selection, model, path,
-                          is_selected, user_data):
-        """Callback Method.
-
-        This method is called when a selection has been
-        made in the associated category view. Selections
-        made populate the items view with the associated
-        model to display MenuItems for selection.
-
-        @param selection: Gtk.Selection that represents
-        the selection associated with the treeview
-
-        @param model: Gtk.TreeModel that stores the data
-        displayed in the associated treeview
-
-        @param path: Gtk.TreePath pointing to a row in the
-        associated treeview
-
-        @param is_selected: bool value that represents if
-        the row was selected prior to this current selection.
-
-        @param user_data: user defined arguments passed into
-        this selection method. Expected None.
-
-        @return: bool value, default is True
-        """
-        itr = model.get_iter(path)
-        key = model[itr][0]
-
-        category_model = self.model_data[key]
-
-        self.item_view.set_model(category_model)
-
-        self.item_name_entry.set_text('')
-        self.item_name_entry.set_sensitive(False)
-
-        self.price_spin_button.set_value(0.0)
-        self.price_spin_button.set_sensitive(False)
-
-        self.stars_spin_button.set_value(0)
-        self.stars_spin_button.set_sensitive(False)
-
-        self.is_confirmed_switch.set_active(False)
-        self.is_confirmed_switch.set_sensitive(False)
-
-        self.is_editable_switch.set_active(False)
-        self.is_editable_switch.set_sensitive(False)
-
-        return True
-
-    def generate_item_view(self):
-        """Generates the item view to display
-        the MenuItem information.
-
-        @return: Gtk.TreeView associated with
-        the item view generated.
-        """
-        tree_view = Gtk.TreeView()
-        self.generate_item_model()
-
-        col_list = self.generate_columns(('Menu Item',))
-
-        for col in col_list:
-            tree_view.append_column(col)
-
-        selection = tree_view.get_selection()
-        selection.set_select_function(self.item_selected, None)
-
-        return tree_view
-
-    def item_selected(self, selection, model, path,
-                      is_selected, user_data):
-        """Callback Method.
-
-        This method is called when the a selection from
-        the items_view is selected. This method displays
-        the properties of the associated MenuItem in the
-        properties area for editing.
-
-        @param selection: Gtk.Selection of the treeview
-        that has been selected.
-
-        @param model: Gtk.TreeModel of the treeview that
-        has been selected.
-
-        @param path: Gtk.TreePath of the selected row in
-        the treeview
-
-        @param is_selected: bool value representing if the
-        row was selected, or unselected. This occurs prior
-        to selection. So if a row is true, it was previously
-        selected and clicked again.
-
-        @param user_data: arguments passed into the selected
-        function as designated by the user. Expected value is
-        None
-
-        @return: bool value, by default is True
-        """
-        itr = model.get_iter(path)
-
-        name = model[itr][0]
-        price = model[itr][1]
-        stars = model[itr][2]
-        editable = model[itr][3]
-        confirmed = model[itr][4]
-
-        self.item_name_entry.set_text(name)
-        self.item_name_entry.set_sensitive(True)
-
-        self.price_spin_button.set_value(price)
-        self.price_spin_button.set_sensitive(True)
-
-        self.stars_spin_button.set_value(stars)
-        self.stars_spin_button.set_sensitive(editable)
-
-        self.is_editable_switch.set_active(editable)
-        self.is_editable_switch.set_sensitive(True)
-
-        self.is_confirmed_switch.set_active(not confirmed)
-        self.is_confirmed_switch.set_sensitive(True)
-
-        return True
-
-    def generate_categories_model(self):
-        """Generates and populates the model
-        that is associated with displaying the
-        categories of the menu data.
-
-        @return: None
-        """
-        model = Gtk.ListStore(str)
-
-        for category in self.menu_item_data:
-            model.append((str(category),))
-
-        return model
-
-    def generate_item_model(self):
-        """Generates and populates the
-        models to display the items
-        associated with each category.
-
-        @return: None
-        """
-        self.model_data = {}
-
-        for category in self.menu_item_data:
-            model = Gtk.ListStore(str, float, int, bool, bool)
-
-            for menu_item in self.menu_item_data[category]:
-
-                name = menu_item._name
-                price = menu_item._price
-                stars = menu_item.stars
-                editable = menu_item.editable
-                confirmed = menu_item.confirmed
-
-                values = name, price, stars, editable, confirmed
-
-                model.append(values)
-
-            self.model_data[category] = model
-
-    def generate_columns(self, col_names):
-        """Generates the Gtk.TreeViewColumns
-        to be displayed and returns them as a
-        list.
-
-        @param col_names: list of str that represents
-        the titles to be have columns generated for.
-
-        @return: list of Gtk.TreeViewColumn that
-        represents the columns to be added to
-        view for display.
-        """
-        col_list = []
-
-        for each in col_names:
-            rend = Gtk.CellRendererText()
-            col = Gtk.TreeViewColumn(each, rend, text=0)
-
-        col_list.append(col)
-
-        return col_list
-
-    def add_new_item(self, *args):
-        """Adds a new MenuItem to the
-        menu data. This MenuItem is stored
-        with a generic name, and trivial
-        properties.
-
-        @param args: wildcard catchall that
-        is used to catch the Gtk.Widget that
-        called this method.
-
-        @return: None
-        """
-        model = self.item_view.get_model()
-
-        model.append(('NEW MENU ITEM', 0.0, 0, False, False))
-
-    def remove_selected_item(self, *args):
-        """Removes the selected menu item from
-        the menu data.
-
-        @param args: wildcard catchall that is
-        used to catch the Gtk.Widget that called
-        this method.
-
-        @note: This method will only remove a MenuItem,
-        if a MenuItem is selected.
-
-        @return: None
-        """
-        selection = self.item_view.get_selection()
-        model, itr = selection.get_selected()
-
-        if itr:
-            model.remove(itr)
-
-    def add_new_category(self, *args):
-        """Adds a new category to the menu data.
-        Information for the displayed name of the
-        category is pulled from the associated
-        text entry.
-
-        @note: If text entry is either empty or
-        contains only white space then this method
-        doesn't add any new category.
-
-        @param args:wildcard catchall that is used to
-        catch the Gtk.Widget that called this method.
-
-        @return: None
-        """
-        text = self.categories_name_entry.get_text()
-        text = text.strip().upper()
-
-        self.categories_name_entry.set_text('')
-
-        if len(text) > 0:
-            model = self.categories_view.get_model()
-            model.append((text, ))
-            new_model = Gtk.ListStore(str, float, int,
-                                      bool, bool)
-            self.model_data[text] = new_model
-
-    def remove_selected_category(self, *args):
-        """Removed the selected category from the
-        data.
-
-        @note: If this method is called and the selected
-        category has an associated model with a non-zero
-        length of MenuItems then this method will initiate
-        a warning dialog before deletion.
-
-        @param args: wildcard catchall that is used to
-        catch the Gtk.Widget that called this method.
-
-        @return: None
-        """
-        selection = self.categories_view.get_selection()
-        model, itr = selection.get_selected()
-        key = model[itr][0]
-
-        if itr:
-            response = True
-
-            if len(self.model_data[key]) > 0:
-                title = 'Removing ' + key + \
-                        ' will delete all associated Menu Items'
-                message = 'If you remove the category ' + key + \
-                          ' all Menu Items contained' + \
-                          ' within this category will also be deleted. ' + \
-                          ' This cannot be undone!\n\nDo you want to continue?'
-                response = run_warning_dialog(self.dialog, title, message)
-
-            if response:
-                model.remove(itr)
-                del self.model_data[key]
-
-    def update_item(self, *args):
-        """Updates the item that has been
-        selected by the item view and has had
-        its properties edited in the property
-        editing area.
-
-        @param args: wildcard catchall that is
-        used to catch the Gtk.Widget that called
-        this method.
-
-        @return: None
-        """
-        selection = self.item_view.get_selection()
-        model, itr = selection.get_selected()
-
-        name = self.item_name_entry.get_text()
-        if len(name) > 0 and self.item_name_entry.is_sensitive():
-            model[itr][0] = name.upper()
-
-            model[itr][1] = self.price_spin_button.get_value()
-            model[itr][2] = self.stars_spin_button.get_value_as_int()
-            model[itr][3] = self.is_editable_switch.get_active()
-            model[itr][4] = not self.is_confirmed_switch.get_active()
-
-    def confirm_button_clicked(self, *args):
-        """Override Method.
-
-        Called when the confirm button has been
-        clicked. This method performs the confirmation
-        process by calling the confirm_data method.
-
-        @param args: wildcard catchall to catch the
-        Gtk.Widget that called this method.
-
-        @return: None
-        """
-        super(UpdateMenuItemsDialog, self).confirm_button_clicked()
-        self.confirm_data()
-
-    def confirm_data(self):
-        """Confirm data method is called
-        when the confirm button has been clicked.
-        This method calls the confirm_func stored
-        in the object with object specific parameters
-        passed as arguments.
-
-        @return: dict of str to lists. Each key is a
-        str that represents the category, and each
-        value is a list of MenuItem objects that represents
-        the MenuItem objects associated with that category.
-        """
-        updated_menu_data = {}
-
-        category_model = self.categories_view.get_model()
-        category_itr = category_model.get_iter_first()
-
-        while category_itr:
-
-            item_list = []
-
-            key = category_model[category_itr][0]
-            updated_menu_data[key] = item_list
-            item_model = self.model_data[key]
-
-            item_itr = item_model.get_iter_first()
-
-            while item_itr:
-
-                name = item_model[item_itr][0]
-                price = round(item_model[item_itr][1] * 100) / 100
-                stars = item_model[item_itr][2]
-                editable = item_model[item_itr][3]
-                confirmed = item_model[item_itr][4]
-
-                menu_item = MenuItem(name, price, stars,
-                                     editable, confirmed)
-
-                item_list.append(menu_item)
-
-                item_itr = item_model.iter_next(item_itr)
-
-            category_itr = category_model.iter_next(category_itr)
-
-        self.confirm_func(updated_menu_data)
-
-    def cancel_button_clicked(self, *args):
-        """Override Method.
-
-        Method called when the cancel button
-        has been clicked. This method calls
-        the cancel data method.
-
-        @param args: wildcard catchall that
-        is used to catch the Gtk.Widget that
-        called this method.
-
-        @return: None
-        """
-        super(UpdateMenuItemsDialog, self).cancel_button_clicked()
 
 
 class UndoCheckoutDialog(Dialog):
@@ -3206,6 +2493,658 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
 # that is the "item_selection_area".
 #=========================================================
 
+class UpdateMenuItemsDialog(SelectionDialog):
+    """UpdateMenuItemDialog interacts with the user
+    to display information and receive information to
+    update the stored menu item data for the PeonOrderSystem
+    UI.
+
+    This window expects menu item data to be in a specific
+    form. It then operates on that menu item data, finally
+    calling the given confirm func upon confirmation from
+    the user.
+
+    @group Dialog: This window is a subclass member of the
+    Dialog group. Any changes to the Dialog class could effect
+    the functionality of this window.
+
+    @var menu_item_data: dict of str key to list of MenuItem object
+    values. Each key represents a category and each list is a
+    list of MenuItem objects that represents that category.
+
+    @var confirm_func: function that is to be called if or when
+    the dialog window has been confirmed by the user.
+
+    @var model_data: dict of str key to list of Gtk.TreeModel
+    objects. This represents the associated MenuItems to be
+    displayed for any given category. This information will
+    be edited throughout the classes function, and if confirmation
+    occurs this dict will be changed to MenuItem objects and
+    then passed to the confirm_func.
+
+    @var categories_name_entry: Gtk.Entry that represents the
+    text entry that is used to add a new category with the
+    entered name.
+
+    @var item_name_entry: Gtk.Entry that represents the text
+    entry that is used to edit the name associated with
+    a specific MenuItem object.
+
+    @var price_spin_button: Gtk.SpinButton that represents
+    the edited price associated with a specific MenuItem object.
+
+    @var stars_spin_button: Gtk.SpinButton that represents
+    the edited stars associated with a specific MenuItem object.
+
+    @var is_editable_switch: Gtk.Switch that is associated with
+    editing the associated MenuItem's editable bool value.
+
+    @var is_confirmed_switch: Gtk.Switch that is associated with
+    editing the associated MenuItem's confirmed bool value.
+
+    @var categories_view: Gtk.TreeView object that displays
+    the information of the categories to be selected and
+    edited by the user.
+
+    @var menu_view: Gtk.TreeView object that is used to
+    display the information of the MenuItem objects to
+    be selected and editing by the user.
+    """
+
+    def __init__(self, parent, menu_item_data, confirm_func,
+                 title='Update Menu Items Dialog'):
+        """ Initializes a new UpdateMenuItemsDialog window
+        that will allow the user to interact with the stored
+        menu data and alter it as necessary.
+
+        @param parent: Gtk.Object that represents the parent
+        on which this dialog object was called.
+
+        @param menu_item_data: dict of str keys that map to
+        list values. Each key is a category that stores a list
+        of MenuItem objects associated with menu data that is
+        stored.
+
+        @param option_item_data: dict of str keys that represent
+        categories that map to list of OptionItems that represent
+        the options for those categories.
+
+        @param confirm_func: function that is to be called upon
+        confirmation.
+
+        @param title: str representing the title to be displayed
+        by this dialog window.
+        """
+        self.menu_item_data = menu_item_data
+        #self.option_item_data = option_item_data
+        self.confirm_func = confirm_func
+        self.model_data = None
+
+        self.categories_name_entry = None
+        self.item_name_entry = None
+        self.price_spin_button = None
+        self.stars_spin_button = None
+
+        self.is_editable_switch = None
+        self.is_confirmed_switch = None
+
+        self.categories_view = None
+        self.item_view = None
+
+        super(UpdateMenuItemsDialog, self).__init__(parent, title,
+                                                    default_size=(1100, 600))
+
+    def generate_main_selection_area(self):
+        """Generates the area associated
+        with the categories section.
+
+        @return: Gtk.Container that holds all the
+        associated Gtk.Widgets that are to be
+        displayed.
+        """
+
+        # Generate information for displaying
+        # and editing categories
+        categories_box = Gtk.VBox()
+
+        # Generate categories tree view
+        view_frame = Gtk.Frame()
+        categories_display_box = Gtk.VBox()
+        scroll_window = Gtk.ScrolledWindow()
+
+        self.categories_view = self.generate_categories_view()
+        scroll_window.add(self.categories_view)
+        categories_display_box.pack_start(scroll_window, True, True, 5.0)
+
+        view_frame.add(categories_display_box)
+        categories_box.pack_start(view_frame, True, True, 5.0)
+
+        # Generate categories editing buttons
+        categories_frame = Gtk.Frame(label="Category Editor")
+        categories_edit_box = Gtk.VBox()
+
+        categories_edit_subbox1 = Gtk.HBox()
+
+        self.categories_name_entry = Gtk.Entry()
+        categories_edit_subbox1.pack_start(self.categories_name_entry, False, False,
+                                           5.0)
+        add_category_button = Gtk.Button("ADD")
+        add_category_button.connect('clicked', self.add_new_category)
+        add_category_button.set_can_focus(False)
+        add_category_button.set_size_request(70, 30)
+        categories_edit_subbox1.pack_start(add_category_button, False, False, 5.0)
+
+        categories_edit_box.pack_start(categories_edit_subbox1, False, False, 5.0)
+
+        categories_edit_subbox2 = Gtk.HBox()
+
+        remove_category_button = Gtk.Button("REMOVE SELECTED CATEGORY")
+        remove_category_button.connect('clicked', self.remove_selected_category)
+        remove_category_button.set_can_focus(False)
+        remove_category_button.set_size_request(150, 50)
+        categories_edit_subbox2.pack_start(remove_category_button, False, False,
+                                           5.0)
+
+        categories_edit_box.pack_start(categories_edit_subbox2, False, False, 5.0)
+        categories_frame.add(categories_edit_box)
+        categories_box.pack_start(categories_frame, False, False, 5.0)
+
+        return categories_box
+
+    def generate_categories_view(self):
+        """Generates the categories view associated
+        with displaying the data of categories in
+        menu data.
+
+        @return: Gtk.TreeView that represents the
+        view that will display the category data.
+        """
+        tree_view = Gtk.TreeView()
+        model = self.generate_categories_model()
+        tree_view.set_model(model)
+
+        rend = Gtk.CellRendererText()
+        col = Gtk.TreeViewColumn('Category', rend, text=0)
+        tree_view.append_column(col)
+
+        selection = tree_view.get_selection()
+        selection.set_select_function(self.category_selected, None)
+
+        return tree_view
+
+    def generate_categories_model(self):
+        """Generates and populates the model
+        that is associated with displaying the
+        categories of the menu data.
+
+        @return: None
+        """
+        model = Gtk.ListStore(str)
+
+        for category in self.menu_item_data:
+            model.append((str(category),))
+
+        return model
+
+    def category_selected(self, selection, model, path,
+                              is_selected, user_data):
+        """Callback Method.
+
+        This method is called when a selection has been
+        made in the associated category view. Selections
+        made populate the items view with the associated
+        model to display MenuItems for selection.
+
+        @param selection: Gtk.Selection that represents
+        the selection associated with the treeview
+
+        @param model: Gtk.TreeModel that stores the data
+        displayed in the associated treeview
+
+        @param path: Gtk.TreePath pointing to a row in the
+        associated treeview
+
+        @param is_selected: bool value that represents if
+        the row was selected prior to this current selection.
+
+        @param user_data: user defined arguments passed into
+        this selection method. Expected None.
+
+        @return: bool value, default is True
+        """
+        itr = model.get_iter(path)
+        key = model[itr][0]
+
+        category_model = self.model_data[key]
+
+        self.item_view.set_model(category_model)
+
+        self.item_name_entry.set_text('')
+        self.item_name_entry.set_sensitive(False)
+
+        self.price_spin_button.set_value(0.0)
+        self.price_spin_button.set_sensitive(False)
+
+        self.stars_spin_button.set_value(0)
+        self.stars_spin_button.set_sensitive(False)
+
+        self.is_confirmed_switch.set_active(False)
+        self.is_confirmed_switch.set_sensitive(False)
+
+        self.is_editable_switch.set_active(False)
+        self.is_editable_switch.set_sensitive(False)
+
+        return True
+
+    def add_new_category(self, *args):
+        """Adds a new category to the menu data.
+        Information for the displayed name of the
+        category is pulled from the associated
+        text entry.
+
+        @note: If text entry is either empty or
+        contains only white space then this method
+        doesn't add any new category.
+
+        @param args:wildcard catchall that is used to
+        catch the Gtk.Widget that called this method.
+
+        @return: None
+        """
+        text = self.categories_name_entry.get_text()
+        text = text.strip().upper()
+
+        self.categories_name_entry.set_text('')
+
+        if len(text) > 0:
+            model = self.categories_view.get_model()
+            model.append((text, ))
+            new_model = Gtk.ListStore(str, float, int,
+                                      bool, bool)
+            self.model_data[text] = new_model
+
+    def remove_selected_category(self, *args):
+        """Removed the selected category from the
+        data.
+
+        @note: If this method is called and the selected
+        category has an associated model with a non-zero
+        length of MenuItems then this method will initiate
+        a warning dialog before deletion.
+
+        @param args: wildcard catchall that is used to
+        catch the Gtk.Widget that called this method.
+
+        @return: None
+        """
+        selection = self.categories_view.get_selection()
+        model, itr = selection.get_selected()
+        key = model[itr][0]
+
+        if itr:
+            response = True
+
+            if len(self.model_data[key]) > 0:
+                title = 'Removing ' + key + \
+                        ' will delete all associated Menu Items'
+                message = 'If you remove the category ' + key + \
+                          ' all Menu Items contained' + \
+                          ' within this category will also be deleted. ' + \
+                          ' This cannot be undone!\n\nDo you want to continue?'
+                response = run_warning_dialog(self.dialog, title, message)
+
+            if response:
+                model.remove(itr)
+                del self.model_data[key]
+
+    def generate_secondary_selection_area(self):
+        """Generates the area associated
+        with the items section.
+
+        @return: Gtk.Container that holds all
+        the associated Gtk.Widgets that are
+        associated with the items section
+        display.
+        """
+        menu_items_display_box = Gtk.VBox()
+
+        view_frame = Gtk.Frame()
+        scroll_window = Gtk.ScrolledWindow()
+        self.item_view = self.generate_item_view()
+
+        scroll_window.add(self.item_view)
+        view_frame.add(scroll_window)
+
+        menu_items_display_box.pack_start(view_frame, True, True, 5.0)
+
+        menu_items_edit_frame = Gtk.Frame(label='Menu Item Editor')
+        menu_items_edit_box = Gtk.HBox()
+
+        add_menu_item_button = Gtk.Button('ADD NEW ITEM')
+        add_menu_item_button.connect('clicked', self.add_new_item)
+        add_menu_item_button.set_can_focus(False)
+        add_menu_item_button.set_size_request(100, 50)
+        menu_items_edit_box.pack_start(add_menu_item_button, False, False, 5.0)
+
+        remove_menu_item_button = Gtk.Button('REMOVE ITEM')
+        remove_menu_item_button.connect('clicked',
+                                        self.remove_selected_item)
+        remove_menu_item_button.set_can_focus(False)
+        remove_menu_item_button.set_size_request(100, 50)
+        menu_items_edit_box.pack_end(remove_menu_item_button, False, False, 5.0)
+
+        menu_items_edit_frame.add(menu_items_edit_box)
+
+        menu_items_display_box.pack_start(menu_items_edit_frame, False, False, 5.0)
+
+        return menu_items_display_box
+
+    def item_selected(self, selection, model, path,
+                          is_selected, user_data):
+        """Callback Method.
+
+        This method is called when the a selection from
+        the items_view is selected. This method displays
+        the properties of the associated MenuItem in the
+        properties area for editing.
+
+        @param selection: Gtk.Selection of the treeview
+        that has been selected.
+
+        @param model: Gtk.TreeModel of the treeview that
+        has been selected.
+
+        @param path: Gtk.TreePath of the selected row in
+        the treeview
+
+        @param is_selected: bool value representing if the
+        row was selected, or unselected. This occurs prior
+        to selection. So if a row is true, it was previously
+        selected and clicked again.
+
+        @param user_data: arguments passed into the selected
+        function as designated by the user. Expected value is
+        None
+
+        @return: bool value, by default is True
+        """
+        itr = model.get_iter(path)
+
+        name = model[itr][0]
+        price = model[itr][1]
+        stars = model[itr][2]
+        editable = model[itr][3]
+        confirmed = model[itr][4]
+
+        self.item_name_entry.set_text(name)
+        self.item_name_entry.set_sensitive(True)
+
+        self.price_spin_button.set_value(price)
+        self.price_spin_button.set_sensitive(True)
+
+        self.stars_spin_button.set_value(stars)
+        self.stars_spin_button.set_sensitive(editable)
+
+        self.is_editable_switch.set_active(editable)
+        self.is_editable_switch.set_sensitive(True)
+
+        self.is_confirmed_switch.set_active(not confirmed)
+        self.is_confirmed_switch.set_sensitive(True)
+
+        return True
+
+    def generate_item_view(self):
+        """Generates the item view to display
+        the MenuItem information.
+
+        @return: Gtk.TreeView associated with
+        the item view generated.
+        """
+        tree_view = Gtk.TreeView()
+        self.generate_item_model()
+
+        rend = Gtk.CellRendererText()
+        col = Gtk.TreeViewColumn('Menu Item', rend, text=0)
+        tree_view.append_column(col)
+
+        selection = tree_view.get_selection()
+        selection.set_select_function(self.item_selected, None)
+
+        return tree_view
+
+    def generate_item_model(self):
+        """Generates and populates the
+        models to display the items
+        associated with each category.
+
+        @return: None
+        """
+        self.model_data = {}
+
+        for category in self.menu_item_data:
+            model = Gtk.ListStore(str, float, int, bool, bool)
+
+            for menu_item in self.menu_item_data[category]:
+                name = menu_item._name
+                price = menu_item._price
+                stars = menu_item.stars
+                editable = menu_item.editable
+                confirmed = menu_item.confirmed
+
+                values = name, price, stars, editable, confirmed
+
+                model.append(values)
+
+            self.model_data[category] = model
+
+    def add_new_item(self, *args):
+        """Adds a new MenuItem to the
+        menu data. This MenuItem is stored
+        with a generic name, and trivial
+        properties.
+
+        @param args: wildcard catchall that
+        is used to catch the Gtk.Widget that
+        called this method.
+
+        @return: None
+        """
+        model = self.item_view.get_model()
+
+        model.append(('NEW MENU ITEM', 0.0, 0, False, False))
+
+    def remove_selected_item(self, *args):
+        """Removes the selected menu item from
+        the menu data.
+
+        @param args: wildcard catchall that is
+        used to catch the Gtk.Widget that called
+        this method.
+
+        @note: This method will only remove a MenuItem,
+        if a MenuItem is selected.
+
+        @return: None
+        """
+        selection = self.item_view.get_selection()
+        model, itr = selection.get_selected()
+
+        if itr:
+            model.remove(itr)
+
+    def generate_properties_selection_area(self):
+        """Generates the area associated
+        with the properties editing area.
+
+        @return: Gtk.Container that holds
+        all Gtk.Widgets that are associated
+        with the properties area display.
+        """
+        options_box = Gtk.VBox()
+
+        properties_frame = Gtk.Frame(label='Item Properties')
+        properties_box = Gtk.VBox()
+
+        name_box = Gtk.HBox()
+        name_box.pack_start(Gtk.Label("Name: "), False, False, 5.0)
+        self.item_name_entry = Gtk.Entry()
+        name_box.pack_start(self.item_name_entry, True, True, 5.0)
+        properties_box.pack_start(name_box, False, False, 5.0)
+
+        price_box = Gtk.HBox()
+        price_box.pack_start(Gtk.Label("Price: "), False, False, 5.0)
+        self.price_spin_button = Gtk.SpinButton()
+        self.price_spin_button.set_digits(2)
+        adjustment = Gtk.Adjustment(0.0, 0, 100**100, .01, 1, 1)
+        self.price_spin_button.set_adjustment(adjustment)
+        price_box.pack_start(self.price_spin_button, True, True, 5.0)
+        price_box.pack_start(Gtk.Fixed(), True, True, 5.0)
+        properties_box.pack_start(price_box, False, False, 5.0)
+
+        stars_box = Gtk.HBox()
+        stars_box.pack_start(Gtk.Label("Initial Stars\nValue:"), False, False, 5.0)
+        self.stars_spin_button = Gtk.SpinButton()
+        adjustment = Gtk.Adjustment(0, -100, 100, 1, 1, 1)
+        self.stars_spin_button.set_adjustment(adjustment)
+        stars_box.pack_start(self.stars_spin_button, False, False, 5.0)
+        properties_box.pack_start(stars_box, False, False, 5.0)
+
+        editable_box = Gtk.HBox()
+        editable_box.pack_start(Gtk.Label('Can be\nedited: '), False, False, 5.0)
+        self.is_editable_switch = Gtk.Switch()
+        self.is_editable_switch.connect('button-press-event', self.toggle_stars_editable_display)
+        editable_box.pack_start(Gtk.Fixed(), False, False, 5.0)
+        editable_box.pack_start(self.is_editable_switch, False, False, 5.0)
+        properties_box.pack_start(editable_box, False, False, 5.0)
+
+        confirmed_box = Gtk.HBox()
+        confirmed_box.pack_start(Gtk.Label('Can be sent\nto kitchen: '), False, False, 5.0)
+        self.is_confirmed_switch = Gtk.Switch()
+        confirmed_box.pack_start(Gtk.Fixed(), False, False, 5.0)
+        confirmed_box.pack_start(self.is_confirmed_switch, False, False, 5.0)
+        properties_box.pack_start(confirmed_box, False, False, 5.0)
+
+        update_changes_box = Gtk.HBox()
+        update_changes_button = Gtk.Button('Update Item')
+        update_changes_button.connect('clicked', self.update_item_properties)
+        update_changes_button.set_size_request(150, 35)
+        update_changes_button.set_can_focus(False)
+        update_changes_box.pack_end(update_changes_button, False, False, 5.0)
+        properties_box.pack_end(update_changes_box, False, False, 5.0)
+
+        properties_frame.add(properties_box)
+        options_box.pack_start(properties_frame, False, False, 5.0)
+
+        option_choices_box = Gtk.VBox()
+
+        #TODO add option choices
+
+        options_box.pack_start(option_choices_box, True, True, 5.0)
+
+        return options_box
+
+    def generate_options_view(self):
+        """Generates the options view display.
+
+        @return: Gtk.Container that holds the
+        options view display and
+        """
+        pass
+
+    def update_item_properties(self, *args):
+        """Updates the item properties that has been
+        selected by the item view and has had
+        its properties edited in the property
+        editing area.
+
+        @param args: wildcard catchall that is
+        used to catch the Gtk.Widget that called
+        this method.
+
+        @return: None
+        """
+        selection = self.item_view.get_selection()
+        model, itr = selection.get_selected()
+
+        name = self.item_name_entry.get_text()
+        if len(name) > 0 and self.item_name_entry.is_sensitive():
+            model[itr][0] = name.upper()
+
+            model[itr][1] = self.price_spin_button.get_value()
+            model[itr][2] = self.stars_spin_button.get_value_as_int()
+            model[itr][3] = self.is_editable_switch.get_active()
+            model[itr][4] = not self.is_confirmed_switch.get_active()
+
+    def toggle_stars_editable_display(self, switch_widget, *args):
+        """Toggles if the stars editable area should become
+        interactive or not, based on if the editable switch
+        has been toggled.
+
+        @param switch_widget: Gtk.Switch that called this
+        method.
+
+        @param *args: wildcard catchall used to catch
+        any user defined arguments
+
+        @return: None
+        """
+        # Since this method is called before the action is
+        # performed. We have negated the returned boolean.
+        switch_will_be_on = not switch_widget.get_active()
+        self.stars_spin_button.set_sensitive(switch_will_be_on)
+
+    def confirm_data(self, *args):
+        """Confirm data method is called
+        when the confirm button has been clicked.
+        This method calls the confirm_func stored
+        in the object with object specific parameters
+        passed as arguments.
+
+        @param args: Wildcard catchall that is used
+        to catch the Gtk.Widget that called this method.
+
+        @return: dict of str to lists. Each key is a
+        str that represents the category, and each
+        value is a list of MenuItem objects that represents
+        the MenuItem objects associated with that category.
+        """
+        updated_menu_data = {}
+
+        category_model = self.categories_view.get_model()
+        category_itr = category_model.get_iter_first()
+
+        while category_itr:
+
+            item_list = []
+
+            key = category_model[category_itr][0]
+            updated_menu_data[key] = item_list
+            item_model = self.model_data[key]
+
+            item_itr = item_model.get_iter_first()
+
+            while item_itr:
+
+                name = item_model[item_itr][0]
+                price = round(item_model[item_itr][1] * 100) / 100
+                stars = item_model[item_itr][2]
+                editable = item_model[item_itr][3]
+                confirmed = item_model[item_itr][4]
+
+                menu_item = MenuItem(name, price, stars,
+                                     editable, confirmed)
+
+                item_list.append(menu_item)
+
+                item_itr = item_model.iter_next(item_itr)
+
+            category_itr = category_model.iter_next(category_itr)
+
+        self.confirm_func(updated_menu_data)
+
+        return updated_menu_data
+
+
 class GeneralOptionSelectionDialog(SelectionDialog):
     """GeneralOptionSelectionDialog allows the user to
     select from the total list of possible option items
@@ -3428,14 +3367,14 @@ class GeneralOptionSelectionDialog(SelectionDialog):
         selection = self.option_view.get_selection()
         return selection.get_selected()
 
-    def generate_item_selection_area(self):
+    def generate_properties_selection_area(self):
         """Override Method.
 
-        Generates the display for the item
+        Generates the display for the properties
         selection area.
 
         @return: Gtk.Container that displays
-        the widgets associated with the item
+        the widgets associated with the properties
         selection area.
         """
         main_box = Gtk.VBox()
@@ -3772,7 +3711,6 @@ class SplitCheckConfirmationDialog(CheckoutConfirmationDialog):
         sub_box.pack_start(button, False, False, 5)
 
         return sub_box
-
 
     def generate_check_treeview(self):
         """Generates the Gtk.TreeView
@@ -5227,7 +5165,7 @@ class UpdateGeneralOptionSelectionDialog(GeneralOptionSelectionDialog):
 
         return main_box
 
-    def generate_item_selection_area(self):
+    def generate_properties_selection_area(self):
         """Override Method.
 
         Generates the widgets to be displayed
@@ -5495,9 +5433,10 @@ class UpdateGeneralOptionSelectionDialog(GeneralOptionSelectionDialog):
 
         @return: None
         """
-        self.category_entry.set_text('')
-        self.name_entry.set_text('')
-        self.price_display.set_value(0.0)
+        if self.category_view and self.name_entry and self.price_display:
+            self.category_entry.set_text('')
+            self.name_entry.set_text('')
+            self.price_display.set_value(0.0)
 
     def confirm_data(self, *args):
         """Override Method
