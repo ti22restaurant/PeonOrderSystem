@@ -262,7 +262,7 @@ class OptionItem(object):
         the name associated with
         this option.
         """
-        return self.get_category() + ': ' + self._name
+        return self._name
 
     def get_price(self):
         """Gets the price associated
@@ -272,6 +272,10 @@ class OptionItem(object):
         the price associated with this
         option.
         """
+        print type(self._price)
+        print self._price
+        print type(self._price_scalar)
+        print self._price_scalar
         return self._price * self._price_scalar
 
     def get_category(self):
@@ -338,7 +342,7 @@ class OptionItem(object):
 
         @return: str representing the option
         """
-        return self.get_name()
+        return str(self.get_option_relation()) + ': ' + self._name
 
     def __eq__(self, other):
         """Compares this option item to

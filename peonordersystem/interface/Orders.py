@@ -393,6 +393,7 @@ class OrderStore(Gtk.TreeStore):
             option_data = ''
 
             for option in menu_item.options:
+                option_data += option.get_option_relation() + ': '
                 option_data += option.get_name() + ', '
 
             data = (option_data, '', None, text_color, False, is_priority)
