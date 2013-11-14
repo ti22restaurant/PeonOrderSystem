@@ -388,15 +388,11 @@ class OrderStore(Gtk.TreeStore):
 
             super(OrderStore, self).append(tree_iter, data)
 
-        if menu_item.has_options() and not is_comped:
+        for option in menu_item.options:
 
-            option_data = ''
+            name = option.get_option_relation() + ": " + option.get_name()
 
-            for option in menu_item.options:
-                option_data += option.get_option_relation() + ': '
-                option_data += option.get_name() + ', '
-
-            data = (option_data, '', None, text_color, False, is_priority)
+            data = (name, '', None, text_color, False, is_priority)
             super(OrderStore, self).append(tree_iter, data)
 
         name = menu_item.get_name()

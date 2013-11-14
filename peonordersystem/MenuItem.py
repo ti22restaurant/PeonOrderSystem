@@ -156,7 +156,8 @@ class MenuItem(object):
         options_copy = copy(self._option_choices)
 
         for option in options_copy:
-            if option._price_scalar is not 0.0:
+
+            if not option._price_scalar == 0.0:
                 option._price_scalar = self._price_scalar
 
         return options_copy
@@ -198,21 +199,7 @@ class MenuItem(object):
         the two items are considered equal, false
         otherwise.
         """
-        share_name = self._name is other._name
-        share_price = self._price is other._price
-        share_options = (self.options == other.options)
-        share_option_choices = (self.get_option_choices() == other.get_option_choices())
-        share_notes = self.notes is other.notes
-        share_stars = self.stars is other.stars
-        share_locked = self._locked is other._locked
-        share_editable = self.editable is other.editable
-        share_confirmed = self.confirmed is other.confirmed
-
-        equality_value = (share_name and share_price and share_options
-                          and share_option_choices and share_notes and share_stars
-                          and share_locked and share_editable and share_confirmed)
-
-        return equality_value
+        return self.__dict__ == other.__dict__
 
 
 class OptionItem(object):
@@ -350,11 +337,31 @@ class OptionItem(object):
         @return: bool value that is True if the
         two OptionItems are equal, False otherwise.
         """
-        share_name = self._name is other._name
-        share_price = self._price is other._price
-        share_category = self._category is other._category
-        share_scalar = self._price_scalar is other._price_scalar
-        share_relation = self._relation is other._relation
+        return self.__dict__ == other.__dict__
 
-        return (share_name and share_price and share_category and
-                share_scalar and share_relation)
+    def __cmp__(self, other):
+        """Compares to OptionItem
+        to another OptionItem. Comparison
+        is made according to the relation
+        that they hold, following the order
+        of "ADD" < SUB" < "NO". If both items
+        hold the same relation then the
+        comparison is made on name.
+
+        @param other: OptionItem object that
+        is to be compared to this object.
+
+        @return: Value representing the
+        comparison of the two objects. If
+        positive this object is considered
+        greater than the other, if 0 then
+        they are considered equal, if
+        negative the given object is greater
+        than this one.
+        """
+        cmp_value = cmp(self._relation, other._relation)
+
+        if cmp_value == 0.0:
+            cmp_value = cmp(self._name, other._name)
+
+        return cmp_value

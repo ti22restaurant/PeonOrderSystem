@@ -1,18 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <!-- interface-requires gtk+ 3.0 -->
-  <object class="GtkImage" id="image2">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-fullscreen</property>
-  </object>
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="xalign">0.55000001192092896</property>
     <property name="stock">gtk-go-forward</property>
   </object>
-  <object class="GtkImage" id="image5">
+  <object class="GtkImage" id="image2">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-fullscreen</property>
@@ -23,6 +18,11 @@
     <property name="stock">gtk-properties</property>
   </object>
   <object class="GtkImage" id="image4">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-fullscreen</property>
+  </object>
+  <object class="GtkImage" id="image5">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-fullscreen</property>
@@ -605,7 +605,7 @@ item.</property>
                 </child>
                 <child>
                   <object class="GtkButton" id="editItem">
-                    <property name="label" translatable="yes">EDIT ITEM</property>
+                    <property name="label" translatable="yes">EDIT ITEM OPTIONS</property>
                     <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
