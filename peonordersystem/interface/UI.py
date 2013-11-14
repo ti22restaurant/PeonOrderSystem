@@ -729,9 +729,10 @@ class UI(object):
         @return: None
         """
         menu_data = Builder.load_menu_items()
+        options_data = Builder.get_options_item_data()
 
         self.update_status('Awaiting editing of raw MenuItem data...')
-        response = self.editor.update_menu_items_data(menu_data,
+        response = self.editor.update_menu_items_data(menu_data, options_data,
                                                       self.dump_updated_menu_data)
 
         if response:
