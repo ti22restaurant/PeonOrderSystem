@@ -303,7 +303,7 @@ class Editor(object):
         dialog = Dialog.AddReservationsDialog(self.parent, confirm_function)
         return dialog.run_dialog() == ACCEPT_RESPONSE
 
-    def update_menu_items_data(self, menu_data, confirm_func):
+    def update_menu_items_data(self, menu_data, options_data, confirm_func):
         """Calls a dialog window that allows the user to edit
         the stored menu item data file that the UI uses to
         generate the menu items from. Runs dialog via this
@@ -321,7 +321,7 @@ class Editor(object):
         or not.
         """
         dialog = Dialog.UpdateMenuItemsDialog(self.parent, menu_data,
-                                              confirm_func)
+                                              options_data, confirm_func)
         return dialog.run_dialog() == ACCEPT_RESPONSE
 
     def update_discount_templates(self, confirm_function, discount_templates):
