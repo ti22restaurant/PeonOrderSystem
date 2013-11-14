@@ -415,22 +415,7 @@
         {
             "_locked": false,
             "_name": "GREEN CURRY",
-            "_option_choices": [
-                {
-                    "_name": "SEAFOOD",
-                    "_price": 2.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "PRAWNS",
-                    "_price": 2.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 10.95,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -444,22 +429,7 @@
         {
             "_locked": false,
             "_name": "RED CURRY",
-            "_option_choices": [
-                {
-                    "_name": "SEAFOOD",
-                    "_price": 2.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "PRAWNS",
-                    "_price": 2.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 10.95,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -473,29 +443,7 @@
         {
             "_locked": false,
             "_name": "PANANG CURRY",
-            "_option_choices": [
-                {
-                    "_name": "DINNER:SIDE RICE",
-                    "_price": 1.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "DINNER:BROWN RICE",
-                    "_price": 2.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "LUNCH:BROWN RICE",
-                    "_price": 1.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 10.95,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -525,57 +473,7 @@
         {
             "_locked": false,
             "_name": "ICE CREAM ONE SCOOP",
-            "_option_choices": [
-                {
-                    "_name": "SKAGIT STRAWBERRY",
-                    "_price": 0.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "VANILLA",
-                    "_price": 0.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "CLEARLY COCONUT",
-                    "_price": 0.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "GREEN TEA",
-                    "_price": 0.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "DECIDEDLY CHOCOLATE",
-                    "_price": 0.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "MAPLE NUT",
-                    "_price": 0.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "MINT CHIP",
-                    "_price": 0.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 3.95,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -589,57 +487,7 @@
         {
             "_locked": false,
             "_name": "ICE CREAM TWO SCOOPS",
-            "_option_choices": [
-                {
-                    "_name": "SKAGIT STRAWBERRY",
-                    "_price": 0.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "VANILLA",
-                    "_price": 0.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "CLEARLY COCONUT",
-                    "_price": 0.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "GREEN TEA",
-                    "_price": 0.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "DECIDEDLY CHOCOLATE",
-                    "_price": 0.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "MAPLE NUT",
-                    "_price": 0.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "MINT CHIP",
-                    "_price": 0.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 4.95,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -784,22 +632,7 @@
         {
             "_locked": false,
             "_name": "HAWAIIAN FRIED RICE",
-            "_option_choices": [
-                {
-                    "_name": "SEAFOOD",
-                    "_price": 2.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "PRAWNS",
-                    "_price": 2.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 10.95,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -843,29 +676,7 @@
         {
             "_locked": false,
             "_name": "PANANG CURRY",
-            "_option_choices": [
-                {
-                    "_name": "DINNER:SIDE RICE",
-                    "_price": 1.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "DINNER:BROWN RICE",
-                    "_price": 2.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "LUNCH:BROWN RICE",
-                    "_price": 1.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 8.95,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -879,29 +690,7 @@
         {
             "_locked": false,
             "_name": "ORANGE CHICKEN",
-            "_option_choices": [
-                {
-                    "_name": "DINNER:SIDE RICE",
-                    "_price": 1.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "DINNER:BROWN RICE",
-                    "_price": 2.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "LUNCH:BROWN RICE",
-                    "_price": 1.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 8.95,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -915,29 +704,7 @@
         {
             "_locked": false,
             "_name": "CASHEW NUT CHICKEN",
-            "_option_choices": [
-                {
-                    "_name": "DINNER:SIDE RICE",
-                    "_price": 1.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "DINNER:BROWN RICE",
-                    "_price": 2.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "LUNCH:BROWN RICE",
-                    "_price": 1.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 8.95,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -951,29 +718,7 @@
         {
             "_locked": false,
             "_name": "HOUSE FRIED RICE",
-            "_option_choices": [
-                {
-                    "_name": "DINNER:SIDE RICE",
-                    "_price": 1.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "DINNER:BROWN RICE",
-                    "_price": 2.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "LUNCH:BROWN RICE",
-                    "_price": 1.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 8.95,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -987,29 +732,7 @@
         {
             "_locked": false,
             "_name": "HOUSE BEEF/MUSHROOM",
-            "_option_choices": [
-                {
-                    "_name": "DINNER:SIDE RICE",
-                    "_price": 1.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "DINNER:BROWN RICE",
-                    "_price": 2.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "LUNCH:BROWN RICE",
-                    "_price": 1.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 9.95,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -1023,29 +746,7 @@
         {
             "_locked": false,
             "_name": "SESAME HONEY BEEF",
-            "_option_choices": [
-                {
-                    "_name": "DINNER:SIDE RICE",
-                    "_price": 1.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "DINNER:BROWN RICE",
-                    "_price": 2.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "LUNCH:BROWN RICE",
-                    "_price": 1.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 10.95,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -1059,29 +760,7 @@
         {
             "_locked": false,
             "_name": "THAI CHICKEN CURRY",
-            "_option_choices": [
-                {
-                    "_name": "DINNER:SIDE RICE",
-                    "_price": 1.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "DINNER:BROWN RICE",
-                    "_price": 2.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "LUNCH:BROWN RICE",
-                    "_price": 1.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 8.95,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -1095,29 +774,7 @@
         {
             "_locked": false,
             "_name": "CHILI BASIL PLATE",
-            "_option_choices": [
-                {
-                    "_name": "DINNER:SIDE RICE",
-                    "_price": 1.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "DINNER:BROWN RICE",
-                    "_price": 2.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "LUNCH:BROWN RICE",
-                    "_price": 1.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 8.95,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -1131,29 +788,7 @@
         {
             "_locked": false,
             "_name": "SWEET/SOUR VEGGIES",
-            "_option_choices": [
-                {
-                    "_name": "DINNER:SIDE RICE",
-                    "_price": 1.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "DINNER:BROWN RICE",
-                    "_price": 2.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "LUNCH:BROWN RICE",
-                    "_price": 1.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 8.95,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -1167,29 +802,7 @@
         {
             "_locked": false,
             "_name": "CHICKEN VEGGIE DELIGHT",
-            "_option_choices": [
-                {
-                    "_name": "DINNER:SIDE RICE",
-                    "_price": 1.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "DINNER:BROWN RICE",
-                    "_price": 2.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "LUNCH:BROWN RICE",
-                    "_price": 1.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 7.95,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -1203,29 +816,7 @@
         {
             "_locked": false,
             "_name": "HOUSE GARLIC DELIGHT",
-            "_option_choices": [
-                {
-                    "_name": "DINNER:SIDE RICE",
-                    "_price": 1.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "DINNER:BROWN RICE",
-                    "_price": 2.5,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "LUNCH:BROWN RICE",
-                    "_price": 1.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 7.95,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -1256,15 +847,7 @@
         {
             "_locked": false,
             "_name": "PHAD THAI FAVORITE",
-            "_option_choices": [
-                {
-                    "_name": "PRAWNS",
-                    "_price": 2.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 8.95,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -1278,22 +861,7 @@
         {
             "_locked": false,
             "_name": "PAD KEE MAO",
-            "_option_choices": [
-                {
-                    "_name": "SEAFOOD",
-                    "_price": 2.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "PRAWNS",
-                    "_price": 2.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 9.95,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -1321,22 +889,7 @@
         {
             "_locked": false,
             "_name": "LARD NA NOODLE",
-            "_option_choices": [
-                {
-                    "_name": "SEAFOOD",
-                    "_price": 2.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "PRAWNS",
-                    "_price": 2.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 8.95,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -1352,15 +905,7 @@
         {
             "_locked": false,
             "_name": "PRAWN SALAD",
-            "_option_choices": [
-                {
-                    "_name": "SEAFOOD",
-                    "_price": 2.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 11.95,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -1374,22 +919,7 @@
         {
             "_locked": false,
             "_name": "BEEF SALAD",
-            "_option_choices": [
-                {
-                    "_name": "CHICKEN",
-                    "_price": 0.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "PORK",
-                    "_price": 0.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 11.95,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -1433,22 +963,7 @@
         {
             "_locked": false,
             "_name": "TOM YUM SPICY SOUP",
-            "_option_choices": [
-                {
-                    "_name": "SEAFOOD",
-                    "_price": 2.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                },
-                {
-                    "_name": "PRAWNS",
-                    "_price": 2.0,
-                    "_price_scalar": 1.0,
-                    "_relation": null,
-                    "py/object": "peonordersystem.MenuItem.OptionItem"
-                }
-            ],
+            "_option_choices": [],
             "_price": 7.95,
             "_price_scalar": 1.0,
             "comp_message": null,
