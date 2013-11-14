@@ -1813,9 +1813,12 @@ class OrderConfirmationDialog(ConfirmationDialog):
 
             if menu_item.has_options():
 
-                # Get string of options. Slice brackets from front and back
-                info = str(menu_item.options)[1:-1], None, STANDARD_TEXT
-                tree_model.append(tree_iter, info)
+                for option in menu_item.options:
+
+                    name = option.get_option_relation() + ": " +\
+                           option.get_name()
+                    info = name, '', STANDARD_TEXT
+                    tree_model.append(tree_iter, info)
 
             if menu_item.has_note():
 
@@ -2194,7 +2197,8 @@ class CheckoutConfirmationDialog(ConfirmationDialog):
 
             if menu_item.has_options():
                 for option in menu_item.options:
-                    option_name = option.get_name()
+                    option_name = option.get_option_relation() + ": " + \
+                                  option.get_name()
                     option_price = option.get_price()
                     data = option_name, str(option_price), True
 
