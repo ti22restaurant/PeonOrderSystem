@@ -39,6 +39,7 @@ members:
 """
 
 from gi.repository import Gtk, GObject  # IGNORE:E0611 @UnresolvedImport
+from peonordersystem.standardoperations import tree_view_changed
 from peonordersystem.CustomExceptions import NoSuchSelectionError,\
     InvalidReservationError
 
@@ -165,10 +166,27 @@ class ReservationTreeView(Gtk.TreeView):
         """Initializes the ReservationTreeView object.
         """
         super(ReservationTreeView, self).__init__()
+
+        selection = self.get_selection()
+        selection.connect('changed', tree_view_changed, self)
+
         col_list = self.generate_columns()
         
         for col in col_list:
             self.append_column(col)
+
+    def select_iter(self, itr):
+        """Selects the given iter displayed
+        in the tree view.
+
+        @param itr: Gtk.TreeIter representing
+        an iter pointing to a row in the displayed
+        view.
+
+        @return: None
+        """
+        selection = self.get_selection()
+        selection.select_iter(itr)
     
     def generate_columns(self,
                         col_names=['Name', 'Number',
@@ -259,8 +277,9 @@ class ReservationStore(Gtk.ListStore):
         @param arrival_time: float representing time value
         generated from time.time
         
-        @return: Reserver object that is linked to the
-        value stored.
+        @return: tuple of Gtk.TreeIter pointing to the row,
+        and Reserver containing the data that is pointed
+        to.
         """
         reserver = Reserver(name, number, arrival_time)
         
@@ -272,9 +291,9 @@ class ReservationStore(Gtk.ListStore):
                   reserver.get_arrival_time_str(),
                   reserver.get_eta())
             
-        self.insert(index, row=values)
+        itr = self.insert(index, row=values)
         
-        return reserver
+        return itr, reserver
     
     def _insertion_index(self, other, curr_list):
         """Private Method.
@@ -470,7 +489,8 @@ class Reservations(object):
                                                                             arrival_time)
             raise InvalidReservationError(message)
 
-        reserver = self.model.add_reservation(name, number, arrival_time)
+        itr, reserver = self.model.add_reservation(name, number, arrival_time)
+        self.tree_view.select_iter(itr)
         return reserver.name, reserver.number, reserver.get_arrival_time_str()
 
     def remove_selected_reservation(self):

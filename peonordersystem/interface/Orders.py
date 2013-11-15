@@ -27,6 +27,7 @@ where changes are made that would
 from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 
 from copy import copy
+from peonordersystem.standardoperations import tree_view_changed
 from peonordersystem.MenuItem import MenuItem
 from peonordersystem import ErrorLogger
 from peonordersystem.ConfirmationSystem import TOGO_SEPARATOR
@@ -60,6 +61,10 @@ class OrderTreeView(Gtk.TreeView):
         """
         super(OrderTreeView, self).__init__()
         column_list = self._generate_columns()
+
+        selection = self.get_selection()
+        selection.connect('changed', tree_view_changed, self)
+
         for col in column_list:
             self.append_column(col)
     

@@ -52,6 +52,7 @@ import time
 import math
 
 from peonordersystem import CheckOperations
+from peonordersystem.standardoperations import tree_view_changed
 from peonordersystem.MenuItem import MenuItem
 from peonordersystem.MenuItem import OptionItem
 from peonordersystem.interface.Orders import Orders
@@ -2592,7 +2593,7 @@ class UpdateMenuItemsDialog(SelectionDialog):
         self.menu_item_data = menu_item_data
         self.option_item_data = option_item_data
         self.confirm_func = confirm_func
-        self.model_data = None
+        self.model_data = {}
 
         self.categories_name_entry = None
         self.item_name_entry = None
@@ -2675,6 +2676,10 @@ class UpdateMenuItemsDialog(SelectionDialog):
         view that will display the category data.
         """
         tree_view = Gtk.TreeView()
+
+        selection = tree_view.get_selection()
+        selection.connect('changed', tree_view_changed, tree_view)
+
         model = self.generate_categories_model()
         tree_view.set_model(model)
 
@@ -2700,6 +2705,20 @@ class UpdateMenuItemsDialog(SelectionDialog):
             model.append((str(category),))
 
         return model
+
+    def set_category_selection(self, itr):
+        """Sets the current selection displayed
+        in the category view to the given iter
+        displayed in the category view.
+
+        @param itr: Gtk.TreeIter pointing to a row
+        displayed in the categories_view
+
+        @return: None
+        """
+        if itr:
+            selection = self.categories_view.get_selection()
+            selection.select_iter(itr)
 
     def category_selected(self, selection, model, path,
                               is_selected, user_data):
@@ -2803,10 +2822,13 @@ class UpdateMenuItemsDialog(SelectionDialog):
 
         if len(text) > 0:
             model = self.categories_view.get_model()
-            model.append((text, ))
-            new_model = Gtk.ListStore(str, float, int,
-                                      bool, bool)
+
+            new_model = Gtk.ListStore(str, float)
             self.model_data[text] = new_model
+            self.menu_item_data[text] = []
+
+            new_itr = model.append((text, ))
+            self.set_category_selection(new_itr)
 
     def remove_selected_category(self, *args):
         """Removed the selected category from the
@@ -2841,6 +2863,7 @@ class UpdateMenuItemsDialog(SelectionDialog):
             if response:
                 model.remove(itr)
                 del self.model_data[key]
+                del self.menu_item_data[key]
 
     def generate_secondary_selection_area(self):
         """Generates the area associated
@@ -2855,6 +2878,7 @@ class UpdateMenuItemsDialog(SelectionDialog):
 
         view_frame = Gtk.Frame()
         scroll_window = Gtk.ScrolledWindow()
+
         self.item_view = self.generate_item_view()
 
         scroll_window.add(self.item_view)
@@ -2892,6 +2916,10 @@ class UpdateMenuItemsDialog(SelectionDialog):
         the item view generated.
         """
         tree_view = Gtk.TreeView()
+
+        selection = tree_view.get_selection()
+        selection.connect('changed', tree_view_changed, tree_view)
+
         self.generate_item_model()
 
         rend = Gtk.CellRendererText()
@@ -2910,8 +2938,6 @@ class UpdateMenuItemsDialog(SelectionDialog):
 
         @return: None
         """
-        self.model_data = {}
-
         for category in self.menu_item_data:
             model = Gtk.ListStore(str, float)
 
@@ -2923,6 +2949,20 @@ class UpdateMenuItemsDialog(SelectionDialog):
                 model.append(values)
 
             self.model_data[category] = model
+
+    def set_item_selection(self, itr):
+        """Sets the iter pointing to a row
+        displayed by the items view.
+
+        @param itr: Gtk.TreeIter pointing
+        to a row being displayed by the
+        items view.
+
+        @return: None
+        """
+        if itr:
+            selection = self.item_view.get_selection()
+            selection.select_iter(itr)
 
     def item_selected(self, selection, model, path,
                           is_selected, user_data):
@@ -3016,13 +3056,14 @@ class UpdateMenuItemsDialog(SelectionDialog):
         new_menu_item = MenuItem('NEW MENU ITEM', 0.0, 0, False, False)
         item_list.append(new_menu_item)
 
-        model = self.item_view.get_model()
-
         name = new_menu_item.get_name()
         price = new_menu_item.get_price()
 
+        model = self.item_view.get_model()
         data = (name, price)
-        model.append(data)
+        new_itr = model.append(data)
+
+        self.set_item_selection(new_itr)
 
     def remove_selected_item(self, *args):
         """Removes the selected menu item from
@@ -3414,6 +3455,7 @@ class GeneralOptionSelectionDialog(SelectionDialog):
         self.category_view = Gtk.TreeView(model)
         selection = self.category_view.get_selection()
         selection.set_select_function(self.update_category_select, None)
+        selection.connect('changed', tree_view_changed, self.category_view)
 
         rend = Gtk.CellRendererText()
         col1 = Gtk.TreeViewColumn('Category', rend, text=0)
@@ -3434,6 +3476,20 @@ class GeneralOptionSelectionDialog(SelectionDialog):
         """
         selection = self.category_view.get_selection()
         return selection.get_selected()
+
+    def set_category_selection(self, itr):
+        """Sets the current selection of the
+        category_view to point to the given
+        itr.
+
+        @param itr: Gtk.TreeIter pointing
+        to a row in the category_view display.
+
+        @return: None
+        """
+        if itr:
+            selection = self.category_view.get_selection()
+            selection.select_iter(itr)
 
     def update_category_select(self, selection, model, path, is_selected,
                                user_data=None):
@@ -3511,6 +3567,8 @@ class GeneralOptionSelectionDialog(SelectionDialog):
             self.display_data[category] = model
 
         self.option_view = Gtk.TreeView()
+        selection = self.option_view.get_selection()
+        selection.connect('changed', tree_view_changed, self.option_view)
 
         rend = Gtk.CellRendererText()
         col1 = Gtk.TreeViewColumn('Option Name', rend, text=0)
@@ -3534,6 +3592,20 @@ class GeneralOptionSelectionDialog(SelectionDialog):
         """
         selection = self.option_view.get_selection()
         return selection.get_selected()
+
+    def set_option_selection(self, itr):
+        """Sets the row selected in the
+        options_view to the row pointed to
+        by the given itr.
+
+        @param itr: Gtk.TreeIter pointing to
+        a row displayed in the options_view.
+
+        @return: None
+        """
+        if itr:
+            selection = self.option_view.get_selection()
+            selection.select_iter(itr)
 
     def generate_properties_selection_area(self):
         """Override Method.
@@ -5483,7 +5555,9 @@ class UpdateGeneralOptionSelectionDialog(GeneralOptionSelectionDialog):
             self.display_data[name] = Gtk.ListStore(str, str)
 
             model = self.category_view.get_model()
-            model.append((name,))
+            itr = model.append((name,))
+
+            self.set_category_selection(itr)
 
             return name
 
@@ -5532,10 +5606,13 @@ class UpdateGeneralOptionSelectionDialog(GeneralOptionSelectionDialog):
         option_list = self.option_data[key]
 
         option_model = self.option_view.get_model()
-        option_model.append(('NEW OPTION', str(0.0)))
+        itr = option_model.append(('NEW OPTION', str(0.0)))
 
         option_item = OptionItem('NEW OPTION', key, 0.0)
-        return option_list.append(option_item)
+        option_list.append(option_item)
+
+        self.set_option_selection(itr)
+        return itr
 
     def remove_selected_option(self, *args):
         """Removes the selected option from the

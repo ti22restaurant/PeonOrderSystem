@@ -22,6 +22,7 @@ from gi.repository import Gtk
 import time
 
 from peonordersystem import ErrorLogger
+from peonordersystem.standardoperations import tree_view_changed
 from peonordersystem.ConfirmationSystem import TOGO_SEPARATOR
 from peonordersystem.CustomExceptions import NoSuchSelectionError
 
@@ -42,8 +43,24 @@ class UpcomingOrdersView(Gtk.TreeView):
         object.
         """
         super(UpcomingOrdersView, self).__init__()
+
+        selection = self.get_selection()
+        selection.connect('changed', tree_view_changed, self)
+
         for column in self.generate_columns():
             self.append_column(column)
+
+    def select_iter(self, itr):
+        """Selects the given iter displayed
+        in the tree_view.
+
+        @param itr: Gtk.TreeIter pointing
+        to a row in the tree view.
+
+        @return: None
+        """
+        selection = self.get_selection()
+        selection.select_iter(itr)
     
     def generate_columns(self, column_names=['Order Name',
                             'Order Confirmed At',
@@ -144,7 +161,6 @@ class UpcomingOrderStore(Gtk.ListStore):
         curr_time = time.asctime()
         
         order_name = order_name.replace('_', ' ')
-        
         order = (order_name, curr_time, priority_info)
         
         return super(UpcomingOrderStore, self).append(order)
@@ -299,7 +315,8 @@ class UpcomingOrders(object):
         for menu_item in priority_order:
             priority_info += menu_item.get_name() + ', '
 
-        self.model.append(order_name, priority_info[:-2])
+        itr = self.model.append(order_name, priority_info[:-2])
+        self.tree_view.select_iter(itr)
     
     def remove_selected_order(self):
         """Removes the selected order from the
