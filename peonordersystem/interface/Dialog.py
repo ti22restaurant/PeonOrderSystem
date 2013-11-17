@@ -824,8 +824,11 @@ class AddReservationsDialog(Dialog):
 
         t = time.localtime()
 
-        while minute < t[4]:
-            minute += 30
+        curr_time = t[3] * 60 + t[4]
+
+        if hour*60 + minute < curr_time:
+            hour = t[3]
+            minute = t[4] + 15
 
         t = time.mktime(t[:3] + (hour, minute, 0) + t[6:])
 
