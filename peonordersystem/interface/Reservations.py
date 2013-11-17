@@ -285,8 +285,7 @@ class ReservationStore(Gtk.ListStore):
         super(ReservationStore, self).__init__(str, str, str, float)
         self._reservation_list = []
         self._reservation_notifications = []
-        self._timeout_id = GObject.timeout_add(RESERVATION_UPDATE_TIME_FRAME
-                                               / 100,
+        self._timeout_id = GObject.timeout_add(RESERVATION_UPDATE_TIME_FRAME,
                                                self._on_timeout, None)
     
     def add_reservation(self, name, number, arrival_time):
