@@ -362,6 +362,8 @@ class UI(object):
         option_data = Builder.get_options_item_data()
         response = self.editor.edit_general_options(option_data, menu_item)
 
+        message = ''
+
         if response == Editor.ACCEPT_RESPONSE:
             self.orders.update_item()
 
