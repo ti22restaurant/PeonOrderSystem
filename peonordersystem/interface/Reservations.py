@@ -392,7 +392,12 @@ class ReservationStore(Gtk.ListStore):
         """
         index = self._get_index(itr)
         self.remove(itr)
-        return self._reservation_list.pop(index)
+        reserver = self._reservation_list.pop(index)
+
+        if reserver in self._reservation_notifications:
+            self._reservation_notifications.remove(reserver)
+
+        return reserver
 
     def get_reservation_notifications(self):
         """Gets the stored reservation notifications.
