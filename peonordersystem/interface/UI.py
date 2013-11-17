@@ -16,8 +16,14 @@ from peonordersystem.interface.Orders import Orders
 from peonordersystem.interface.Reservations import Reservations
 from peonordersystem.interface import Editor
 from peonordersystem.interface.UpcomingOrders import UpcomingOrders
+
+from peonordersystem.interface.Dialog import run_warning_dialog
+
 from peonordersystem import ErrorLogger
 from peonordersystem import CustomExceptions
+from peonordersystem import Settings
+
+from time import strftime
 
 
 def non_fatal_error_notification(func):
@@ -582,6 +588,7 @@ class UI(object):
         curr_name, curr_order = self.get_order_info()
         self.upcoming_orders.remove_by_name(curr_name)
         self.orders.clear_order()
+        self.notify_pending_reservations()
         return curr_name, curr_order
 
     @non_fatal_error_notification
@@ -687,6 +694,34 @@ class UI(object):
         """
         return self.orders.get_order_info()
 
+    def notify_pending_reservations(self):
+        """ Notifies the user of any pending
+        reservations by opening and running a
+        new warning dialog window.
+
+        @return: None
+        """
+        notification_list = self.reservations.get_reservation_notifications()
+
+        if len(notification_list) > 0:
+            time = strftime('%H:%M')
+            message_title = 'Time is ' + time + '. You have upcoming ' + \
+                            'reservations!'
+
+            message = 'The following reservations are expected in the next ' + \
+                      Settings.RESERVATION_NOTIFICATION_TIME_FRAME_STR + ':\n\n'
+
+            for name, number, arrival_time in notification_list:
+                reservation = name + ' at ' + arrival_time
+                message += '    ' + reservation + '\n'
+
+            message += '\n\nOk?'
+            response = run_warning_dialog(self.builder.window, message_title,
+                                          message)
+
+            if response:
+                self.reservations.clear_reservation_notifications()
+
     #===========================================================================
     # This block contains methods that are used to display information about
     # the UI's operations to the user via the builder object.
@@ -763,6 +798,8 @@ class UI(object):
         else:
             self.update_status('Cancelled Discount templates update.')
 
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def update_option_items(self, *args):
         """This method is called when the associated
         widget is pressed. This method displays a dialog
@@ -819,6 +856,8 @@ class UI(object):
         """
         Builder.update_discount_templates_data(updated_discount_templates)
 
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def dump_updated_option_data(self, updated_option_data):
         """Called when the update option items has been
         updated. This method is used to call the associated
