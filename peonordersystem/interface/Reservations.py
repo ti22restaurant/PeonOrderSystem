@@ -40,6 +40,8 @@ members:
 
 from gi.repository import Gtk, GObject  # IGNORE:E0611 @UnresolvedImport
 from peonordersystem.standardoperations import tree_view_changed
+from peonordersystem.Settings import RESERVATION_UPDATE_TIME_FRAME, \
+    RESERVATION_NOTIFICATION_TIME_MAX, RESERVATION_NOTIFICATION_TIME_MIN
 from peonordersystem.CustomExceptions import NoSuchSelectionError,\
     InvalidReservationError
 
@@ -102,6 +104,26 @@ class Reserver(object):
         self.name = name
         self.number = number
         self._arrival_time = arrival_time
+
+    def get_arrival_time(self):
+        """Gets the current arrival time in
+        number of seconds since epoch.
+
+        @return: time.struct_time representing
+        when the arrival is expected.
+        """
+        return time.localtime(self._arrival_time)
+
+    def get_time_until_arrival(self):
+        """Gets the number of second until the
+        expected reservations arrival.
+
+        @return: float representing the number
+        of seconds until the arrival of the
+        expected reservation.
+        """
+        curr_time = time.time()
+        return self._arrival_time - curr_time
     
     def get_arrival_time_str(self):
         """Gets the current arrival time in str
@@ -262,7 +284,9 @@ class ReservationStore(Gtk.ListStore):
         """
         super(ReservationStore, self).__init__(str, str, str, float)
         self._reservation_list = []
-        self._timeout_id = GObject.timeout_add(1000, self._on_timeout, None)
+        self._reservation_notifications = []
+        self._timeout_id = GObject.timeout_add(RESERVATION_UPDATE_TIME_FRAME,
+                                               self._on_timeout, None)
     
     def add_reservation(self, name, number, arrival_time):
         """Adds the given information as a new Reserver
@@ -325,8 +349,6 @@ class ReservationStore(Gtk.ListStore):
                 else:
                     new_list = curr_list[new_length:-1 - 2]
                     return self._insertion_index(other, new_list) + new_length + 1
-                
-            
         return 0
     
     def _get_index(self, itr):
@@ -370,7 +392,29 @@ class ReservationStore(Gtk.ListStore):
         """
         index = self._get_index(itr)
         self.remove(itr)
-        return self._reservation_list.pop(index)
+        reserver = self._reservation_list.pop(index)
+
+        if reserver in self._reservation_notifications:
+            self._reservation_notifications.remove(reserver)
+
+        return reserver
+
+    def get_reservation_notifications(self):
+        """Gets the stored reservation notifications.
+
+        @return: list of Reserver objects that represents
+        the reservations that are incoming within the
+        time frame.
+        """
+        return self._reservation_notifications
+
+    def clear_reservation_notifications(self):
+        """Clears the currently stored reservation
+        notifications.
+
+        @return: None
+        """
+        self._reservation_notifications = []
     
     def _on_timeout(self, *args):
         """Callback method that is performed
@@ -384,6 +428,15 @@ class ReservationStore(Gtk.ListStore):
         """
         for row, reserver in zip(self, self._reservation_list):
             row[3] = reserver.get_eta()
+
+            until_reservation = reserver.get_time_until_arrival()
+
+            if (until_reservation <= RESERVATION_NOTIFICATION_TIME_MAX) and \
+               (until_reservation > RESERVATION_NOTIFICATION_TIME_MIN) and \
+               (reserver not in self._reservation_notifications):
+
+                self._reservation_notifications.append(reserver)
+
         return True
 
     def _dump(self):
@@ -492,6 +545,39 @@ class Reservations(object):
         itr, reserver = self.model.add_reservation(name, number, arrival_time)
         self.tree_view.select_iter(itr)
         return reserver.name, reserver.number, reserver.get_arrival_time_str()
+
+    def get_reservation_notifications(self):
+        """Gets a list representing the current
+        reservation notifications.
+
+        @return: list of tuple where each entry
+        represents an upcoming reservation within
+        the time frame. Each tuple is of type str
+        representing the (name, number, time)
+        of the expected arrival, respectively.
+        """
+        notifications = []
+        reservation_notifications = self.model.get_reservation_notifications()
+
+        for reserver in reservation_notifications:
+
+            name = reserver.name
+            number = reserver.number
+            arrival_time = reserver.get_arrival_time_str()
+
+            data = name, number, arrival_time
+
+            notifications.append(data)
+
+        return notifications
+
+    def clear_reservation_notifications(self):
+        """Clears the reservation notifications
+        list of all current notifications.
+
+        @return: None
+        """
+        return self.model.clear_reservation_notifications()
 
     def remove_selected_reservation(self):
         """Removes the selected reservation.
