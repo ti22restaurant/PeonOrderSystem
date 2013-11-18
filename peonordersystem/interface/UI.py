@@ -696,6 +696,8 @@ class UI(object):
         """
         return self.orders.get_order_info()
 
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def notify_pending_reservations(self):
         """ Notifies the user of any pending
         reservations by opening and running a
