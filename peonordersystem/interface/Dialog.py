@@ -53,7 +53,7 @@ import math
 
 from peonordersystem import CheckOperations
 from peonordersystem.standardoperations import tree_view_changed
-from peonordersystem.MenuItem import MenuItem
+from peonordersystem.MenuItem import MenuItem, DiscountItem
 from peonordersystem.MenuItem import OptionItem
 from peonordersystem.interface.Orders import Orders
 from peonordersystem.Settings import STANDARD_TEXT, STANDARD_TEXT_BOLD,\
@@ -5009,7 +5009,7 @@ class DiscountCheckoutConfirmationDialog(CheckoutConfirmationDialog):
                 price = data
                 name += '$' + str(price)
 
-            discount_item = MenuItem(name, -1 * price)
+            discount_item = DiscountItem(name, -1 * price, message)
             discount_item.editable = False
             discount_item.confirmed = True
             discount_item.notes = message

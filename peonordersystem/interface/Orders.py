@@ -190,9 +190,6 @@ class OrderStore(Gtk.TreeStore):
         """Appends the given menu_item to the
         OrderStore storing its values for display.
         
-        @raise Exception: If a non-MenuItem is given
-        as the menu_item parameter.
-        
         @attention: This is the only valid method for
         adding MenuItems to the OrderStore. All other
         methods are not supported (swap, insert, prepend..etc)
@@ -203,18 +200,13 @@ class OrderStore(Gtk.TreeStore):
         @return: Gtk.TreeIter pointing to the currently added
         item.
         """
-        if type(menu_item) is not MenuItem:
-            raise Exception("Tried to append a non-MenuItem "
-                            + "to the OrderStore." + 
-                            " Type Expected: MenuItem" + 
-                            " Type Received: " + 
-                            str(type(menu_item)))
+        if _check_if_menu_item(menu_item):
             
-        self.order_list.append(menu_item)
-        new_entry = []
-        
-        name = menu_item.get_name()
-        stars = ''
+            self.order_list.append(menu_item)
+            new_entry = []
+
+            name = menu_item.get_name()
+            stars = ''
         
         if menu_item.is_editable():
             stars = str(menu_item.stars)
@@ -765,7 +757,9 @@ class Orders(object):
         @param menu_item: MenuItem object representing
         the menu item to be added to the current order.
         """
-        if _check_order(self.current_order) and _check_menu_item(menu_item):
+        if _check_order(self.current_order) and \
+                _check_valid_menu_item(menu_item):
+
             itr = self.current_order.append(menu_item)
             self.tree_view.select_iter(itr)
     
@@ -779,7 +773,7 @@ class Orders(object):
         if _check_order(self.current_order):
             itr = self._get_selected_iter()
             menu_item = self.get_selected()
-            if _check_menu_item(menu_item):
+            if _check_valid_menu_item(menu_item):
                 return self.current_order.remove(itr)
     
     def update_item(self):
@@ -916,15 +910,34 @@ class Orders(object):
         return str(self.__dict__)
 
 
-def _check_menu_item(menu_item):
+def _check_if_menu_item(menu_item):
+    """Checks if the given MenuItem is
+    an instance or subclass of MenuItem.
+
+    @param menu_item: object that is to be
+    checked.
+
+    @raise InvalidItemError: If the given item
+    is not an instance or subclass of MenuItem
+
+    @return: bool representing of the MenuItem
+    passed this check.
+    """
+    if not isinstance(menu_item, MenuItem):
+        message = 'Expected MenuItem instance or subclass. Got ' + \
+                  str(type(menu_item)) + ' instead.'
+
+        raise CustomExceptions.InvalidItemError(message)
+
+    return True
+
+
+def _check_valid_menu_item(menu_item):
     """Checks if the given MenuItem is a valid
     MenuItem.
     
     @param menu_item: MenuItem object that represents
     the MenuItem to be checked.
-
-    @raise NonMenuItemError: If the given item is not
-    an instance of MenuItem
 
     @raise InvalidItemError: If the given item is either
     None or is locked.
@@ -932,7 +945,7 @@ def _check_menu_item(menu_item):
     @return: bool representing if the MenuItem given
     is valid and operations can be performed on it.
     """
-    if menu_item.is_locked():
+    if (not _check_if_menu_item(menu_item)) or menu_item.is_locked():
         name = menu_item.get_name()
         price = menu_item.get_price()
         editable = menu_item.is_editable()
