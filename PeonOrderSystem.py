@@ -126,8 +126,19 @@ class PeonOrderSystem(UI):
         """
         order_name, order_list = self.get_order_info()
         ConfirmationSystem.print_check(order_name, order_list)
+
+    def run(self):
+        """Runs the thread to execute the UI
+        built by this object.
+
+        @return: int value representing the
+        response associated with the closure of
+        running this object.
+        """
+        Gtk.main()
+        ConfirmationSystem.update_notification_data()
     
 if __name__ == '__main__':
     
     USER = PeonOrderSystem()
-    Gtk.main()
+    USER.run()
