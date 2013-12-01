@@ -18,11 +18,11 @@ from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 # Path import unused. Imported to set working directory
 # as the one that PeonOrderSystem object is placed in.
 
-from peonordersystem import path  # IGNORE:W0611
-from peonordersystem.interface import Editor
-from peonordersystem.interface.UI import UI
-from peonordersystem import ConfirmationSystem
-from peonordersystem import ErrorLogger
+from src.peonordersystem import path  # IGNORE:W0611
+from src.peonordersystem.interface import Editor
+from src.peonordersystem.interface.UI import UI
+from src.peonordersystem import ConfirmationSystem
+from src.peonordersystem import ErrorLogger
 
 @ErrorLogger.error_logging
 class PeonOrderSystem(UI):
@@ -43,6 +43,7 @@ class PeonOrderSystem(UI):
         """
         ErrorLogger.initializing_fencepost_begin()
         load_data = ConfirmationSystem.generate_files()
+        print load_data
         super(PeonOrderSystem, self).__init__(title, load_data=load_data)
         ErrorLogger.initializing_fencepost_finish()
     
@@ -126,8 +127,19 @@ class PeonOrderSystem(UI):
         """
         order_name, order_list = self.get_order_info()
         ConfirmationSystem.print_check(order_name, order_list)
+
+    def run(self):
+        """Runs the thread to execute the UI
+        built by this object.
+
+        @return: int value representing the
+        response associated with the closure of
+        running this object.
+        """
+        Gtk.main()
+        ConfirmationSystem.update_notification_data()
     
 if __name__ == '__main__':
     
     USER = PeonOrderSystem()
-    Gtk.main()
+    USER.run()

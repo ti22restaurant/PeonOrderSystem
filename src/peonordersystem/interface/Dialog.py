@@ -51,12 +51,12 @@ from copy import copy, deepcopy
 import time
 import math
 
-from peonordersystem import CheckOperations
-from peonordersystem.standardoperations import tree_view_changed
-from peonordersystem.MenuItem import MenuItem
-from peonordersystem.MenuItem import OptionItem
-from peonordersystem.interface.Orders import Orders
-from peonordersystem.Settings import STANDARD_TEXT, STANDARD_TEXT_BOLD,\
+from src.peonordersystem import CheckOperations
+from src.peonordersystem.standardoperations import tree_view_changed
+from src.peonordersystem.MenuItem import MenuItem, DiscountItem
+from src.peonordersystem.MenuItem import OptionItem
+from src.peonordersystem.interface.Orders import Orders
+from src.peonordersystem.Settings import STANDARD_TEXT, STANDARD_TEXT_BOLD,\
     STANDARD_TEXT_LIGHT
 
 #========================================================
@@ -3747,7 +3747,7 @@ class GeneralOptionSelectionDialog(SelectionDialog):
             path = option_model.get_path(itr)
             index = path.get_indices()[0]
 
-            option_item = option_list[index]
+            option_item = copy(option_list[index])
             option_item.set_option_relation(option_relation)
 
             self.new_option_list.append(option_item)
@@ -5009,7 +5009,7 @@ class DiscountCheckoutConfirmationDialog(CheckoutConfirmationDialog):
                 price = data
                 name += '$' + str(price)
 
-            discount_item = MenuItem(name, -1 * price)
+            discount_item = DiscountItem(name, -1 * price, message)
             discount_item.editable = False
             discount_item.confirmed = True
             discount_item.notes = message
@@ -5435,7 +5435,8 @@ class UpdateGeneralOptionSelectionDialog(GeneralOptionSelectionDialog):
         price_entry_box.pack_start(Gtk.Label('Add Price: '), False, False, 5.0)
 
         self.price_display = Gtk.SpinButton()
-        adjustment = Gtk.Adjustment(0.0, 0.0, 100 * 100.0, 0.01, 1, 0)
+        adjustment = Gtk.Adjustment(0.0, -1 * 100 * 100.0, 100 * 100.0,
+                                    0.01, 1, 0)
         self.price_display.set_adjustment(adjustment)
         self.price_display.set_digits(2)
 
@@ -5655,7 +5656,7 @@ class UpdateGeneralOptionSelectionDialog(GeneralOptionSelectionDialog):
 
         self.clear_entries()
 
-        if itr and len(name) > 0 and price >= 0.0:
+        if itr and len(name) > 0:
             key = self.get_selected_category()
 
             option_list = self.option_data[key]

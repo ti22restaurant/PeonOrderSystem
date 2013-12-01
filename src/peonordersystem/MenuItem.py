@@ -46,7 +46,7 @@ class MenuItem(object):
         self._option_choices = option_choices
         self._locked = False
         self._price_scalar = 1.0
-        self.comp_message = None
+        self._notification_message = None
         
         self.editable = bool(editable)
         self.stars = int(stars)
@@ -69,7 +69,7 @@ class MenuItem(object):
         if this menu item has been comped or
         not.
         """
-        return self._price_scalar == 0.0 and self.comp_message
+        return self._price_scalar == 0.0 and self._notification_message
 
     def get_comp_message(self):
         """Gets the comp message associated
@@ -79,7 +79,7 @@ class MenuItem(object):
         associated with the comp. None if there
         is_comped returns false.
         """
-        return self.comp_message
+        return self._notification_message
 
     def comp(self, value, message):
         """
@@ -92,10 +92,10 @@ class MenuItem(object):
         """
         if value:
             self._price_scalar = 0.0
-            self.comp_message = message
+            self._notification_message = message
         else:
             self._price_scalar = 1.0
-            self.comp_message = None
+            self._notification_message = None
     
     def is_locked(self):
         """Returns the value of the locked attribute.
@@ -200,6 +200,39 @@ class MenuItem(object):
         otherwise.
         """
         return self.__dict__ == other.__dict__
+
+
+class DiscountItem(MenuItem):
+    """This object stored information relating to the
+    DiscountItem which is a special type of MenuItem
+    that represents a discount to be applied.
+    """
+
+    def __init__(self, name, price, discount_message):
+        """Initializes a new DiscountItem.
+
+        @param name: str representing the name to be
+        associated with this discount.
+
+        @param price: float representing the price to
+        be associated with this discount item. Negative
+        prices will be subtracted from an order, positive
+        prices will be added to an order.
+
+        @param discount_message: str representing the
+        message to be associated with the DiscountItem
+        """
+        super(DiscountItem, self).__init__(name, price)
+        self._notification_message = discount_message
+
+    def get_discount_message(self):
+        """Gets the discount message associated
+        with this DiscountItem.
+
+        @return: str representing the message
+        associated with this DiscountItem.
+        """
+        return self._notification_message
 
 
 class OptionItem(object):

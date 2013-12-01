@@ -21,10 +21,10 @@ from gi.repository import Gtk
 
 import time
 
-from peonordersystem import ErrorLogger
-from peonordersystem.standardoperations import tree_view_changed
-from peonordersystem.ConfirmationSystem import TOGO_SEPARATOR
-from peonordersystem.CustomExceptions import NoSuchSelectionError
+from src.peonordersystem import ErrorLogger
+from src.peonordersystem.standardoperations import tree_view_changed
+from src.peonordersystem.ConfirmationSystem import TOGO_SEPARATOR
+from src.peonordersystem.CustomExceptions import NoSuchSelectionError
 
 
 class UpcomingOrdersView(Gtk.TreeView):

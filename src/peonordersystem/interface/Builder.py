@@ -8,7 +8,7 @@
 """
 from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 
-from peonordersystem import path
+from src.peonordersystem import path
 from collections import deque
 
 import jsonpickle

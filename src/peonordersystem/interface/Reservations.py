@@ -39,10 +39,10 @@ members:
 """
 
 from gi.repository import Gtk, GObject  # IGNORE:E0611 @UnresolvedImport
-from peonordersystem.standardoperations import tree_view_changed
-from peonordersystem.Settings import RESERVATION_UPDATE_TIME_FRAME, \
+from src.peonordersystem.standardoperations import tree_view_changed
+from src.peonordersystem.Settings import RESERVATION_UPDATE_TIME_FRAME, \
     RESERVATION_NOTIFICATION_TIME_MAX, RESERVATION_NOTIFICATION_TIME_MIN
-from peonordersystem.CustomExceptions import NoSuchSelectionError,\
+from src.peonordersystem.CustomExceptions import NoSuchSelectionError,\
     InvalidReservationError
 
 import time

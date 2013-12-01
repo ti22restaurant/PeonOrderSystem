@@ -9,9 +9,10 @@ confirm Orders.
 """
 
 from gi.repository import Gtk
-from peonordersystem.interface import Dialog
-from peonordersystem import ErrorLogger
-from peonordersystem.CustomExceptions import InvalidItemError, InvalidOrderError
+from src.peonordersystem.interface import Dialog
+from src.peonordersystem import ErrorLogger
+from src.peonordersystem.CustomExceptions import InvalidItemError, \
+    InvalidOrderError
 
 PRINT_RESPONSE = Dialog.PRINT_DIALOG_RESPONSE
 COMP_RESPONSE = Dialog.COMP_DIALOG_RESPONSE

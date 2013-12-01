@@ -12,7 +12,8 @@ real time.
 @version: 1.0
 """
 import json
-from path import NON_FATAL_ERROR_MESSAGES_DATA as ERROR_FILE
+from src.peonordersystem.path import NON_FATAL_ERROR_MESSAGES_DATA as \
+    ERROR_FILE
 
 curr_file = open(ERROR_FILE, 'r')
 

@@ -4,8 +4,8 @@
 @version: 1.0
 '''
 
-from peonordersystem.path import SYSTEM_LOG_PATH
-from peonordersystem.CustomExceptions import NoSuchSelectionError,\
+from src.peonordersystem.path import SYSTEM_LOG_PATH
+from src.peonordersystem.CustomExceptions import NoSuchSelectionError,\
     InvalidReservationError, InvalidOrderError, InvalidItemError
 
 import traceback

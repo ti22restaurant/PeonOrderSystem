@@ -8,7 +8,7 @@ given check.
 '''
 import math
 
-SALES_TAX = .10
+from src.peonordersystem.Settings import SALES_TAX
 
 def get_order_subtotal(order_list):
     """Gets the current subtotal of the given

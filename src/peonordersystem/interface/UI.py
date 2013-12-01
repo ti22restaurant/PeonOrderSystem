@@ -7,21 +7,21 @@ the main GUI is utilized as components in UI object.
 @contact: cjmcgraw.u.washington.edu
 @version: 1.0
 """
-from peonordersystem.path import MAIN_UI_PATH
+from src.peonordersystem.path import MAIN_UI_PATH
 
 import copy
 
-from peonordersystem.interface import Builder
-from peonordersystem.interface.Orders import Orders
-from peonordersystem.interface.Reservations import Reservations
-from peonordersystem.interface import Editor
-from peonordersystem.interface.UpcomingOrders import UpcomingOrders
+from src.peonordersystem.interface import Builder
+from src.peonordersystem.interface.Orders import Orders
+from src.peonordersystem.interface.Reservations import Reservations
+from src.peonordersystem.interface import Editor
+from src.peonordersystem.interface.UpcomingOrders import UpcomingOrders
 
-from peonordersystem.interface.Dialog import run_warning_dialog
+from src.peonordersystem.interface.Dialog import run_warning_dialog
 
-from peonordersystem import ErrorLogger
-from peonordersystem import CustomExceptions
-from peonordersystem import Settings
+from src.peonordersystem import ErrorLogger
+from src.peonordersystem import CustomExceptions
+from src.peonordersystem import Settings
 
 from time import strftime
 
@@ -591,6 +591,7 @@ class UI(object):
         self.upcoming_orders.remove_by_name(curr_name)
         self.orders.clear_order()
         self.notify_pending_reservations()
+        self.builder.set_table('')
         return curr_name, curr_order
 
     @non_fatal_error_notification

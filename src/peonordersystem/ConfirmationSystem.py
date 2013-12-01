@@ -14,28 +14,196 @@ or day changes it instantiates a new directory.
 @version: 1.0
 """
 import os
-import jsonpickle
-jsonpickle.set_encoder_options('simplejson', sort_keys=True, indent=4)
 import time
+import jsonpickle
 
-from peonordersystem import path
+jsonpickle.set_encoder_options('simplejson', sort_keys=True, indent=4)
+
+from src.peonordersystem import path
+from src.peonordersystem import MenuItem
+from src.peonordersystem import CheckOperations
 
 
-directory = path.SYSTEM_ORDERS_PATH
+DIRECTORY = path.SYSTEM_ORDERS_PATH
 
-if not os.path.exists(directory):
-    os.mkdir(directory)
+if not os.path.exists(DIRECTORY):
+    os.mkdir(DIRECTORY)
 
 current_date = time.localtime()[:3]
 
+CURR_ORDER_DIRECTORY = DIRECTORY
+
 for value in current_date:
-    directory = directory + '{}/'.format(value)
+    CURR_ORDER_DIRECTORY += '/{}'.format(value)
     
-    if not os.path.exists(directory):
-        os.mkdir(directory)
+    if not os.path.exists(CURR_ORDER_DIRECTORY):
+        os.mkdir(CURR_ORDER_DIRECTORY)
 
 TOGO_SEPARATOR = '::@::'
 CHECKOUT_SEPARATOR = '::=::'
+
+TYPE_SUFFIX_TOGO = '.togo'
+TYPE_SUFFIX_ORDER = '.table'
+TYPE_SUFFIX_CHECKOUT = '.checkout'
+TYPE_SUFFIX_NOTIFICATION_LOG = '.log'
+
+
+def unpack_notification_data(curr_directory=CURR_ORDER_DIRECTORY):
+    """Unpacks the information stored
+    in the notification data area.
+
+    @param curr_directory: str representing
+    the system path of the directory.
+
+    @return: list of MenuItem objects that
+    represents the MenuItems that were stored
+    in the notification data area.
+    """
+    curr_directory += '/notification_data.log'
+
+    if os.path.exists(curr_directory):
+        file_data = file(curr_directory, 'r')
+
+        data = file_data.read()
+
+        return jsonpickle.decode(data)
+
+    else:
+        return []
+
+notification_data = unpack_notification_data()
+
+
+def update_notification_data(curr_directory=CURR_ORDER_DIRECTORY):
+    """Updates the stored notification
+    data to display the current updated
+    notification data.
+
+    @param curr_directory: str representing
+    the directory where the data to be updated
+    is located.
+
+    @return: list of notification objects
+    that represents the notification data
+    saved.
+    """
+    curr_directory += '/notification_data.log'
+
+    file_data = open(curr_directory, 'w')
+    data = jsonpickle.encode(notification_data)
+
+    file_data.write(data)
+
+    return notification_data
+
+
+def unpack_order_data(curr_directory):
+    """Unpacks the information stored in
+    the given directory and returns
+    that information.
+
+    @param curr_directory: str representing
+    the system path of the directory
+
+    @return: 2-tuple of dict types. Each
+    dict maps a str key to a list of MenuItem
+    objects. Each key represents the name of
+    an order and each list represents the
+    order.
+    """
+
+    table_orders = {}
+    togo_orders = {}
+    itr = os.walk(curr_directory)
+
+    dirpath, dirnames, filenames = itr.next()
+
+    for curr_filename in filenames:
+        time, filename, filetype = parse_standardized_file_name(curr_filename,
+                                                togo_separator=TOGO_SEPARATOR)
+
+        filename = filename.replace('_', ' ')
+
+        print filetype
+
+        if filetype in TYPE_SUFFIX_ORDER:
+            current_orders = table_orders
+        else:
+            current_orders = togo_orders
+
+        data = open(dirpath + '/' + curr_filename)
+
+        loaded_data = jsonpickle.decode(data.read())
+
+        current_orders[filename] = loaded_data
+
+    return table_orders, togo_orders
+
+
+def unpack_checkout_data(load_date=current_date):
+    """Unpacks the information stored
+    in the checkout area, of the date
+    designated
+
+    @keyword load_date: tuple of 3 str
+    indexes represent (YYYY, MM, DD).
+    The given information will be loaded
+    from that date.
+
+    @return: dict of key tuples, with
+    each index a str. Representing
+    (name, time). Mapped to values
+    representing a list of MenuItem
+    objects that represents the checked
+    out order
+    """
+    checkout_data = {}
+
+    curr_directory = DIRECTORY + '/'
+    curr_directory += str(load_date[0]) + '/' + str(load_date[1]) +\
+                      '/' + str(load_date[2])
+    curr_directory += '/checkout'
+    print curr_directory
+    itr = os.walk(curr_directory)
+    dirpath, dirnames, filenames = itr.next()
+
+    for curr_filename in filenames:
+
+        filename, filetype = curr_filename.split('.')
+        filetime, filename = filename.split(CHECKOUT_SEPARATOR)
+
+        separator = None
+        if TOGO_SEPARATOR in filename:
+            separator = TOGO_SEPARATOR
+        else:
+            separator = '_'
+
+        filename = filename.replace(separator, ' ')
+
+        print dirpath + '/' + curr_filename
+        data = open(dirpath + '/' + curr_filename)
+        loaded_data = jsonpickle.decode(data.read())
+
+        key = (filename, filetime + ', ' + str(current_date[1]) +
+                         '/' + str(current_date[2]))
+
+        checkout_data[key] = loaded_data
+        print loaded_data
+
+    return checkout_data
+
+
+def add_notification_item(menu_item):
+    """Adds a notification to the
+    notification data
+
+    @param menu_item: MenuItem object
+    that is to be added to the notification
+    data.
+
+    @return: None
+    """
+    notification_data.append(menu_item)
 
 
 def generate_files():
@@ -51,15 +219,61 @@ def generate_files():
     dict has a key that maps to a list of the MenuItem
     objects that were present in that order.
     """
-    curr_directory = directory + 'confirmed/'
+    curr_directory = CURR_ORDER_DIRECTORY + '/confirmed'
     
     if not os.path.exists(curr_directory):
         os.mkdir(curr_directory)
-        os.mkdir(directory + 'checkout/')
+        os.mkdir(CURR_ORDER_DIRECTORY + '/checkout')
+        print CURR_ORDER_DIRECTORY + '/checkout'
     else:
         return unpack_order_data(curr_directory)
 
     return {}, {}
+
+
+def parse_standardized_file_name(file_name, time_separator=':',
+                                 togo_separator=' '):
+    """Parses the str that represents the
+    standard files information that is stored
+    as the file name.
+
+    @param file_name: str representing the file
+    name that is to be parsed.
+
+    @keyword time_separator: str representing the
+    character to be placed inbetween the hours, minutes
+    and seconds in the generated time string. By default
+    is ':'. For 'HH:MM:SS' format.
+
+    @keyword togo_separator: str representing the character
+    to be placed between the name and number representation
+    representing the togo name. By default is whitespace. Thus
+    'WXYZ 1234' is the standard format.
+
+    @return: tuple of length 3. Representing the
+    (time, order_name, type) respectively as three
+    str types.
+
+    order_time = HH:MM:SS (blank if non specified)
+    order_name = standard order name
+    file_type = checkout, order, togo, or log types
+    """
+    file_time = ''
+    file_type = ''
+    order_name = file_name
+
+    if CHECKOUT_SEPARATOR in order_name:
+        file_time, order_name = order_name.split(CHECKOUT_SEPARATOR)
+
+        file_time = file_time.replace('-', time_separator)
+
+    if '.' in order_name:
+        order_name, file_type = order_name.split('.')
+
+    if TOGO_SEPARATOR in order_name:
+        order_name = order_name.replace(TOGO_SEPARATOR, togo_separator)
+
+    return file_time, order_name, file_type
 
 
 def standardize_confirm_file_name(order_name):
@@ -77,9 +291,9 @@ def standardize_confirm_file_name(order_name):
     order_name = order_name.replace(' ', '_')
     
     if TOGO_SEPARATOR in order_name:
-        order_name += '.togo'
+        order_name += TYPE_SUFFIX_TOGO
     else:
-        order_name += '.table'
+        order_name += TYPE_SUFFIX_ORDER
     
     return order_name
 
@@ -97,7 +311,7 @@ def standardize_checkout_file_name(order_name):
     """
     order_name = order_name.replace(' ', '_')
     curr_time = time.strftime('%H-%M-%S')
-    return curr_time + CHECKOUT_SEPARATOR + order_name + '.checkout'
+    return curr_time + CHECKOUT_SEPARATOR + order_name + TYPE_SUFFIX_CHECKOUT
 
 
 def order_confirmed(order_name, priority_list,
@@ -123,10 +337,10 @@ def order_confirmed(order_name, priority_list,
     print_order(order_name, non_priority_list,
                 priority_list=priority_list)
 
-    curr_directory = directory + 'confirmed/'
+    curr_directory = CURR_ORDER_DIRECTORY + '/confirmed'
     order_name = standardize_confirm_file_name(order_name)
     
-    curr_file = open(curr_directory + order_name, 'w')
+    curr_file = open(curr_directory + '/' + order_name, 'w')
 
     obj_info = jsonpickle.encode(full_order)
     curr_file.write(obj_info)
@@ -141,13 +355,13 @@ def remove_order_confirmed_file(order_name):
     associated with the given order. The given name
     will be transformed into the standarized format.
     """
-    curr_directory = directory + 'confirmed/'
+    curr_directory = CURR_ORDER_DIRECTORY + '/confirmed'
     order_name = standardize_confirm_file_name(order_name)
 
-    f_name = curr_directory + order_name
+    file_name = curr_directory + '/' +  order_name
 
-    if os.path.isfile(f_name):
-        os.remove(curr_directory + order_name)
+    if os.path.isfile(file_name):
+        os.remove(file_name)
 
 
 def checkout_confirmed(order_name, orders, order_list):
@@ -170,15 +384,14 @@ def checkout_confirmed(order_name, orders, order_list):
     for logging purposes.
     """
     remove_order_confirmed_file(order_name)
+    print order_name
 
-    curr_directory = directory + 'checkout/'
+    curr_directory = CURR_ORDER_DIRECTORY + '/checkout'
     order_name = standardize_checkout_file_name(order_name)
-    curr_file = open(curr_directory + order_name, 'w')
+    curr_file = open(curr_directory + '/' + order_name, 'w')
     obj_info = jsonpickle.encode(order_list)
     curr_file.write(obj_info)
-
-    for order in orders:
-        print_check(order_name, order)
+    print_check(order_name, order_list)
 
 
 def print_order(order_name, order_list, priority_list=None):
@@ -229,95 +442,16 @@ def print_check(order_name, order_list):
     print order_name
     print order_list
     print''
-    pass
 
+    subtotal = CheckOperations.get_order_subtotal(order_list)
 
-def unpack_order_data(curr_directory):
-    """Unpacks the information stored in
-    the given directory and returns
-    that information.
+    print 'Subtotal : ' + str(subtotal)
+    print 'Tax : ' + str(CheckOperations.get_total_tax(subtotal))
+    print 'Total : ' + str(CheckOperations.get_total(order_list))
 
-    @param curr_directory: str representing
-    the system path of the directory
+    # to add to notification log
+    for menu_item in order_list:
 
-    @return: 2-tuple of dict types. Each
-    dict maps a str key to a list of MenuItem
-    objects. Each key represents the name of
-    an order and each list represents the
-    order.
-    """
-
-    table_orders = {}
-    togo_orders = {}
-    itr = os.walk(curr_directory)
-
-    dirpath, dirnames, filenames = itr.next()
-
-    for curr_filename in filenames:
-        filename, filetype = curr_filename.split('.')
-        filename = filename.replace('_', ' ')
-
-        if filetype == 'table':
-            current_orders = table_orders
-        else:
-            current_orders = togo_orders
-
-        data = open(dirpath + curr_filename)
-
-        loaded_data = jsonpickle.decode(data.read())
-
-        current_orders[filename] = loaded_data
-
-    return table_orders, togo_orders
-
-
-def unpack_checkout_data(load_date=current_date):
-    """Unpacks the information stored
-    in the checkout area, of the date
-    designated
-
-    @keyword load_date: tuple of 3 str
-    indexes represent (YYYY, MM, DD).
-    The given information will be loaded
-    from that date.
-
-    @return: dict of key tuples, with
-    each index a str. Representing
-    (name, time). Mapped to values
-    representing a list of MenuItem
-    objects that represents the checked
-    out order
-    """
-    checkout_data = {}
-
-    curr_directory = path.SYSTEM_ORDERS_PATH
-    curr_directory += str(load_date[0]) + '/' + str(load_date[1]) +\
-                      '/' + str(load_date[2]) + '/'
-    curr_directory += 'checkout/'
-
-    itr = os.walk(curr_directory)
-    dirpath, dirnames, filenames = itr.next()
-
-    for curr_filename in filenames:
-
-        filename, filetype = curr_filename.split('.')
-        filetime, filename = filename.split(CHECKOUT_SEPARATOR)
-
-        separator = None
-        if TOGO_SEPARATOR in filename:
-            separator = TOGO_SEPARATOR
-        else:
-            separator = '_'
-
-        filename = filename.replace(separator, ' ')
-
-
-        data = open(dirpath + curr_filename)
-        loaded_data = jsonpickle.decode(data.read())
-
-        key = (filename, filetime + ', ' + str(current_date[1]) +
-                         '/' + str(current_date[2]))
-
-        checkout_data[key] = loaded_data
-
-    return checkout_data
+        if menu_item.is_comped() or \
+                isinstance(menu_item, MenuItem.DiscountItem):
+            add_notification_item(menu_item)
