@@ -3842,7 +3842,7 @@ class AuditDataSelectionDialog(SelectionDialog):
     """
 
     DEFAULT_FILE_PATH = 'Default Location'
-    DEFAULT_FILE_NAME = 'Audit.xls'
+    DEFAULT_FILE_NAME = 'Audit'
 
     def __init__(self, parent, confirm_func, title='Data Auditor'):
         """Initializes a new AuditDataSelectionDialog window.
@@ -3909,9 +3909,10 @@ class AuditDataSelectionDialog(SelectionDialog):
 
         sub_box = Gtk.HBox()
         sub_box.pack_start(self.name_entry, True, True, 5.0)
-        sub_box.pack_start(Gtk.Fixed(), True, True, 5.0)
         self.name_entry.set_text(self.DEFAULT_FILE_NAME)
         self.name_entry.set_sensitive(False)
+
+        sub_box.pack_start(Gtk.Label('_(m1:d1-m2:d2)'), False, False, 5.0)
 
         main_box.pack_start(sub_box, False, False, 5.0)
         sub_box = Gtk.HBox()
@@ -4137,9 +4138,8 @@ class AuditDataSelectionDialog(SelectionDialog):
         name = self.name_entry.get_text()
         name = name.strip()
 
-        file_name = name
-        if not '.' in file_name:
-            file_name += '.xls'
+        if '.' in name:
+            name = name.split('.')[0]
 
         location = self.location_entry.get_text()
         location = location.strip()
@@ -4153,7 +4153,7 @@ class AuditDataSelectionDialog(SelectionDialog):
             self.set_warning_message('Invalid save name or location')
         else:
             super(AuditDataSelectionDialog, self).confirm_button_clicked(
-                start_date, end_date, location, file_name)
+                start_date, end_date, location, name)
 
     def confirm_data(self, start_date, end_date, location, name):
         """Confirms the data by calling the confirm function
@@ -4176,11 +4176,12 @@ class AuditDataSelectionDialog(SelectionDialog):
 
         @return: None
         """
-        if location == self.DEFAULT_FILE_PATH:
-            location = None
-        if name == self.DEFAULT_FILE_NAME:
-            name = None
-        self.confirm_func(start_date, end_date, location, name)
+        kwargs = {}
+        if not location == self.DEFAULT_FILE_PATH:
+            kwargs['location'] = location
+        if not name == self.DEFAULT_FILE_NAME:
+            kwargs['name'] = name
+        self.confirm_func(start_date, end_date, **kwargs)
 
 
 #==========================================================

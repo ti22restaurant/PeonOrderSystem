@@ -750,13 +750,11 @@ class UI(object):
         """
         return self.builder.update_status(message, styles)
 
-    #==============================================================================
+    #==========================================================================
     # This block contains methods that relate to the functioning of the
     # error logging system for the GUI. This includes dumping, debugging and
     # other logging methods.
-    #==============================================================================
-
-
+    #==========================================================================
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
     def request_audit(self, *args):
@@ -773,7 +771,7 @@ class UI(object):
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
-    def perform_audit(self, start_date, end_date, location, name):
+    def perform_audit(self, start_date, end_date, **kwargs):
         """This represents a place holder method that is expected
         to be overriden by a subclass.
 
@@ -786,11 +784,9 @@ class UI(object):
         @param end_date: datetime.date object that represents
         the ending date of the audit, inclusive.
 
-        @param location: str representing the directory that
-        the audit file will be save to.
-
-        @param name: str representing the name that the audit
-        file will be saved as.
+        @keyword kwargs: Keyword args associated with the audit.
+            location: str representing directory
+            name: str representing file name to be saved.
 
         @return: None
         """

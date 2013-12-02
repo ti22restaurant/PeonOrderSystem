@@ -28,14 +28,15 @@ AUDIT_DIRECTORY = path.SYSTEM_AUDIT_PATH
 
 TODAY_DIRECTORY = AUDIT_DIRECTORY
 
-curr_time = time.localtime()[:3]
+TODAYS_DATE = time.localtime()[:3]
 
-for value in curr_time:
+for value in TODAYS_DATE:
     TODAY_DIRECTORY += "/{}".format(value)
     if not os.path.exists(TODAY_DIRECTORY):
         os.mkdir(TODAY_DIRECTORY)
 
-REQUEST_DIRECTORY = AUDIT_DIRECTORY + "/{}".format(curr_time[0]) + "/requests"
+REQUEST_DIRECTORY = AUDIT_DIRECTORY + "/{}".format(TODAYS_DATE[0]) + \
+                    "/requests"
 if not os.path.exists(REQUEST_DIRECTORY):
     os.mkdir(REQUEST_DIRECTORY)
 
@@ -59,15 +60,17 @@ def closing_audit():
 
     @return: None
     """
-    closing_audit_filepath = TODAY_DIRECTORY + "closing_audit"
+    today = datetime.date(TODAYS_DATE[0], TODAYS_DATE[1], TODAYS_DATE[2])
+    print today
+    workbook = audit_data(today, today)
+
+    closing_audit_filepath = TODAY_DIRECTORY + '/closing_audit.xls'
     closing_audit_filepath = get_acceptable_filepath(closing_audit_filepath)
-
-    workbook = audit_data(curr_time, curr_time)
-
     workbook.save(closing_audit_filepath)
 
 
-def request_audit(from_date, until_date, name):
+def request_audit(from_date, until_date, location=REQUEST_DIRECTORY,
+                  name='Audit'):
     """Performs an audit over the selected date
     period.
 
@@ -82,16 +85,20 @@ def request_audit(from_date, until_date, name):
 
     @return: None
     """
-    from_date_str = time.strftime("%m/%d", from_date)
-    until_date_str = time.strftime("%m/%d", until_date)
-    request_audit_filepath = REQUEST_DIRECTORY + from_date_str + "-" + \
-                             until_date_str + "_audit"
+    from_date_str = str(from_date.month) + ':' + str(from_date.day)
+    until_date_str = str(until_date.month) + ':' + str(until_date.day)
+
+    str_date_range = '_(' + from_date_str + '-' + until_date_str + ')'
+
+    request_audit_filepath = location + '/' + name + str_date_range
 
     request_audit_filepath = get_acceptable_filepath(request_audit_filepath)
 
     workbook = audit_data(from_date, until_date)
 
-    workbook.save(request_audit_filepath)
+    print request_audit_filepath
+
+    workbook.save(request_audit_filepath + '.xls')
 
 
 def get_acceptable_filepath(file_path):
