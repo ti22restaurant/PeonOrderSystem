@@ -10,6 +10,8 @@ them into an xls document that is more human readable.
 from src.peonordersystem.ConfirmationSystem import parse_standardized_file_name
 from src.peonordersystem import CheckOperations
 from src.peonordersystem import path
+from src.peonordersystem.Settings import AUDIT_FILE_TYPE, \
+    CLOSING_AUDIT_DEFAULT_NAME
 
 import jsonpickle
 import datetime
@@ -35,8 +37,8 @@ for value in TODAYS_DATE:
     if not os.path.exists(TODAY_DIRECTORY):
         os.mkdir(TODAY_DIRECTORY)
 
-REQUEST_DIRECTORY = AUDIT_DIRECTORY + "/{}".format(TODAYS_DATE[0]) + \
-                    "/requests"
+REQUEST_DIRECTORY = AUDIT_DIRECTORY  + "/requests"
+
 if not os.path.exists(REQUEST_DIRECTORY):
     os.mkdir(REQUEST_DIRECTORY)
 
@@ -64,7 +66,7 @@ def closing_audit():
     print today
     workbook = audit_data(today, today)
 
-    closing_audit_filepath = TODAY_DIRECTORY + '/closing_audit.xls'
+    closing_audit_filepath = TODAY_DIRECTORY + '/' + CLOSING_AUDIT_DEFAULT_NAME
     closing_audit_filepath = get_acceptable_filepath(closing_audit_filepath)
     workbook.save(closing_audit_filepath)
 
@@ -85,10 +87,12 @@ def request_audit(from_date, until_date, location=REQUEST_DIRECTORY,
 
     @return: None
     """
-    from_date_str = str(from_date.month) + ':' + str(from_date.day)
-    until_date_str = str(until_date.month) + ':' + str(until_date.day)
+    from_date_str = str(from_date.month) + '-' + str(from_date.day) + '-' + \
+                    str(from_date.year)
+    until_date_str = str(until_date.month) + '-' + str(until_date.day) + '-' \
+                     + str(until_date.year)
 
-    str_date_range = '_(' + from_date_str + '-' + until_date_str + ')'
+    str_date_range = '[' + from_date_str + ',' + until_date_str + ']'
 
     request_audit_filepath = location + '/' + name + str_date_range
 
@@ -96,9 +100,7 @@ def request_audit(from_date, until_date, location=REQUEST_DIRECTORY,
 
     workbook = audit_data(from_date, until_date)
 
-    print request_audit_filepath
-
-    workbook.save(request_audit_filepath + '.xls')
+    workbook.save(request_audit_filepath)
 
 
 def get_acceptable_filepath(file_path):
@@ -115,10 +117,13 @@ def get_acceptable_filepath(file_path):
     """
     counter = 1
 
-    new_file_path = file_path
+    new_file_path = file_path.split('.')[0] + AUDIT_FILE_TYPE
+
+    print os.path.exists(file_path)
 
     while os.path.exists(new_file_path):
-        new_file_path = file_path + "(" + str(counter) + ")"
+        new_file_path = file_path.split('.')[0] + "(" + str(counter) + ")" + \
+                        AUDIT_FILE_TYPE
         counter += 1
 
     return new_file_path

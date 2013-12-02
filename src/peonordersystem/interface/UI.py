@@ -17,7 +17,7 @@ from src.peonordersystem.interface.Reservations import Reservations
 from src.peonordersystem.interface import Editor
 from src.peonordersystem.interface.UpcomingOrders import UpcomingOrders
 
-from src.peonordersystem.interface.Dialog import run_warning_dialog
+from src.peonordersystem.interface import Dialog
 
 from src.peonordersystem import ErrorLogger
 from src.peonordersystem import CustomExceptions
@@ -721,8 +721,7 @@ class UI(object):
                 message += '    ' + reservation + '\n'
 
             message += '\n\nOk?'
-            response = run_warning_dialog(self.builder.window, message_title,
-                                          message)
+            response = run_warning_dialog(message_title, message)
 
             if response:
                 self.reservations.clear_reservation_notifications()
@@ -749,6 +748,29 @@ class UI(object):
         if yes, false if no.
         """
         return self.builder.update_status(message, styles)
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def run_warning_dialog(self, message_title, message):
+        """Runs a warning dialog to prompt the user of a yes
+        no question that is given by the given message, with
+        the descriptor as the message title.
+
+        @param message_title: str representing the title to be
+        displayed to the user with this warning dialog. This
+        message should be short and very informative to give
+        a one sentence of overview of what is occurring.
+
+        @param message: str representing the message to be displayed
+        this should be a message that is a simple yes no question that
+        displays the relevant information and is more descriptive than
+        the message title.
+
+        @return: bool representing if the dialog window was confirmed
+        or not.
+        """
+        window = self.builder.window
+        return Dialog.run_warning_dialog(window, message_title, message)
 
     #==========================================================================
     # This block contains methods that relate to the functioning of the

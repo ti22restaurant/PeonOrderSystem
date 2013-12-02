@@ -162,7 +162,19 @@ class PeonOrderSystem(UI):
         """
         Gtk.main()
         ConfirmationSystem.update_notification_data()
-        DataAudit.closing_audit()
+
+        message_title = "Do you want to perform a closing audit?"
+
+        message = 'You are about to close the POS UI.\n\n Do you want to '
+        message += 'perform a closing audit?\n\n'
+        message += 'This audit will compile all the data for the today ' + \
+                   'and store it in an easy to read excel file in the ' + \
+                   'standard audit area. \n\n' \
+                   ' This make take a minute though, are you sure you ' + \
+                   'want to perform the audit?'
+
+        if self.run_warning_dialog(message_title, message):
+            DataAudit.closing_audit()
 
     
 if __name__ == '__main__':
