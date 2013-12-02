@@ -421,6 +421,35 @@ class Editor(object):
             response = dialog.run_dialog()
             return response
 
+    def get_audit_info(self, confirm_func):
+        """Calls a dialog window that allows the user to select
+        a date range that the audit should be performed over and
+        a file path and file name that the audit will be saved
+        to as a spreadsheet.
+
+        @param confirm_func: function that is to be called upon
+        confirmation of the dialog window. Function is expected
+        to take the following parameters:
+
+            1. start_date: datetime.date object that represents
+            the start date of the audit.
+
+            2. end_date: datetime.date object that represents the
+            end date of the audit.
+
+            3. location: str representing the directory that the
+            spreadsheet should be saved to.
+
+            4. name: str representing the name that the file will
+            be saved as in the directory.
+
+        @return: bool representing if the dialog was confirmed or
+        not.
+        """
+        dialog = Dialog.AuditDataSelectionDialog(self.parent, confirm_func)
+        response = dialog.run_dialog()
+        return response == ACCEPT_RESPONSE
+
 
 #===========================================================================
 # This block contains functions that are called as conditionals to

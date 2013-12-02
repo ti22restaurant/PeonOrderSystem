@@ -756,6 +756,48 @@ class UI(object):
     # other logging methods.
     #==============================================================================
 
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def request_audit(self, *args):
+        """This method is called when an associated Gtk.Widget
+        is clicked. THis method calls the associated audit
+        request.
+
+        @param args: wildcard catchall that is used to catch
+        the Gtk.WIdget that called this method.
+
+        @return: None
+        """
+        response = self.editor.get_audit_info(self.perform_audit)
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def perform_audit(self, start_date, end_date, location, name):
+        """This represents a place holder method that is expected
+        to be overriden by a subclass.
+
+        As such this method simply notifies the user that the audit
+        is being performed from the given date period.
+
+        @param start_date: datetime.date object that represents
+        the starting date of the audit, inclusive.
+
+        @param end_date: datetime.date object that represents
+        the ending date of the audit, inclusive.
+
+        @param location: str representing the directory that
+        the audit file will be save to.
+
+        @param name: str representing the name that the audit
+        file will be saved as.
+
+        @return: None
+        """
+        message = 'Performing audit. This may take a moment...'
+        message += ' AUDIT: from {} to {} '.format(start_date, end_date)
+        self.update_status(message)
+
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
     def update_menu_items(self, *args):
