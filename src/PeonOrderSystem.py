@@ -23,6 +23,7 @@ from src.peonordersystem.interface import Editor
 from src.peonordersystem.interface.UI import UI
 from src.peonordersystem import ConfirmationSystem
 from src.peonordersystem import ErrorLogger
+from src.peonordersystem import DataAudit
 
 @ErrorLogger.error_logging
 class PeonOrderSystem(UI):
@@ -128,6 +129,29 @@ class PeonOrderSystem(UI):
         order_name, order_list = self.get_order_info()
         ConfirmationSystem.print_check(order_name, order_list)
 
+    def perform_audit(self, start_date, end_date, **kwargs):
+        """Override Method.
+
+        Performs an audit over the specified period from start date
+        until end date. The audited file is stored in a spread sheet
+        and saved at the location given, with the given name.
+
+        @param start_date: datetime.date object that represents the
+        beginning date to start the audit.
+
+        @param end_date: datetime.date object that represents the
+        ending date to end the audit.
+
+        @param location: str representing the directory to which
+        the generated audit spreadsheet should be saved to.
+
+        @param name: str representing the file name to which
+        the generated audit spreadsheet should be saved as.
+
+        @return: None
+        """
+        DataAudit.request_audit(start_date, end_date, **kwargs)
+
     def run(self):
         """Runs the thread to execute the UI
         built by this object.
@@ -138,6 +162,8 @@ class PeonOrderSystem(UI):
         """
         Gtk.main()
         ConfirmationSystem.update_notification_data()
+        DataAudit.closing_audit()
+
     
 if __name__ == '__main__':
     
