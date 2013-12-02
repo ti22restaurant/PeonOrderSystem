@@ -48,6 +48,7 @@ from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 
 from abc import ABCMeta, abstractmethod
 from copy import copy, deepcopy
+import datetime
 import time
 import math
 
@@ -3790,6 +3791,397 @@ class GeneralOptionSelectionDialog(SelectionDialog):
         @return: None
         """
         self.menu_item.options = self.new_option_list
+
+
+class AuditDataSelectionDialog(SelectionDialog):
+    """AuditDisplaySelectionDialog allows the user to
+    select a date range to run an audit over of all files
+    that fall within the associated date range. The dialog
+    also allows the user to select a location that the
+    file will be saved to.
+
+    @group SelectionDialog: This class is a subclass member
+    of the SelectionDialog group and as such it inherits
+    some of its functionality from SelectionDialog class.
+    Any changes in the SelectionDialog class may effect
+    the functionality of this class.
+
+    @cvar DEFAULT_FILE_PATH: str representing the default
+    file path that will be displayed as a place holder to
+    notify the user that the file path selected is currently
+    the default.
+
+    @cvar DEFAULT_FILE_NAME: str representing the default
+    file name that the audit will be saved under.
+
+    @var confirm_func: Function that is to be called upon
+    confirmation of the dialog window.
+
+    @var selection_calendar: Gtk.Calendar that is to be
+    interacted with by the user to select a dates.
+
+    @var location_entry: Gtk.Entry that represents a str
+    associated with the file path that the audit
+    will be saved at.
+
+    @var name_entry: Gtk.Entry that represents a str associated
+    with the file name that the audit will be saved as.
+
+    @var from_date_display: Gtk.Entry that represents a str
+    associated with the start date for the audit.
+
+    @var until_date_display: Gtk.Entry that represents a str
+    associated with the end date for the audit.
+
+    @var warning_label: Gtk.Label that is used to display
+    warning messages to the user.
+
+    @var date_bounds: list of expected length 2 that stores
+    the start date at the first index [0] and the end date
+    as the last index[1].
+    """
+
+    DEFAULT_FILE_PATH = 'Default Location'
+    DEFAULT_FILE_NAME = 'Audit.xls'
+
+    def __init__(self, parent, confirm_func, title='Data Auditor'):
+        """Initializes a new AuditDataSelectionDialog window.
+
+        @param parent: Gtk.Object that this dialog window was
+        called on.
+
+        @param confirm_func: function that is to be called when
+        the dialog window is confirmed.
+
+        @param title: str representing the title associated with
+        this dialog window.
+        """
+        self.confirm_func = confirm_func
+
+        self.location_entry = Gtk.Entry()
+        self.name_entry = Gtk.Entry()
+
+        self.selection_calendar = Gtk.Calendar()
+
+        self.from_date_display = Gtk.Entry()
+        self.until_date_display = Gtk.Entry()
+
+        self.warning_label = Gtk.Label()
+
+        self.date_bounds = [0.0, 0.0]
+
+        super(AuditDataSelectionDialog, self).__init__(parent, title)
+
+    def generate_main_selection_area(self):
+        """Generates the main selection area for the
+        SelectionDialog.
+
+        @return: Gtk.Container that holds all the associated
+        widgets to be displayed in the main selection area.
+        """
+        frame = Gtk.Frame(label='Storage Selection Area')
+        main_box = Gtk.VBox()
+
+        sub_box = Gtk.HBox()
+        sub_box.pack_start(Gtk.Label('File Save Location:'), False, False, 5.0)
+        main_box.pack_start(sub_box, False, False, 5.0)
+
+        sub_box = Gtk.HBox()
+        sub_box.pack_start(self.location_entry, True, True, 5.0)
+        sub_box.pack_start(Gtk.Fixed(), True, True, 5.0)
+        self.location_entry.set_text(self.DEFAULT_FILE_PATH)
+        self.location_entry.set_sensitive(False)
+
+        main_box.pack_start(sub_box, False, False, 5.0)
+        select_location = Gtk.ToggleButton('Edit Save as Location')
+        select_location.set_can_focus(False)
+
+        sub_box = Gtk.HBox()
+        sub_box.pack_start(select_location, False, False, 5.0)
+        select_location.connect('toggled', self.location_toggled)
+        select_location.set_size_request(200, 50)
+
+        main_box.pack_start(sub_box, False, False, 5.0)
+
+        sub_box = Gtk.HBox()
+        sub_box.pack_start(Gtk.Label('File Save as Name:'), False, False, 5.0)
+        main_box.pack_start(sub_box, False, False, 5.0)
+
+        sub_box = Gtk.HBox()
+        sub_box.pack_start(self.name_entry, True, True, 5.0)
+        sub_box.pack_start(Gtk.Fixed(), True, True, 5.0)
+        self.name_entry.set_text(self.DEFAULT_FILE_NAME)
+        self.name_entry.set_sensitive(False)
+
+        main_box.pack_start(sub_box, False, False, 5.0)
+        sub_box = Gtk.HBox()
+        select_name = Gtk.ToggleButton('Edit Save as Name')
+        select_name.set_can_focus(False)
+
+        sub_box.pack_start(select_name, False, False, 5.0)
+        select_name.connect('toggled', self.name_toggled)
+        select_name.set_size_request(200, 50)
+
+        main_box.pack_start(sub_box, False, False, 5.0)
+
+        frame.add(main_box)
+        return frame
+
+    def generate_secondary_selection_area(self):
+        """Generates the secondary selection area for
+        the SelectionDialog.
+
+        @return: Gtk.Container that holds all the widgets
+        to be displayed in the secondary selection area.
+        """
+        frame = Gtk.Frame(label='Date Selection Area')
+        main_box = Gtk.VBox()
+
+        sub_box = Gtk.HBox()
+        calendar_frame = Gtk.Frame()
+        calendar_frame.add(self.selection_calendar)
+
+        sub_box.pack_start(calendar_frame, False, False, 5.0)
+        main_box.pack_start(sub_box, True, True, 5.0)
+
+        main_box.pack_start(Gtk.Fixed(), True, True, 5.0)
+
+        sub_box = Gtk.HBox()
+        sub_box.pack_start(Gtk.Label('Start Date:'), False, False, 5.0)
+        main_box.pack_start(sub_box, False, False, 5.0)
+
+        sub_box = Gtk.HBox()
+        sub_box.pack_start(self.from_date_display, True, True, 5.0)
+        self.from_date_display.set_sensitive(False)
+
+        set_start_date_button = Gtk.Button('set Start Date')
+        sub_box.pack_start(set_start_date_button, True, True, 5.0)
+        set_start_date_button.connect('clicked', self.set_start_date)
+
+        sub_box.pack_start(Gtk.Fixed(), True, True, 5.0)
+        main_box.pack_start(sub_box, True, True, 5.0)
+
+        sub_box = Gtk.HBox()
+        sub_box.pack_start(Gtk.Label('Until Date:'), False, False, 5.0)
+        main_box.pack_start(sub_box, False, False, 5.0)
+
+        sub_box = Gtk.HBox()
+        sub_box.pack_start(self.until_date_display, True, True, 5.0)
+        self.until_date_display.set_sensitive(False)
+
+        set_end_date_button = Gtk.Button('set Until Date')
+        sub_box.pack_start(set_end_date_button, True, True, 5.0)
+        set_end_date_button.connect('clicked', self.set_end_date)
+        set_end_date_button.set_size_request(100, 15)
+
+        sub_box.pack_start(Gtk.Fixed(), True, True, 5.0)
+        main_box.pack_start(sub_box, True, True, 5.0)
+
+        main_box.pack_start(self.warning_label, True, True, 5.0)
+
+        frame.add(main_box)
+        return frame
+
+    def generate_properties_selection_area(self):
+        """Generates the properties selection area to
+        be displayed in the selectionDialog.
+
+        @return: Gtk.Container that holds all the
+        widgets associated with the properties
+        selection area.
+        """
+        return Gtk.HBox()
+
+    def location_toggled(self, toggle_button):
+        """Toggles the location area to allow the
+        user to edit the location that the generated
+        audit file will be saved to.
+
+        Allows the user to toggle between the default
+        or a selected directory.
+
+        @param toggle_button: Gtk.ToggleButton that
+        called this method.
+
+        @return: None
+        """
+        self.set_warning_message('')
+        if toggle_button.get_active():
+            URI = self.choose_location()
+
+            if URI == self.DEFAULT_FILE_PATH:
+                toggle_button.set_active(False)
+
+            self.location_entry.set_text(URI)
+
+        else:
+            self.location_entry.set_text(self.DEFAULT_FILE_PATH)
+
+    def choose_location(self, *args):
+        """Opens and controls a new dialog window
+        that allows the user to select a new path
+        for the file to be saved to.
+
+        @param args: wildcard catchall used to catch
+        the Gtk.Widget that called this method.
+
+        @return: str representing the directory selected
+        by the user. If no choice was made by the user
+        then the default file path is returned.
+        """
+        self.set_warning_message('')
+        buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN,
+                   Gtk.ResponseType.ACCEPT)
+
+        file_chooser = Gtk.FileChooserDialog('Save Audit As', self.dialog,
+                                             Gtk.FileChooserAction.SELECT_FOLDER,
+                                             buttons)
+        response = file_chooser.run()
+        uri = file_chooser.get_uri()
+        file_chooser.destroy()
+
+        if response == Gtk.ResponseType.ACCEPT:
+
+            return uri.split('file://')[1]
+
+        else:
+            return self.DEFAULT_FILE_PATH
+
+    def name_toggled(self, toggle_button):
+        """Toggles the name area to be editable
+        by the user.
+
+        @param toggle_button. Gtk.ToggleButton that
+        called this method.
+
+        @return: None
+        """
+        self.set_warning_message('')
+        if toggle_button.get_active():
+            name_sensitive = True
+            name_text = ''
+        else:
+            name_sensitive = False
+            name_text = self.DEFAULT_FILE_NAME
+
+        self.name_entry.set_sensitive(name_sensitive)
+        self.name_entry.set_text(name_text)
+
+    def set_start_date(self, *args):
+        """Sets the currently selected date in the
+        calendar area as the currently selected start
+        date for the audit. Updates the start date display
+        area to notify the user.
+
+        @param args: wildcard catchall that is used
+        to catch the Gtk.Widget that called this method.
+
+        @return: None
+        """
+        self.set_warning_message('')
+        text = self.from_date_display.get_text()
+        text = text.strip()
+
+        year, month, day = self.selection_calendar.get_date()
+
+        start_date = datetime.date(year, month + 1, day)
+        self.from_date_display.set_text('{}/{}/{}'.format(month + 1, day,
+                                                          year))
+        self.date_bounds[0] = start_date
+
+    def set_end_date(self, *args):
+        """Sets the currently selected date in the
+        calendar area as the currently selected end
+        date for the audit. Updates the end date display
+        area to notify the user.
+
+        @param args: wildcard catchall that is used to
+        catch the Gtk.Widget that called this method.
+
+        @return: None
+        """
+        self.set_warning_message('')
+        text = self.until_date_display.get_text()
+        text = text.strip()
+
+        year, month, day = self.selection_calendar.get_date()
+
+        end_date = datetime.date(year, month + 1, day)
+        self.until_date_display.set_text('{}/{}/{}'.format(month + 1, day,
+                                                           year))
+        self.date_bounds[1] = end_date
+
+    def set_warning_message(self, message):
+        """
+
+        @param message:
+        @return:
+        """
+        markup = '<span foreground="red" weight="bold">' + message + '</span>'
+        self.warning_label.set_markup(markup)
+
+    def confirm_button_clicked(self, *args):
+        """Confirms the selected dialog window. This
+        method checks if the selected information is
+        able to be confirmed, if so then the dialog
+        window is confirmed. If not then a warning
+        message is displayed in the dialog window
+        prompting the user.
+
+        @param args: wildcard catchall that is used
+        to catch the Gtk.Widget that called this method.
+
+        @return: None
+        """
+        self.set_warning_message('')
+        name = self.name_entry.get_text()
+        name = name.strip()
+
+        file_name = name
+        if not '.' in file_name:
+            file_name += '.xls'
+
+        location = self.location_entry.get_text()
+        location = location.strip()
+
+        start_date = self.date_bounds[0]
+        end_date = self.date_bounds[1]
+
+        if not (start_date and end_date) or (end_date < start_date):
+            self.set_warning_message('Invalid dates selected!')
+        elif not name and location:
+            self.set_warning_message('Invalid save name or location')
+        else:
+            super(AuditDataSelectionDialog, self).confirm_button_clicked(
+                start_date, end_date, location, file_name)
+
+    def confirm_data(self, start_date, end_date, location, name):
+        """Confirms the data by calling the confirm function
+        associated with this dialog window with data regarding
+        the start date, end date of the audit as well as the
+        location and name associated with where the file should
+        be saved.
+
+        @param start_date: datetime.date object that represents
+        the start date of the audit.
+
+        @param end_date: datetime.date object that represents the
+        end date of the audit.
+
+        @param location: str representing the directory location
+        where the file is to be saved.
+
+        @param name: str representing the name that the file
+        will be saved as under the directory location.
+
+        @return: None
+        """
+        if location == self.DEFAULT_FILE_PATH:
+            location = None
+        if name == self.DEFAULT_FILE_NAME:
+            name = None
+        self.confirm_func(start_date, end_date, location, name)
+
 
 #==========================================================
 # This block represents windows that form the specific
