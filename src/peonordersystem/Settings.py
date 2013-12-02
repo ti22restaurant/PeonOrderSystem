@@ -26,3 +26,11 @@ MENU_ITEM_NON_CONFIRMED_COLOR_HEXADECIMAL = '#000000'
 MENU_ITEM_CONFIRMED_COLOR_HEXADECIMAL = '#999999'
 
 SALES_TAX = .10
+
+#==============================================================================
+# This block represents constants that are utilized by the audit dialogs when
+# generating audit files.
+#==============================================================================
+AUDIT_FILE_TYPE = '.xls'
+CLOSING_AUDIT_DEFAULT_NAME = 'closing_audit'
+

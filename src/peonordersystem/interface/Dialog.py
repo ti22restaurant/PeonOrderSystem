@@ -4139,7 +4139,7 @@ class AuditDataSelectionDialog(SelectionDialog):
         name = name.strip()
 
         if '.' in name:
-            name = name.split('.')[0]
+            name = ''
 
         location = self.location_entry.get_text()
         location = location.strip()
@@ -4152,6 +4152,7 @@ class AuditDataSelectionDialog(SelectionDialog):
         elif not name and location:
             self.set_warning_message('Invalid save name or location')
         else:
+            self.set_warning_message('Please wait while the data is compiled')
             super(AuditDataSelectionDialog, self).confirm_button_clicked(
                 start_date, end_date, location, name)
 
@@ -4182,6 +4183,7 @@ class AuditDataSelectionDialog(SelectionDialog):
         if not name == self.DEFAULT_FILE_NAME:
             kwargs['name'] = name
         self.confirm_func(start_date, end_date, **kwargs)
+        self.set_warning_message('DONE!')
 
 
 #==========================================================
