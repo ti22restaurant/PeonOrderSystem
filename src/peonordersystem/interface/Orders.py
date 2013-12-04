@@ -24,7 +24,7 @@ where changes are made that would
 @version: 1.0
 """
 
-from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
+from gi.repository import Gtk # IGNORE:E0611 @UnresolvedImport
 from copy import copy
 
 from src.peonordersystem.standardoperations import tree_view_changed

@@ -10,6 +10,7 @@ them into an xls document that is more human readable.
 from src.peonordersystem.ConfirmationSystem import parse_standardized_file_name
 from src.peonordersystem import CheckOperations
 from src.peonordersystem import path
+from src.peonordersystem.CustomExceptions import InvalidDateRangeError
 from src.peonordersystem.Settings import AUDIT_FILE_TYPE, \
     CLOSING_AUDIT_DEFAULT_NAME
 
@@ -622,6 +623,8 @@ def _get_data(start_date, end_date):
     to values which are lists of MenuItems that represent
     the order specified by the key.
     """
+    _check_dates(start_date, end_date)
+
     data = {}
 
     curr_date = start_date
@@ -645,6 +648,27 @@ def _get_data(start_date, end_date):
         curr_date += datetime.timedelta(days=1)
 
     return data
+
+
+def _check_dates(start_date, end_date):
+    """Checks the given dates to see if
+    they are within the acceptable range.
+
+    @raise InvalidDateRangeError: if
+    start_date > end_date.
+
+    @param start_date: datetime.date
+    object that represents the beginning
+    date of the date range.
+
+    @param end_date: datetime.date object
+    that represents the ending date of
+    the date range.
+
+    @return: None
+    """
+    if start_date > end_date:
+        raise InvalidDateRangeError(start_date, end_date)
 
 
 if __name__ == '__main__':

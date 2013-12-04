@@ -3872,6 +3872,11 @@ class AuditDataSelectionDialog(SelectionDialog):
 
         super(AuditDataSelectionDialog, self).__init__(parent, title)
 
+        buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN,
+                   Gtk.ResponseType.ACCEPT)
+
+        self.file_chooser = Gtk.FileChooserDialog('Save Audit As', self.dialog,
+                              Gtk.FileChooserAction.SELECT_FOLDER,buttons)
     def generate_main_selection_area(self):
         """Generates the main selection area for the
         SelectionDialog.
@@ -3993,7 +3998,7 @@ class AuditDataSelectionDialog(SelectionDialog):
         """
         return Gtk.HBox()
 
-    def location_toggled(self, toggle_button):
+    def location_toggled(self, toggle_button, **kwargs):
         """Toggles the location area to allow the
         user to edit the location that the generated
         audit file will be saved to.
@@ -4004,21 +4009,26 @@ class AuditDataSelectionDialog(SelectionDialog):
         @param toggle_button: Gtk.ToggleButton that
         called this method.
 
+        @param kwargs: dict wildcard catchall that is
+        used to catch keyword parameters that will be
+        used for testing purposes. All keyword parameters
+        will be passed to secondary called methods.
+
         @return: None
         """
         self.set_warning_message('')
         if toggle_button.get_active():
-            URI = self.choose_location()
+            file_path = self.choose_location(**kwargs)
 
-            if URI == self.DEFAULT_FILE_PATH:
+            if file_path == self.DEFAULT_FILE_PATH:
                 toggle_button.set_active(False)
 
-            self.location_entry.set_text(URI)
+            self.location_entry.set_text(file_path)
 
         else:
             self.location_entry.set_text(self.DEFAULT_FILE_PATH)
 
-    def choose_location(self, *args):
+    def choose_location(self, *args, **kwargs):
         """Opens and controls a new dialog window
         that allows the user to select a new path
         for the file to be saved to.
@@ -4026,24 +4036,41 @@ class AuditDataSelectionDialog(SelectionDialog):
         @param args: wildcard catchall used to catch
         the Gtk.Widget that called this method.
 
+        @param kwargs: dict wildcard catchall used to catch
+        test information passed into this method. The
+        current test parameters are as such:
+
+            1. 'file_chooser' = Gtk.FileChooserDialog that
+            is to have information pulled from it.
+
+            2. 'file_chooser_response' = Gtk.ResponseType
+            to be simulated as emitted from the file_chooser.
+
         @return: str representing the directory selected
         by the user. If no choice was made by the user
         then the default file path is returned.
         """
         self.set_warning_message('')
-        buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN,
-                   Gtk.ResponseType.ACCEPT)
 
-        file_chooser = Gtk.FileChooserDialog('Save Audit As', self.dialog,
-                                             Gtk.FileChooserAction.SELECT_FOLDER,
-                                             buttons)
-        response = file_chooser.run()
-        uri = file_chooser.get_uri()
-        file_chooser.destroy()
+        file_chooser = self.file_chooser
+        response = False
+
+        # Test case. Allows for dummy file chooser.
+        if 'file_chooser' in kwargs:
+            file_chooser = kwargs['file_chooser']
+
+        # Test case. Allows for dummy response.
+        if 'file_chooser_response' in kwargs:
+            response = kwargs['file_chooser_response']
+        else:
+            response = file_chooser.run()
+
+        file_path = file_chooser.get_filename()
+        file_chooser.hide()
 
         if response == Gtk.ResponseType.ACCEPT:
 
-            return uri.split('file://')[1]
+            return file_path
 
         else:
             return self.DEFAULT_FILE_PATH
@@ -4086,8 +4113,7 @@ class AuditDataSelectionDialog(SelectionDialog):
         year, month, day = self.selection_calendar.get_date()
 
         start_date = datetime.date(year, month + 1, day)
-        self.from_date_display.set_text('{}/{}/{}'.format(month + 1, day,
-                                                          year))
+        self.from_date_display.set_text(self._get_date_str(start_date))
         self.date_bounds[0] = start_date
 
     def set_end_date(self, *args):
@@ -4108,9 +4134,21 @@ class AuditDataSelectionDialog(SelectionDialog):
         year, month, day = self.selection_calendar.get_date()
 
         end_date = datetime.date(year, month + 1, day)
-        self.until_date_display.set_text('{}/{}/{}'.format(month + 1, day,
-                                                           year))
+        self.until_date_display.set_text(self._get_date_str(end_date))
         self.date_bounds[1] = end_date
+
+    def _get_date_str(self, date):
+        """Gets the str associated with the
+        given date, in the mm/dd/yyyy format.
+
+        @param date: datetime.date object that
+        represents the date to be transfered to
+        a str.
+
+        @return: str representing the date in
+        standard mm/dd/yyyy format.
+        """
+        return '{}/{}/{}'.format(date.month, date.day, date.year)
 
     def set_warning_message(self, message):
         """
@@ -4183,7 +4221,6 @@ class AuditDataSelectionDialog(SelectionDialog):
         if not name == self.DEFAULT_FILE_NAME:
             kwargs['name'] = name
         self.confirm_func(start_date, end_date, **kwargs)
-        self.set_warning_message('DONE!')
 
 
 #==========================================================
