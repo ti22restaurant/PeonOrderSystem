@@ -2420,10 +2420,31 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
         catch all. The first argument is the
         widget that emitted the signal
         """
-        name = self.name_entry.get_text()
-        number = self.number_entry.get_text()
-        if name is not '' and number is not '':
-            t = time.strftime('%X, %A, %m/%y')
+        name = self.name_entry.get_text().strip()
+        number = self.number_entry.get_text().strip()
+
+        non_repeat = True
+
+        itr = self.model.get_iter_first()
+
+        while itr and non_repeat:
+
+            stored_name, stored_number, stored_time = self.model[itr]
+            if stored_name == name and stored_number == number:
+                message_title = 'Invalid name and number selected!'
+                message = '\nYou have selected an invalid name and number ' \
+                          'combination. This current selection is invalid ' \
+                          'because there already exists an order under that ' \
+                          'exact name and number combination. \n\n To continue ' \
+                          'please choose a valid name and number combination!'
+                run_warning_dialog(self.dialog, message_title, message)
+
+                non_repeat = False
+
+            itr = self.model.iter_next(itr)
+
+        if len(name) > 0 and len(number) > 0 and non_repeat:
+            t = time.asctime()
             new_order = (name, number, t)
 
             self.confirm_button_clicked(None, order=new_order)
