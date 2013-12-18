@@ -8,7 +8,8 @@ dialog window present in the dialog module.
 from src.peonordersystem import path
 from src.peonordersystem.interface import Dialog
 
-from test.peonordersystem.standardoperations_test import generate_random_date
+from test.peonordersystem.standardoperations_test import generate_random_date, \
+    MAXIMUM_POTENTIAL_DATE_SHIFT_IN_DAYS
 
 from gi.repository import Gtk # IGNORE:E0611 @UnresolvedImport
 
@@ -179,7 +180,11 @@ class AuditDataSelectionDialogTest(unittest.TestCase):
         #   0   :   1
         #   1   :   2
         #   2   :   3
-        domain_values = [(1, 250), (0, 0), (-250, -1)]
+        domain_values = [
+            (1, MAXIMUM_POTENTIAL_DATE_SHIFT_IN_DAYS),
+            (0, 0),
+            (-1 * MAXIMUM_POTENTIAL_DATE_SHIFT_IN_DAYS, -1)
+        ]
 
         for low, high in domain_values:
 
@@ -243,7 +248,11 @@ class AuditDataSelectionDialogTest(unittest.TestCase):
         #   0       1
         #   1       2
         #   2       3
-        domain_values = [(1, 250), (0, 0), (-250, -1)]
+        domain_values = [
+            (1, MAXIMUM_POTENTIAL_DATE_SHIFT_IN_DAYS),
+            (0, 0),
+            (-1 * MAXIMUM_POTENTIAL_DATE_SHIFT_IN_DAYS, -1)
+        ]
 
         for low, high in domain_values:
 
@@ -434,7 +443,11 @@ class AuditDataSelectionDialogTest(unittest.TestCase):
         # 5. w/ name
         # 6. w/ location and name
 
-        domain_values = (1, 250), (0, 0), (-250, -1)
+        domain_values = (
+            (1, MAXIMUM_POTENTIAL_DATE_SHIFT_IN_DAYS),
+            (0, 0),
+            (-1 * MAXIMUM_POTENTIAL_DATE_SHIFT_IN_DAYS, -1)
+        )
 
         directory_values = (None, None), (None, 'audit'), ('/home/carl-m', None),\
                            ('/home/carl-m', 'audit')
