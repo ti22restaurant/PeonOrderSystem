@@ -145,6 +145,15 @@ class MenuItem(object):
         false otherwise.
         """
         return self.editable and not self._locked
+
+    def is_notification(self):
+        """Checks if the current MenuItem
+        object is a notification item.
+
+        @return: bool representing if the
+        MenuItem is a notification item.
+        """
+        return self.is_comped()
     
     def get_option_choices(self):
         """Gets a copy of the current options choices dict.
@@ -233,6 +242,17 @@ class DiscountItem(MenuItem):
         associated with this DiscountItem.
         """
         return self._notification_message
+
+    def is_notification(self):
+        """Checks if the DiscountItem is
+        a notification item.
+
+        By default always returns true.
+
+        @return: True because all DiscountItems
+        by definition are notification items.
+        """
+        return True
 
 
 class OptionItem(object):
