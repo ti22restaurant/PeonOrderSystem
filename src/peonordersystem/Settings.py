@@ -6,6 +6,9 @@ throughout the PeonOrderSystem project.
 @contact: cjmcgraw@u.washington.edu
 @version: 1.0
 """
+
+SYSTEM_TITLE = 'Fish Cake Factory'
+
 # in milliseconds, 10 minutes default
 RESERVATION_UPDATE_TIME_FRAME = 1000 * 60 * 10
 # in seconds, 12000 sec(20 minutes) default
@@ -31,6 +34,14 @@ SALES_TAX = .10
 # This block represents constants that are utilized by the audit dialogs when
 # generating audit files.
 #==============================================================================
-AUDIT_FILE_TYPE = '.xls'
+AUDIT_FILE_TYPE = '.xlsx'
 CLOSING_AUDIT_DEFAULT_NAME = 'closing_audit'
 
+#==============================================================================
+# This block represents constants that are utilized by the orders area for
+# generating displayed information to the user.
+#==============================================================================
+
+STANDARD_TABLE_NAME = 'TABLE'
+# Expected less than 12 for ease of use.
+NUM_OF_TABLES_TO_DISPLAY = 10
