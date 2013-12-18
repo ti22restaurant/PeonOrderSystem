@@ -106,7 +106,7 @@ class UI(object):
     """
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
-    def __init__(self, title, load_data=None):
+    def __init__(self, title, load_data=None, reservation_data=None):
         """Initializes a new object. Generates the base GUI
         from XML file obtained from Path. Instantiates the
         component objects.
@@ -124,7 +124,8 @@ class UI(object):
         self.builder.set_menu_item_view(self.orders.get_display_view())
         
         # These objects control secondary displays
-        self.reservations = Reservations(self.builder.reservation_window)
+        self.reservations = Reservations(self.builder.reservation_window,
+                                         reservation_data=reservation_data)
         self.upcoming_orders = UpcomingOrders(self.builder.upcoming_orders_window,
                                               load_data=load_data)
         
@@ -625,7 +626,7 @@ class UI(object):
         number = new_reservation[1]
         arrival = new_reservation[2]
 
-        self.reservations.add_reservation(name, number, arrival)
+        return self.reservations.add_reservation(name, number, arrival)
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
