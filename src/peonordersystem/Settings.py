@@ -1,6 +1,8 @@
 """
 Settings module holds constants that are used
-throughout the PeonOrderSystem project.
+throughout the PeonOrderSystem project. These
+constants represent Settings that could potentially
+be adjusted.
 
 @author: Carl McGraw
 @contact: cjmcgraw@u.washington.edu
