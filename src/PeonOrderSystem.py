@@ -15,37 +15,32 @@ the PeonOrderSystem GUI.
 
 from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 
-# Path import unused. Imported to set working directory
-# as the one that PeonOrderSystem object is placed in.
-
-from src.peonordersystem import path  # IGNORE:W0611
 from src.peonordersystem.interface import Editor
 from src.peonordersystem.interface.UI import UI
 from src.peonordersystem import ConfirmationSystem
 from src.peonordersystem import ErrorLogger
 from src.peonordersystem import DataAudit
+from src.peonordersystem.Settings import SYSTEM_TITLE
 
 @ErrorLogger.error_logging
 class PeonOrderSystem(UI):
     """Generates and controls the PeonOrderSystem GUI and
     establishes its functionality.
     """
-    def __init__(self, title='Fish Cake Factory'):
+    def __init__(self, title=SYSTEM_TITLE):
         """Initializes and displays PeonOrderSystem GUI
         
-        @keyword load_data: Keyword argument that accepts a
-        2 tuple representing a dict of lists for the table orders
-        and togo orders respectively. This Keyword argument is
-        only to be used in cases of failure.
-        
         @keyword title: Keyword argument that sets the title
-        of the main GUI window. Default value is 'Fish Cake
-        Factory'
+        of the main GUI window. Default value is title constant
+        given by Settings module.
         """
         ErrorLogger.initializing_fencepost_begin()
-        load_data = ConfirmationSystem.generate_files()
-        print load_data
-        super(PeonOrderSystem, self).__init__(title, load_data=load_data)
+
+        load_data = ConfirmationSystem.unpack_order_data()
+        reservation_data = ConfirmationSystem.unpack_reservations_data()
+
+        super(PeonOrderSystem, self).__init__(title, load_data=load_data,
+                                              reservation_data=reservation_data)
         ErrorLogger.initializing_fencepost_finish()
     
     def order_confirmed(self, priority_order, non_priority_order):
@@ -78,6 +73,29 @@ class PeonOrderSystem(UI):
         """
         order_name, order_list = super(PeonOrderSystem, self).checkout_confirm()
         ConfirmationSystem.checkout_confirmed(order_name, order, order_list)
+
+    def add_reservation_confirmed(self, new_reservation):
+        """Override Method
+
+        Updates the reservation data by passing it to the
+        confirmation system so that it may be serialized and
+        persist.
+
+        @param new_reservation: data representing the
+        reservation.
+
+        @warning: This data is not used. Instead it is
+        expected that the call to the super class will
+        return an instance of the reservation that may
+        be used instead.
+
+        @return: Reservation object that was yielded
+        from the call on super.
+        """
+        reserver = super(PeonOrderSystem, self).add_reservation_confirmed(
+            new_reservation)
+        ConfirmationSystem.add_reservation_to_database(reserver)
+        return reserver
 
     def undo_checkout_order(self, *args):
         """Override Method
@@ -161,7 +179,6 @@ class PeonOrderSystem(UI):
         running this object.
         """
         Gtk.main()
-        ConfirmationSystem.update_notification_data()
 
         message_title = "Do you want to perform a closing audit?"
 
@@ -174,6 +191,7 @@ class PeonOrderSystem(UI):
                    'want to perform the audit?'
 
         if self.run_warning_dialog(message_title, message):
+            ConfirmationSystem.update_database()
             DataAudit.closing_audit()
 
     
