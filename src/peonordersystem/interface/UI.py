@@ -722,7 +722,7 @@ class UI(object):
                 message += '    ' + reservation + '\n'
 
             message += '\n\nOk?'
-            response = run_warning_dialog(message_title, message)
+            response = self.run_warning_dialog(message_title, message)
 
             if response:
                 self.reservations.clear_reservation_notifications()
