@@ -22,8 +22,10 @@ from collections import Counter
 from src.peonordersystem import path
 from src.peonordersystem import MenuItem
 from src.peonordersystem import CheckOperations
-from src.peonordersystem.Settings import TOGO_SEPARATOR, TYPE_SUFFIX_TOGO, \
-    TYPE_SUFFIX_STANDARD_ORDER, TYPE_SUFFIX_CHECKOUT, UNDONE_CHECKOUT_SEPARATOR
+from src.peonordersystem.Settings import (TOGO_SEPARATOR,
+                                          TYPE_SUFFIX_STANDARD_ORDER,
+                                          TYPE_SUFFIX_CHECKOUT,
+                                          UNDONE_CHECKOUT_SEPARATOR)
 
 jsonpickle.set_encoder_options('simplejson', sort_keys=True, indent=4)
 
@@ -111,7 +113,7 @@ def _check_and_create_orders_database(database_directory=ORDERS_DATABASE_PATH):
                '        OrderNotifications_json TEXT, '
                '        OrderItemFrequency_json TEXT,'
                '        OrderType_standard INT,'
-               '        Ordertype_togo INT,'
+               '        OrderType_togo INT,'
                '        OrderData_json TEXT'
                '    );')
 
@@ -186,8 +188,6 @@ def standardize_file_name(order_name, is_checkout=False, set_time=None):
 
     if is_checkout:
         order_name += TYPE_SUFFIX_CHECKOUT
-    elif TOGO_SEPARATOR in order_name:
-        order_name += TYPE_SUFFIX_TOGO
     else:
         order_name += TYPE_SUFFIX_STANDARD_ORDER
 
@@ -264,6 +264,7 @@ def _find_order_name_paths(order_name, directory):
     for each of the values that matched the given order
     name.
     """
+    order_name = order_name.replace(' ', '_')
     p = re.compile('[\[..\]]')
     dirpath, dirnames, filenames = os.walk(directory).next()
 
@@ -271,7 +272,7 @@ def _find_order_name_paths(order_name, directory):
 
     for filename in filenames:
         i = re.search(p, filename).start()
-        curr_order_name = filename[:i].replace('_', ' ')
+        curr_order_name = filename[:i]
 
         if curr_order_name == order_name:
             matching_file_paths.append(directory + '/' + filename)
@@ -324,7 +325,7 @@ def unpack_order_data():
             togo_separator=TOGO_SEPARATOR)
 
         current_order = table_orders
-        if file_type == TYPE_SUFFIX_TOGO:
+        if TOGO_SEPARATOR in order_name:
             current_order = togo_orders
 
         current_order[order_name, order_time] = _load_data(dirpath + '/' + filename)

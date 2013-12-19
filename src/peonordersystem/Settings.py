@@ -67,8 +67,7 @@ NUM_OF_TABLES_TO_DISPLAY = 10
 # to serialize and display data.
 #====================================================================================
 
-TOGO_SEPARATOR = '::@::'
-TYPE_SUFFIX_TOGO = '.' + 'togo'
+TOGO_SEPARATOR = chr(127)
 TYPE_SUFFIX_STANDARD_ORDER = '.' + 'order'
 TYPE_SUFFIX_CHECKOUT = '.' + 'checkout'
 
@@ -77,3 +76,37 @@ TYPE_SUFFIX_CHECKOUT = '.' + 'checkout'
 # conventions.
 #====================================================================================
 UNDONE_CHECKOUT_SEPARATOR = '***UNDONE CHECKOUT***'
+
+#====================================================================================
+# This block contains the schema that are utilized to build the necessary databases.
+#====================================================================================
+
+DATE_DATA_COLS = {'Date': 'NUMERIC',
+                  'DateNumOfOrders_standard': 'INT',
+                  'DateNumOfOrders_togo': 'INT',
+                  'DateSubtotal': 'REAL',
+                  'DateTax': 'REAL',
+                  'DateTotal': 'REAL'}
+
+ORDER_DATA_COLS = {'OrderNumber': 'INT',
+                   'OrderDate': 'NUMERIC',
+                   'OrderName': 'TEXT',
+                   'OrderSubtotal': 'REAL',
+                   'OrderTax': 'REAL',
+                   'OrderTotal': 'REAL',
+                   'OrderHasNotifications': 'INT',
+                   'OrderNotifications_json': 'TEXT',
+                   'OrderItemFrequency_json': 'TEXT',
+                   'OrderType_standard': 'INT',
+                   'OrderType_togo': 'INT',
+                   'OrderData_json': 'TEXT'}
+
+ITEM_DATA_COLS = {'ItemName': 'TEXT',
+                  'ItemDate': 'NUMERIC',
+                  'ItemIsNotification': 'INT',
+                  'ItemData_json': 'TEXT'}
+
+RESERVATIONS_DATA_COLS = {'ReservationName': 'TEXT',
+                          'ReservationTime': 'NUMERIC',
+                          'ReservationNumber': 'TEXT',
+                          'ReservationData_json': 'TEXT'}
