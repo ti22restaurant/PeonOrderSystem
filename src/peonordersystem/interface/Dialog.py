@@ -58,19 +58,19 @@ from src.peonordersystem.MenuItem import MenuItem, DiscountItem
 from src.peonordersystem.MenuItem import OptionItem
 from src.peonordersystem.interface.Orders import Orders
 from src.peonordersystem.Settings import STANDARD_TEXT, STANDARD_TEXT_BOLD,\
-    STANDARD_TEXT_LIGHT
+    STANDARD_TEXT_LIGHT, TOGO_SEPARATOR, UNDONE_CHECKOUT_SEPARATOR
 
 #========================================================
 # This block represents module wide constants that are
 # utilized inside and outside of this module to determine
 # the responses of the classes and other information.
 #========================================================
-
 SPLIT_CHECK_DIALOG_RESPONSE = 99
 PRINT_DIALOG_RESPONSE = SPLIT_CHECK_DIALOG_RESPONSE - 1
 COMP_DIALOG_RESPONSE = PRINT_DIALOG_RESPONSE - 1
 DISCOUNT_DIALOG_RESPONSE = COMP_DIALOG_RESPONSE - 1
 GENERAL_OPTIONS_DIALOG_RESPONSE = DISCOUNT_DIALOG_RESPONSE - 1
+
 
 #=========================================================
 # This block represents windows that form the
@@ -86,8 +86,6 @@ GENERAL_OPTIONS_DIALOG_RESPONSE = DISCOUNT_DIALOG_RESPONSE - 1
 # by their naming convention. Which will be the classes
 # name followed by its super classes.
 #=========================================================
-
-
 class Dialog(object):
     """Abstract Base Class. Provides the base functionality
     for a Dialog window.
@@ -708,7 +706,6 @@ class SelectionDialog(Dialog):
 # their respective super classes will effect these classes
 # as well.
 #=========================================================
-
 class AddReservationsDialog(Dialog):
     """AddReservationsDialog prompts the user with
     a dialog window to insert a new reservation into
@@ -859,358 +856,6 @@ class AddReservationsDialog(Dialog):
         super(AddReservationsDialog, self).cancel_button_clicked()
 
 
-class UndoCheckoutDialog(Dialog):
-    """UndoCheckoutDialog window allows for the user to
-    access previously checked out orders and return them to the
-    main GUI for user interactions.
-
-    @group Dialog: This class is a subclass member of the Dialog
-    group. As such it inherits functionality from the Dialog super
-    class. Any changes in the Dialog class could effect the
-    functionality of this class.
-
-    @var name_entry: Gtk.Entry object that allows for entry of
-    a name to be displayed when the checked out order is undone.
-
-    @var orders: Orders object that allows for displaying and
-    editing the associated MenuItems with an order.
-
-    @var orders_view: Gtk.TreeView object that displays the orders
-    that had previously been checked out.
-
-    @var imported_view: Gtk.TreeView object that displays the imported
-    orders that will be passed back to the UI for user interaction.
-
-    @var confirm_func: Function that will be called upon confirmation.
-    """
-
-    def __init__(self, parent, checkout_information, confirm_func,
-                 title='Undo Checkout Dialog Window'):
-        """Initializes a new UndoCheckoutDialog window that allows
-        the user to retrieve previously checked out orders.
-
-        @param parent: Gtk.Object that this dialog window will be
-        called upon. The parent will be frozen and unable to be
-        interacted with until this dialog window is confirmed or
-        canceled.
-
-        @param checkout_information: dict where each key is a str
-        representing an order previously checked out, and each
-        value is a list of MenuItem objects that is associated
-        with the order that was checked out.
-
-        @param confirm_func: function that is to be called upon
-        confirmation of this dialog window.
-
-        @param title: str representing the
-        """
-        load_data = (checkout_information, {})
-
-        self.name_entry = None
-        self.orders = Orders(load_data=load_data, num_of_tables=0)
-
-        self.orders_view = None
-        self.imported_view = None
-
-        self.update_label = None
-
-        self.confirm_func = confirm_func
-
-        super(UndoCheckoutDialog, self).__init__(parent, title, default_size=(700, 800))
-
-    def generate_layout(self):
-        """Override Method.
-
-        Generates the main layout to
-        be displayed in the content area.
-
-        @return: Gtk.Container that contains
-        the widget that should be displayed in
-        the content area of the dialog window.
-        """
-        main_box = Gtk.HBox()
-
-        order_selection_area = self.generate_order_selection()
-        main_box.pack_start(order_selection_area, True, True, 5.0)
-
-        properties_area = self.generate_properties_area()
-        main_box.pack_start(properties_area, True, True, 5.0)
-
-        return main_box
-
-    def generate_order_selection(self):
-        """Generates the order selection
-        area. This area is expected to be
-        able to generate the names of each
-        previously checked out order that
-        can be imported.
-
-        @return: Gtk.Container that holds the
-        widgets to be displayed in this area.
-        """
-        order_frame = Gtk.Frame(label='Order Selection')
-        main_box = Gtk.VBox()
-
-        order_display_area = self.generate_order_display()
-        main_box.pack_start(order_display_area, True, True, 0.0)
-
-        order_frame.add(main_box)
-        return order_frame
-
-    def generate_order_display(self):
-        """Generates the order display
-        that will display the orders
-        for selection.
-
-        @return: Gtk.Container that
-        contains the order display
-        widgets.
-        """
-        scroll_window = Gtk.ScrolledWindow()
-        model = Gtk.ListStore(str, str)
-
-        self.orders_view = Gtk.TreeView(model)
-        selection = self.orders_view.get_selection()
-        selection.set_select_function(self.update_item_view, None)
-
-        for key in self.orders.get_orders_list():
-            model.append((key[0], key[1]))
-
-        rend = Gtk.CellRendererText()
-        col1 = Gtk.TreeViewColumn('Order Name', rend, text=0)
-        self.orders_view.append_column(col1)
-        col2 = Gtk.TreeViewColumn('Checkout Time', rend, text=1)
-        self.orders_view.append_column(col2)
-
-        scroll_window.add(self.orders_view)
-
-        return scroll_window
-
-    def generate_properties_area(self):
-        """Generates the properties area
-        that displays the property options
-        associated with a selected order.
-        These options include displaying
-        menu items of the associated order
-        and the import buttons.
-
-        @return: Gtk.Container that holds
-        the widgets that will be used to
-        interact with the properties of
-        a specific order.
-        """
-        main_box = Gtk.VBox()
-
-        properties_frame = Gtk.Frame(label='Order Properties')
-        properties_box = Gtk.VBox()
-
-        menu_items_display = self.generate_menu_items_display()
-        properties_box.pack_start(menu_items_display, True, True, 0.0)
-
-        self.update_label = Gtk.Label()
-        properties_box.pack_start(self.update_label, False, False, 0.0)
-        properties_sub_box = Gtk.HBox()
-        properties_sub_box.pack_start(Gtk.Label("Name: "), False, False, 0.0)
-        self.name_entry = Gtk.Entry()
-        properties_sub_box.pack_start(self.name_entry, True, True, 5.0)
-        properties_box.pack_start(properties_sub_box, False, False, 5.0)
-
-        button_box = Gtk.HBox()
-
-        button_box.pack_start(Gtk.Fixed(), True, True, 5.0)
-
-        import_button = Gtk.Button("Import Selected Order")
-        import_button.connect('clicked', self.import_selected_order)
-        import_button.set_size_request(200, 50)
-        import_button.set_can_focus(False)
-        button_box.pack_start(import_button, False, False, 0.0)
-
-        properties_box.pack_start(button_box, False, False, 0.0)
-
-        properties_frame.add(properties_box)
-
-        main_box.pack_start(properties_frame, True, True, 5.0)
-
-        import_frame = Gtk.Frame(label="Imported Orders")
-        import_box = Gtk.VBox()
-
-        scroll_window = Gtk.ScrolledWindow()
-        self.imported_view = Gtk.TreeView(Gtk.ListStore(str, str, str))
-        scroll_window.add(self.imported_view)
-
-        import_box.pack_start(scroll_window, True, True, 0.0)
-
-        rend = Gtk.CellRendererText()
-        col1 = Gtk.TreeViewColumn('Order Name', rend, text=0)
-        self.imported_view.append_column(col1)
-
-        col2 = Gtk.TreeViewColumn('Import As', rend, text=2)
-        self.imported_view.append_column(col2)
-
-        button_box = Gtk.HBox()
-        button_box.pack_start(Gtk.Fixed(), True, True, 0.0)
-        remove_button = Gtk.Button("Remove Import")
-        remove_button.set_size_request(200, 50)
-        remove_button.set_can_focus(False)
-        remove_button.connect('clicked', self.remove_selected_import)
-        button_box.pack_start(remove_button, False, False, 0.0)
-
-        import_box.pack_start(button_box, False, False, 0.0)
-
-        import_frame.add(import_box)
-
-        main_box.pack_start(import_frame, True, True, 0.0)
-
-        return main_box
-
-    def generate_menu_items_display(self):
-        """Generates the area that displays
-        the menu items of a selected order.
-
-        @return: Gtk.Container that holds
-        the widgets associated with displaying
-        the menu items from a selected order.
-        """
-        scroll_window = Gtk.ScrolledWindow()
-
-        display_view = self.orders.get_display_view()
-        scroll_window.add(display_view)
-
-        return scroll_window
-
-    def update_item_view(self, selection, model, path, is_selected, user_data=None):
-        """Updates the item view when an order is selected.
-
-        @param selection: Gtk.Selection that represents the selection
-        associated with the Gtk.TreeView that displays the order.
-
-        @param model: Gtk.TreeModel that represents the model that
-        displays the order data.
-
-        @param path: Gtk.TreePath that points to the row that was
-        selected.
-
-        @param is_selected: bool value that represents if the
-        row was selected prior to the selection that initiated
-        this method.
-
-        @keyword user_data: keyword argument that allows for
-        user data to be passed in. Default is None
-
-        @return: bool value representing if the selection is
-        ok to be made. Default always returns True.
-        """
-        if not is_selected:
-            itr = model.get_iter(path)
-            path_data = model[itr]
-            key = path_data[0], path_data[1]
-            self.orders.set_current_table(key)
-
-            self.update_label.set_text("")
-
-        return True
-
-    def confirm_button_clicked(self, *args):
-        """Override Method.
-
-        Confirms the dialog window.
-
-        @param args: wildcard catchall that is
-        used to catch the Gtk.Widget that called
-        this method.
-
-        @return: None
-        """
-        self.confirm_data(self, *args)
-        super(UndoCheckoutDialog, self).confirm_button_clicked()
-
-    def cancel_button_clicked(self, *args):
-        """Override Method.
-
-        Cancels the dialog window.
-
-        @param args: wildcard catchall that
-        is used to catch the Gtk.Widget that
-        called this method.
-
-        @return: None
-        """
-        super(UndoCheckoutDialog, self).cancel_button_clicked()
-
-    def confirm_data(self, *args):
-        """Confirms the information
-        stored in the dialog window
-        and calls the confirm function
-        with the parameter of a dict,
-        representing the orders to be
-        added.
-
-        @param args: wildcard catchall that
-        is used to catch additional parameters
-
-        @return: None
-        """
-        import_list = {}
-
-        for row in self.imported_view.get_model():
-            import_name = row[2], "***Undone Checkout***", row[1]
-            import_stored_name = row[0], row[1]
-
-            self.orders.set_current_table(import_stored_name)
-            import_info = self.orders.get_current_order()
-
-            import_list[import_name] = import_info
-
-        self.confirm_func(import_list)
-
-    def import_selected_order(self, *args):
-        """Adds the currently selected order to
-        the import list that will be sent to the
-        confirm function.
-
-        @param args: wildcard catchall that catches
-        the Gtk.Widget that called this method.
-
-        @return: None
-        """
-        name = self.name_entry.get_text()
-        self.name_entry.set_text("")
-        name = name.strip()
-
-        if len(name) > 0:
-            curr_name, curr_order = self.orders.get_order_info()
-
-            model = self.imported_view.get_model()
-            has_entry = False
-
-            for row in model:
-                if row[2] == name:
-                    has_entry = True
-
-            if not has_entry:
-                model.append((curr_name[0], curr_name[1], name))
-                self.update_label.set_markup('')
-            else:
-                self.update_label.set_markup('<span foreground="red">Name already '
-                                             'present!</span>')
-
-    def remove_selected_import(self, *args):
-        """Removes the selected import from the
-        import list that will be sent to the confirm
-        function.
-
-        @param args: wildcard catchall that catches
-        the Gtk.Widget that called this method.
-
-        @return: None
-        """
-        selection = self.imported_view.get_selection()
-        model, itr = selection.get_selected()
-
-        if itr:
-            model.remove(itr)
-
-
 #=========================================================
 # This block represents windows that form the specific
 # classes that can be instantiated. All classes in this
@@ -1224,7 +869,6 @@ class UndoCheckoutDialog(Dialog):
 # changes in their respective super classes will effect
 # these classes as well.
 #=========================================================
-
 class OptionEntryDialog(EntryDialog):
     """ Creates, displays and runs an EntryDialog for editing the given
     MenuItem's selected options. Possible button choices for options are
@@ -1653,6 +1297,7 @@ class StarEntryDialog(EntryDialog):
         """
         return super(StarEntryDialog, self).cancel_data()
 
+
 #=========================================================
 # This block represents windows that form the specific
 # classes that can be instantiated. All classes in this
@@ -1668,8 +1313,6 @@ class StarEntryDialog(EntryDialog):
 # Any changes in their respective super classes will
 # effect these classes as well.
 #=========================================================
-
-
 class OrderConfirmationDialog(ConfirmationDialog):
     """OrderConfirmationDialog displays a dialog window
     prompting the user to either confirm the other and
@@ -2280,6 +1923,7 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
         of counter spaces that are to be accounted for. Default value
         is 4.
         """
+        print name_list
         self.NUM_OF_EXTERIOR_TABLES = int(num_of_exterior_tables)
         self.NUM_OF_COUNTER_SPACES = int(num_of_counter_spaces)
 
@@ -2404,11 +2048,12 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
         @return: Gtk.TreeModel representing the
         store for the display.
         """
-        self.model = Gtk.ListStore(str, str, str)
+        self.model = Gtk.ListStore(str, str, str, float)
 
         if self.name_list is not None:
-            for each in self.name_list:
-                self.model.append(each)
+            for name, number, order_time in self.name_list:
+                self.model.append((name, number, time.ctime(order_time),
+                                   order_time))
 
         return self.model
 
@@ -2429,7 +2074,7 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
 
         while itr and non_repeat:
 
-            stored_name, stored_number, stored_time = self.model[itr]
+            stored_name, stored_number, _, _ = self.model[itr]
             if stored_name == name and stored_number == number:
                 message_title = 'Invalid name and number selected!'
                 message = '\nYou have selected an invalid name and number ' \
@@ -2444,7 +2089,7 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
             itr = self.model.iter_next(itr)
 
         if len(name) > 0 and len(number) > 0 and non_repeat:
-            t = time.asctime()
+            t = time.time()
             new_order = (name, number, t)
 
             self.confirm_button_clicked(None, order=new_order)
@@ -2478,7 +2123,9 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
         model, itr = tree_selection.get_selected()
 
         if itr:
-            return model.get(itr, 0, 1, 2)
+            name, number, display_time, real_time = model[itr]
+
+            return name, number, real_time
 
         return None
 
@@ -2526,6 +2173,378 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
 # is the "secondary_selection_area" and a right most box
 # that is the "item_selection_area".
 #=========================================================
+class UndoCheckoutSelectionDialog(SelectionDialog):
+    """UndoCheckoutSelectionDialog window allows for the user to
+    access previously checked out orders and return them to the
+    main GUI for user interactions.
+
+    @group SelectionDialog: This class is a subclass member of the
+    SelectionDialog group. As such it inherits functionality
+    from the SelectionDialog super class. Any changes in the
+    SelectionDialog class could effect the functionality
+    of this class.
+
+    @var name_entry: Gtk.Entry object that allows for entry of
+    a name to be displayed when the checked out order is undone.
+
+    @var orders: Orders object that allows for displaying and
+    editing the associated MenuItems with an order.
+
+    @var orders_view: Gtk.TreeView object that displays the orders
+    that had previously been checked out.
+
+    @var imported_view: Gtk.TreeView object that displays the imported
+    orders that will be passed back to the UI for user interaction.
+
+    @var confirm_func: Function that will be called upon confirmation.
+    """
+
+    def __init__(self, parent, checkout_information, confirm_func,
+                 title='Undo Checkout Dialog Window'):
+        """Initializes a new UndoCheckoutDialog window that allows
+        the user to retrieve previously checked out orders.
+
+        @param parent: Gtk.Object that this dialog window will be
+        called upon. The parent will be frozen and unable to be
+        interacted with until this dialog window is confirmed or
+        canceled.
+
+        @param checkout_information: dict where each key is a str
+        representing an order previously checked out, and each
+        value is a list of MenuItem objects that is associated
+        with the order that was checked out.
+
+        @param confirm_func: function that is to be called upon
+        confirmation of this dialog window.
+
+        @param title: str representing the
+        """
+        self.checkout_information = checkout_information
+        self.orders = Orders(num_of_tables=0)
+
+        self.name_entry = None
+        self.orders_view = None
+        self.imported_view = None
+
+        self.update_label = None
+
+        self.confirm_func = confirm_func
+
+        super(UndoCheckoutSelectionDialog, self).__init__(parent, title,
+                                                          default_size=(950, 800))
+
+    def generate_main_selection_area(self):
+        """Override Method.
+
+        Generates the main selection area of
+        the SelectionDialog window.
+
+        @return: Gtk.Container holding the widgets
+        that are to be displayed.
+        """
+        frame = Gtk.Frame(label='Order Selection')
+        main_box = Gtk.VBox()
+
+        self.orders_view = self._generate_orders_view()
+        self.orders_view.set_model(self._generate_orders_model())
+        main_box.pack_start(self.orders_view, True, True, 5.0)
+
+        frame.add(main_box)
+        return frame
+
+    def _generate_orders_view(self, cols=('Order Name:',
+                                          'Original Checkout Date/Time')):
+        """ Private Method.
+
+        Generates the orders view column to be
+        displayed in the main selection area.
+
+        @keyword cols: tuple representing the
+        column names that are to be displayed.
+        Each name will be expected to have a
+        matching data set under the model that
+        maps directly to the index of which the
+        column is displayed.
+
+        @return: Gtk.TreeView that represents
+        the column to be displayed in the main
+        selection area.
+        """
+        orders_view = Gtk.TreeView()
+
+        selection = orders_view.get_selection()
+        selection.set_select_function(self._orders_selection_function, None)
+
+        index = 0
+
+        for col in cols:
+            rend = Gtk.CellRendererText()
+            column = Gtk.TreeViewColumn(col, rend, text=index)
+            orders_view.append_column(column)
+
+            index += 1
+
+        return orders_view
+
+    def _generate_orders_model(self):
+        """ Private method.
+
+        Generates the orders view model that will store the
+        data for displaying. Populates the model with the
+        data from the checkout information.
+
+        @return: Gtk.TreeModel that represents the model
+        that will be displaying the data.
+        """
+        orders_model = Gtk.ListStore(str, str, float)
+
+        for order_name, order_time in self.checkout_information:
+
+            orders_model.append((order_name, time.ctime(order_time),
+                                order_time))
+
+        return orders_model
+
+    def _orders_selection_function(self, selection, model, path, is_selected,
+                                   user_data):
+        """ Private Method.
+
+        Method called when an order has been selected.
+
+        @param selection: Gtk.TreeSelection that represents
+        the selection that called this method.
+
+        @param model: Gtk.TreeModel that represents the model
+        that is displaying the data associated with this
+        selection.
+
+        @param path: Gtk.TreePath pointing to the row in the
+        view that was selected.
+
+        @param is_selected: Bool value representing if the
+        column was selected prior to this current selection
+        attempt.
+
+        @param user_data: None by default.
+
+        @return: bool representing if this column is ok to
+        be accepted. True if ok, False if not.
+        """
+        itr = model.get_iter(path)
+
+        name, time_str, time_float = model[itr]
+        key = name, '', time_float
+
+        self.orders.select_togo_order(key)
+        return True
+
+    def generate_secondary_selection_area(self):
+        """Override Method.
+
+        Generates the secondary selection area.
+        By default this area is left blank for
+        the UndoCheckoutSelectionDialog.
+
+        @return: Gtk.Container that is empty by
+        default.
+        """
+        return Gtk.VBox()
+
+    def generate_properties_selection_area(self):
+        """Override Method.
+
+        Generates the properties selection area
+        of the dialog window.
+
+        @return: Gtk.Container that holds the widgets
+        that are used to display the properties selection
+        area.
+        """
+        frame = Gtk.Frame(label='Properties Selection Area')
+        main_box = Gtk.VBox()
+
+        sub_box = Gtk.VBox()
+        sub_box.pack_start(self._generate_items_display_area(), True, True, 5.0)
+        main_box.pack_start(sub_box, True, True, 5.0)
+
+        sub_box = Gtk.VBox()
+        sub_box.pack_start(self._generate_import_area(), True, True, 5.0)
+        main_box.pack_start(sub_box, True, True, 5.0)
+
+        frame.add(main_box)
+        return frame
+
+    def _generate_items_display_area(self):
+        """Private Method.
+
+        Generates the item displays area. This
+        utilizes the previously generated self.orders.
+
+        Populates the orders with every key from
+        checkout information that was available. Each
+        key is stored in the orders as a togo order with
+        the key of (str, '', float) representing the
+        items name, a blank string and then finally the
+        float representing the time since epoch in seconds.
+
+        @return: Gtk.Container that holds the display
+        view for self.orders widget.
+        """
+        main_box = Gtk.VBox()
+        main_box.pack_start(self.orders.get_display_view(), True, True, 5.0)
+
+        for order_name, order_time in self.checkout_information:
+            data = self.checkout_information[order_name, order_time]
+            key = (order_name, '', order_time)
+
+            self.orders.load_new_order(key, data)
+
+        return main_box
+
+    def _generate_import_area(self):
+        """ Private Method.
+
+        Generates the import area to be displayed.
+
+        @return: Gtk.Container holding all the
+        Gtk.Widgets that will be displayed in
+        the import area.
+        """
+        main_box = Gtk.VBox()
+
+        sub_box = Gtk.HBox()
+        self.name_entry = Gtk.Entry()
+        sub_box.pack_start(self.name_entry, True, True, 5.0)
+
+        import_button = Gtk.Button('Import As')
+        import_button.connect('clicked', self._add_import_data)
+        sub_box.pack_start(import_button, False, False, 5.0)
+
+        main_box.pack_start(sub_box, False, False, 5.0)
+
+        self.imported_view = self._generate_imported_view()
+        self.imported_view.set_model(self._generate_imported_model())
+
+        main_box.pack_start(self.imported_view, True, True, 5.0)
+
+        sub_box = Gtk.HBox()
+        remove_button = Gtk.Button('Remove Import')
+        remove_button.connect('clicked', self._remove_import_data)
+        sub_box.pack_start(remove_button, False, False, 5.0)
+        sub_box.pack_start(Gtk.Fixed(), True, True, 5.0)
+
+        main_box.pack_start(sub_box, False, False, 5.0)
+
+        return main_box
+
+    def _generate_imported_view(self, cols=('Checkout Name', 'Undo as')):
+        """ Private Method.
+
+        Generates the imported view that will be used
+        to display which imports will be made.
+
+        @param cols: tuple representing the names that
+        the columns should be displayed with. Each column
+        will have the index of the tuple used as the index
+        through which it will get its data from the model.
+
+        @return: Gtk.TreeView that is used to display the
+        imported data.
+        """
+        imported_view = Gtk.TreeView()
+
+        index = 0
+
+        for col in cols:
+            rend = Gtk.CellRendererText()
+            column = Gtk.TreeViewColumn(col, rend, text=index)
+            imported_view.append_column(column)
+
+            index += 1
+
+        return imported_view
+
+    def _generate_imported_model(self):
+        """Private Method.
+
+        Generates the imported view model that is used
+        to store the data to be displayed that represents
+        the checkout orders name, the name it will be imported
+        as and the time that is associated with it.
+
+        @param types: tuple representing the data types the
+        model should display. By default is (str, str, float)
+        that represents the original name, the new name and
+        the number of seconds since the epoch when it was
+        ordered.
+
+        @return: Gtk.TreeModel that stores the data to be
+        displayed in the imported view.
+        """
+        tree_model = Gtk.ListStore(str, str, float)
+        return tree_model
+
+    def _add_import_data(self, *args):
+        """ Adds the currently selected import from the
+        orders view to the imported view under the
+        name specified by the name entry.
+
+        @param args: wildcard catchall used to
+        catch the Gtk.Widget that called this method.
+
+        @return: None
+        """
+        selection = self.orders_view.get_selection()
+        model, itr = selection.get_selected()
+
+        name = self.name_entry.get_text().strip()
+        self.name_entry.set_text('')
+
+        if itr and name:
+            order_name, _, order_time = model[itr]
+
+            imported_model = self.imported_view.get_model()
+            imported_model.append((order_name, name, order_time))
+
+    def _remove_import_data(self, *args):
+        """Removes the currently selected import
+        from the imported list.
+
+        @param args: wildcard catchall that catches
+        the Gtk.Widget that called this method.
+
+        @return: None
+        """
+        selection = self.imported_view.get_selection()
+        model, itr = selection.get_selected()
+
+        if itr:
+            model.remove(itr)
+
+    def confirm_data(self, *args):
+        """Override Method.
+
+        Confirms the selected data and sends
+        it to the confirm function.
+
+        @param args: wildcard catchall that
+        represents the Gtk.Widget that called
+        this method.
+
+        @return: None
+        """
+        imported_data = {}
+        undone_checkout_keys = []
+
+        for order_name, name, order_time in self.imported_view.get_model():
+            order_data = self.checkout_information[order_name, order_time]
+
+            imported_data[name, UNDONE_CHECKOUT_SEPARATOR, time.time()] = order_data
+
+            undone_checkout_keys.append((order_name, order_time, name))
+
+        self.confirm_func(imported_data, undone_checkout_keys)
+
 
 class UpdateMenuItemsDialog(SelectionDialog):
     """UpdateMenuItemDialog interacts with the user
@@ -3898,6 +3917,7 @@ class AuditDataSelectionDialog(SelectionDialog):
 
         self.file_chooser = Gtk.FileChooserDialog('Save Audit As', self.dialog,
                               Gtk.FileChooserAction.SELECT_FOLDER,buttons)
+
     def generate_main_selection_area(self):
         """Generates the main selection area for the
         SelectionDialog.
@@ -4262,8 +4282,6 @@ class AuditDataSelectionDialog(SelectionDialog):
 # super classes will change the functionality of these
 # classes.
 #==========================================================
-
-
 class SplitCheckConfirmationDialog(CheckoutConfirmationDialog):
     """SplitCheckConfirmationDialog object displays the given
     information allowing the user to split any MenuItem object
@@ -5546,7 +5564,6 @@ class DiscountCheckoutConfirmationDialog(CheckoutConfirmationDialog):
 # to inherit from these classes, as their inheritance tree
 # could cause eventual problems by being excessively robust.
 #==========================================================
-
 class UpdateTemplateDiscountCheckoutConfirmationDialog(DiscountCheckoutConfirmationDialog):
     """UpdateTemplateDiscountCheckoutConfirmationDialog is a window
     that allows the user to update the templates stored and accessed by the
@@ -6161,7 +6178,6 @@ class UpdateGeneralOptionSelectionDialog(GeneralOptionSelectionDialog):
 # utilized in classes throughout this module to perform
 # general operations that are useful.
 #===========================================================
-
 def get_row_refs(model, paths):
     """Gets a list of Gtk.TreeRowReferences
     associated with the given paths.

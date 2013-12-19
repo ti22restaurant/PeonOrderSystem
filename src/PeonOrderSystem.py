@@ -97,6 +97,34 @@ class PeonOrderSystem(UI):
         ConfirmationSystem.add_reservation_to_database(reserver)
         return reserver
 
+    def add_checkout_order(self, imported_order, undone_checkouts):
+        """Override Method.
+
+        Passes the given data to the ConfirmationSystem to
+        remove any stored keys that have been undone.
+
+        @param imported_order: dict of tuple
+        (str, str, time.struct_time) that represent
+        the order name, filler info, and time of undo.
+        These keys are mapped to values of list of MenuItem
+        objects that represent the associated undone order.
+
+        @param checkout_keys: list of tuples that
+        (str, str, time.struct_time) that represent
+        the order_name, the new order name, and
+        the order time of the orders that were undone.
+
+        @return: None
+        """
+        super(PeonOrderSystem, self).add_checkout_order(imported_order,
+                                                        undone_checkouts)
+
+        for original_name, original_time, new_name in undone_checkouts:
+            ConfirmationSystem.undo_checkout_file(original_name, original_time,
+                                                  new_name)
+
+
+
     def undo_checkout_order(self, *args):
         """Override Method
 

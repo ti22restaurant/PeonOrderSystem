@@ -30,12 +30,11 @@ from copy import copy
 from src.peonordersystem.standardoperations import tree_view_changed
 from src.peonordersystem.MenuItem import MenuItem
 from src.peonordersystem import ErrorLogger
-from src.peonordersystem.ConfirmationSystem import TOGO_SEPARATOR
 from src.peonordersystem import CustomExceptions
 from src.peonordersystem.Settings import STANDARD_TEXT, STANDARD_TEXT_BOLD, \
     STANDARD_TEXT_LIGHT, MENU_ITEM_CONFIRMED_COLOR_HEXADECIMAL, \
     MENU_ITEM_NON_CONFIRMED_COLOR_HEXADECIMAL, STANDARD_TABLE_NAME, \
-    NUM_OF_TABLES_TO_DISPLAY
+    NUM_OF_TABLES_TO_DISPLAY, TOGO_SEPARATOR
 
 import time
 
@@ -584,7 +583,6 @@ class Orders(object):
         if load_data:
             self._load_data(load_data)
 
-
     def get_display_view(self):
         """ Gets the display_view associated
         with the Orders object.
@@ -615,9 +613,8 @@ class Orders(object):
         for name, order_time in togo_orders:
             order_data = togo_orders[name, order_time]
 
-            curr_time = time.asctime(order_time)
             togo_name, number = name.split(TOGO_SEPARATOR)
-            key = (togo_name, number, curr_time)
+            key = (togo_name, number, order_time)
 
             self.load_new_order(key, togo_orders[name, order_time],
                                 is_table=False)
@@ -781,7 +778,7 @@ class Orders(object):
             itr = self._get_selected_iter()
             self.current_order.update_item(itr)
     
-    def get_order_info(self):
+    def get_order_info(self, togo_separator=TOGO_SEPARATOR):
         """Gets the label associated with the
         current table.
         
@@ -793,7 +790,7 @@ class Orders(object):
         key, order_list = self._get_order_key()
         
         if key in self.to_go_dict:
-            key = key[0] + TOGO_SEPARATOR + key[1]
+            key = key[0] + togo_separator + key[1]
         
         return key, self.get_current_order()
 

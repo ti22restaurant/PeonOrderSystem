@@ -392,8 +392,8 @@ class Editor(object):
         was confirmed or not. True representing if the dialog
         was confirmed. False if it was cancelled.
         """
-        dialog = Dialog.UndoCheckoutDialog(self.parent, checked_out_data,
-                                           confirm_function)
+        dialog = Dialog.UndoCheckoutSelectionDialog(self.parent, checked_out_data,
+                                                    confirm_function)
         response = dialog.run_dialog()
 
         return response == ACCEPT_RESPONSE

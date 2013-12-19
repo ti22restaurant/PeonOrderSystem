@@ -22,6 +22,8 @@ from collections import Counter
 from src.peonordersystem import path
 from src.peonordersystem import MenuItem
 from src.peonordersystem import CheckOperations
+from src.peonordersystem.Settings import TOGO_SEPARATOR, TYPE_SUFFIX_TOGO, \
+    TYPE_SUFFIX_STANDARD_ORDER, TYPE_SUFFIX_CHECKOUT, UNDONE_CHECKOUT_SEPARATOR
 
 jsonpickle.set_encoder_options('simplejson', sort_keys=True, indent=4)
 
@@ -44,11 +46,6 @@ for dirs in (DIRECTORY, CHECKOUT_DIRECTORY, CONFIRMED_DIRECTORY,
              path.SYSTEM_DATABASE_PATH):
     if not os.path.exists(dirs):
         os.mkdir(dirs)
-
-TOGO_SEPARATOR = '::@::'
-TYPE_SUFFIX_TOGO = '.togo'
-TYPE_SUFFIX_ORDER = '.order'
-TYPE_SUFFIX_CHECKOUT = '.checkout'
 
 # Expected to be surrounded by '[', ']' brackets, with any
 # valid format for time.strftime function.
@@ -183,16 +180,16 @@ def standardize_file_name(order_name, is_checkout=False, set_time=None):
     order_name = p.sub('_', order_name)
 
     if not set_time:
-        set_time = time.localtime()
+        set_time = time.time()
 
-    order_name += time.strftime(STANDARD_TIME_FORMAT, set_time)
+    order_name += time.strftime(STANDARD_TIME_FORMAT, time.localtime(set_time))
 
     if is_checkout:
         order_name += TYPE_SUFFIX_CHECKOUT
     elif TOGO_SEPARATOR in order_name:
         order_name += TYPE_SUFFIX_TOGO
     else:
-        order_name += TYPE_SUFFIX_ORDER
+        order_name += TYPE_SUFFIX_STANDARD_ORDER
 
     return order_name
 
@@ -214,8 +211,8 @@ def parse_standardized_file_name(file_name, togo_separator=' '):
     (time, order_name, type) respectively as three
     str types.
 
-        order_time = time.struct_time which
-        represents the time of the order.
+        order_time = float as number of seconds
+        since epoch.
 
         order_name = standard order name
 
@@ -229,7 +226,7 @@ def parse_standardized_file_name(file_name, togo_separator=' '):
 
     i = p.search(order_name).start()
     file_time = order_name[i:]
-    file_time = time.strptime(file_time, STANDARD_TIME_FORMAT)
+    file_time = time.mktime(time.strptime(file_time, STANDARD_TIME_FORMAT))
 
     order_name = order_name[:i]
     order_name = order_name.replace(TOGO_SEPARATOR, togo_separator)
@@ -250,8 +247,9 @@ def _load_data(file_path):
     @return: object that represents the
     json data that was serialized.
     """
-    data = open(file_path).read()
-    return jsonpickle.decode(data)
+    with open(file_path) as file_data:
+        data = file_data.read()
+        return jsonpickle.decode(data)
 
 
 def _find_order_name_paths(order_name, directory):
@@ -281,7 +279,7 @@ def _find_order_name_paths(order_name, directory):
     return matching_file_paths
 
 
-def get_current_order_number(database=ORDERS_DATABASE):
+def _get_current_order_number(database=ORDERS_DATABASE):
     """Gets the current order number that is being
     counted. Pulls this data from the database. This
     function may be slow.
@@ -293,7 +291,7 @@ def get_current_order_number(database=ORDERS_DATABASE):
     counter = db.execute("SELECT COUNT (*) FROM OrderData")
     return counter.next()[0]
 
-current_order_counter = get_current_order_number()
+current_order_counter = _get_current_order_number()
 
 
 #====================================================================================
@@ -309,7 +307,7 @@ def unpack_order_data():
 
     @return: 2-tuple of dict types. Each
     dict maps a 2-tuple key to a list of MenuItem
-    objects. Each key is a (str, time.struct_time),
+    objects. Each key is a (str, float),
     that represents the name and time of order
     respectively. They are mapped to values that
     represent the order as a list of MenuItem
@@ -339,9 +337,9 @@ def unpack_checkout_data():
     in the checkout area, of the date
     designated
 
-    @return: dict of key (str, time.struct_time)
+    @return: dict of key (str, float)
     representing the order's associated name and
-    the time.struct_time it was checked out at.
+    the number of seconds since epoch it was checked out at.
     This is mapped to a list of MenuItem objects
     that represents the order.
     """
@@ -352,7 +350,8 @@ def unpack_checkout_data():
 
     for filename in filenames:
 
-        order_time, order_name, file_type = parse_standardized_file_name(filename)
+        order_time, order_name, file_type = parse_standardized_file_name(filename,
+                                                     togo_separator=TOGO_SEPARATOR)
         checkout_data[order_name, order_time] = _load_data(dirpath + '/' + filename)
 
     return checkout_data
@@ -362,18 +361,15 @@ def unpack_reservations_data(date=None):
     """Unpacks the reservation data on
     the specified date.
 
-    @keyword date: time.struct_time that
-    represents the date that is to have
-    its reservation data unpacked. By
-    default is None, which yields
-    any reservations for today
+    @keyword date: float representing the
+    number of seconds since unix epoch.
 
     @return: list of 3-tuple representing
     the name, str and struct_time that
     represents the reservations.
     """
     if not date:
-        date = time.localtime()
+        date = time.time()
 
     db = RESERVATIONS_DATABASE.cursor()
 
@@ -385,7 +381,7 @@ def unpack_reservations_data(date=None):
                       '     date(ReservationTime) = date(?, "unixepoch", "localtime") '
                       'AND  '
                       '     ReservationTime > datetime(?, "unixepoch", "localtime");',
-                      ([time.mktime(date) for x in range(2)]))
+                      ([date for x in range(2)]))
     RESERVATIONS_DATABASE.commit()
 
     return [jsonpickle.decode(value[0]) for value in data]
@@ -442,6 +438,32 @@ def _save_order_file_data(order_data, file_path):
         data_file.write(order_data_str)
 
 
+def undo_checkout_file(original_checkout_name, checkout_time, new_name):
+    """Undoes the given original checkout by removing the data
+    from the CHECKOUT_DIRECTORY and storing it in the CONFIRMED_DIRECTORY.
+
+    @param original_checkout_name: str representing the original name
+    of the order.
+
+    @param checkout_time: float representing the number of seconds
+    since epoch that this original order was checked out at.
+
+    @param new_name: str representing the new name that the
+    order should be stored as.
+
+    @return: list of MenuItem objects that represents the
+    checkout data that was undone.
+    """
+    new_name += TOGO_SEPARATOR + UNDONE_CHECKOUT_SEPARATOR
+    standardized_name = standardize_file_name(original_checkout_name,
+                                              is_checkout=True,
+                                              set_time=checkout_time)
+
+    data = _remove_order_file(standardized_name, directory=CHECKOUT_DIRECTORY)
+    _save_confirmed_order(data, new_name, CONFIRMED_DIRECTORY)
+    return data
+
+
 #====================================================================================
 # This block represents functions that are used to modify and update the databases
 # that store the orders information beyond the standard single day period.
@@ -479,8 +501,8 @@ def update_database():
 def _update_date_table(date, database=ORDERS_DATABASE):
     """Updates the date database to store the respective data given.
 
-    @param date: time.struct_time object representing the current
-    local time and date. Expected values as follows:
+    @param date: float that represents the number of seconds
+    since the epoch.
 
     @keyword database: sqlite3.connection that represents
     the database that has been opened. By default this
@@ -500,6 +522,7 @@ def _update_date_table(date, database=ORDERS_DATABASE):
 
     @return: None
     """
+    date = time.localtime(date)
     data = [sqlite3.datetime.date(date[0], date[1], date[2]) for x in range(6)]
     db = database.cursor()
     db.execute('INSERT OR REPLACE INTO DateData '
@@ -533,8 +556,8 @@ def _update_order_table(date, order_data, order_name, database=ORDERS_DATABASE):
     """Updates the order data table that displays information
     on orders made.
 
-    @param date: time.struct_time object that stores the
-    date and time that this order was checked out.
+    @param date: float representing the number of seconds
+    since the epoch.
 
     @param order_data: list of MenuItem objects that
     represents this order that was checked out.
@@ -586,7 +609,7 @@ def _update_order_table(date, order_data, order_name, database=ORDERS_DATABASE):
         yield menu_item
 
     data = (current_order_counter,
-            time.mktime(date),
+            date,
             order_name,
             subtotal,
             tax,
@@ -620,9 +643,8 @@ def _update_order_table(date, order_data, order_name, database=ORDERS_DATABASE):
 def _update_item_table(date, menu_item, database=ORDERS_DATABASE):
     """Updates the item table data that stores item data.
 
-    @param date: time.struct_time object that stores the
-    date and time that the given menu_item should be stored
-    under.
+    @param date: float representing the number of seconds
+    since the epoch.
 
     @param menu_item: MenuItem object that represents a
     MenuItem that is to be stored in the table.
@@ -639,7 +661,7 @@ def _update_item_table(date, menu_item, database=ORDERS_DATABASE):
     @return: None
     """
     data = (menu_item.get_name(),
-            time.mktime(date),
+            date,
             jsonpickle.encode(menu_item),
             menu_item.is_notification())
 
@@ -712,9 +734,31 @@ def order_confirmed(order_name, priority_list,
     for file_paths in _find_order_name_paths(order_name, CONFIRMED_DIRECTORY):
         os.remove(file_paths)
 
-    order_name = standardize_file_name(order_name)
-    _save_order_file_data(full_order, CONFIRMED_DIRECTORY + '/' + order_name)
+    _save_confirmed_order(full_order, order_name, directory=CONFIRMED_DIRECTORY)
     print_order(order_name, non_priority_list, priority_list=priority_list)
+
+
+def _save_confirmed_order(order_data, order_name, directory=CONFIRMED_DIRECTORY,
+                           set_time=None):
+    """Standardizes the file name and saves it in the
+    given directory.
+
+    @param order_data: list of MenuItem objects that represents the order.
+
+    @param order_name: str representing the order. This string will be
+    standardized and shouldn't contain the following characters:
+
+        [ ] / .
+
+    @keyword directory: str representing the path to the
+    directory that the file will be saved to.
+
+    @return: None
+    """
+    is_checkout = directory == CHECKOUT_DIRECTORY
+    order_name = standardize_file_name(order_name, is_checkout=is_checkout,
+                                       set_time=set_time)
+    _save_order_file_data(order_data, directory + '/' + order_name)
 
 
 def checkout_confirmed(order_name, orders, order_list):
@@ -739,8 +783,7 @@ def checkout_confirmed(order_name, orders, order_list):
     for file_paths in _find_order_name_paths(order_name, CONFIRMED_DIRECTORY):
         os.remove(file_paths)
 
-    order_name = standardize_file_name(order_name, is_checkout=True)
-    _save_order_file_data(order_list, CHECKOUT_DIRECTORY + '/' + order_name)
+    _save_confirmed_order(order_list, order_name, directory=CHECKOUT_DIRECTORY)
     print_check(order_name, order_list)
 
 

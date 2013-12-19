@@ -165,7 +165,7 @@ class UpcomingOrderStore(Gtk.ListStore):
         if not curr_time:
             display_time = time.asctime()
         else:
-            display_time = time.asctime(curr_time)
+            display_time = time.ctime(curr_time)
         
         order_name = order_name.replace('_', ' ')
         order = (order_name, display_time, priority_info)

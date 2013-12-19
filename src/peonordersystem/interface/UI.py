@@ -534,8 +534,8 @@ class UI(object):
         checked out orders and return them to the UI.
 
         @param checkout_data: dict where each key is represented
-        by a tuple of (str, str) -> (name, date), and each value
-        mapped is a list of MenuItem objects.
+        by a tuple of (str, time.struct_time) -> (name, date),
+        and each value mapped is a list of MenuItem objects.
 
         @return: None
         """
@@ -663,7 +663,7 @@ class UI(object):
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
-    def add_checkout_order(self, imported_order):
+    def add_checkout_order(self, imported_order, checkout_keys):
         """Adds the given, previously checked out
         order to the current orders displayed.
 
@@ -671,6 +671,10 @@ class UI(object):
         objects that represents an order that
         was previously checked out and is being
         imported.
+
+        @param checkout_keys: list of tuples that
+        represents the keys that are associated
+        with each stored checkout order.
 
         @return: None
         """
