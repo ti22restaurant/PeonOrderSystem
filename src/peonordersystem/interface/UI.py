@@ -106,7 +106,7 @@ class UI(object):
     """
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
-    def __init__(self, title, load_data=None):
+    def __init__(self, title, load_data=None, reservation_data=None):
         """Initializes a new object. Generates the base GUI
         from XML file obtained from Path. Instantiates the
         component objects.
@@ -124,7 +124,8 @@ class UI(object):
         self.builder.set_menu_item_view(self.orders.get_display_view())
         
         # These objects control secondary displays
-        self.reservations = Reservations(self.builder.reservation_window)
+        self.reservations = Reservations(self.builder.reservation_window,
+                                         reservation_data=reservation_data)
         self.upcoming_orders = UpcomingOrders(self.builder.upcoming_orders_window,
                                               load_data=load_data)
         
@@ -219,9 +220,9 @@ class UI(object):
         for selected widget 
         """
         self.update_status('Removing selected reservation...')
-        name, number, arrival_time = self.reservations.remove_selected_reservation()
-        self.update_status('Removed reservation for {} at {}'.format(name,
-                                                                     arrival_time))
+        reserver = self.reservations.remove_selected_reservation()
+        self.update_status('Removed reservation for '
+                           '{} at {}'.format(reserver.name,reserver._arrival_time))
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
@@ -533,8 +534,8 @@ class UI(object):
         checked out orders and return them to the UI.
 
         @param checkout_data: dict where each key is represented
-        by a tuple of (str, str) -> (name, date), and each value
-        mapped is a list of MenuItem objects.
+        by a tuple of (str, time.struct_time) -> (name, date),
+        and each value mapped is a list of MenuItem objects.
 
         @return: None
         """
@@ -625,7 +626,7 @@ class UI(object):
         number = new_reservation[1]
         arrival = new_reservation[2]
 
-        self.reservations.add_reservation(name, number, arrival)
+        return self.reservations.add_reservation(name, number, arrival)
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
@@ -662,7 +663,7 @@ class UI(object):
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
-    def add_checkout_order(self, imported_order):
+    def add_checkout_order(self, imported_order, checkout_keys):
         """Adds the given, previously checked out
         order to the current orders displayed.
 
@@ -670,6 +671,10 @@ class UI(object):
         objects that represents an order that
         was previously checked out and is being
         imported.
+
+        @param checkout_keys: list of tuples that
+        represents the keys that are associated
+        with each stored checkout order.
 
         @return: None
         """
@@ -721,7 +726,7 @@ class UI(object):
                 message += '    ' + reservation + '\n'
 
             message += '\n\nOk?'
-            response = run_warning_dialog(message_title, message)
+            response = self.run_warning_dialog(message_title, message)
 
             if response:
                 self.reservations.clear_reservation_notifications()

@@ -17,9 +17,8 @@ group.
 @version: 1.0
 '''
 
+from datetime import datetime
 from gi.repository import Gtk
-
-import time
 
 from src.peonordersystem import ErrorLogger
 from src.peonordersystem.standardoperations import tree_view_changed
@@ -144,7 +143,7 @@ class UpcomingOrderStore(Gtk.ListStore):
         super(UpcomingOrderStore, self).remove(itr)
         return name
 
-    def append(self, order_name, priority_info):
+    def append(self, order_name, priority_info, curr_time=None):
         """Appends the given order_name, and current_order
         to the UpcomingOrderStore.
         
@@ -155,13 +154,19 @@ class UpcomingOrderStore(Gtk.ListStore):
         list of selected MenuItems that represent the
         priority order associated with this order. None if
         there were no items.
+
+        @keyword curr_time: datetime object that represents
+        the current time for the upcoming order.
         
         @return: Gtk.TreeIter pointing at the added item
         """
-        curr_time = time.asctime()
+        if not curr_time:
+            curr_time = datetime.now()
+
+        display_time = curr_time.ctime()
         
         order_name = order_name.replace('_', ' ')
-        order = (order_name, curr_time, priority_info)
+        order = (order_name, display_time, priority_info)
         
         return super(UpcomingOrderStore, self).append(order)
 
@@ -242,7 +247,7 @@ class UpcomingOrders(object):
         @param parent: Gtk.Container subclass that will be holding the
         generated treeview.
         
-        @param load_data: 2-tuple of dicts that repersent the given
+        @param load_data: 2-tuple of dicts that represents the given
         saved orders. First entry is table orders, second entry is
         togo orders.
         """
@@ -271,8 +276,10 @@ class UpcomingOrders(object):
         the dict of the misc orders
         """
         for order in load_data:
-            for key, value in order.items():
-                self.add_order(key, value)
+            for order_name, order_time in order:
+
+                order_data = order[order_name, order_time]
+                self.add_order(order_name, order_data, curr_time=order_time)
 
     def _get_selected_iter(self):
         """Private method.
@@ -294,7 +301,8 @@ class UpcomingOrders(object):
 
         return itr
 
-    def add_order(self, order_name, current_order, priority_order=[]):
+    def add_order(self, order_name, current_order, priority_order=[],
+                  curr_time=None):
         """Adds the given order to the UpcomingOrders
         display and stores it under the given order_name
         
@@ -308,14 +316,15 @@ class UpcomingOrders(object):
         @keyword priority_order: list of MenuItem objects that
         represent the priority order associated with the
         current order. By default this value is an empty list.
+
+        @keyword curr_time: datetime that represents the time
+        that the order was placed at.
         """
         order_name = order_name.replace(TOGO_SEPARATOR, ' ')
-        priority_info = ''
 
-        for menu_item in priority_order:
-            priority_info += menu_item.get_name() + ', '
+        priority_info = [menu_item.get_name() for menu_item in priority_order]
 
-        itr = self.model.append(order_name, priority_info[:-2])
+        itr = self.model.append(order_name, str(priority_info)[1:-1], curr_time)
         self.tree_view.select_iter(itr)
     
     def remove_selected_order(self):

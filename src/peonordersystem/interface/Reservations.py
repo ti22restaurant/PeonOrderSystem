@@ -38,14 +38,18 @@ members:
 @version: 1.0
 """
 
-from gi.repository import Gtk, GObject  # IGNORE:E0611 @UnresolvedImport
-from src.peonordersystem.standardoperations import tree_view_changed
-from src.peonordersystem.Settings import RESERVATION_UPDATE_TIME_FRAME, \
-    RESERVATION_NOTIFICATION_TIME_MAX, RESERVATION_NOTIFICATION_TIME_MIN
-from src.peonordersystem.CustomExceptions import NoSuchSelectionError,\
-    InvalidReservationError
+from datetime import datetime
 
-import time
+from gi.repository import Gtk, GObject  # IGNORE:E0611 @UnresolvedImport
+
+from src.peonordersystem.standardoperations import tree_view_changed
+
+from src.peonordersystem.Settings import (RESERVATION_UPDATE_TIME_FRAME,
+                                          RESERVATION_NOTIFICATION_TIME_MAX,
+                                          RESERVATION_NOTIFICATION_TIME_MIN)
+
+from src.peonordersystem.CustomExceptions import (NoSuchSelectionError,
+                                                  InvalidReservationError)
 
 
 class Reserver(object):
@@ -89,17 +93,11 @@ class Reserver(object):
         @raise ValueError: If the given time is
         in the past
         """
-        self._curr_time = time.time()
+        self._curr_time = datetime.now()
         
         if self._curr_time > arrival_time:
-            raise ValueError('Reserver class expected ' +
-                             'an arrival time parameter that ' +
-                             'was set in the future, and generated ' +
-                             "from python's import time function, such " +
-                             'that it is a number representing the ' +
-                             'number of seconds from the epoch. The value ' +
-                             'you gave was ' + str(arrival_time) + ' which is ' +
-                             'before the current time of ' + str(self._curr_time))
+            raise ValueError('Reserver expects reservation time to be '
+                             'before current time.')
         
         self.name = name
         self.number = number
@@ -109,20 +107,19 @@ class Reserver(object):
         """Gets the current arrival time in
         number of seconds since epoch.
 
-        @return: time.struct_time representing
-        when the arrival is expected.
+        @return: datetime object that represents
+        the arrival time of this reservation.
         """
-        return time.localtime(self._arrival_time)
+        return self._arrival_time
 
     def get_time_until_arrival(self):
         """Gets the number of second until the
         expected reservations arrival.
 
-        @return: float representing the number
-        of seconds until the arrival of the
-        expected reservation.
+        @return: timedelta that represents the
+        length of time until arrival.
         """
-        curr_time = time.time()
+        curr_time = datetime.now()
         return self._arrival_time - curr_time
     
     def get_arrival_time_str(self):
@@ -133,8 +130,7 @@ class Reserver(object):
         times "Hours:Mins, weekday, mth/yr' as
         the format.
         """
-        t = time.localtime(self._arrival_time)
-        return time.strftime('%H:%M %a, %m/%y', t)
+        return self._arrival_time.ctime()
         
     def get_eta(self):
         """Gets the expected time of arrival as a number
@@ -146,10 +142,11 @@ class Reserver(object):
         100.0 for right now or already occurred.
         """
         arrival_time = self._arrival_time
-        curr_time = time.time()
+        curr_time = datetime.now()
         
         if arrival_time >= curr_time:
-            return (curr_time - self._curr_time) / (arrival_time - self._curr_time) * 100
+            return (((curr_time - self._curr_time).total_seconds()) /
+                    ((arrival_time - self._curr_time).total_seconds())) * 100
         return 100.0
     
     def __cmp__(self, other):
@@ -161,13 +158,10 @@ class Reserver(object):
         @param other: Reserver object that is being
         compared to this one.
         
-        @return: int which represents the relation to
-        the other Reserver. Negative if the other
-        object is greater than this one. Positive if
-        the other object is less than, and zero if they
-        are equal.
+        @return: int representing the total number
+        of seconds between the two orders.
         """
-        return int(self._arrival_time - other._arrival_time)
+        return (self._arrival_time - other._arrival_time).total_seconds()
     
     def __repr__(self):
         return str(self.__dict__)
@@ -210,9 +204,8 @@ class ReservationTreeView(Gtk.TreeView):
         selection = self.get_selection()
         selection.select_iter(itr)
     
-    def generate_columns(self,
-                        col_names=['Name', 'Number',
-                                    'ArrivalTime', 'Estimated Arrival']):
+    def generate_columns(self, col_names=['Name', 'Number',
+        'ArrivalTime', 'Estimated Arrival']):
         """Generates the columns for the display. At default
         names for each column are obtained from keyword.
         
@@ -288,7 +281,7 @@ class ReservationStore(Gtk.ListStore):
         self._timeout_id = GObject.timeout_add(RESERVATION_UPDATE_TIME_FRAME,
                                                self._on_timeout, None)
     
-    def add_reservation(self, name, number, arrival_time):
+    def add_reservation(self, reserver):
         """Adds the given information as a new Reserver
         on model to be displayed.
         
@@ -305,8 +298,6 @@ class ReservationStore(Gtk.ListStore):
         and Reserver containing the data that is pointed
         to.
         """
-        reserver = Reserver(name, number, arrival_time)
-        
         # find insertion
         index = self._insertion_index(reserver, self._reservation_list)
 
@@ -483,7 +474,7 @@ class Reservations(object):
     @var model: ReservationStore object that represents
     the model to store the data.
     """
-    def __init__(self, parent):
+    def __init__(self, parent, reservation_data):
         """Intializes a new Reservations object that
         displays and controls data.
         
@@ -496,6 +487,9 @@ class Reservations(object):
         
         self.tree_view.set_model(self.model)
         self.tree_view.show_all()
+
+        for reserver in reservation_data:
+            self.model.add_reservation(reserver)
 
     def _get_selected_iter(self):
         """Private Method.
@@ -536,15 +530,12 @@ class Reservations(object):
         @return: 3-tuple of str type that represent the
         added name, number, and arrival time respectively
         """
-        if type(name) != str or type(number) != str or type(arrival_time) != float:
-            message = 'Expected values for name, number, and arrival_time' +\
-                      'name -> {}\nnumber -> {}\narrival_time -> {}'.format(name, number,
-                                                                            arrival_time)
-            raise InvalidReservationError(message)
+        reserver = Reserver(name, number, arrival_time)
 
-        itr, reserver = self.model.add_reservation(name, number, arrival_time)
+        itr, _ = self.model.add_reservation(reserver)
         self.tree_view.select_iter(itr)
-        return reserver.name, reserver.number, reserver.get_arrival_time_str()
+
+        return reserver
 
     def get_reservation_notifications(self):
         """Gets a list representing the current
@@ -584,7 +575,7 @@ class Reservations(object):
         """
         itr = self._get_selected_iter()
         reserver = self.model.remove_selected(itr)
-        return reserver.name, reserver.number, reserver.get_arrival_time_str()
+        return reserver
     
     def __repr__(self):
         """Gets a string representation of the
