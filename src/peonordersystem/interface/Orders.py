@@ -36,8 +36,6 @@ from src.peonordersystem.Settings import STANDARD_TEXT, STANDARD_TEXT_BOLD, \
     MENU_ITEM_NON_CONFIRMED_COLOR_HEXADECIMAL, STANDARD_TABLE_NAME, \
     NUM_OF_TABLES_TO_DISPLAY, TOGO_SEPARATOR
 
-import time
-
 
 class OrderTreeView(Gtk.TreeView):
     """OrderTreeView object that creates

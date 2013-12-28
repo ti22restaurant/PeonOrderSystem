@@ -8,6 +8,9 @@ be adjusted.
 @contact: cjmcgraw@u.washington.edu
 @version: 1.0
 """
+import re
+import string
+from datetime import datetime, timedelta
 
 SYSTEM_TITLE = 'Fish Cake Factory'
 
@@ -16,17 +19,17 @@ SYSTEM_TITLE = 'Fish Cake Factory'
 # Reserver objects.
 #====================================================================================
 
-# in milliseconds, 10 minutes default
+# in milliseconds, 10 seconds by default
 RESERVATION_UPDATE_TIME_FRAME = 1000 * 10
-# in seconds, 12000 sec(20 minutes) default
-RESERVATION_NOTIFICATION_TIME_MAX = RESERVATION_UPDATE_TIME_FRAME / 1000 * \
-                                      2.0 - 1.0
+# default is 10 minutes
+RESERVATION_NOTIFICATION_TIME_MAX = \
+    timedelta(minutes=RESERVATION_UPDATE_TIME_FRAME / 1000)
 # in seconds, 0 seconds
-RESERVATION_NOTIFICATION_TIME_MIN = 0.0
+RESERVATION_NOTIFICATION_TIME_MIN = timedelta(seconds=0.0)
 
 # notification time frame as str
 RESERVATION_NOTIFICATION_TIME_FRAME_STR = \
-    str(round(RESERVATION_NOTIFICATION_TIME_MAX / 60)) + ' minutes'
+    str(round(RESERVATION_UPDATE_TIME_FRAME / 1000)) + ' minutes'
 
 #====================================================================================
 # This block represents constants used for MenuItem objects and the displaying of
@@ -66,10 +69,32 @@ NUM_OF_TABLES_TO_DISPLAY = 10
 # This block represents constants that are utilized in the ConfirmationSystem module
 # to serialize and display data.
 #====================================================================================
-
 TOGO_SEPARATOR = chr(127)
-TYPE_SUFFIX_STANDARD_ORDER = '.' + 'order'
-TYPE_SUFFIX_CHECKOUT = '.' + 'checkout'
+FILE_TYPE_SEPARATOR = '.'
+
+TYPE_SUFFIX_STANDARD_ORDER = FILE_TYPE_SEPARATOR + 'order'
+TYPE_SUFFIX_CHECKOUT = FILE_TYPE_SEPARATOR + 'checkout'
+
+FILENAME_PATTERN = re.compile('^(?P<order_name>.*)\[(?P<order_datetime>.*)\](?P<file_type>.*)')
+FILENAME_TEMPLATE = '{order_name}[{order_datetime}]{file_type}'
+
+#BLACKLIST REQUIRES THE FOLLOWING CHARACTERS BY DEFAULT
+# '\', '[', ']', '.'
+FILENAME_BLACKLIST_CHARS = {r'[': chr(1),
+                            r']': chr(2),
+                            '\\': chr(3),
+                            '/': chr(4),
+                            ' ': chr(5),
+                            '\n': chr(6),
+                            FILE_TYPE_SEPARATOR: chr(7)}
+
+TRANSLATION_FROM_CHARS_TO_BLACKLIST_CHARS = string.maketrans(
+    ''.join(FILENAME_BLACKLIST_CHARS.keys()),
+    ''.join(FILENAME_BLACKLIST_CHARS.values()))
+
+TRANSLATION_FROM_BLACKLIST_CHARS_TO_CHARS = string.maketrans(
+    ''.join(FILENAME_BLACKLIST_CHARS.values()),
+    ''.join(FILENAME_BLACKLIST_CHARS.keys()))
 
 #====================================================================================
 # This block represents constants that are used in Dialog windows and for naming
@@ -101,7 +126,8 @@ ORDER_DATA_COLS = {'OrderNumber': 'INT',
                    'OrderType_togo': 'INT',
                    'OrderData_json': 'TEXT'}
 
-ITEM_DATA_COLS = {'ItemName': 'TEXT',
+ITEM_DATA_COLS = {'OrderNumber': 'INT',
+                  'ItemName': 'TEXT',
                   'ItemDate': 'NUMERIC',
                   'ItemIsNotification': 'INT',
                   'ItemData_json': 'TEXT'}
@@ -110,3 +136,17 @@ RESERVATIONS_DATA_COLS = {'ReservationName': 'TEXT',
                           'ReservationTime': 'NUMERIC',
                           'ReservationNumber': 'TEXT',
                           'ReservationData_json': 'TEXT'}
+
+#====================================================================================
+# This block represents constants that are utilized in accordance with time
+#====================================================================================
+CTIME_STR = "%a %b %d %H:%M:%S %Y"
+
+SQLITE_DATE_TIME_FORMAT_STR = '%Y-%m-%d %H:%M:%S'
+SQLITE_DATE_FORMAT_STR = '%Y-%m-%d'
+
+# Based on utilizing stftime, which piggy backs on the time module. Therefore
+# times are invalid before or beyond the unix epoch.
+MAX_DATETIME = datetime(2038, 1, 1)
+MIN_DATETIME = datetime.fromtimestamp(0)
+

@@ -43,22 +43,24 @@ subclass members of the Dialog group
 @contact: cjmcgraw@u.washington.edu
 @version: 1.0
 """
-
-from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
-
-from abc import ABCMeta, abstractmethod
-from copy import copy, deepcopy
-import datetime
 import time
 import math
+from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
+from datetime import datetime, timedelta
+from copy import copy, deepcopy
+from abc import ABCMeta, abstractmethod
 
 from src.peonordersystem import CheckOperations
 from src.peonordersystem.standardoperations import tree_view_changed
 from src.peonordersystem.MenuItem import MenuItem, DiscountItem
 from src.peonordersystem.MenuItem import OptionItem
 from src.peonordersystem.interface.Orders import Orders
-from src.peonordersystem.Settings import STANDARD_TEXT, STANDARD_TEXT_BOLD,\
-    STANDARD_TEXT_LIGHT, TOGO_SEPARATOR, UNDONE_CHECKOUT_SEPARATOR
+from src.peonordersystem.Settings import (STANDARD_TEXT,
+                                          STANDARD_TEXT_BOLD,
+                                          STANDARD_TEXT_LIGHT,
+                                          TOGO_SEPARATOR,
+                                          UNDONE_CHECKOUT_SEPARATOR,
+                                          CTIME_STR)
 
 #========================================================
 # This block represents module wide constants that are
@@ -757,8 +759,7 @@ class AddReservationsDialog(Dialog):
         @return: Gtk.VBox that is to be added to the
         content area
         """
-        t = time.localtime()
-        hour = t[3]
+        t = datetime.now()
 
         main_box = Gtk.VBox()
 
@@ -780,7 +781,7 @@ class AddReservationsDialog(Dialog):
 
         self.hour_combo_box = Gtk.ComboBoxText()
 
-        for number in range(hour, 24):
+        for number in range(t.hour, 24):
             self.hour_combo_box.append_text(str(number))
 
         inner_box1.pack_start(self.hour_combo_box, True, True, 5)
@@ -811,26 +812,24 @@ class AddReservationsDialog(Dialog):
         user and returns.
 
         @return: 3-tuple of (str, str, float) representing
-        name, number, and time in secs since epoch, respectively.
+        name, number, and datetime object, respectively.
         """
-        name = self.name_entry.get_text()
-        number = self.number_entry.get_text()
+        name = self.name_entry.get_text().strip()
+        number = self.number_entry.get_text().strip()
 
         hour = int(self.hour_combo_box.get_active_text())
-
         minute = int(self.min_combo_box.get_active_text())
 
-        t = time.localtime()
+        selected_time = datetime.now()
+        selected_time = selected_time.replace(hour=hour, minute=minute, second=0,
+                                              microsecond=0)
 
-        curr_time = t[3] * 60 + t[4]
+        curr_time = datetime.now()
 
-        if hour*60 + minute < curr_time:
-            hour = t[3]
-            minute = t[4] + 15
+        while selected_time < curr_time:
+            selected_time += timedelta(minutes=10)
 
-        t = time.mktime(t[:3] + (hour, minute, 0) + t[6:])
-
-        return name, number, t
+        return name, number, selected_time
 
     def confirm_button_clicked(self, *args):
         """Callback method called when the confirm button has been
@@ -839,10 +838,9 @@ class AddReservationsDialog(Dialog):
         @param *args: wildcard that represents a catch all for the
         widget that emitted the call.
         """
-        has_hour = self.hour_combo_box.get_active() > -1
-        has_min = self.min_combo_box.get_active() > -1
+        name, number, selected_time = self.get_information()
 
-        if has_hour and has_min:
+        if name and number and selected_time:
             super(AddReservationsDialog, self).confirm_button_clicked()
             self.confirm_func(self.get_information())
 
@@ -1923,7 +1921,6 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
         of counter spaces that are to be accounted for. Default value
         is 4.
         """
-        print name_list
         self.NUM_OF_EXTERIOR_TABLES = int(num_of_exterior_tables)
         self.NUM_OF_COUNTER_SPACES = int(num_of_counter_spaces)
 
@@ -2048,12 +2045,11 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
         @return: Gtk.TreeModel representing the
         store for the display.
         """
-        self.model = Gtk.ListStore(str, str, str, float)
+        self.model = Gtk.ListStore(str, str, str)
 
         if self.name_list is not None:
             for name, number, order_time in self.name_list:
-                self.model.append((name, number, time.ctime(order_time),
-                                   order_time))
+                self.model.append((name, number, order_time.ctime()))
 
         return self.model
 
@@ -2089,8 +2085,7 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
             itr = self.model.iter_next(itr)
 
         if len(name) > 0 and len(number) > 0 and non_repeat:
-            t = time.time()
-            new_order = (name, number, t)
+            new_order = (name, number, datetime.now())
 
             self.confirm_button_clicked(None, order=new_order)
 
@@ -2123,9 +2118,9 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
         model, itr = tree_selection.get_selected()
 
         if itr:
-            name, number, display_time, real_time = model[itr]
+            name, number, display_time = model[itr]
 
-            return name, number, real_time
+            return name, number, datetime.strptime(display_time, CTIME_STR)
 
         return None
 
@@ -2296,12 +2291,10 @@ class UndoCheckoutSelectionDialog(SelectionDialog):
         @return: Gtk.TreeModel that represents the model
         that will be displaying the data.
         """
-        orders_model = Gtk.ListStore(str, str, float)
+        orders_model = Gtk.ListStore(str, str)
 
         for order_name, order_time in self.checkout_information:
-
-            orders_model.append((order_name, time.ctime(order_time),
-                                order_time))
+            orders_model.append((order_name, order_time.ctime()))
 
         return orders_model
 
@@ -2332,8 +2325,8 @@ class UndoCheckoutSelectionDialog(SelectionDialog):
         """
         itr = model.get_iter(path)
 
-        name, time_str, time_float = model[itr]
-        key = name, '', time_float
+        name, time_str = model[itr]
+        key = name, '', datetime.strptime(time_str, CTIME_STR)
 
         self.orders.select_togo_order(key)
         return True
@@ -2383,9 +2376,9 @@ class UndoCheckoutSelectionDialog(SelectionDialog):
         Populates the orders with every key from
         checkout information that was available. Each
         key is stored in the orders as a togo order with
-        the key of (str, '', float) representing the
+        the key of (str, '', datetime) representing the
         items name, a blank string and then finally the
-        float representing the time since epoch in seconds.
+        time represented as a datetime object.
 
         @return: Gtk.Container that holds the display
         view for self.orders widget.
@@ -2481,7 +2474,7 @@ class UndoCheckoutSelectionDialog(SelectionDialog):
         @return: Gtk.TreeModel that stores the data to be
         displayed in the imported view.
         """
-        tree_model = Gtk.ListStore(str, str, float)
+        tree_model = Gtk.ListStore(str, str, str)
         return tree_model
 
     def _add_import_data(self, *args):
@@ -2501,10 +2494,12 @@ class UndoCheckoutSelectionDialog(SelectionDialog):
         self.name_entry.set_text('')
 
         if itr and name:
-            order_name, _, order_time = model[itr]
+            order_name, order_time_str = model[itr]
+
+            order_time = datetime.strptime(order_time_str, CTIME_STR)
 
             imported_model = self.imported_view.get_model()
-            imported_model.append((order_name, name, order_time))
+            imported_model.append((order_name, name, order_time_str))
 
     def _remove_import_data(self, *args):
         """Removes the currently selected import
@@ -2536,10 +2531,15 @@ class UndoCheckoutSelectionDialog(SelectionDialog):
         imported_data = {}
         undone_checkout_keys = []
 
-        for order_name, name, order_time in self.imported_view.get_model():
+        for order_name, name, order_time_str in self.imported_view.get_model():
+            order_time = datetime.strptime(order_time_str, CTIME_STR)
             order_data = self.checkout_information[order_name, order_time]
 
-            imported_data[name, UNDONE_CHECKOUT_SEPARATOR, time.time()] = order_data
+            # Normalize the datetime now allow for accuracy between stored
+            # datetimes.
+            curr_time = datetime.strptime(datetime.now().ctime(), CTIME_STR)
+
+            imported_data[name, UNDONE_CHECKOUT_SEPARATOR, curr_time] = order_data
 
             undone_checkout_keys.append((order_name, order_time, name))
 

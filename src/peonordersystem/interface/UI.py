@@ -220,9 +220,9 @@ class UI(object):
         for selected widget 
         """
         self.update_status('Removing selected reservation...')
-        name, number, arrival_time = self.reservations.remove_selected_reservation()
-        self.update_status('Removed reservation for {} at {}'.format(name,
-                                                                     arrival_time))
+        reserver = self.reservations.remove_selected_reservation()
+        self.update_status('Removed reservation for '
+                           '{} at {}'.format(reserver.name,reserver._arrival_time))
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data

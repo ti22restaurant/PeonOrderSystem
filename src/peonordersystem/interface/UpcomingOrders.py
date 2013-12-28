@@ -17,9 +17,8 @@ group.
 @version: 1.0
 '''
 
+from datetime import datetime
 from gi.repository import Gtk
-
-import time
 
 from src.peonordersystem import ErrorLogger
 from src.peonordersystem.standardoperations import tree_view_changed
@@ -156,16 +155,15 @@ class UpcomingOrderStore(Gtk.ListStore):
         priority order associated with this order. None if
         there were no items.
 
-        @keyword curr_time: time.struct_time object that
-        represents the time to be displayed in lieu of
-        the current time.
+        @keyword curr_time: datetime object that represents
+        the current time for the upcoming order.
         
         @return: Gtk.TreeIter pointing at the added item
         """
         if not curr_time:
-            display_time = time.asctime()
-        else:
-            display_time = time.ctime(curr_time)
+            curr_time = datetime.now()
+
+        display_time = curr_time.ctime()
         
         order_name = order_name.replace('_', ' ')
         order = (order_name, display_time, priority_info)
@@ -319,9 +317,8 @@ class UpcomingOrders(object):
         represent the priority order associated with the
         current order. By default this value is an empty list.
 
-        @keyword curr_time: time.struct_time object that represents
-        the time that the order should be displayed as having been
-        confirmed at. Default None
+        @keyword curr_time: datetime that represents the time
+        that the order was placed at.
         """
         order_name = order_name.replace(TOGO_SEPARATOR, ' ')
 

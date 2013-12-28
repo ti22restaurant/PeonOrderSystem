@@ -69,7 +69,7 @@ class MenuItem(object):
         if this menu item has been comped or
         not.
         """
-        return self._price_scalar == 0.0 and self._notification_message
+        return self._price_scalar == 0.0 and bool(self._notification_message)
 
     def get_comp_message(self):
         """Gets the comp message associated
@@ -418,3 +418,10 @@ class OptionItem(object):
             cmp_value = cmp(self._name, other._name)
 
         return cmp_value
+
+
+
+#====================================================================================
+# This block represents tests that may be performed to ensure that a given object
+# is one of the objects defined in this module
+#====================================================================================

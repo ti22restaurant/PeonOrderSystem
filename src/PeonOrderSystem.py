@@ -123,8 +123,6 @@ class PeonOrderSystem(UI):
             ConfirmationSystem.undo_checkout_file(original_name, original_time,
                                                   new_name)
 
-
-
     def undo_checkout_order(self, *args):
         """Override Method
 
@@ -219,7 +217,7 @@ class PeonOrderSystem(UI):
                    'want to perform the audit?'
 
         if self.run_warning_dialog(message_title, message):
-            ConfirmationSystem.update_database()
+            ConfirmationSystem.update_orders_database()
             DataAudit.closing_audit()
 
     
