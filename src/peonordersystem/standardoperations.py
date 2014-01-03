@@ -10,6 +10,7 @@ import os
 import sqlite3
 import datetime
 
+
 def tree_view_changed(selection, tree_view, *args):
     """Callback Function
 
@@ -43,6 +44,62 @@ def tree_view_changed(selection, tree_view, *args):
 # This block represents utility functions that are utilized for checking and
 # raising errors with reference only to external libraries.
 #====================================================================================
+def check_date_range(start_date, end_date):
+    """Checks that the given dates are valid dates
+    and that it represents an actual selectable range.
+
+    @raise ValueError: If the objects are not date
+    objects or they do not represent a range such
+    that start_date <= end_date
+
+    @param start_date: object that represents the
+    start date of the selectable range. Inclusive.
+
+    @param end_date: object that represents the
+    end date of the selectable range. Inclusive.
+
+    @return: bool representing if the dates are
+    both datetime.date objects and start_date
+    <= end_date
+    """
+    check_date(start_date)
+    check_date(end_date)
+    if start_date > end_date:
+        raise ValueError('Given start date: ' + str(start_date) + '\n'
+                         'Given end date: ' + str(end_date) + '\n'
+                         ' Expected start date <= end date.')
+    return True
+
+
+def check_datetime_range(start_date, end_date):
+    """Checks that the given datetimes are valid
+    datetimes and that they represent an actual
+    selectable range.
+
+    @raise ValueError: If the objects are not
+    datetime objects or they do not represent
+    a range such that start_date <= end_date
+
+    @param start_date: object that represents
+    the start datetime of the selectable range.
+    Inclusive
+
+    @param end_date: object that represents the
+    end datetime of the selectable range.
+    Inclusive.
+
+    @return: bool representing if the datetimes
+    are both datetime.datetime objects and
+    start_date <= end_date
+    """
+    check_datetime(start_date)
+    check_datetime(end_date)
+    if start_date > end_date:
+        raise ValueError('Given start datetime: ' + str(start_date) + '\n'
+                         'Given end datetime: ' + str(end_date) + '\n'
+                         ' Expected start date <= end date.')
+
+
 def check_datetime(date_time):
     """Checks that the given object is
     a subclass or instance of the datetime

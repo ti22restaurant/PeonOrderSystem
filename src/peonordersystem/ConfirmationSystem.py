@@ -1,13 +1,15 @@
 """This module provides functionality for the confirmation system.
 Importing the module implicitly builds the necessary directories
-to store in the data folder of the project. This import builds 
-the following files ontop of data if they do not already exist
+to store in the data folder of the project.
 
-'...data/orders/{year}/{month}/{day}/'
+The ConfirmationSystem is built on two principles.
 
-All of this modules functions operate on this as the parent
-directory. Each time this module is invoked and the year, month
-or day changes it instantiates a new directory.
+First a standard human readable confirmation/checkout system
+incase of system failure exists in the orders area of the data.
+
+Second a database that stores the data after it has been used
+and is no longer necessary to have around. This is for later
+usage.
 
 @author: Carl McGraw
 @contact: cjmcgraw@u.washington.edu
@@ -16,14 +18,21 @@ or day changes it instantiates a new directory.
 import os
 import sqlite3
 import jsonpickle
-from collections import Counter
 from datetime import datetime
+from collections import Counter, deque
 from src.peonordersystem import path
 from src.peonordersystem import CheckOperations
+from src.peonordersystem.PackagedData import (PackagedDateData,
+                                              PackagedOrderData,
+                                              PackagedItemData)
+
 from src.peonordersystem.standardoperations import (check_date,
                                                     check_datetime,
+                                                    check_date_range,
+                                                    check_datetime_range,
                                                     check_directory,
                                                     check_database)
+
 from src.peonordersystem.Settings import (TOGO_SEPARATOR,
                                           FILE_TYPE_SEPARATOR,
                                           TYPE_SUFFIX_STANDARD_ORDER,
@@ -286,7 +295,7 @@ def _load_data(file_path):
     json data that was serialized.
     """
     is_parseable_file_name(file_path)
-    with open(file_path) as file_data:
+    with open(file_path, 'r') as file_data:
         data = file_data.read()
         return jsonpickle.decode(data)
 
@@ -317,7 +326,6 @@ def _find_order_name_paths(order_name, directory):
     for filename in filenames:
         try:
             order_time, name, file_type = parse_standardized_file_name(filename)
-
             if name == order_name:
                 matching_file_paths.append(directory + '/' + filename)
 
@@ -605,41 +613,35 @@ def _update_date_table(curr_date, database=ORDERS_DATABASE):
 
     @return: None
     """
-    check_datetime(curr_date)
-    data = [sqlite3.datetime.date(curr_date.year, curr_date.month, curr_date.day)
-            for x in xrange(6)]
+    check_date(curr_date)
+    dates = sqlite3.datetime.date(curr_date.year, curr_date.month, curr_date.day)
     db = database.cursor()
-    db.execute('INSERT OR REPLACE INTO DateData ( Date,'
-               '                                  DateNumOfOrders_standard,'
-               '                                  DateNumOfOrders_togo,'
-               '                                  DateSubtotal,'
-               '                                  DateTax,'
-               '                                  DateTotal'
-               '                                ) '
-               '     VALUES '
-               '         (  ?, '
-               '            (   SELECT SUM(OrderType_standard) '
-               '                FROM OrderData '
-               '                WHERE date(OrderDate)=?'
-               '             ), '
-               '            (   SELECT SUM(OrderType_togo) '
-               '                FROM OrderData '
-               '                WHERE date(OrderDate)=?'
-               '            ), '
-               '            (   SELECT SUM(OrderSubtotal) '
-               '                FROM OrderData '
-               '                WHERE date(OrderDate)=?'
-               '            ), '
-               '            (   SELECT SUM(OrderTax) '
-               '                FROM OrderData '
-               '                WHERE date(OrderDate)=?'
-               '            ), '
-               '            (   SELECT SUM(OrderTotal) '
-               '                FROM OrderData '
-               '                WHERE date(OrderDate)=?'
-               '            )'
-               '         );', tuple(data))
+
+    order_data = db.execute('SELECT '
+                            '       SUM(OrderType_standard),'
+                            '       SUM(OrderType_togo),'
+                            '       SUM(OrderSubtotal),'
+                            '       SUM(OrderTax),'
+                            '       SUM(OrderTotal)'
+                            'FROM '
+                            '       OrderData '
+                            'WHERE '
+                            '       date(OrderDate)=?;', (dates,))
+    data = order_data.fetchall()
+
+    if len(data) > 1 or not(data[0] == (None, None, None, None, None)):
+        for curr_data in data:
+            db.execute('INSERT OR REPLACE INTO DateData (   Date,'
+                       '                                    DateNumOfOrders_standard,'
+                       '                                    DateNumOfOrders_togo,'
+                       '                                    DateSubtotal,'
+                       '                                    DateTax,'
+                       '                                    DateTotal'
+                       '                                ) '
+                       '    VALUES (   ?, ?, ?, ?, ?, ?);', (dates,) + curr_data)
     database.commit()
+
+    return (str(dates), ) + data[0]
 
 
 def _update_order_table(curr_date, order_data, order_name, notification_data,
@@ -803,11 +805,161 @@ def add_reservation_to_database(reserver, database=RESERVATIONS_DATABASE):
 
 
 #====================================================================================
+# This block represents function that are used to retrieve data from the specific
+# databases.
+#====================================================================================
+def get_stored_date_data(start_date, end_date, database=ORDERS_DATABASE):
+    """Gets the stored date data that is stored
+    in the given database between the given datetime
+    ranges, inclusive.
+
+    @param start_date: datetime.datetime object
+    that represents the starting date for the
+    range, inclusive.
+
+    @param end_date: datetime.datetime object
+    that represents the ending date for the
+    range, inclusive.
+
+    @param database: sqlite3.Connection that represents
+    the database that is to have the data pulled from
+    it.
+
+    @return: deque of PackagedDateData classes that
+    holds the data for a row. Each entry is ordered in
+    ascending order according to their date.
+    """
+    check_date_range(start_date, end_date)
+    check_database(database)
+    c = database.cursor()
+
+    dates = (start_date.strftime(SQLITE_DATE_FORMAT_STR),
+             end_date.strftime(SQLITE_DATE_FORMAT_STR))
+
+    row_data = c.execute('SELECT '
+                         '     * '
+                         'FROM '
+                         '     DateData '
+                         'WHERE '
+                         '     Date >= ? '
+                         ' AND '
+                         '     Date <= ? '
+                         'ORDER BY '
+                         '     Date;', dates)
+    return _package_data(row_data.fetchall(), PackagedDateData)
+
+
+def get_stored_order_data(start_date, end_date, database=ORDERS_DATABASE):
+    """Gets the stored order data that is stored
+    in the given database, between the given datetime
+    ranges, inclusive.
+
+    @param start_date: datetime.datetime object
+    that represents the starting datetime for the
+    range.
+
+    @param end_date: datetime.datetime object that
+    represents the ending datetime for the range.
+
+    @keyword database: Testing parameter. Database
+    for the data to be pulled from. By default is
+    ORDERS_DATABASE.
+
+    @return: deque of PackagedOrderData classes
+    that holds the data for a row. Each entry
+    is ordered in ascending order according to
+    their date.
+    """
+    check_datetime_range(start_date, end_date)
+    check_database(database)
+    c = database.cursor()
+
+    dates = (start_date.strftime(SQLITE_DATE_TIME_FORMAT_STR),
+             end_date.strftime(SQLITE_DATE_TIME_FORMAT_STR))
+
+    row_data = c.execute('SELECT '
+                         '      * '
+                         'FROM '
+                         '      OrderData '
+                         'WHERE '
+                         '      OrderDate >= ? '
+                         '  AND '
+                         '      OrderDate <= ? '
+                         'ORDER BY '
+                         '      OrderDate;', dates)
+
+    return _package_data(row_data.fetchall(), PackagedOrderData)
+
+
+def get_stored_item_data(start_date, end_date, database=ORDERS_DATABASE):
+    """Gets the stored item data that is
+    stored in the given database, between
+    the given time range, inclusive.
+
+    @param start_date: datetime.datetime object
+    that represents the starting date for
+    the range of items to be selected. Inclusive.
+
+    @param end_date: datetime.datetime object
+    that represents the ending date for the
+    range of items to be selected. Inclusive.
+
+    @keyword database: Testing keyword argument.
+    Default is ORDERS_DATABASE
+
+    @return: deque of PackagedItemData that represent
+    the rows of data that was pulled from the database.
+    Each entry is ordered in ascending order
+    according to their date.
+    """
+    check_datetime_range(start_date, end_date)
+    check_database(database)
+    c = database.cursor()
+
+    dates = (start_date.strftime(SQLITE_DATE_TIME_FORMAT_STR),
+             end_date.strftime(SQLITE_DATE_TIME_FORMAT_STR))
+
+    row_data = c.execute('SELECT '
+                          '      * '
+                          'FROM '
+                          '      ItemData '
+                          'WHERE '
+                          '      ItemDate >= ? '
+                          '  AND '
+                          '      ItemDate <= ? '
+                          'ORDER BY '
+                          '      ItemDate;', dates)
+
+    return _package_data(row_data.fetchall(), PackagedItemData)
+
+
+def _package_data(row_data, packaged_cls):
+    """Packages the data into its respective
+    packaged class. The data is assumed to be
+    in sorted order.
+
+    @param row_data: list of tuples. Each tuple
+    represents the data associated with a specific
+    row.
+
+    @return: deque of packaged_cls type where each
+    entry represents a row in the row data.
+    """
+    data = deque()
+
+    for row in row_data:
+        data.append(packaged_cls(row))
+
+    return data
+
+
+#====================================================================================
 # This blocks represents functions that are used for temporary storage prior to
 # being processed by the databases. These functions are used to store their
 # respective data in the respective areas.
 #====================================================================================
-def order_confirmed(order_name, priority_list, non_priority_list, full_order):
+def order_confirmed(order_name, priority_list, non_priority_list, full_order,
+                    set_time=None):
     """Confirms an order by dumping the data into a text
     file that will be utilized at a later time. This text
     file will be pickled into json using jsonpickle.
@@ -831,7 +983,7 @@ def order_confirmed(order_name, priority_list, non_priority_list, full_order):
 
     print_order(order_name, non_priority_list, priority_list=priority_list)
     return _save_confirmed_order(full_order, order_name,
-                               directory=CONFIRMED_DIRECTORY)
+                                 directory=CONFIRMED_DIRECTORY, set_time=set_time)
 
 
 def _save_confirmed_order(order_data, order_name, directory=CONFIRMED_DIRECTORY,
@@ -851,14 +1003,14 @@ def _save_confirmed_order(order_data, order_name, directory=CONFIRMED_DIRECTORY,
 
     @return: None
     """
-    is_checkout = directory == CHECKOUT_DIRECTORY
+    is_checkout = (directory == CHECKOUT_DIRECTORY)
     order_name = standardize_file_name(order_name, is_checkout=is_checkout,
                                        set_time=set_time)
     _save_order_file_data(order_data, directory + '/' + order_name)
     return order_name
 
 
-def checkout_confirmed(order_name, orders, order_list):
+def checkout_confirmed(order_name, orders, order_list, set_time=None):
     """Generates the necessary checkout files
     and adds the given order to that file for
     storage. This is utilized later.
@@ -881,8 +1033,8 @@ def checkout_confirmed(order_name, orders, order_list):
         os.remove(file_paths)
 
     print_check(order_name, orders)
-    return _save_confirmed_order(order_list, order_name,
-                                directory=CHECKOUT_DIRECTORY)
+    return _save_confirmed_order(order_list, order_name, directory=CHECKOUT_DIRECTORY,
+                                 set_time=set_time)
 
 
 #====================================================================================
@@ -946,9 +1098,3 @@ def print_check(order_name, order_data, print_data=False):
             print 'Subtotal : ' + str(subtotal)
             print 'Tax : ' + str(CheckOperations.get_total_tax(subtotal))
             print 'Total : ' + str(CheckOperations.get_total(order))
-
-
-
-if __name__ == "__main__":
-    update_orders_database()
-

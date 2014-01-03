@@ -16,13 +16,22 @@ import jsonpickle
 
 jsonpickle.set_encoder_options('simplejson', sort_keys=True, indent=4)
 
-from collections import Counter
+import heapq
+from collections import Counter, deque
 from datetime import date, time, datetime, timedelta
 
 
 from src.peonordersystem import path
-from src.peonordersystem.MenuItem import MenuItem, DiscountItem
 from src.peonordersystem.interface.Reservations import Reserver
+from src.peonordersystem.MenuItem import MenuItem, DiscountItem
+
+from src.peonordersystem.CheckOperations import (get_order_subtotal,
+                                                 get_total_tax,
+                                                 get_total)
+from src.peonordersystem.PackagedData import (PackagedDateData,
+                                              PackagedOrderData,
+                                              PackagedItemData)
+
 from src.peonordersystem.Settings import (TOGO_SEPARATOR,
                                           TYPE_SUFFIX_CHECKOUT,
                                           TYPE_SUFFIX_STANDARD_ORDER,
@@ -36,11 +45,20 @@ from src.peonordersystem.Settings import (TOGO_SEPARATOR,
                                           MAX_DATETIME,
                                           MIN_DATETIME)
 
+from test.TestingFunctions import (save_data_to_file,
+                                   get_data_from_file,
+                                   generate_random_names,
+                                   generate_random_times,
+                                   generate_random_menu_items,
+                                   generate_random_reservations)
 
-TABS = '    '
-POSSIBLE_CHARS = string.printable * 10 + TOGO_SEPARATOR * 6
-NUMBER_OF_ITEMS_TO_GENERATE = 50
+from test.Settings import (POSSIBLE_CHARS,
+                           TABS,
+                           NUMBER_OF_ITEMS_TO_GENERATE,
+                           NUM_OF_CHARS,
+                           GENERATOR_MAX)
 
+NUM_OF_CYCLES = NUMBER_OF_ITEMS_TO_GENERATE
 #====================================================================================
 #====================================================================================
 # Initialization testing for the initialization of the module. This section tests
@@ -94,192 +112,11 @@ assert (os.path.exists(path.SYSTEM_RESERVATIONS_DATABASE))
 
 
 #====================================================================================
-# This area contains module wide functions and constants that are used for testing
-# purposes.
+# This block contains generator functions that are utilized in the module to
+# generate data.
 #====================================================================================
-def _add_data_to_file(order_data, file_path):
-    """Adds the given data to the given file path
-    overwriting any data the currently exists.
-
-    The given data will be written by utilizing
-    jsonpickle to serialize the data.
-
-    @param order_data: data to be serialized.
-
-    @param file_path: str representing the path
-    of the file to be saved to.
-
-    @return: data that was saved to the file,
-    as it would return from decoding it from
-    the file.
-    """
-    data = jsonpickle.encode(order_data)
-    with open(file_path, 'w') as f:
-        f.write(data)
-
-    return jsonpickle.decode(data)
-
-
-def _add_order_data_to_database(order_data, database):
-    """Adds the given order data to the given database.
-
-    @param order_data: values that are generated from
-    the populate_directory_with_random_orders function.
-    Specifically expecting a list of tuples, where each
-    tuple is a (str, str, list of MenuItems) representing
-    the standardized name, file path and order data
-    respectively.
-
-    @param database: sqlite3.connection object that
-    represents the database to have the order added.
-
-    @return: tuple representing the data that was
-    stored in the database. Each entry represents
-    the column
-    """
-    data = []
-
-    for std_name, file_path, file_data in order_data:
-
-        f_time, f_name, f_type = \
-            ConfirmationSystem.parse_standardized_file_name(std_name)
-
-        notification_data = []
-        item_frequency = Counter()
-
-        for menu_item in file_data:
-            item_frequency[menu_item.get_name()] += 1
-
-            if menu_item.is_notification():
-                notification_data.append(menu_item)
-
-        curr_data = ConfirmationSystem._update_order_table(f_time, file_data, f_name,
-                        notification_data, item_frequency, database=database)
-
-        data.append(curr_data)
-
-    return data
-
-
-def _get_data_from_file(file_path):
-    """Gets the data from the file and decodes
-    it using jsonpickle.
-
-    The given file path will be read and any
-    data contained will be decoded and returned.
-
-    @param file_path: file path of file that
-    stores serialized json data.
-
-    @return: decoded data that was stored
-    in the object.
-    """
-    with open(file_path, 'r') as f:
-        return jsonpickle.decode(f.read())
-
-
-def _generate_random_names(from_chars=POSSIBLE_CHARS,
-                           n=NUMBER_OF_ITEMS_TO_GENERATE, num_of_chars=100):
-    """Generates a list of str that represent random
-    names generated from the given character set. The list
-    will be of n length.
-
-    the randomly generated names are guaranteed to be
-    unique and not repeated in the list
-
-    @keyword from_chars: str representing the characters
-    to be chosen from. Default POSSIBLE_CHARS
-
-    @keyword n: int representing the number of names to
-    generate and populate the list with.
-
-    @keyword num_of_chars: int representing the number of
-    characters each name should be in length. Default 100
-
-    @return: list of n length, where each index represents
-    a str that was randomly generated from the given from_chars
-    and is num_of_chars long.
-    """
-    data = set()
-
-    while len(data) < n:
-        name = ''.join(random.sample(from_chars, num_of_chars))
-        data.add(name)
-
-    return list(data)
-
-
-def _generate_random_times(from_time=MIN_DATETIME, until_time=MAX_DATETIME,
-                           num=NUMBER_OF_ITEMS_TO_GENERATE):
-    """Generates random times within the given time frame.
-
-    @param from_time: datetime object that represents
-    the starting time, inclusive.
-
-    @param until_time: datetime object that represents
-    the ending time, inclusive.
-
-    @keyword num: number of datetimes to generate within
-    the given constraints.
-
-    @return: list of datetime objects that all fall
-    within the date range given, that were randomly
-    generated. To the second. milliseconds are automatically
-    set at 0 for all.
-    """
-    max_time_delta = until_time - from_time
-    max_time_seconds = int(max_time_delta.total_seconds())
-    data = []
-
-    for n in xrange(num):
-        time_data = {'seconds': random.randint(1, max(1, max_time_seconds)),
-                     'microseconds': 0}
-
-        time_delta = timedelta(**time_data)
-        data.append(until_time - time_delta)
-    return data
-
-
-def _generate_orders_data(directory):
-    """Generates orders data in the
-    given directory. This function is
-    designed to return identical data to
-    the unpacked functions.
-
-    @warning: Testing method. This method relies
-    heavily on the standardize and parse
-    file name methods. Results from this function
-    may be inaccurate if parse/standardize tests
-    fail.
-
-    @param directory: str representing the
-    directory that the random data is to be added to.
-
-    @return: tuple of dict values. Representing the
-    order data and togo data respectively. Each dict
-    maps keys of (str, datetime) representing the
-    (order_name, order_time) to list of MenuItem objects
-    that represents the order. This output is identical
-    to that generated by the unpack functions in the
-    ConfirmationSystem module.
-    """
-    result = []
-
-    for curr_data in _populate_directory_with_random_orders(directory):
-        data = {}
-        generated_data = curr_data.items()
-        for name, (std_name, file_path, order_data) in generated_data:
-
-            p_time, p_name, p_type = \
-                ConfirmationSystem.parse_standardized_file_name(std_name)
-
-            data[name, p_time] = order_data
-        result.append(data)
-
-    return tuple(result)
-
-
-def _generate_non_parseable_random_files(directory):
+def _populate_non_parseable_random_files(directory, n=NUMBER_OF_ITEMS_TO_GENERATE,
+                                         from_chars=string.ascii_letters + string.digits):
     """Generates random non-parseable files
     in the given directory.
 
@@ -291,10 +128,51 @@ def _generate_non_parseable_random_files(directory):
 
     @return: None
     """
-    from_chars = (string.ascii_letters + string.digits) * 10
+    file_names = []
+    rand_names = generate_random_names(from_chars=from_chars * 10)
 
-    for name in _generate_random_names(from_chars=from_chars):
-        _add_data_to_file(name, directory + '/' + name)
+    for x in xrange(n):
+        name = rand_names.next()
+        save_data_to_file(name, directory + '/' + name)
+
+        heapq.heappush(file_names, name)
+
+    return sorted(file_names)
+
+
+def _populate_orders_data_files(directory, n=NUM_OF_CYCLES,
+                                num_of_chars=NUM_OF_CHARS,
+                                is_checkout=False):
+    """Populates the given directory with n
+    number of random order files.
+
+    @param directory: str representing the directory
+    that the files should be saved to.
+
+    @keyword n: int representing the number of files
+    to generate. Default NUM_OF_CYCLES.
+
+    @return dict of (datetime, str, str) keys which
+    represent the parsed file data. Mapped to str
+    representing the files location.
+    """
+    data = {}
+
+    rand_orders = _generate_random_order(num_of_chars=num_of_chars,
+                                         is_checkout=is_checkout)
+    for x in xrange(n):
+        std_name, order_data = rand_orders.next()
+        file_path = directory + '/' + std_name
+
+        save_data_to_file(order_data, file_path)
+
+        p_time, p_name, p_type = ConfirmationSystem.parse_standardized_file_name(
+            std_name)
+
+        data[p_time, p_name, p_type] = file_path, order_data
+
+    rand_orders.close()
+    return data
 
 
 def _generate_reservations_data(n=NUMBER_OF_ITEMS_TO_GENERATE):
@@ -309,30 +187,121 @@ def _generate_reservations_data(n=NUMBER_OF_ITEMS_TO_GENERATE):
     a dict that categories all reservations
     by date.
     """
-    # Generate intial data.
     reserver_data = []
     reserver_data_by_date = {}
+    rand_rsvr = generate_random_reservations()
 
-    random_names = _generate_random_names(n=n)
-    random_nums = _generate_random_names(n=n)
-    random_times = _generate_random_times(datetime.now() + timedelta(minutes=30),
-                                          MAX_DATETIME, num=n)
-
-
-    for name, num, rsvr_time  in zip(random_names, random_nums, random_times):
-        # Generate reservation
-        reserver = Reserver(name, num, rsvr_time)
+    for x in xrange(n):
+        reserver = rand_rsvr.next()
         reserver_data.append(reserver)
 
         # Store data in appropriate area.
-        rsvr_date = datetime.combine(rsvr_time.date(), time.min)
+        rsvr_date = datetime.combine(reserver._arrival_time.date(), time.min)
         if rsvr_date in reserver_data_by_date:
             bisect.insort(reserver_data_by_date[rsvr_date], reserver)
         else:
             reserver_data_by_date[rsvr_date] = [reserver]
 
+    rand_rsvr.close()
+
     return reserver_data, reserver_data_by_date
 
+
+def _generate_random_order(num_of_chars=NUM_OF_CHARS,
+                           notification=0.0, is_checkout=False, n=GENERATOR_MAX):
+    """Gives a generator that yields a random
+    order.
+
+    @keyword num_of_chars: int representing the
+    number of characters that should be present
+    in any given generated name. Default 100.
+
+    @keyword notification: float representing the
+    probability of any given notification item
+    being a notification item. Default 0.0
+
+    @keyword is_checkout: bool value representing
+    if this random order should be standardized as
+    a checkout order or not. Default False
+
+    @keyword n: int representing the number of
+    items this generator should be capable of
+    generating. This is to ensure that an
+    indefinite loop doesn't occur. Default
+    GENERATOR_MAX.
+
+    @return: generator that yields values
+
+    @yield: str, list of MenuItem objects
+    representing the standardized name and
+    the order data.
+    """
+    rand_times = generate_random_times()
+    rand_names = generate_random_names(num_of_chars=num_of_chars)
+    rand_items = generate_random_menu_items(n=n*30, is_notification=notification)
+
+    counter = 0
+
+    while counter < n:
+        order_name = rand_names.next()
+        file_time = rand_times.next()
+        order_data = [rand_items.next() for x in xrange(NUM_OF_CYCLES)]
+
+        std_name = ConfirmationSystem.standardize_file_name(order_name,
+                                                            is_checkout=is_checkout,
+                                                            set_time=file_time)
+
+        yield std_name, order_data
+
+        counter += 1
+
+    rand_times.close()
+    rand_names.close()
+    rand_items.close()
+
+
+# This is a subset utilized to generate ordered data.
+
+def _generate_ordered_times(start_date=MIN_DATETIME, end_date=MAX_DATETIME,
+                               n=NUMBER_OF_ITEMS_TO_GENERATE):
+    """Generates an ordered list of datetime.datetime objects that
+    all adhere to the specific date range.
+
+    @param start_date: datetime.datetime object that
+    represents the start date. Inclusive.
+
+    @param end_date: datetime.datetime object that
+    represents the end date. Inclusive.
+
+    @param n: int representing the number of dates
+    to generate.
+
+    @return: Generator that yields
+
+    @yield: Yields a datetime object within the specifics range.
+    """
+    prev_date = start_date
+    maximum_change_in_time = (end_date - start_date) / n
+
+    counter = 0
+    while counter < n:
+        time_data = {
+            'days': random.randint(1, maximum_change_in_time.days),
+            'seconds': random.randint(1, maximum_change_in_time.seconds),
+            'microseconds': 0
+        }
+        data = prev_date + timedelta(**time_data)
+        prev_date = data
+
+        counter += 1
+        yield data
+
+
+#====================================================================================
+# This block contains helper functions that are used through multiple tests to
+# add, push, pull, parse, unpack, convert, or otherwise interact with stored data
+# or alter input to have same values are stored data.
+#====================================================================================
 
 def _get_current_num_database_rows(db, table_name):
     """Gets the current database tables number
@@ -350,80 +319,92 @@ def _get_current_num_database_rows(db, table_name):
     c = db.cursor()
     data = c.execute('SELECT '
                      '     COUNT (*) '
-                     'FROM'
+                     'FROM '
                      '     {}'.format(table_name))
     return data.next()[0]
 
 
-def _populate_directory_with_random_orders(directory, num_of_chars=100,
-    n=NUMBER_OF_ITEMS_TO_GENERATE, save_data=True):
-    """Populates the given directory with n random orders.
+def _get_random_stored_date_data(generated_stored_data,
+                                 n=NUMBER_OF_ITEMS_TO_GENERATE / 2):
+    """Gets a dict of date ranges, where each key is mapped
+    to a deque of the data within the date ranges.
 
-    @param directory: str pointing to the directory that
-    is to have the data added to it.
+    All data ranges will be chosen from 6 cases:
 
-    @keyword num_of_chars: int representing The number
-    of characters that each file should be created with.
-    Draws characters from String.printable. Must be greater
-    than 0.
+        1.  Exceeding both bounds from generated_stored_data and
+            expecting it to encompass all data given
 
-    @keyword n: int representing the number
-    of files to generate.
+        2.  Proceeding lower bound from generated_stored_data, matching
+            upper bound and expecting it to encompass all data given
 
-    @keyword save_data: bool value representing if the data
-    should be saved to the directory. Default True, if false
-    all items are generated with their file paths as having
-    the directory as a prefix, but are not saved there.
+        3.  Exceeding upper bound from generated_stored_data, matching
+            lower bound and expecting it to encompass all data given
 
-    @return: 2 tuple representing two dicts. The first dict
-    is considered the togo_dict and contains file names with
-    the togo separator. The second dict is the orders dict
-    and doesn't contain file names with the togo separator.
+        4.  Both proceeding lower bound from generated_stored_data and
+            expecting it to be an empty data set
 
-    Each dict maps a file_name to a tuple of
-    (str, str, str) representing the
-    (standardized name, file_path, file_data)
-    respectively.
+        5.  Both exceeding upper bound from generated_stored_data and
+            expecting it to be an empty data set
+
+        6.  Randomly chosen dates within the upper and lower bounds
+            expect data set to match those whose date range they span.
+
+    @param generated_stored_data: collection of
+    PackagedData subclasses that represent
+    the data.
+
+    @param n: number of items to generate. Will
+    generate n + 5 items. Encompassing all possibilities.
+
+    @return: dict of tuple (datetime.datetime, datetime.datetime)
+    representing the date range of the data set. This is mapped
+    to the values which represent a deque of the data sorted by
+    date.
     """
-    # Generate initial data
-    togo_data = {}
-    order_data = {}
+    data = {}
+    itr = iter(generated_stored_data)
+    subsection_range = int(len(generated_stored_data) / n)
 
-    is_checkout = directory is path.SYSTEM_ORDERS_CHECKOUT_DIRECTORY
+    begin_date = generated_stored_data[0].date
+    end_date = generated_stored_data[-1].date
 
-    random_times = _generate_random_times(num=n)
-    random_names = _generate_random_names(num_of_chars=num_of_chars)
+    #add data that exceeds both bounds. Expect it to match all data.
+    data[begin_date - timedelta(days=100),
+         end_date + timedelta(days=100)] = generated_stored_data
 
-    for order_name, file_time in zip(random_names, random_times):
-        # Generate name and file path
-        std_name = ConfirmationSystem.standardize_file_name(order_name,
-                        is_checkout=is_checkout, set_time=file_time)
+    #add data that exceeds start bounds but matches end bounds
+    data[begin_date - timedelta(days=100), end_date] = generated_stored_data
 
-        file_path = directory + '/' + str(std_name)
-        curr_order = []
+    #add data that exceeds end bounds but matches start bounds
+    data[begin_date, end_date + timedelta(days=100)] = generated_stored_data
 
-        for name in _generate_random_names(n=random.randint(1, 30), num_of_chars=30):
-            price = random.randint(1, 100)
-            item = MenuItem(name, price)
+    #add data that is outside of range on the lower side
+    data[begin_date - timedelta(days=100),
+         begin_date - timedelta(days=1)] = deque()
 
-            if random.randint(1, 10) > 7:
-                item.comp(True, ''.join(random.sample(POSSIBLE_CHARS, 30)))
+    #add data that is outside of range on the higher side
+    data[end_date + timedelta(days=1),
+         end_date + timedelta(days=100)] = deque()
 
-            curr_order.append(item)
+    for x in xrange(n - 1):
+        curr_data = deque()
+        info = itr.next()
+        curr_data.append(info)
 
-        # Generate type
-        file_data = order_data
-        if TOGO_SEPARATOR in order_name:
-            file_data = togo_data
+        date1 = info.date
 
-        # Create and save data if applicable.
-        file_data[order_name] = (std_name, file_path, curr_order)
+        counter = 1
+        while counter < (subsection_range - 2):
+            curr_data.append(itr.next())
+            counter += 1
 
-        if save_data:
-            with open(file_path, 'w') as f:
-                f.write(jsonpickle.encode(curr_order))
+        info = itr.next()
+        date2 = info.date
+        curr_data.append(info)
 
-    return order_data, togo_data
+        data[date1, date2] = curr_data
+
+    return data
 
 
 #====================================================================================
@@ -440,7 +421,6 @@ class ConfirmationSystemTest(unittest.TestCase):
         @return: None
         """
         print TABS + 'BEGIN: Testing ConfirmationSystem module'
-
 
     @classmethod
     def tearDownClass(cls):
@@ -542,70 +522,38 @@ class ConfirmationSystemTest(unittest.TestCase):
         #    ValueError
         #
         # Case 7:
-        #
         #   Invalid dates data passed in to standardize. Expect standardize to
         #   generate date at time of call.
         #============================================================================
         # Generate initial data to test
         #============================================================================
-        curr_dir = path.SYSTEM_ORDERS_CONFIRMED_DIRECTORY
-
-        def standardize_names(name_data, is_checkout=False, set_time=None):
-            data = {}
-
-            for name in name_data:
-                std_name = ConfirmationSystem.standardize_file_name(name,
-                               is_checkout=is_checkout, set_time=set_time)
-                data[name] = std_name
-            return data
-
-        def parse_names(std_name_data, togo_separator=TOGO_SEPARATOR):
-            data = {}
-            alt_data = {}
-
-            for std_name in std_name_data:
-                p_time, p_name, p_type = \
-                    ConfirmationSystem.parse_standardized_file_name(std_name,
-                        togo_separator=togo_separator)
-                data[p_name] = std_name
-                alt_data[std_name] = (p_time, p_name, p_type)
-            return data, alt_data
+        standardize = ConfirmationSystem.standardize_file_name
+        parse = ConfirmationSystem.parse_standardized_file_name
 
         #============================================================================
         # Generate data for testing Case 1
         #============================================================================
-        name_data = _generate_random_names()
-        name_data.sort()
-
-        standardized_data = standardize_names(name_data)
-        parsed_data, _ = parse_names(standardized_data.values())
+        rand_name = generate_random_names()
 
         #============================================================================
         # Case 1: Testing that the a given name can be standardized, then parsed
         # and reverts to its original name.
         print TABS * 3 + 'Testing Case 1...',
         #============================================================================
-        self.assertEqual(name_data, sorted(parsed_data.keys()))
-        self.assertEqual(parsed_data, standardized_data)
+        for x in xrange(NUM_OF_CYCLES):
+            name = rand_name.next()
+
+            std_name = standardize(name)
+            _, p_name, _ = parse(std_name)
+
+            self.assertEqual(name, p_name)
 
         print 'done'
 
         #============================================================================
         # Generate data for testing Case 2
         #============================================================================
-        standardized_data_by_value = {}
-        parsed_data_by_value = {}
-        data_by_time = {}
-
-        for curr_time in _generate_random_times(num=10):
-            names = _generate_random_names()
-            standardized_data = standardize_names(names, set_time=curr_time)
-            standardized_data_by_value[curr_time] = standardized_data
-
-            parsed_data, alt_parsed_data = parse_names(standardized_data.values())
-            parsed_data_by_value[curr_time] = parsed_data
-
-            data_by_time[curr_time] = alt_parsed_data
+        rand_time = generate_random_times()
 
         #============================================================================
         # Case 2: Testing first that the standardized data matches the parsed data.
@@ -613,42 +561,32 @@ class ConfirmationSystemTest(unittest.TestCase):
         # both the standardized and parsed data.
         print TABS * 3 + 'Testing Case 2...',
         #============================================================================
-        self.assertEqual(standardized_data_by_value, parsed_data_by_value)
+        for x in xrange(NUM_OF_CYCLES):
+            name = rand_name.next()
+            t = rand_time.next()
 
-        for curr_time, alt_parsed_data in data_by_time.items():
-            for p_time, p_name, p_type in alt_parsed_data.values():
-                self.assertEqual(p_time, curr_time)
+            std_name = standardize(name, set_time=t)
+            p_time, p_name, _ = parse(std_name)
+
+            self.assertEqual(t, p_time)
+            self.assertEqual(name, p_name)
 
         print 'done'
-
-        #============================================================================
-        # Generating data for test Case 3
-        #============================================================================
-        standardized_data_by_value = {True: [], False: []}
-        parsed_data_by_value = {True: [], False: []}
-        data_by_value = {True: [], False: []}
-
-        for is_checkout in [random.choice([True, False]) for _ in xrange(10)]:
-            names = _generate_random_names()
-
-            standardized_data = standardize_names(names, is_checkout=is_checkout)
-            standardized_data_by_value[is_checkout].append(standardized_data)
-
-            parsed_data, alt_parsed_data = parse_names(standardized_data.values())
-            parsed_data_by_value[is_checkout].append(parsed_data)
-
-            data_by_value[is_checkout] = alt_parsed_data
 
         #============================================================================
         # Case 3: Testing first the standardized data matches the parsed data. Next
         # testing that the parsed bool values match the generated bool values.
         print TABS * 3 + 'Testing Case 3...',
         #============================================================================
-        self.assertEqual(standardized_data_by_value, parsed_data_by_value)
+        for x in xrange(NUM_OF_CYCLES):
+            name = rand_name.next()
+            is_checkout = random.choice([True, False])
 
-        for is_checkout, alt_parsed_data in data_by_value.items():
-            for p_time, p_name, p_type in alt_parsed_data.values():
-                self.assertEqual(is_checkout, p_type == TYPE_SUFFIX_CHECKOUT)
+            std_name = standardize(name, is_checkout=is_checkout)
+            _, p_name, p_type = parse(std_name)
+
+            self.assertEqual(is_checkout, p_type == TYPE_SUFFIX_CHECKOUT)
+            self.assertEqual(name, p_name)
 
         print 'done'
 
@@ -656,21 +594,19 @@ class ConfirmationSystemTest(unittest.TestCase):
         # Testing Case 4: Testing for empty order name. Should raise ValueError
         print TABS * 3 + 'Testing Case 4...',
         #============================================================================
-        self.assertRaises(StandardError, ConfirmationSystem.standardize_file_name, '')
-        self.assertRaises(StandardError,
-                          ConfirmationSystem.parse_standardized_file_name, '')
+        self.assertRaises(StandardError, standardize, '')
+        self.assertRaises(StandardError, parse, '')
 
         print 'done'
 
         #============================================================================
         # Generate Case 5 data: Generating the data the execute test case 5.
         #============================================================================
-        invalid_chars = ''.join(BLACKLIST.keys())
-        names = _generate_random_names(from_chars=(POSSIBLE_CHARS + invalid_chars * 5))
-        names.sort()
+        rand_name.close()
+        rand_time.close()
 
-        standardized_data = standardize_names(names)
-        parsed_data, _ = parse_names(standardized_data.values())
+        chr = ''.join(BLACKLIST.keys())
+        rand_name = generate_random_names(from_chars=(POSSIBLE_CHARS * 10 + chr))
 
         #============================================================================
         # Testing Case 5: Testing for situation involving name where known invalid
@@ -680,20 +616,25 @@ class ConfirmationSystemTest(unittest.TestCase):
         # the parsed data output/input.
         print TABS * 3 + 'Testing Case 5...',
         #============================================================================
-        self.assertEqual(names, sorted(parsed_data.keys()))
-        self.assertEqual(standardized_data, parsed_data)
+        for x in xrange(NUM_OF_CYCLES):
+            name = rand_name.next()
+
+            std_name = standardize(name)
+            _, p_name, _ = parse(std_name)
+
+            self.assertEqual(name, p_name)
 
         print 'done'
 
         #============================================================================
         # Generate data for testing Case 6
         #============================================================================
-        values = _generate_random_names()
-        values.append('antidisestablishmentaranism')
-        values.append(lambda x: x)
-        values.append(10)
-        values.append(10.0)
-        values.append(self)
+        values = (rand_name.next(),
+                  'antidisestablishmentaranism',
+                  10.0,
+                  10,
+                  lambda x: x,
+                  self)
 
         #============================================================================
         # Testing Case 6: non pattern string given to parse function. Expect error
@@ -701,43 +642,27 @@ class ConfirmationSystemTest(unittest.TestCase):
         print TABS * 3 + 'Testing Case 6...',
         #============================================================================
         for name in values:
-            self.assertRaises(StandardError,
-              ConfirmationSystem.parse_standardized_file_name, name)
-
+            self.assertRaises(StandardError, parse, name)
         print 'done'
-
-        #============================================================================
-        # Generating data to test Case 7
-        #============================================================================
-        standardized_data_by_value = {}
-        for date in values:
-            standardized_data = standardize_names(names, set_time=date)
-            standardized_data_by_value[date] = standardized_data
-
-        parsed_data_by_value = {}
-        alt_parsed_data_by_value = {}
-
-        for date in standardized_data_by_value:
-
-            data = standardized_data_by_value[date]
-            parsed_data, alt_parsed_data = parse_names(data.values())
-            parsed_data_by_value[date] = parsed_data
-
-            alt_parsed_data_by_value[date] = alt_parsed_data
 
         #============================================================================
         # Testing Case 7: Given invalid date. Expect all dates to be set to the
         # current date, within an error range of 5 seconds.
         print TABS * 3 + 'Testing Case 7...',
         #============================================================================
-        self.assertEqual(standardized_data_by_value, parsed_data_by_value)
+        for set_time in values:
+            name = rand_name.next()
 
-        for alt_parsed_data in alt_parsed_data_by_value.values():
-            for p_time, p_name, p_type in alt_parsed_data.values():
-                self.assertTrue(p_time - datetime.now() < timedelta(seconds=5))
+            std_name = standardize(name, set_time=set_time)
+            p_time, p_name, _, = parse(std_name)
+
+            self.assertEqual(name, p_name)
+            self.assertTrue((p_time - datetime.now()) < timedelta(seconds=1))
 
         print 'done'
 
+        rand_name.close()
+        rand_time.close()
         #============================================================================
         print TABS * 2 + 'Finished testing standardize and parse name functions'
         #============================================================================
@@ -855,36 +780,32 @@ class ConfirmationSystemTest(unittest.TestCase):
         # Generate initial data for comparison.
         #============================================================================
         curr_dir = path.SYSTEM_ORDERS_CONFIRMED_DIRECTORY
-        order_data, togo_data = _populate_directory_with_random_orders(curr_dir)
-        file_data = togo_data.values() + order_data.values()
+
+        load = ConfirmationSystem._load_data
+        rand_order = _generate_random_order()
 
         #============================================================================
         # Case 1: Checking that data loads properly
         print TABS * 3 + 'Testing Case 1...',
         #============================================================================
-        for file_name, file_path, order_data in file_data:
-            data = ConfirmationSystem._load_data(file_path)
-            self.assertEqual(data, order_data)
+        for x in xrange(NUM_OF_CYCLES):
+            std_name, order_data = rand_order.next()
+            file_path = curr_dir + '/' + std_name
 
+            save_data_to_file(order_data, file_path)
+            unpacked_data = load(file_path)
+
+            self.assertTrue(len(unpacked_data) > 0)
+            self.assertEqual(unpacked_data, order_data)
         print 'done'
-
-        #============================================================================
-        # Generate data for Case 2
-        #============================================================================
-        file_paths = []
-        for file_name, file_path, order_data in file_data:
-            file_paths.append(file_path)
-            os.remove(file_path)
-
-        file_paths += _generate_random_names()
 
         #============================================================================
         # Case 2: Checking that data doesn't load and raises error instead.
         print TABS * 3 + 'Testing Case 2...',
         #============================================================================
-        for file_path in file_paths:
-            self.assertRaises(StandardError, ConfirmationSystem._load_data, file_path)
+        std_name, _ = rand_order.next()
 
+        self.assertRaises(StandardError, load, curr_dir + '/' + std_name)
         print 'done'
 
         #============================================================================
@@ -951,54 +872,23 @@ class ConfirmationSystemTest(unittest.TestCase):
         #===========================================================================
         curr_dir = path.SYSTEM_ORDERS_CONFIRMED_DIRECTORY
 
-        def get_generated_data(curr_data):
-            data = {}
-
-            for order_name, (std_name, file_path, file_type) in curr_data:
-                data_files = [file_path]
-
-                if order_name in data:
-                    data[order_name] += data_files
-                else:
-                    data[order_name] = data_files
-
-            return data
-
-        def get_order_data(curr_data, dir, set_time=None):
-            data = {}
-
-            for order_name in curr_data:
-                data_files = ConfirmationSystem._find_order_name_paths(order_name,
-                                                                       dir)
-                if order_name in data:
-                    data[order_name] += data_files
-                else:
-                    data[order_name] = data_files
-
-            return data
-
-        def clear_directory(dir):
-            shutil.rmtree(dir)
-            os.mkdir(dir)
-
-        _populate_directory_with_random_orders(curr_dir, n=70)
-        order_data, togo_data = _populate_directory_with_random_orders(curr_dir, n=30)
-
+        find = ConfirmationSystem._find_order_name_paths
+        _populate_non_parseable_random_files(curr_dir, from_chars=string.ascii_letters)
         #============================================================================
         # Generate data for testing Case 1
         #============================================================================
-        generated_data = get_generated_data(order_data.items() + togo_data.items())
-        unpacked_data = get_order_data(order_data.keys() + togo_data.keys(),
-                                       curr_dir)
+        order_data = _populate_orders_data_files(curr_dir)
 
         #============================================================================
         # Case 1: All values returned should be exactly the correct path.
         print TABS * 3 + 'Testing Case 1...',
         #============================================================================
-        self.assertEqual(generated_data, unpacked_data)
+        for key in order_data:
+            _, order_name, _ = key
 
-        for data in unpacked_data.values():
-            self.assertEqual(len(data), 1)
+            data = find(order_name, curr_dir)
+            file_path, _ = order_data[key]
+            self.assertEqual(data, [file_path])
 
         print 'done'
 
@@ -1010,34 +900,21 @@ class ConfirmationSystemTest(unittest.TestCase):
         # and multiple index shifts (addition vs replacement) that occurs to allow
         # for a sufficiently large data set to be gathered and analyzed.
         #============================================================================
-        generated_data = {}
-        for order_name in order_data.keys() + togo_data.keys():
+        prev_order_data = order_data
+        order_data = {}
+        for p_time, p_name, p_type in prev_order_data:
 
             # ensure that the index replacement works at both limits and any random
             # index in the range.
-            index_data = [0,
-                          random.randint(1, len(order_name)),
-                          len(order_name)]
+            for index in [0, random.randint(1, len(order_name)), len(order_name)]:
 
-            for index in index_data:
-                char = random.choice(string.printable)
-                name = order_name[:index] + char + order_name[index:]
-
-                std_name = ConfirmationSystem.standardize_file_name(name)
-                file_path = curr_dir + '/' + std_name
-
-                _add_data_to_file('test', file_path)
-
-                # All generated order data is unique. However there could
-                # exist a potential conflict that this would randomly select
-                # an identical index and shift a name to another name. As such
-                # an update would be the correct way to add it.
-                if name in generated_data:
-                    bisect.insort(generated_data[name], file_path)
-                else:
-                    generated_data[name] = [file_path]
-
-        unpacked_data = get_order_data(generated_data.keys(), curr_dir)
+                for shift in [0, 1]:
+                    order_name = p_name[:index] + p_name[index + shift:]
+                    std_name = ConfirmationSystem.standardize_file_name(order_name,
+                                                                        set_time=p_time)
+                    file_path = curr_dir + '/' + std_name
+                    save_data_to_file(None, file_path)
+                    order_data[p_time, p_name, p_type] = [file_path]
 
         #============================================================================
         # Case 2: Expect all generated dicts to match the unpacked dicts. This
@@ -1045,8 +922,11 @@ class ConfirmationSystemTest(unittest.TestCase):
         # previously stored data.
         print TABS * 3 + 'Testing Case 2...',
         #============================================================================
-        self.assertTrue(len(unpacked_data) > 0)
-        self.assertEqual(unpacked_data, generated_data)
+        for key in order_data:
+            _, order_name, _ = key
+
+            data = find(order_name, curr_dir)
+            self.assertEqual(data, order_data[key])
         print 'done'
 
         #============================================================================
@@ -1055,34 +935,26 @@ class ConfirmationSystemTest(unittest.TestCase):
         # matches this description. This means pulling the previous data and
         # resaving it with a new time stamp.
         #============================================================================
-        generated_data = {}
+        for p_time, p_name, p_type in order_data:
+            for x in range(1, 3):
+                curr_time = datetime.now() + timedelta(days=x)
+                std_name = ConfirmationSystem.standardize_file_name(p_name,
+                                                                    set_time=curr_time)
+                file_path = curr_dir + '/' + std_name
+                save_data_to_file(None, file_path)
 
-        for order_name in order_data.keys() + togo_data.keys():
-            new_time = datetime.now() + timedelta(days=1)
-
-            std_name = ConfirmationSystem.standardize_file_name(order_name,
-                                                                set_time=new_time)
-
-            file_path = curr_dir + '/' + std_name
-            _add_data_to_file('test', curr_dir + '/' + std_name)
-
-            # order data and keys data are known to be unique.
-            generated_data[order_name] = [file_path]
-
-
-        unpacked_data = get_order_data(generated_data.keys(), curr_dir)
+                order_data[p_time, p_name, p_type] += [file_path]
 
         #============================================================================
         # Case 3: Expect the list to contain the correct file path, but not
         # necessarily that specific unique file path.
         print TABS * 3 + 'Testing Case 3...',
         #============================================================================
-        self.assertTrue(unpacked_data > 0)
-        self.assertEqual(len(unpacked_data), len(generated_data))
+        for key in order_data:
+            _, order_name, _ = key
 
-        for key in unpacked_data:
-            self.assertTrue(set(generated_data[key]).issubset(set(unpacked_data[key])))
-
+            data = find(order_name, curr_dir)
+            self.assertEqual(data.sort(), order_data[key].sort())
         print 'done'
 
         #============================================================================
@@ -1184,20 +1056,32 @@ class ConfirmationSystemTest(unittest.TestCase):
         #===========================================================================
         curr_dir = path.SYSTEM_ORDERS_CONFIRMED_DIRECTORY
 
+        def generate_data_comparison(generated_data, unpacked_data):
+            for key in generated_data:
+                order_time, order_name, _ = key
+                _, g_data = generated_data[key]
+
+                if TOGO_SEPARATOR in order_name:
+                    u_data = unpacked_data[1][order_name, order_time]
+                else:
+                    u_data = unpacked_data[0][order_name, order_time]
+
+                yield u_data, g_data
+
+        unpack = ConfirmationSystem.unpack_order_data
         #============================================================================
         # Generate data for Case 1
         #============================================================================
-        generated_data = _generate_orders_data(curr_dir)
-        unpacked_data = ConfirmationSystem.unpack_order_data(curr_dir)
+        generated_data = _populate_orders_data_files(curr_dir)
+        unpacked_data = unpack(curr_dir)
 
         #============================================================================
         # Testing Case 1: Checking that the generated data and unpacked data are
         # equal.
         print TABS * 3 + 'Testing Case 1...',
         #============================================================================
-        self.assertTrue(len(unpacked_data[0]) > 0)
-        self.assertTrue(len(unpacked_data[1]) > 0)
-        self.assertEqual(generated_data, unpacked_data)
+        for u_data, g_data in generate_data_comparison(generated_data, unpacked_data):
+            self.assertEqual(u_data, g_data)
         print 'done'
 
         #============================================================================
@@ -1205,11 +1089,10 @@ class ConfirmationSystemTest(unittest.TestCase):
         #============================================================================
         prev_generated_data = generated_data
 
-        generated_data = _generate_orders_data(curr_dir)
-        generated_data[0].update(prev_generated_data[0])
-        generated_data[1].update(prev_generated_data[1])
+        generated_data = _populate_orders_data_files(curr_dir)
+        generated_data.update(prev_generated_data)
 
-        unpacked_data = ConfirmationSystem.unpack_order_data(curr_dir)
+        unpacked_data = unpack(curr_dir)
 
         #============================================================================
         # Testing Case 2: Checking that all appropriately returned data has been
@@ -1217,9 +1100,8 @@ class ConfirmationSystemTest(unittest.TestCase):
         # associated order name and time respectively.
         print TABS * 3 + 'Testing Case 2...',
         #============================================================================
-        self.assertTrue(len(unpacked_data[0]) > 0)
-        self.assertTrue(len(unpacked_data[1]) > 0)
-        self.assertEqual(generated_data, unpacked_data)
+        for u_data, g_data in generate_data_comparison(generated_data, unpacked_data):
+            self.assertEqual(u_data, g_data)
         print 'done'
 
         #============================================================================
@@ -1241,7 +1123,7 @@ class ConfirmationSystemTest(unittest.TestCase):
         #============================================================================
         # Generate data for Case 4
         #============================================================================
-        _generate_non_parseable_random_files(curr_dir)
+        _populate_non_parseable_random_files(curr_dir)
 
         generated_data = {}, {}
         unpacked_data = ConfirmationSystem.unpack_order_data(curr_dir)
@@ -1256,8 +1138,8 @@ class ConfirmationSystemTest(unittest.TestCase):
         #============================================================================
         # Generate data for Case 5
         #============================================================================
-        generated_data = _generate_orders_data(curr_dir)
-        unpacked_data = ConfirmationSystem.unpack_order_data(curr_dir)
+        generated_data = _populate_orders_data_files(curr_dir)
+        unpacked_data = unpack(curr_dir)
 
         #============================================================================
         # Case 5: Testing similar to Case 1 with added constraints of new
@@ -1265,9 +1147,8 @@ class ConfirmationSystemTest(unittest.TestCase):
         # generated data to be unpacked.
         print TABS * 3 + 'Testing Case 5...',
         #============================================================================
-        self.assertTrue(len(unpacked_data[0]) > 0)
-        self.assertTrue(len(unpacked_data[1]) > 0)
-        self.assertEqual(generated_data, unpacked_data)
+        for u_data, g_data in generate_data_comparison(generated_data, unpacked_data):
+            self.assertEqual(u_data, g_data)
         print 'done'
 
         #============================================================================
@@ -1275,11 +1156,10 @@ class ConfirmationSystemTest(unittest.TestCase):
         #============================================================================
         prev_generated_data = generated_data
 
-        generated_data = _generate_orders_data(curr_dir)
-        generated_data[0].update(prev_generated_data[0])
-        generated_data[1].update(prev_generated_data[1])
+        generated_data = _populate_orders_data_files(curr_dir)
+        generated_data.update(prev_generated_data)
 
-        unpacked_data = ConfirmationSystem.unpack_order_data(curr_dir)
+        unpacked_data = unpack(curr_dir)
 
         #============================================================================
         # Case 6: Testing similar to Case 2 with added constraints of new
@@ -1287,9 +1167,26 @@ class ConfirmationSystemTest(unittest.TestCase):
         # previously generated data and new generated data to be unpacked.
         print TABS * 3 + 'Testing Case 6...',
         #============================================================================
-        self.assertTrue(len(unpacked_data[0]) > 0)
-        self.assertTrue(len(unpacked_data[1]) > 0)
-        self.assertEqual(generated_data, unpacked_data)
+        for u_data, g_data in generate_data_comparison(generated_data, unpacked_data):
+            self.assertEqual(u_data, g_data)
+        print 'done'
+
+        #============================================================================
+        # Generate data for Case 7
+        #============================================================================
+        values = ('antidisestablishmentaranism',
+                  10.0,
+                  10,
+                  None,
+                  lambda x: x,
+                  self)
+
+        #============================================================================
+        # Case 7: Given non existing directory or non str expect error.
+        print TABS * 3 + 'Testing Case 7...',
+        #============================================================================
+        for directory in values:
+            self.assertRaises(StandardError, unpack, directory)
         print 'done'
 
         #============================================================================
@@ -1672,54 +1569,51 @@ class ConfirmationSystemTest(unittest.TestCase):
         #
         # Case 1:
         #
-        #   Directory contains only parseable file names. Expect dict returned to
-        #   contain the data of both the order data and togo data.
+        #   Directory contains only non-parseable file names. Expect empty dict.
         #
         # Case 2:
         #
-        #   Directory contains both parseable and non parseable file names. Expect
-        #   dict returned to contain the data of both the order data and togo data.
+        #   Directory contains only parseable file names. Expect dict returned to
+        #   contain the data of both the order data and togo data.
         #
         # Case 3:
         #
-        #   Directory contains only non-parseable file names. Expect empty dict.
+        #   Directory contains both parseable and non parseable file names. Expect
+        #   dict returned to contain the data of both the order data and togo data.
         #
         #============================================================================
         # Generate initial data for testing
         #============================================================================
         curr_dir = path.SYSTEM_ORDERS_CHECKOUT_DIRECTORY
 
-        def generate_data(dir):
-            data = {}
+        def generate_data_comparison(generated_data, unpacked_data):
+            for key in generated_data:
+                order_time, order_name, _ = key
+                _, g_data = generated_data[key]
 
-            order_data, togo_data = _populate_directory_with_random_orders(dir)
-            items = order_data.items() + togo_data.items()
+                u_data = unpacked_data[order_name, order_time]
 
-            for order_name, (std_name, path, f_data) in items:
-
-                p_time, p_name, p_type = \
-                    ConfirmationSystem.parse_standardized_file_name(std_name)
-
-                data[order_name, p_time] = f_data
-
-            return data
+                yield u_data, g_data
 
         def clear_directory(dir):
             shutil.rmtree(dir)
             os.mkdir(dir)
 
+        unpack = ConfirmationSystem.unpack_checkout_data
+
         #============================================================================
         # Generate data for testing Case 1
         #============================================================================
-        generated_data = generate_data(curr_dir)
-        unpacked_data = ConfirmationSystem.unpack_checkout_data()
+        _populate_non_parseable_random_files(curr_dir)
+
+        generated_data = {}
+        unpacked_data = unpack()
 
         #============================================================================
         # Case 1: Expect unpacked data to match the items of the combined order
         # data and togo data.
         print TABS * 3 + 'Testing Case 1...',
         #============================================================================
-        self.assertTrue(len(unpacked_data) > 0)
         self.assertEqual(generated_data, unpacked_data)
         print 'done'
 
@@ -1727,36 +1621,502 @@ class ConfirmationSystemTest(unittest.TestCase):
         # Generate data for testing Case 2
         #============================================================================
         clear_directory(curr_dir)
-        _generate_non_parseable_random_files(curr_dir)
 
-        generated_data = generate_data(curr_dir)
-        unpacked_data = ConfirmationSystem.unpack_checkout_data()
+        generated_data = _populate_orders_data_files(curr_dir)
+        unpacked_data = unpack()
 
         #============================================================================
         # Case 2: Expect unpacked data to match the items of the combined order
         # data and togo data.
         print TABS * 3 + 'Testing Case 2...',
         #============================================================================
-        self.assertTrue(len(unpacked_data) > 0)
-        self.assertEqual(generated_data, unpacked_data)
+        for u_data, g_data in generate_data_comparison(generated_data,  unpacked_data):
+            self.assertEqual(u_data, g_data)
         print 'done'
 
         #============================================================================
         # Generate data for testing Case 3
         #============================================================================
-        clear_directory(curr_dir)
-        _generate_non_parseable_random_files(curr_dir)
-        unpacked_data = ConfirmationSystem.unpack_checkout_data()
+        _populate_non_parseable_random_files(curr_dir)
+
+        prev_generated_data = generated_data
+        generated_data = _populate_orders_data_files(curr_dir)
+        generated_data.update(prev_generated_data)
+
+        unpacked_data = unpack()
 
         #============================================================================
         # Case 3: Expect unpacked data to be empty.
         print TABS * 3 + 'Testing Case 3...',
         #============================================================================
-        self.assertEqual(unpacked_data, {})
+        for u_data, g_data in generate_data_comparison(generated_data,  unpacked_data):
+            self.assertEqual(u_data, g_data)
         print 'done'
 
         #============================================================================
         print TABS * 2 + 'Finished testing unpack checkout function.'
+        #============================================================================
+
+    def test_get_stored_date_data(self):
+        """Tests the get stored date data function
+
+        @return: None
+        """
+        #============================================================================
+        print TABS * 2 + 'Testing get stored date data function'
+        #============================================================================
+        # This function should retrieve the stored date database data in the given
+        # date range, from the keyword database which is default the
+        # ORDERS_DATABASE constant for the module.
+        #
+        # Case 1:
+        #
+        #   Empty database. Given specific range. Expect empty data to be returned.
+        #
+        # Case 2:
+        #
+        #   Populated database, given specific range. Expect data returned to
+        #   match the range, inclusive.
+        #
+        # Case 3:
+        #
+        #   Given date range such that start date > end date. Expect error.
+        #
+        # Case 4:
+        #
+        #   Given non-datetime object for start date. Expect error.
+        #
+        # Case 5:
+        #
+        #   Given non-datetime object for end date. Expect error.
+        #
+        # Case 6:
+        #
+        #
+        #   Given non sqlite3.Connection object as database. Expect error.
+        #============================================================================
+        # Generate initial data for testing.
+        #============================================================================
+        db = ConfirmationSystem._check_and_create_orders_database(':memory:')
+
+        def generate_data(db, n=NUMBER_OF_ITEMS_TO_GENERATE, num_of_orders=10):
+            data = deque()
+
+            rand_time = _generate_ordered_times(n=n)
+            rand_name = generate_random_names(n=n * num_of_orders)
+            rand_item = generate_random_menu_items(n=10*n)
+
+            for x in xrange(n):
+                order_time = rand_time.next()
+                order_data = [rand_item.next() for x in xrange(10)]
+
+                for y in xrange(num_of_orders):
+                    update_order(order_time, order_data, rand_name.next(), [], [],
+                                 database=db)
+
+                date_data = update(order_time, database=db)
+
+                data.append(PackagedDateData(date_data))
+
+            return data
+
+
+
+        update = ConfirmationSystem._update_date_table
+        update_order = ConfirmationSystem._update_order_table
+
+        unpack = ConfirmationSystem.get_stored_date_data
+        #============================================================================
+        # Generate data for testing Case 1
+        #============================================================================
+        start_date = datetime.now() - timedelta(days=1000)
+        end_date = datetime.now() + timedelta(days=1000)
+
+        unpacked_data = unpack(start_date, end_date, database=db)
+
+        #============================================================================
+        # Case 1: Testing case 1, given empty database pulled data is empty.
+        print TABS * 3 + 'Testing Case 1...',
+        #============================================================================
+        self.assertEqual(unpacked_data, deque())
+        print 'done'
+
+        #============================================================================
+        # Generate data for testing Case 2
+        #============================================================================
+        initial_generated_data = generate_data(db)
+        generated_data = _get_random_stored_date_data(initial_generated_data)
+
+        #============================================================================
+        # Case 2: Testing data generated over multiple date ranges. Including
+        # boundary cases.
+        print TABS * 3 + 'Testing Case 2...',
+        #============================================================================
+        for (min_date, max_date), stored_data in generated_data.items():
+            unpacked_data = unpack(min_date, max_date, database=db)
+            self.assertEqual(unpacked_data, stored_data)
+        print 'done'
+
+        #============================================================================
+        # Generate data for testing Case 3
+        #============================================================================
+        start_date = datetime.now()
+        end_date = datetime.now()
+
+        td = timedelta(seconds=1)
+
+        f = unpack
+        #============================================================================
+        # Case 3: Testing start date > end date. Expect error.
+        print TABS * 3 + 'Testing Case 3...',
+        #============================================================================
+        self.assertRaises(StandardError, f, start_date + td, end_date, db)
+        print 'done'
+
+        #============================================================================
+        # Generate data for testing Case 4
+        #============================================================================
+        values = ('antidisestablishmentaranism',
+                  10.0,
+                  10,
+                  None,
+                  True,
+                  lambda x: x,
+                  self)
+
+        from_date = datetime.now()
+        until_date = datetime.now() + timedelta(seconds=1)
+
+        #============================================================================
+        # Case 4: Testing for non-datetime object for start date. Expect error.
+        print TABS * 3 + 'Testing Case 4...',
+        #============================================================================
+        for start_date in values:
+            self.assertRaises(StandardError, f, start_date, until_date, db)
+        print 'done'
+
+        #============================================================================
+        # Case 5: Testing for non-datetime object for end date. Expect error.
+        print TABS * 3 + 'Testing Case 5...',
+        #============================================================================
+        for end_date in values:
+            self.assertRaises(StandardError, f, from_date, end_date, db)
+        print 'done'
+
+        #============================================================================
+        # Case 6: Testing for non-sqlite3.Connection object given as database.
+        # Expect error.
+        print TABS * 3 + 'Testing Case 6...',
+        #============================================================================
+        for database in values:
+            self.assertRaises(StandardError, f, from_date, until_date, database)
+        print 'done'
+
+        #============================================================================
+        print TABS * 2 + 'Finished testing get stored date data function'
+        #============================================================================
+
+    def test_get_stored_order_data(self):
+        """Tests the get_stored_order_data function.
+
+        @return: None
+        """
+        #============================================================================
+        print TABS * 2 + 'Testing the get stored order data function'
+        #============================================================================
+        # This function should retrieve the stored database data in the given date
+        # range, from the keyword database which is default the ORDERS_DATABASE
+        # constant for the module.
+        #
+        # Case 1:
+        #
+        #   Empty database. Given specific range. Expect empty data to be returned.
+        #
+        # Case 2:
+        #
+        #   Populated database. Given specific range. Expect data returned
+        #   to match data within that range
+        #
+        # Case 3:
+        #
+        #   Populated database. Given specific range where start date is less than
+        #   the end date. Expect raise error.
+        #
+        # Case 4:
+        #
+        #   Populated database. Given non datetime start_date expect error raised.
+        #
+        # Case 5:
+        #
+        #   Populated database. Given non datetime end_date expect error raised.
+        #
+        # Case 6:
+        #
+        #   Populated database. Given non sqlite3.Connection object for database
+        #   expect error raised.
+        #============================================================================
+        # Generate initial data for testing.
+        #============================================================================
+        db = ConfirmationSystem._check_and_create_orders_database(':memory:')
+
+        def generate_data(package_class, n=NUMBER_OF_ITEMS_TO_GENERATE):
+            data = deque()
+
+            rand_name = generate_random_names(n=n)
+            rand_ordered_time = _generate_ordered_times(n=n)
+            rand_item = generate_random_menu_items(n=n*30)
+
+            counter = 0
+
+            for x in xrange(n):
+                order_name = rand_name.next()
+                order_date = rand_ordered_time.next()
+                order_data = [rand_item.next() for y in xrange(30)]
+
+                curr_data = ConfirmationSystem._update_order_table(order_date,
+                                                                   order_data,
+                                                                   order_name,
+                                                                   [], [],
+                                                                   database=db)
+
+                curr_data = PackagedOrderData(curr_data)
+                data.append(curr_data)
+
+            return data
+
+        unpack = ConfirmationSystem.get_stored_order_data
+        #============================================================================
+        # Generate data for testing Case 1
+        #============================================================================
+        start_date = datetime.now() - timedelta(days=1)
+        end_date = datetime.now() + timedelta(days=1)
+
+        unpacked_data = unpack(start_date, end_date, database=db)
+
+        #============================================================================
+        # Case 1: Empty data set. Expect empty data set returned.
+        print TABS * 3 + 'Testing Case 1...',
+        #============================================================================
+        self.assertEqual(unpacked_data, deque())
+        print 'done'
+
+        #============================================================================
+        # Generate data for testing Case 2. Each generated data is expected to be
+        # a dict that has a key representing the dates range. This is mapped to
+        # the expected dict outputted from any given call on get_stored_order_data.
+        #============================================================================
+        initial_generated_data = generate_data(db)
+        generated_data = _get_random_stored_date_data(initial_generated_data)
+
+        #============================================================================
+        # Case 2: Populated data set. Randomly chosen times that represent both
+        # inside and outside data range. Expect generated data and unpacked data
+        # to be equal.
+        print TABS * 3 + 'Testing Case 2...',
+        #============================================================================
+        for (min_date, max_date), stored_data in generated_data.items():
+            unpacked_data = unpack(min_date, max_date, database=db)
+            self.assertEqual(unpacked_data, stored_data)
+        print 'done'
+
+        #============================================================================
+        # Generate data for testing Case 3
+        #============================================================================
+        start_date = datetime.now()
+        end_date = datetime.now()
+
+        change_in_date = timedelta(days=10)
+
+        f = ConfirmationSystem.get_stored_order_data
+        #============================================================================
+        # Case 3: Testing for case where end date is less than start date. Expect
+        # error raised.
+        print TABS * 3 + 'Testing Case 3...',
+        #============================================================================
+        self.assertRaises(StandardError, f, start_date, end_date - change_in_date, db)
+        print 'done'
+
+        #============================================================================
+        # Generate data for testing Case 4
+        #============================================================================
+        values = ('antidisestablishmentaranism',
+                  10.0,
+                  10,
+                  lambda x: x,
+                  self,
+                  datetime.date)
+
+        #============================================================================
+        # Case 4: Testing for case where start date is non datetime object.
+        # Expect error raised.
+        print TABS * 3 + 'Testing Case 4...',
+        #============================================================================
+        for start_date in values:
+            self.assertRaises(StandardError, f, start_date, end_date, db)
+        print 'done'
+
+        #============================================================================
+        # Case 5: Testing for case where end date is non datetime object. Expect
+        # error raised.
+        print TABS * 3 + 'Testing Case 5...',
+        #============================================================================
+        for end_date in values:
+            self.assertRaises(StandardError, f, start_date, end_date, db)
+        print 'done'
+
+        #============================================================================
+        # Case 6: Testing for case where database is non sqlite3.connection object.
+        # Expect error raised.
+        print TABS * 3 + 'Testing Case 6...',
+        #============================================================================
+        for database in values:
+            self.assertRaises(StandardError, f, start_date, end_date, database)
+        print 'done'
+
+        #============================================================================
+        print TABS * 2 + 'Finished testing the get stored order data function'
+        #============================================================================
+
+    def test_get_stored_item_data(self):
+        """Tests the get stored item data function.
+
+        @return: None
+        """
+        #============================================================================
+        print TABS * 3 + 'Testing get stored item data function'
+        #============================================================================
+        # This function is expected to retrieve specific order item data within a
+        # certain date range.
+        #
+        # Case 1:
+        #
+        #   Empty database. Attempting to pull data expect empty set.
+        #
+        # Case 2:
+        #
+        #   Populated database. Pull data within random given date ranges.
+        #   Including boundary cases. Expect data to match generated data.
+        #
+        # Case 3:
+        #
+        #   Given date ranges such that start_date > end_date. Expect error.
+        #
+        # Case 4:
+        #
+        #   Given start date that is non-datetime object. Expect error.
+        #
+        # Case 5:
+        #
+        #   Given end date that is non-datetime object. Expect error.
+        #
+        # Case 6:
+        #
+        #   Given non-sqlite3.Connection for database. Expect error.
+        #============================================================================
+        # Generate initial data
+        #============================================================================
+        db = ConfirmationSystem._check_and_create_orders_database(':memory:')
+
+        def generate_data(n=NUMBER_OF_ITEMS_TO_GENERATE):
+            data = deque()
+
+            rand_item = generate_random_menu_items(n=n)
+            rand_date = _generate_ordered_times(n=n)
+
+            for x in xrange(n):
+                row_data = ConfirmationSystem._update_item_table(rand_date.next(),
+                                                                 rand_item.next(),
+                                                                 database=db)
+                data.append(PackagedItemData(row_data))
+
+            return data
+
+        unpack = ConfirmationSystem.get_stored_item_data
+        #============================================================================
+        # Generate data for testing Case 1
+        #============================================================================
+        unpacked_data = unpack(datetime.now(),
+                               datetime.now() + timedelta(days=1),
+                               database=db)
+
+        #============================================================================
+        # Case 1: Testing that the data returned is empty because it is out of
+        # known range.
+        print TABS * 3 + 'Testing Case 1...',
+        #============================================================================
+        self.assertEqual(unpacked_data, deque())
+        print 'done'
+
+        #============================================================================
+        # Generate data for testing Case 2
+        #============================================================================
+        generated_data = generate_data()
+        generated_data = _get_random_stored_date_data(generated_data)
+
+        #============================================================================
+        # Case 2: Testing that the data returned matches the data generated
+        # including boundary cases.
+        print TABS * 3 + 'Testing Case 2...',
+        #============================================================================
+        for (min_date, max_date), order_data in generated_data.items():
+            unpacked_data = unpack(min_date,  max_date, database=db)
+            self.assertEqual(unpacked_data, order_data)
+        print 'done'
+
+        #============================================================================
+        # Generate data for testing Case 3
+        #============================================================================
+        start_date = datetime.now()
+        end_date = datetime.now()
+
+        change = timedelta(seconds=1)
+
+        #============================================================================
+        # Case 3: Given start date > end date expect error.
+        print TABS * 3 + 'Testing Case 3...',
+        #============================================================================
+        self.assertRaises(StandardError, unpack, start_date + change, end_date, db)
+        print 'done'
+
+        #============================================================================
+        # Generate data for testing Case 4
+        #============================================================================
+        values = ('Antidisestablishmentaranism',
+                  10,
+                  10.0,
+                  None,
+                  date.today(),
+                  lambda x: x,
+                  self)
+
+        #============================================================================
+        # Case 4: Testing for non-datetime object in as the start date. Expect
+        # error raised.
+        print TABS * 3 + 'Testing Case 4...',
+        #============================================================================
+        for curr_date in values:
+            self.assertRaises(StandardError, unpack, curr_date, end_date, db)
+        print 'done'
+
+        #============================================================================
+        # Case 5: Testing for non-datetime object in as the end date. Expect error
+        # raised.
+        print TABS * 3 + 'Testing Case 5...',
+        #============================================================================
+        for curr_date in values:
+            self.assertRaises(StandardError, unpack, start_date, curr_date, db)
+        print 'done'
+
+        #============================================================================
+        # Case 6: Testing for non-sqlite3.Connection object given as database.
+        # Expect error raised.
+        print TABS * 3 + 'Testing Case 6...',
+        #============================================================================
+        for database in values:
+            self.assertRaises(StandardError, unpack, start_date, end_date, database)
+        print 'done'
+        #============================================================================
+        print TABS * 2 + 'Finished testing get stored item data function'
         #============================================================================
 
     def test_remove_order_file(self):
@@ -1798,9 +2158,15 @@ class ConfirmationSystemTest(unittest.TestCase):
         def generate_files_data(dir):
             data = {}
 
-            order_data, togo_data = _populate_directory_with_random_orders(dir)
+            order_data = _populate_orders_data_files(dir)
 
-            for name, path, file_data in order_data.values() + togo_data.values():
+            for key in order_data:
+                p_time, p_name, p_type = key
+                _, file_data = order_data[key]
+
+                name = ConfirmationSystem.standardize_file_name(p_name,
+                                                                set_time=p_time)
+
                 data[name] = file_data
             return data
 
@@ -1839,7 +2205,7 @@ class ConfirmationSystemTest(unittest.TestCase):
         #============================================================================
         # Generate data for test Case 2
         #============================================================================
-        _generate_non_parseable_random_files(curr_dir)
+        _populate_non_parseable_random_files(curr_dir)
         generated_data = generate_files_data(curr_dir)
         unpacked_data = remove_files(generated_data, curr_dir)
 
@@ -1926,16 +2292,23 @@ class ConfirmationSystemTest(unittest.TestCase):
         #============================================================================
         curr_dir = path.SYSTEM_ORDERS_CONFIRMED_DIRECTORY
 
-        def generate_data(dir):
+        def generate_data(dir, n=NUM_OF_CYCLES):
             data = {}
 
-            order, togo = _populate_directory_with_random_orders(dir,
-                                                                 save_data=False)
-            for std_name, file_path, file_data in order.values() + togo.values():
+            rand_name = generate_random_names(n=n)
+            rand_item = generate_random_menu_items(n=n*10)
+
+            for x in xrange(n):
+                std_name = ConfirmationSystem.standardize_file_name(rand_name.next())
+                file_path = dir + '/' + std_name
+
+                file_data = [rand_item.next() for y in xrange(10)]
                 data[file_path] = file_data
 
                 ConfirmationSystem._save_order_file_data(file_data, file_path)
 
+            rand_name.close()
+            rand_item.close()
             return data
 
         def unpack_data(file_paths, dir):
@@ -1963,7 +2336,7 @@ class ConfirmationSystemTest(unittest.TestCase):
         #============================================================================
         # Generate data for test Case 2
         #============================================================================
-        _generate_non_parseable_random_files(curr_dir)
+        _populate_non_parseable_random_files(curr_dir)
         unpacked_data = unpack_data(generated_data.keys(), curr_dir)
 
         #============================================================================
@@ -2052,24 +2425,25 @@ class ConfirmationSystemTest(unittest.TestCase):
             data = {}
             data_paths = []
 
-            order, togo = _populate_directory_with_random_orders(dir)
+            order_data = _populate_orders_data_files(dir, is_checkout=True)
 
-            for name, path, file_data in order.values() + togo.values():
-                p_time, p_name, p_type = \
-                    ConfirmationSystem.parse_standardized_file_name(name)
+            for key in order_data:
+                p_time, p_name, p_type = key
+
+                file_path, file_data = order_data[key]
 
                 data[p_name, p_time] = file_data
-                _add_data_to_file(file_data, path)
 
-                data_paths.append(path)
+                data_paths.append(file_path)
 
             return data, data_paths
 
         def unpack_data(file_data):
             data = {}
-            names = _generate_random_names(num_of_chars=20)
+            rand_name = generate_random_names(num_of_chars=50)
 
-            for (p_name, p_time), name in zip(file_data, names):
+            for p_name, p_time in file_data:
+                name = rand_name.next()
                 new_path, _ = ConfirmationSystem.undo_checkout_file(p_name,  p_time,
                                                                     name)
                 data[p_name, p_time] = ConfirmationSystem._load_data(new_path)
@@ -2103,7 +2477,7 @@ class ConfirmationSystemTest(unittest.TestCase):
         #============================================================================
         # Generate data for testing Case 2
         #============================================================================
-        _generate_non_parseable_random_files(curr_dir)
+        _populate_non_parseable_random_files(curr_dir)
         generated_data, data_paths = generate_data(curr_dir)
         unpacked_data = unpack_data(generated_data)
 
@@ -2183,6 +2557,9 @@ class ConfirmationSystemTest(unittest.TestCase):
         #============================================================================
         print TABS * 2 + 'Testing update orders database function'
         #============================================================================
+        # WARNING: This method relies heavily on the get unpacked data functions.
+        # Any errors in the get unpacked data functions could cause errors here.
+        #
         # Testing the update orders database requires the checkout directory to be
         # populated with files that are to be added to the database. All database
         # operations are performed from the RAM by using the ":memory:" parameter
@@ -2192,13 +2569,13 @@ class ConfirmationSystemTest(unittest.TestCase):
         #
         #   Case 1:
         #
-        #       Fully populated Checkout directory. Every order is pulled and
-        #       added to a specific temporary database.
+        #       Empty Checkout directory. Nothing is added to the temporary
+        #       database
         #
         #   Case 2:
         #
-        #       Empty Checkout directory. Nothing is added to the temporary
-        #       database.
+        #       Fully populated Checkout directory. Every order is pulled and
+        #       added to a specific temporary database.
         #
         #   Case 3:
         #
@@ -2222,69 +2599,145 @@ class ConfirmationSystemTest(unittest.TestCase):
         # All other cases of functionality in a single database will be
         # considered in their respective methods.
         #============================================================================
-        # Generate initial data for database.
+        # Generate initial data for testing.
         #============================================================================
-        dir = path.SYSTEM_ORDERS_CHECKOUT_DIRECTORY
+        curr_dir = path.SYSTEM_ORDERS_CHECKOUT_DIRECTORY
         db = ConfirmationSystem._check_and_create_orders_database(':memory:')
 
-        order_data, togo_data = _populate_directory_with_random_orders(dir)
+        def generate_data_files(dir, n=NUM_OF_CYCLES, num_of_items=5):
+            date_data = []
+            order_data = []
+            item_data = []
 
-        data = order_data.values() + togo_data.values()
+            rand_time = _generate_ordered_times()
+            rand_name = generate_random_names()
+            rand_item = generate_random_menu_items()
 
-        def test_database_size(self, database, data):
-            ConfirmationSystem.update_orders_database(database=database)
-            orders_database_row = ConfirmationSystem.current_order_counter
+            for x in xrange(n):
+                order_name = rand_name.next()
+                curr_order = []
 
-            self.assertEqual(orders_database_row, len(data))
+                item = rand_item.next()
+                item_data.append((jsonpickle.encode(item),))
+                curr_order.append(item)
+
+                order_time = rand_time.next()
+                order_data.append((jsonpickle.encode(curr_order),))
+                date_data.append((order_time.strftime(SQLITE_DATE_FORMAT_STR),))
+
+                std_name = ConfirmationSystem.standardize_file_name(order_name,
+                                                                    set_time=order_time)
+                save_data_to_file(curr_order, dir + '/' + std_name)
+
+            return date_data, order_data, item_data
+
+        update = ConfirmationSystem.update_orders_database
+
+        def get_database_table_data(db):
+            c = db.cursor()
+
+            # Generate date database data
+            row_data = c.execute('SELECT '
+                                 '      Date '
+                                 'FROM '
+                                 '      DateData '
+                                 'ORDER BY '
+                                 '      Date;')
+            date_data = row_data.fetchall()
+
+            # Generate order database data
+            row_data = c.execute('SELECT '
+                                 '      OrderData_json '
+                                 'FROM '
+                                 '      OrderData '
+                                 'ORDER BY '
+                                 '      OrderDate;')
+            order_data = row_data.fetchall()
+
+            # Generate item database data
+            row_data = c.execute('SELECT '
+                                 '      ItemData_json '
+                                 'FROM '
+                                 '      ItemData '
+                                 'ORDER BY '
+                                 '      ItemDate;')
+            item_data = row_data.fetchall()
+
+            return date_data, order_data, item_data
 
         #============================================================================
-        # Case 1: Fully populated checkout directory. Pulling all data from
-        # checkout and loading it into the temporary database. This case will
-        # check that the data is pulled, that the temporary database was updated.
+        # Generate data for testing Case 1
+        #============================================================================
+        update(database=db)
+
+        unpacked_item_data, unpacked_order_data, unpacked_date_data = \
+            get_database_table_data(db)
+
+        #============================================================================
+        # Case 1: Testing empty list and empty Checkout directory. Expected 0 rows
+        # added to database.
         print TABS * 3 + 'Testing Case 1...',
         #============================================================================
-        test_database_size(self, db, data)
-
+        self.assertEqual(unpacked_date_data, [])
+        self.assertEqual(unpacked_order_data, [])
+        self.assertEqual(unpacked_item_data, [])
         print 'done'
 
         #============================================================================
         # Generating data for Case 2.
         #============================================================================
-        new_db = ConfirmationSystem._check_and_create_orders_database(':memory:')
+        date_data, order_data, item_data = generate_data_files(curr_dir)
 
-        ConfirmationSystem.current_order_counter = 0
+        update(database=db)
+
+        unpacked_date_data, unpacked_order_data, unpacked_item_data = \
+            get_database_table_data(db)
 
         #============================================================================
-        # Case 2: Testing empty list and empty Checkout directory. Expected 0 rows
-        # added to database.
+        # Case 2: Fully populated checkout directory. Pulling all data from
+        # checkout and loading it into the temporary database. This case will
+        # check that the data is pulled, that the temporary database was updated.
         print TABS * 3 + 'Testing Case 2...',
-        #============================================================================
-        test_database_size(self, new_db, [])
+        #===========================================================================
+        self.assertEqual(date_data, unpacked_date_data)
+        self.assertEqual(order_data, unpacked_order_data)
+        self.assertEqual(item_data, unpacked_item_data)
         print 'done'
 
         #============================================================================
         # Generating data for testing Case 3
         #============================================================================
-        for x in xrange(30):
-            name = ''.join(random.sample(POSSIBLE_CHARS.replace('/', '_'), 30))
-            with open(dir + '/' + name, 'w') as f:
-                f.write('')
+        _populate_non_parseable_random_files(curr_dir)
+        update(database=db)
+
+        date_data = unpacked_date_data
+        order_data = unpacked_order_data
+        item_data = unpacked_item_data
+
+        unpacked_date_data, unpacked_order_data, unpacked_item_data = \
+            get_database_table_data(db)
 
         #============================================================================
         # Case 3: Testing for directory containing non-parsable file names. These
-        # filenames should be ignored, leaving only the file names that fit the
-        # pattern as parsed and read into the database. As such I expect the new
-        # database to remain empty.
+        # filenames should be ignored. Previous data should be
         print TABS * 3 + 'Testing Case 3...',
         #============================================================================
-        test_database_size(self, new_db, [])
+        self.assertEqual(date_data, unpacked_date_data)
+        self.assertEqual(order_data, unpacked_order_data)
+        self.assertEqual(item_data, unpacked_item_data,)
 
         print 'done'
 
         #============================================================================
         # Generate data for testing case 4
         #============================================================================
-        orders_data, togo_data = _populate_directory_with_random_orders(dir)
+        db = ConfirmationSystem._check_and_create_orders_database(':memory:')
+
+        date_data, order_data, item_data = generate_data_files(curr_dir)
+        update(database=db)
+
+        unpacked_date_data, unpacked_order_data, unpacked_item_data = \
+            get_database_table_data(db)
 
         #============================================================================
         # Case 4: Testing for directory containing both parsable and non-parasable
@@ -2294,7 +2747,9 @@ class ConfirmationSystemTest(unittest.TestCase):
         # order and togo data.
         print TABS * 3 + 'Testing Case 4...',
         #============================================================================
-        test_database_size(self, new_db, orders_data.keys() + togo_data.keys())
+        self.assertEqual(date_data, unpacked_date_data)
+        self.assertEqual(order_data, unpacked_order_data)
+        self.assertEqual(item_data, unpacked_item_data)
         print 'done'
 
         #============================================================================
@@ -2417,20 +2872,15 @@ class ConfirmationSystemTest(unittest.TestCase):
         #
         #   Case 1:
         #
+        #       Empty Checkout data. Unaffected Dates database.
+        #
+        #   Case 2:
+        #
         #       Requires an adequately populated Orders database for this method to
         #       function. As such Case 1 is that the orders are populated,
         #       and then the date is updated with the correct data.
         #
-        #   Case 2:
-        #
-        #       Empty Checkout data. Unaffected Dates database.
-        #
         #   Case 3:
-        #
-        #       Repopulated Checkout data. Should contain only a single row
-        #       representing the date, which has now been updated.
-        #
-        #   Case 4:
         #
         #       AttributeError when non-datetime object is passed in as date.
         #
@@ -2444,11 +2894,6 @@ class ConfirmationSystemTest(unittest.TestCase):
         dir = path.SYSTEM_ORDERS_CHECKOUT_DIRECTORY
         db = ConfirmationSystem._check_and_create_orders_database(':memory:')
 
-        order_data, togo_data = _populate_directory_with_random_orders(dir,
-                                    save_data=False)
-
-        date_data_info =[]
-
         def get_order_info(db, curr_date):
             c = db.cursor()
             data = c.execute('SELECT '
@@ -2461,99 +2906,74 @@ class ConfirmationSystemTest(unittest.TestCase):
                              'FROM'
                              '      OrderData '
                              'WHERE '
-                             '      date(OrderDate)=? '
-                             'ORDER BY '
-                             '      OrderDate;', (curr_date,))
-            rows = data.fetchall()
-            return rows
+                             '      date(OrderDate)=?;',
+                             (curr_date.strftime(SQLITE_DATE_FORMAT_STR),))
+            return data.fetchall()
 
-        def get_date_data(db):
+        def get_date_info(db, curr_date):
             c = db.cursor()
             data = c.execute('SELECT '
                              '      * '
                              'FROM '
                              '      DateData '
-                             'ORDER BY '
-                             '      Date;')
+                             'WHERE '
+                             '      Date = ?;',
+                             (curr_date.strftime(SQLITE_DATE_FORMAT_STR),))
             return data.fetchall()
 
-        def load_order_data(data, db):
-            curr_data = _add_order_data_to_database(data, database=db)
-            return set([datetime.strptime(x[1], SQLITE_DATE_TIME_FORMAT_STR)
-                        for x in curr_data])
+        def generate_data(db, n=NUM_OF_CYCLES, num_of_orders=10):
+            dates = []
 
-        def load_date_data(dates, db):
-            for date in dates:
-                ConfirmationSystem._update_date_table(date, database=db)
+            rand_name = generate_random_names()
+            rand_time = generate_random_times()
+            rand_item = generate_random_menu_items()
+
+            for x in xrange(n):
+                order_time = rand_time.next()
+
+                for y in xrange(num_of_orders):
+                    order_name = rand_name.next()
+                    order_data = [rand_item.next() for i in xrange(5)]
+
+                    ConfirmationSystem._update_order_table(order_time, order_data,
+                                                           order_name, [], [],
+                                                           database=db)
+                dates.append(order_time)
+
+            return dates
 
         #============================================================================
         # Generate data for Case 1
         #============================================================================
-        dates = load_order_data(order_data.values() + togo_data.values(), db)
-        load_date_data(dates, db)
+        dates = generate_data(db)
 
         #============================================================================
-        # Case 1: Testing that the DateData table is populated with the correct
-        # information.
+        # Case 1: Testing empty database is.
         print TABS * 3 + 'Testing Case 1...',
         #============================================================================
-        for date_data in get_date_data(db):
+        for curr_date in dates:
+            generated_data = get_order_info(db, curr_date)
+            ConfirmationSystem._update_date_table(curr_date, database=db)
+            unpacked_data = get_date_info(db, curr_date)
 
-            order_info = get_order_info(db, date_data[0])
-
-            for order in order_info:
-                date_data_info.append(date_data)
-                self.assertEqual(date_data, order)
+            self.assertEqual(generated_data, unpacked_data)
 
         print 'done'
 
         #============================================================================
-        # Generate data for Case 2
-        #============================================================================
-        dates = load_order_data([] + [], db)
-
-        #============================================================================
-        # Case 2: Testing no change
+        # Case 2: Testing database is updated.
         print TABS * 3 + 'Testing Case 2...',
         #============================================================================
-        index = 0
-        for date_data in get_date_data(db):
-            self.assertEqual(date_data, date_data_info[index])
-            index += 1
+        for curr_date in [datetime.now()]:
+            ConfirmationSystem._update_date_table(curr_date, database=db)
+            unpacked_data = get_date_info(db, curr_date)
+
+            self.assertEqual([], unpacked_data)
 
         print 'done'
 
         #============================================================================
         # Generate data for Case 3
-        #============================================================================
-        order_data, togo_data = _populate_directory_with_random_orders(dir,
-                                    save_data=False)
-        dates = load_order_data(order_data.values() + togo_data.values(), db)
-        load_date_data(dates, db)
-
-        #============================================================================
-        # Case 3: Testing that the order data is accurately updated, and previous
-        # data remains.
-        print TABS * 3 + 'Testing Case 3...',
-        #============================================================================
-        dates_data = sorted(get_date_data(db))
-
-        # ensure data is still formatted and updated correctly.
-        for date_data in dates_data:
-            order_info = get_order_info(db, date_data[0])
-
-            for order in order_info:
-                date_data_info.append(date_data)
-                self.assertEqual(date_data, order)
-
-        # ensure that all rows are direct references to dates with
-        # no repeats.
-        self.assertEqual(len(dates_data), len(set(dates_data)))
-
-        print 'done'
-
-        #============================================================================
-        # Generate data for Case 4
         #============================================================================
         values = (MenuItem('should raise an error', 1.0),
                  'antidisestablishmentaranism',
@@ -2561,9 +2981,9 @@ class ConfirmationSystemTest(unittest.TestCase):
                  self)
 
         #============================================================================
-        # Case 4: Testing for appropriate error be raised given non-datetime date
+        # Case 3: Testing for appropriate error be raised given non-datetime date
         # object.
-        print TABS * 3 + 'Testing Case 4...',
+        print TABS * 3 + 'Testing Case 3...',
         #============================================================================
         for date in values:
             self.assertRaises(StandardError, ConfirmationSystem._update_date_table,
@@ -2572,9 +2992,9 @@ class ConfirmationSystemTest(unittest.TestCase):
         print 'done'
 
         #============================================================================
-        # Case 5: Testing for appropriate error to be raised given non-sqlite3
+        # Case 4: Testing for appropriate error to be raised given non-sqlite3
         # .connection object for database.
-        print TABS * 3 + 'Testing Case 5...',
+        print TABS * 3 + 'Testing Case 4...',
         #============================================================================
         for database in values:
             self.assertRaises(StandardError, ConfirmationSystem._update_date_table,
@@ -2621,37 +3041,28 @@ class ConfirmationSystemTest(unittest.TestCase):
         #
         # Case 4:
         #
-        #       Pass data that is specifically togo or order and ensure the
-        #       correct area displays which type of order it was.
-        #
-        # Case 5:
-        #
         #       Pass in specific number of MenuItem objects for the order,
         #       expect specific frequency data to be displayed
         #
-        # Case 6:
+        # Case 5:
         #
         #       Error raised when non-MenuItem order is passed in as order.
         #
-        # Case 7:
+        # Case 6:
         #
         #       Error raised when non-datetime object is passed in as date.
         #
-        # Case 8:
+        # Case 7:
         #
         #       Error raised when non-sqlite3.connection object is passed
         #       in as database.
         #============================================================================
         # Generate initial data for testing cases.
         #============================================================================
-        dir = path.SYSTEM_ORDERS_CONFIRMED_DIRECTORY
-        order_data, togo_data = _populate_directory_with_random_orders(dir,
-                                    save_data=False)
+        curr_dir = path.SYSTEM_ORDERS_CONFIRMED_DIRECTORY
 
         db = ConfirmationSystem._check_and_create_orders_database(':memory:')
 
-        data = \
-            _add_order_data_to_database(order_data.values() + togo_data.values(), db)
 
         def get_order_data(db):
             c = db.cursor()
@@ -2661,22 +3072,88 @@ class ConfirmationSystemTest(unittest.TestCase):
                                  '     OrderData;')
             return row_data.fetchall()
 
-        def get_specific_order_data(order_number, db):
-            c = db.cursor()
-            row_data = c.execute('SELECT '
-                                 '      *'
-                                 'FROM '
-                                 '      OrderData '
-                                 'WHERE '
-                                 '      OrderNumber=?;', (order_number,))
-            return row_data.fetchall()
+        def generate_and_add_to_orders_database(db, n=GENERATOR_MAX,
+                                                num_of_items=10,
+                                                notification_data=False,
+                                                item_frequency=False):
+            rand_name = generate_random_names(n=n)
+            rand_time = generate_random_times(n=n)
+            rand_item = generate_random_menu_items(n=n)
 
+            counter = _get_current_num_database_rows(db, 'OrderData')
+
+            while counter < n:
+                order_name = rand_name.next()
+                order_date = rand_time.next()
+                order_data = []
+
+                notif_data = []
+                item_freq = Counter()
+                for x in xrange(num_of_items):
+                    item = rand_item.next()
+
+                    order_data.append(item)
+
+                    if notification_data and item.is_notification():
+                        notif_data.append(item)
+
+                    if item_frequency:
+                        item_freq[item.get_name()] += 1
+
+                subtotal = get_order_subtotal(order_data)
+                tax = get_total_tax(subtotal)
+                total = get_total(order_data)
+
+                order_standard = True
+                order_togo = False
+
+                if TOGO_SEPARATOR in order_name:
+                    order_standard = False
+                    order_togo = True
+
+                u_data = update(order_date, order_data, order_name, notif_data,
+                                item_freq, database=db)
+
+                data = (counter,
+                        order_date.strftime(SQLITE_DATE_TIME_FORMAT_STR),
+                        order_name,
+                        subtotal,
+                        tax,
+                        total,
+                        notification_data,
+                        jsonpickle.encode(notif_data),
+                        jsonpickle.encode(item_freq),
+                        order_standard,
+                        order_togo,
+                        jsonpickle.encode(order_data))
+
+                self.assertEqual(data, u_data)
+                yield data
+
+                counter += 1
+
+            rand_name.close()
+            rand_time.close()
+            rand_item.close()
+
+        update = ConfirmationSystem._update_order_table
+
+        #============================================================================
+        # Generate data for testing Case 1
+        #============================================================================
+        rand_date_update = generate_and_add_to_orders_database(db)
+        data = []
         #============================================================================
         # Case 1: Testing general data parsing and storage by the database. Expect
         # for the row to be accurately displayed.
         print TABS * 3 + 'Testing Case 1...',
         #============================================================================
-        self.assertEqual(get_order_data(db), data)
+        for x in xrange(NUM_OF_CYCLES):
+            updated_data = rand_date_update.next()
+            data.append(updated_data)
+
+            self.assertEqual(get_order_data(db), data)
+
         print 'done'
 
         #============================================================================
@@ -2690,28 +3167,9 @@ class ConfirmationSystemTest(unittest.TestCase):
         #============================================================================
         # Generate data for Case 3.
         #============================================================================
-        # Generate random names for order.
-        order_name = ''.join(random.sample(POSSIBLE_CHARS, 30))
-        std_name = ConfirmationSystem.standardize_file_name(order_name)
-
-        # Generate notification list to test for.
-        notification_list = []
-
-        for x in xrange(15):
-
-            item = DiscountItem('.'.join(random.sample(POSSIBLE_CHARS, 30)),
-                                random.randint(1, 100), 'a')
-            notification_list.append(item)
-
-        notification_data = (std_name, std_name, notification_list)
-
-        # Insert list and find order number to check for proper storage.
-        updated_data = _add_order_data_to_database((notification_data,), db)
-
-        order_number = ConfirmationSystem.current_order_counter - 1
-
-        unpacked_data = get_specific_order_data(order_number, db)
-        data += updated_data
+        rand_date_update.close()
+        rand_date_update = generate_and_add_to_orders_database(db,
+                                                               notification_data=True)
 
         #============================================================================
         # Case 3: Testing notification data flag and notification data json.
@@ -2719,64 +3177,31 @@ class ConfirmationSystemTest(unittest.TestCase):
         # and displayed accurately in the notifications json file.
         print TABS * 3 + 'Testing Case 3...',
         #============================================================================
-        # index 7 is the column that the notification data is in.
-        self.assertEqual(unpacked_data, updated_data)
-        self.assertEqual(data, get_order_data(db))
+        for x in xrange(NUM_OF_CYCLES):
+            updated_data = rand_date_update.next()
+
+            data.append(updated_data)
+            self.assertTrue(len(jsonpickle.decode(updated_data[7])) > 0)
+            self.assertEqual(get_order_data(db), data)
         print 'done'
 
         #============================================================================
         # Generating data for Case 4
         #============================================================================
-        order_data, togo_data = _populate_directory_with_random_orders(dir,
-                                  save_data=False)
+        rand_date_update.close()
+        rand_date_update = generate_and_add_to_orders_database(db,
+                                                               item_frequency=True)
 
         #============================================================================
-        # Case 4: Testing order type data storage in database. Passing in a
-        # specific, different order type. Expecting the specific order type to be
-        # displayed correctly.
+        # Case 4: Testing order database for accuracy of displayed item frequency.
         print TABS * 3 + 'Testing Case 4...',
         #============================================================================
-        data += _add_order_data_to_database(order_data.values(), database=db)
-        unpacked_data = get_order_data(db)
-        self.assertEqual(data, unpacked_data)
+        for x in xrange(NUM_OF_CYCLES):
+            updated_data = rand_date_update.next()
 
-        data += _add_order_data_to_database(togo_data.values(), database=db)
-        unpacked_data = get_order_data(db)
-        self.assertEqual(data, unpacked_data)
-
-        print 'done'
-
-        #============================================================================
-        # Generate data to test item frequency
-        #============================================================================
-
-        item_counter = Counter()
-
-        for x in xrange(50):
-
-            name = ''.join(random.sample(POSSIBLE_CHARS, 30))
-
-            for num in xrange(random.randint(1, 50)):
-                item_counter[name] += 1
-
-        order_data = [MenuItem('test', 1.0)]
-
-        data = ConfirmationSystem._update_order_table(datetime.now(), order_data,
-                                                      'test_name', [],
-                                                      item_counter, database=db)
-        # Because the returned unpacked data will be in a list
-        data = [data]
-
-        #============================================================================
-        # Case 5: Testing item frequency data storage. Passing in a specific
-        # number of MenuItems in the order. Expect the frequency to be adequately
-        # represented.
-        print TABS * 3 + 'Testing Case 5...',
-        #============================================================================
-        unpacked_data = get_specific_order_data(
-            ConfirmationSystem.current_order_counter - 1, db)
-        self.assertEqual(data, unpacked_data)
-
+            data.append(updated_data)
+            self.assertTrue(len(jsonpickle.encode(updated_data[8])) > 0)
+            self.assertEqual(get_order_data(db), data)
         print 'done'
 
         #============================================================================
@@ -2789,9 +3214,9 @@ class ConfirmationSystemTest(unittest.TestCase):
                   [])
 
         #============================================================================
-        # Case 6: Testing for AttributeError raised when given a list of non
+        # Case 5: Testing for AttributeError raised when given a list of non
         # menuitem objects as order data.
-        print TABS * 3 + 'Testing Case 6...',
+        print TABS * 3 + 'Testing Case 5...',
         #============================================================================
         for order_data in values:
             self.assertRaises(StandardError, ConfirmationSystem._update_order_table,
@@ -2800,9 +3225,9 @@ class ConfirmationSystemTest(unittest.TestCase):
         print 'done'
 
         #============================================================================
-        # Case 7: Testing for AttributeError raised when given a non datetime
+        # Case 6: Testing for AttributeError raised when given a non datetime
         # object as the order date.
-        print TABS * 3 + 'Testing Case 7...',
+        print TABS * 3 + 'Testing Case 6...',
         #============================================================================
         for date in values:
             self.assertRaises(StandardError, ConfirmationSystem._update_order_table,
@@ -2811,9 +3236,9 @@ class ConfirmationSystemTest(unittest.TestCase):
         print 'done'
 
         #============================================================================
-        # Case 8: Testing for AttributeError raised when given a non
+        # Case 7: Testing for AttributeError raised when given a non
         # sqlite3.connection object as the database
-        print TABS * 3 + 'Testing Case 8...',
+        print TABS * 3 + 'Testing Case 7...',
         #============================================================================
         for database in values:
             self.assertRaises(StandardError, ConfirmationSystem._update_order_table,
@@ -2864,26 +3289,7 @@ class ConfirmationSystemTest(unittest.TestCase):
         #============================================================================
         # Generating initial data to perform tests
         #============================================================================
-        dir = path.SYSTEM_ORDERS_CONFIRMED_DIRECTORY
-
         db = ConfirmationSystem._check_and_create_orders_database(':memory:')
-
-        order_data, togo_data = _populate_directory_with_random_orders(dir,
-                                    save_data=False)
-
-        item_data = []
-        counter = 0
-        for std_name, file_path, items in order_data.values() + togo_data.values():
-
-            f_time, f_name, f_type = \
-                ConfirmationSystem.parse_standardized_file_name(std_name)
-
-            for item in items:
-
-                curr_data = ConfirmationSystem._update_item_table(f_time, item, db)
-                item_data.append(curr_data)
-
-            counter += 1
 
         def get_item_data(db):
             c = db.cursor()
@@ -2893,42 +3299,77 @@ class ConfirmationSystemTest(unittest.TestCase):
                              '      ItemData;')
             return data.fetchall()
 
+        def generate_and_add_item_data(db, n=GENERATOR_MAX, is_notification=0.5):
+            rand_item = generate_random_menu_items(is_notification=is_notification)
+            rand_time = generate_random_times()
+
+            counter = ConfirmationSystem.current_order_counter
+
+            while counter < n:
+
+                item_date = rand_time.next()
+                item = rand_item.next()
+
+
+
+                u_data = update(item_date, item, database=db)
+
+                data = (counter,
+                        item.get_name(),
+                        item_date.strftime(SQLITE_DATE_TIME_FORMAT_STR),
+                        int(item.is_notification()),
+                        jsonpickle.encode(item))
+
+                self.assertEqual(data, u_data)
+
+                yield data
+
+                counter += 1
+                ConfirmationSystem.current_order_counter += 1
+
+            rand_item.close()
+            rand_time.close()
+
+        update = ConfirmationSystem._update_item_table
+        data = []
+        #============================================================================
+        # Generate data for testing Case 1
+        #============================================================================
+        rand_item = generate_and_add_item_data(db, is_notification=0.0)
+
         #============================================================================
         # Case 1: Testing the standard Case looking for matching data on a row by
         # row basis. Randomly generated menu item names, times, and prices. Focus
         # is on date, menu item data, and json str.
         print TABS * 3 + 'Testing Case 1...',
         #============================================================================
-        unpacked_data = get_item_data(db)
-        self.assertTrue(len(unpacked_data) > 0)
-        self.assertEqual(unpacked_data, item_data)
+        for x in xrange(NUM_OF_CYCLES):
+            generated_data = rand_item.next()
+            data.append(generated_data)
 
+            unpacked_data = get_item_data(db)
+
+            self.assertEqual(data, unpacked_data)
         print 'done'
 
         #============================================================================
         # Generate data for test case 2.
         #============================================================================
-        for x in range(random.randint(1, 100)):
-
-            name = ''.join(random.sample(POSSIBLE_CHARS, 30))
-            price = random.randint(1, 100)
-            note = ''.join(random.sample(POSSIBLE_CHARS, 50))
-
-            curr_data = ConfirmationSystem._update_item_table(datetime.now(),
-                          DiscountItem(name, price, note), database=db)
-
-            item_data.append(curr_data)
-
+        rand_item.close()
+        rand_item = generate_and_add_item_data(db, is_notification=1.0)
 
         #============================================================================
         # Case 2: Notification flag case. Testing for notification flag being
         # tripped on data.
         print TABS * 3 + 'Testing Case 2...',
         #============================================================================
-        unpacked_data = get_item_data(db)
-        self.assertTrue(len(unpacked_data) > 0)
-        self.assertEqual(unpacked_data, item_data)
+        for x in xrange(NUM_OF_CYCLES):
+            generated_data = rand_item.next()
+            data.append(generated_data)
 
+            unpacked_data = get_item_data(db)
+
+            self.assertEqual(data, unpacked_data)
         print 'done'
 
         #============================================================================
@@ -2939,15 +3380,16 @@ class ConfirmationSystemTest(unittest.TestCase):
                   10,
                   True,
                   self)
+
         def ensure_database_unchanged(db):
-            return unpacked_data == get_item_data(db)
+            return data == get_item_data(db)
         #============================================================================
         # Case 3: Testing error raised when a non datetime object is given as date.
         print TABS * 3 + 'Testing Case 3...',
         #============================================================================
         for date in values:
-            self.assertRaises(StandardError, ConfirmationSystem._update_item_table,
-                              date, MenuItem('test', 1.0), database=db)
+            self.assertRaises(StandardError, update, date, MenuItem('test', 1.0),
+                              database=db)
 
         self.assertTrue(ensure_database_unchanged(db))
 
@@ -2959,8 +3401,8 @@ class ConfirmationSystemTest(unittest.TestCase):
         print TABS * 3 + 'Testing Case 4...',
         #============================================================================
         for item in values:
-            self.assertRaises(StandardError, ConfirmationSystem._update_item_table,
-                              datetime.now(), item, database=db)
+            self.assertRaises(StandardError, update, datetime.now(), item,
+                              database=db)
         self.assertTrue(ensure_database_unchanged(db))
 
         print 'done'
@@ -2971,9 +3413,8 @@ class ConfirmationSystemTest(unittest.TestCase):
         print TABS * 3 + 'Testing Case 5...',
         #============================================================================
         for database in values:
-            self.assertRaises(StandardError, ConfirmationSystem._update_item_table,
-                              datetime.now(), MenuItem('test', 1.0),
-                              database=database)
+            self.assertRaises(StandardError, update, datetime.now(),
+                              MenuItem('test', 1.0), database=database)
 
         self.assertTrue(ensure_database_unchanged(db))
 
@@ -3013,9 +3454,19 @@ class ConfirmationSystemTest(unittest.TestCase):
         #
         # Case 3:
         #
-        #       Populated directory. All order names are parse-able.
+        #       Testing Case 1 but with directory populated by randomly generated
+        #       files. Expect identical outcome.
         #
         # Case 4:
+        #
+        #       Testing Case 2 but with directory populated by randomly generated
+        #       files. Expect identical outcome
+        #
+        # Case 5.
+        #
+        #       Populated directory. All order names are parse-able.
+        #
+        # Case 6:
         #
         #       Given non-str order_name expect Error raised.
         #
@@ -3024,91 +3475,149 @@ class ConfirmationSystemTest(unittest.TestCase):
         #============================================================================
         # Generate initial data for test cases.
         #============================================================================
-        dir = path.SYSTEM_ORDERS_CONFIRMED_DIRECTORY
+        curr_dir = path.SYSTEM_ORDERS_CONFIRMED_DIRECTORY
 
-        def pull_directory_files(dir):
-            files = {}
-            dirnames, dirpaths, filenames = os.walk(dir).next()
+        def pull_directory_data(dir):
+            data = {}
+            dirname, dirpath, filenames = os.walk(dir).next()
 
             for filename in filenames:
-                with open(dir + '/' + filename, 'r') as f:
-                    files[filename] = jsonpickle.decode(f.read())
+                try:
+                    ConfirmationSystem.parse_standardized_file_name(filename)
+                    filepath = curr_dir + '/' + filename
+                    with open(filepath, 'r') as f:
+                        data[filepath] = jsonpickle.decode(f.read())
 
-            return files
-
-        def generate_and_store_data(dir):
-            data = {}
-
-            order_data = _populate_directory_with_random_orders(dir, save_data=False)
-            order_data = order_data[0].items() + order_data[1].items()
-
-            for order_name, (std_name, file_path, file_data) in order_data:
-                file_name = ConfirmationSystem.order_confirmed(order_name, [],
-                                [], file_data)
-                data[file_name] = file_data
+                except ValueError:
+                    pass
 
             return data
 
+        def generate_file_data(dir):
+            data = {}
+
+            rand_order = _generate_random_order()
+
+            for x in xrange(NUM_OF_CYCLES):
+                std_name, order_data = rand_order.next()
+
+                p_time, p_name, p_type = \
+                    ConfirmationSystem.parse_standardized_file_name(std_name)
+
+                filepath = dir + '/' + std_name
+
+                confirm(p_name, [], order_data, order_data, set_time=p_time)
+
+                data[filepath] = order_data
+
+            return data
+
+        confirm = ConfirmationSystem.order_confirmed
         #============================================================================
         # Generate data for testing Case 1
         #============================================================================
-        data = generate_and_store_data(dir)
-        unpacked_data = pull_directory_files(dir)
+        generated_data = generate_file_data(curr_dir)
+        unpacked_data = pull_directory_data(curr_dir)
 
         #============================================================================
         # Case 1: Testing standard case. Adding unique names/values as files in
         # the directory. Pulling that data and then checking they are identical.
         print TABS * 3 + 'Testing Case 1...',
         #============================================================================
-        self.assertTrue(len(data) > 0)
-        self.assertEqual(data, unpacked_data)
+        self.assertTrue(len(unpacked_data) > 0)
+        self.assertEqual(generated_data, unpacked_data)
         print 'done'
 
         #============================================================================
         # Generate data for testing Case 2
         #============================================================================
-        prev_data = data
-        data = generate_and_store_data(dir)
+        def generate_duplicate_names(dir, prev_data):
+            data = {}
 
-        for file_name, order_data in prev_data.items():
-            f_time, f_name, f_type = \
-                ConfirmationSystem.parse_standardized_file_name(file_name)
+            rand_item = generate_random_menu_items()
+            for filepath, order_data in prev_data.items():
+                new_order_data = order_data + [rand_item.next()]
+                _, std_name = filepath.split(dir + '/')
 
-            file_name = ConfirmationSystem.order_confirmed(f_name, [],
-                                                           [], order_data)
-            data[file_name] = order_data
+                p_time, p_name, p_type = \
+                    ConfirmationSystem.parse_standardized_file_name(std_name)
 
-        unpacked_data = pull_directory_files(dir)
+                curr_time = datetime.now()
+
+                std_name = ConfirmationSystem.standardize_file_name(p_name,
+                            set_time=curr_time)
+
+                confirm(p_name, [], new_order_data, new_order_data,
+                        set_time=curr_time)
+
+                data[dir + '/' + std_name] = new_order_data
+
+            rand_item.close()
+            return data
+
+        generated_data = generate_duplicate_names(curr_dir, generated_data)
+        unpacked_data = pull_directory_data(curr_dir)
 
         #============================================================================
         # Case 2: Testing
         print TABS * 3 + 'Testing Case 2...',
         #============================================================================
-        self.assertTrue(len(data) > 0)
-        self.assertEqual(data, unpacked_data)
+        self.assertTrue(len(unpacked_data) > 0)
+        self.assertEqual(generated_data, unpacked_data)
 
         print 'done'
 
         #============================================================================
-        # Generating data for test Case 3
+        # Generate data for testing Case 3
+        #============================================================================
+        shutil.rmtree(curr_dir)
+        os.mkdir(curr_dir)
+
+        _populate_non_parseable_random_files(curr_dir)
+        generated_data = generate_file_data(curr_dir)
+        unpacked_data = pull_directory_data(curr_dir)
+
+        #============================================================================
+        # Case 3: Testing Case 1 but with directory also containing randomly
+        # generated files.
+        print TABS * 3 + 'Testing Case 3...',
+        #============================================================================
+        self.assertTrue(len(unpacked_data) > 0)
+        self.assertEqual(generated_data, unpacked_data)
+        print 'done'
+
+        #============================================================================
+        # Generate data for testing Case 4
+        #============================================================================
+        generated_data = generate_duplicate_names(curr_dir, generated_data)
+        unpacked_data = pull_directory_data(curr_dir)
+
+        #============================================================================
+        # Case 4: Testing Case 2 but with directory containing randomly generated
+        # files.
+        print TABS * 3 + 'Testing Case 4...',
+        #============================================================================
+        self.assertTrue(len(unpacked_data) > 0)
+        self.assertEqual(generated_data, unpacked_data)
+        print 'done'
+
+        #============================================================================
+        # Generating data for test Case 5
         #============================================================================
         order_names = unpacked_data
 
         #============================================================================
-        # Case 3: We know at this point that both prev_data and the unpacked data
-        # will be equal at any given time. This is necessary for them to pass
-        # through both tests and have no other code executed. As such now I will
-        # simply check that all file names are parsable.
-        print TABS * 3 + 'Testing Case 3...',
+        # Case 5: Testing that file data has been correctly saved as parseable.
+        print TABS * 3 + 'Testing Case 5...',
         #============================================================================
         for order_name in order_names:
-            self.assertIsNotNone(
-                ConfirmationSystem.parse_standardized_file_name(order_name))
+            _, name = order_name.split(curr_dir + '/')
+            self.assertIsNotNone(ConfirmationSystem.parse_standardized_file_name(name))
 
         print 'done'
 
         #============================================================================
-        # Generate data for test Case 4
+        # Generate data for test Case 6
         #============================================================================
         values = (10.0,
                   10,
@@ -3120,8 +3629,8 @@ class ConfirmationSystemTest(unittest.TestCase):
         priority_order = order_data
 
         #============================================================================
-        # Case 4: Testing error raised when improper order name is given.
-        print TABS * 3 + 'Testing Case 4...',
+        # Case 6: Testing error raised when improper order name is given.
+        print TABS * 3 + 'Testing Case 6...',
         #============================================================================
         for order_names in values:
             self.assertRaises(StandardError, ConfirmationSystem.order_confirmed,
@@ -3174,15 +3683,6 @@ class ConfirmationSystemTest(unittest.TestCase):
         #
         # Case 5:
         #
-        #   Confirmed directory populated with both parse-able and non-parse-able
-        #   filenames that represent orders and non-orders respectively. Previously
-        #   populated checkout directory. Given orders that represents an order
-        #   split into several checks. Expect data to accurately be displayed in
-        #   filenames as single order. All parse-able confirmed directory files
-        #   have been removed.
-        #
-        # Case 6:
-        #
         #   non string order name given. Expect error raised.
         #
         # //TODO provide additional test cases to test for data being accurately
@@ -3194,84 +3694,81 @@ class ConfirmationSystemTest(unittest.TestCase):
         checkout_dir = path.SYSTEM_ORDERS_CHECKOUT_DIRECTORY
         confirm_dir = path.SYSTEM_ORDERS_CONFIRMED_DIRECTORY
 
-        def add_orders_data(curr_data, split_orders=False):
+        def generate_data(checkout_dir, confirm_dir, n=NUM_OF_CYCLES,
+                          save_data=False):
+            checkout_data = {}
+
+            rand_order = _generate_random_order(is_checkout=True)
+            rand_time = generate_random_times()
+
+            for x in xrange(n):
+                std_name, order_data = rand_order.next()
+
+                p_time, p_name, p_type = \
+                    ConfirmationSystem.parse_standardized_file_name(std_name)
+
+                if save_data:
+                    save_data_to_file(order_data, confirm_dir + '/' + std_name)
+
+                confirm(p_name, (order_data,), order_data, set_time=p_time)
+
+                checkout_data[std_name] = order_data
+
+            return checkout_data
+
+        def pull_file_data(curr_dir):
             data = {}
 
-            if split_orders:
-                split_data = [(x,) for x in curr_data]
-            else:
-                split_data = curr_data
+            dirpath, dirname, filenames = os.walk(curr_dir).next()
 
-            for order_name, (std_name, file_path, order_data) in curr_data:
-                name = ConfirmationSystem.checkout_confirmed(order_name,
-                                                             (split_data,),
-                                                             order_data)
-                data[name] = order_data
+            for filename in filenames:
+
+                try:
+                    ConfirmationSystem.parse_standardized_file_name(filename)
+                    filepath = curr_dir + '/' + filename
+                    with open(filepath, 'r') as f:
+                        order_data = jsonpickle.decode(f.read())
+
+                    data[filename] = order_data
+
+                except ValueError:
+                    pass
 
             return data
 
-        def add_non_parseable_data(dir):
-            data = {}
+        def pull_all_file_data(curr_dir):
+            dirpath, dirname, filenames = os.walk(curr_dir).next()
+            return sorted(filenames)
 
-            for x in xrange(random.randint(1, 100)):
-                name = ''.join(random.sample(string.ascii_letters, 30))
-                file_data = name
-                data[name] = name
-
-                with open(dir + '/' + name, 'w') as f:
-                    f.write(jsonpickle.encode(file_data))
-
-            return data
-
-        def pull_directory_data(dir):
-            data = {}
-
-            dirnames, dirpaths, file_names = os.walk(dir).next()
-            for file_name in file_names:
-
-                with open(dir + '/' + file_name, 'r') as f:
-                    order_data = jsonpickle.decode(f.read())
-                    data[file_name] = order_data
-
-            return data
-
-        def clear_directory(dir):
-            shutil.rmtree(dir)
-            os.mkdir(dir)
-
+        confirm = ConfirmationSystem.checkout_confirmed
         #============================================================================
         # Generate data for test Case 1
         #============================================================================
-        order_data, togo_data = _populate_directory_with_random_orders(
-            checkout_dir, save_data=False)
-
-        updated_data = add_orders_data(order_data.items() + togo_data.items())
-        unpacked_data = pull_directory_data(checkout_dir)
+        generated_data = generate_data(checkout_dir, confirm_dir)
+        unpacked_data = pull_file_data(checkout_dir)
 
         #============================================================================
         # Case 1: Testing standard care. With empty directories the given orders
         # are added and the files saved as expected.
         print TABS * 3 + 'Testing Case 1...',
         #============================================================================
-        self.assertEqual(updated_data, unpacked_data)
+        self.assertTrue(len(unpacked_data) > 0)
+        self.assertEqual(generated_data, unpacked_data)
         print 'done'
 
         #============================================================================
         # Generate data for test Case 2
         #============================================================================
-        prev_updated_data = updated_data
-        non_parsed_data = add_non_parseable_data(confirm_dir)
-        order_data, togo_data = _populate_directory_with_random_orders(confirm_dir,
-                                   save_data=False)
+        non_parsed_data = _populate_non_parseable_random_files(confirm_dir)
 
-        updated_data = add_orders_data(order_data.items() + togo_data.items())
+        prev_generated_data = generated_data
+        generated_data = generate_data(checkout_dir, confirm_dir)
+        generated_data.update(prev_generated_data)
 
-        # This makes sense. Since ever file name will contain a unique time stamp.
-        updated_data.update(prev_updated_data)
+        unpacked_data = pull_file_data(checkout_dir)
 
-        unpacked_data = pull_directory_data(checkout_dir)
+        unpacked_confirm_data = pull_all_file_data(confirm_dir)
 
-        unpacked_confirm_data = pull_directory_data(confirm_dir)
 
         #============================================================================
         # Case 2: Testing multiple files case. In this case multiple non-parse-able
@@ -3280,23 +3777,22 @@ class ConfirmationSystemTest(unittest.TestCase):
         # and the non-parse-able files should be left untouched and intact.
         print TABS * 3 + 'Testing Case 2...',
         #============================================================================
-        self.assertEqual(updated_data, unpacked_data)
+        self.assertEqual(unpacked_data, generated_data)
         self.assertEqual(non_parsed_data, unpacked_confirm_data)
         print 'done'
 
         #============================================================================
         # Generate data for test Case 3
         #============================================================================
-        prev_updated_data = updated_data
-        clear_directory(confirm_dir)
+        shutil.rmtree(confirm_dir)
+        shutil.rmtree(checkout_dir)
+        os.mkdir(confirm_dir)
+        os.mkdir(checkout_dir)
 
-        order_data, togo_data = _populate_directory_with_random_orders(confirm_dir)
+        generated_data = generate_data(checkout_dir, confirm_dir, save_data=True)
+        unpacked_data = pull_file_data(checkout_dir)
 
-        updated_data = add_orders_data(order_data.items() + togo_data.items())
-        updated_data.update(prev_updated_data)
-
-        unpacked_data = pull_directory_data(checkout_dir)
-        unpacked_confirm_data = pull_directory_data(confirm_dir)
+        unpacked_confirm_data = pull_all_file_data(confirm_dir)
 
         #============================================================================
         # Case 3: Testing confirmed directory contains only parse-able file names.
@@ -3305,7 +3801,7 @@ class ConfirmationSystemTest(unittest.TestCase):
         # been removed and the checkout directory contains the data.
         print TABS * 3 + 'Testing Case 3...',
         #============================================================================
-        self.assertEqual(updated_data, unpacked_data)
+        self.assertEqual(generated_data, unpacked_data)
         self.assertEqual(len(unpacked_confirm_data), 0)
 
         print 'done'
@@ -3313,52 +3809,29 @@ class ConfirmationSystemTest(unittest.TestCase):
         #============================================================================
         # Generate data for test Case 4
         #============================================================================
-        prev_updated_data = updated_data
-        order_data, togo_data = _populate_directory_with_random_orders(confirm_dir)
-        non_parsed_data = add_non_parseable_data(confirm_dir)
+        non_parsed_data = _populate_non_parseable_random_files(confirm_dir)
 
-        updated_data = add_orders_data(order_data.items() + togo_data.items())
-        updated_data.update(prev_updated_data)
+        prev_generated_data = generated_data
+        generated_data = generate_data(checkout_dir, confirm_dir, save_data=True)
+        generated_data.update(prev_generated_data)
 
-        unpacked_data = pull_directory_data(checkout_dir)
-        unpacked_confirm_data = pull_directory_data(confirm_dir)
+        unpacked_data = pull_file_data(checkout_dir)
+
+        unpacked_confirm_data = pull_all_file_data(confirm_dir)
 
         #============================================================================
         # Case 4: Testing confirmed directory contains only non-parse-able file
         # names after it has contained both parseable and non-parseable file names.
         print TABS * 3 + 'Testing Case 4...',
         #============================================================================
-        self.assertEqual(updated_data, unpacked_data)
+        self.assertEqual(generated_data, unpacked_data)
         self.assertEqual(unpacked_confirm_data, non_parsed_data)
 
         print 'done'
 
+
         #============================================================================
         # Generate data for test Case 5
-        #============================================================================
-        prev_updated_data = updated_data
-        prev_non_parsed_data = non_parsed_data
-        order_data, togo_data = _populate_directory_with_random_orders(confirm_dir)
-
-        updated_data = add_orders_data(order_data.items() + togo_data.items(),
-                                       split_orders=True)
-        updated_data.update(prev_updated_data)
-
-        unpacked_data = pull_directory_data(checkout_dir)
-        unpacked_confirm_data = pull_directory_data(confirm_dir)
-
-        #============================================================================
-        # Case 5: Testing that the introduction of a split check doesn't alter the
-        # functionality of the function.
-        print TABS * 3 + 'Testing Case 5...',
-        #============================================================================
-        self.assertEqual(updated_data, unpacked_data)
-        self.assertEqual(unpacked_confirm_data, prev_non_parsed_data)
-
-        print 'done'
-
-        #============================================================================
-        # Generate data for test Case 6
         #============================================================================
         values = (open,
                   10.0,
@@ -3368,8 +3841,8 @@ class ConfirmationSystemTest(unittest.TestCase):
         order_data = [MenuItem('testing', 1.0)]
 
         #============================================================================
-        # Case 6: Testing for a non-string given as order name
-        print TABS * 3 + 'Testing Case 6...',
+        # Case 5: Testing for a non-string given as order name
+        print TABS * 3 + 'Testing Case 5...',
         #============================================================================
         for order_name in values:
             self.assertRaises(StandardError, ConfirmationSystem.checkout_confirmed,
