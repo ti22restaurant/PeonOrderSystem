@@ -9,10 +9,15 @@ them into an xls document that is more human readable.
 import os
 import jsonpickle
 import xlsxwriter
+from collections import Counter
 from datetime import time, date, datetime, timedelta
 
 from src.peonordersystem.PackagedData import PackagedOrderData
-from src.peonordersystem.Settings import SQLITE_DATE_TIME_FORMAT_STR
+from src.peonordersystem.Settings import (SQLITE_DATE_TIME_FORMAT_STR,
+                                          OPEN_TIME,
+                                          CLOSE_TIME,
+                                          CHANGE_IN_CHART_DATE_AXIS,
+                                          )
 from src.peonordersystem import path
 from src.peonordersystem.MenuItem import MenuItem, DiscountItem
 from src.peonordersystem import ConfirmationSystem
@@ -28,91 +33,25 @@ TODAY = datetime.now()
 TODAY_DIRECTORY = AUDIT_DIRECTORY + '/' + TODAY.strftime('%Y/%m/%d')
 
 if not os.path.exists(TODAY_DIRECTORY):
-    os.mkdir(TODAY_DIRECTORY)
+    os.makedirs(TODAY_DIRECTORY)
 
 REQUEST_DIRECTORY = AUDIT_DIRECTORY + "/requests"
 
 if not os.path.exists(REQUEST_DIRECTORY):
     os.mkdir(REQUEST_DIRECTORY)
 
-#====================================================================================
-# This block represents constants utilized in generating the title area
-#====================================================================================
-TITLE_ROW_START = 0
-TITLE_ROW_END = 2
 
-TITLE_AREA_ROW_HEIGHT = 30
-
-TITLE_AREA_FORMAT = {'bottom': 1,
-                     'bold': True,
-                     'align': 'center',
-                     'valign': 'vcenter',
-                     'font_size': 10}
-
-DATE_FORMAT = {'num_format': 'd mmmm yyyy'}
-DATE_TIME_FORMAT = {'num_format': 'dd/mm/yy hh:mm:ss'}
 
 #====================================================================================
-# This block represents constants utilized in generating the totals area
+# This block represents functions and constants that are useable for generating
+# charts and their data.
 #====================================================================================
-TOTAL_AREA_ROW_START = TITLE_ROW_END
-TOTAL_AREA_ROW_END = TOTAL_AREA_ROW_START + 2
+DEFAULT_CHART_WIDTH = 950
+DEFAULT_CHART_HEIGHT = 400
 
-TOTAL_AREA_ROW_HEIGHT = 20
-
-TOTAL_DATA_FORMAT = {'top': 1,
-                     'bottom': 1,
-                     'bold': True,
-                     'valign': 'vcenter',
-                     'font_size': 10}
-
-SUBTOTAL_DATA_FORMAT = {'top': 1,
-                        'bottom': 1,
-                        'font_color': 'gray',
-                        'valign': 'vcenter',
-                        'font_size': 8}
-
-MONEY_FORMAT = {'num_format': '$#,##0.00;[Red]-$#,##0.00'}
-
-#====================================================================================
-# This block represents constants utilized in generating an arbitrary area.
-#====================================================================================
-AREA_COL_NUM = 2
-AREA_COL_WIDTH = 20
-
-#====================================================================================
-# This block represents constants utilized in generating formats
-#====================================================================================
-format_dict = {}
-
-BOLD_TOP_BORDER_FORMAT = {'top': 2,
-                          'bold': True}
-
-BOLD_BOTTOM_BORDER_FORMAT = {'bottom': 2,
-                             'bold': True}
-
-LEFT_COL_FORMAT = {'left': 1,
-                   'align': 'left'}
-
-RIGHT_COL_FORMAT = {'right': 1,
-                    'align': 'right'}
-
-ITEM_NOTE_FORMAT = {'text_wrap': True,
-                    'font_color': 'gray',
-                    'font_size': 9}
-
-ITEM_INFO_FORMAT = {'font_color': 'gray',
-                    'font_size': 10,
-                    'indent': 1}
-
-NOTIF_TIME_FORMAT = {'font_color': 'gray',
-                     'font_size': 10,
-                     'indent': 1,
-                     'num_format': 'hh:mm:ss'}
-
-ORDER_SUBTOTAL_FORMAT = {'font_color': 'gray',
-                         'font_size': 8,
-                         'num_format': '$#,##0.00'}
+# THESE NUMBERS FOUND EXPERIMENTALLY
+DEFAULT_CHART_WIDTH_IN_COLUMNS = 14
+DEFAULT_CHART_HEIGHT_IN_ROWS = 19
 
 
 #====================================================================================
@@ -139,6 +78,7 @@ def create_formats(workbook):
 
     format_dict['date_format'] = workbook.add_format(DATE_FORMAT)
     format_dict['datetime_format'] = workbook.add_format(DATE_TIME_FORMAT)
+    format_dict['time_format'] = workbook.add_format(TIME_FORMAT)
     format_dict['notif_time_format'] = workbook.add_format(NOTIF_TIME_FORMAT)
 
     format_dict['money_format'] = workbook.add_format(MONEY_FORMAT)
@@ -264,6 +204,32 @@ def _generate_title_area(worksheet, start_row, start_column, curr_date, title):
     return curr_row, start_column
 
 
+def _increment_time_value(curr_time_value, time_increment=CHANGE_IN_CHART_DATE_AXIS):
+    """Gets the next value for the given time value. This will increment
+    the time value by the time_increment keyword.
+
+    @note: For any values that exceed the time.max value and
+    carry over to 00:00 this function will return the time.max
+    value instead.
+
+    @param curr_time_value: datetime.time object that is
+    to have the next incremented
+
+    @keyword time_increment: the datetime.timdelta that
+    the time is to be incremented by.
+
+    @return: datetime.time value representing the new
+    incremented time value.
+    """
+    curr = datetime.combine(datetime.now(), curr_time_value) + time_increment
+    curr = curr.time()
+
+    if curr < curr_time_value:
+        return time.max
+
+    return curr
+
+
 #====================================================================================
 # This block represents all functions that are used for generating data for the
 # general date sheet which displays orders for that date, notification data for
@@ -328,7 +294,7 @@ def generate_date_sheet(worksheet, row, column, curr_date, packaged_orders_data)
     #================================================================================
     for packaged_order in packaged_orders_data:
         order_name = packaged_order.name
-        order_date = packaged_order.date
+        order_date = packaged_order.datetime
         totals = packaged_order.totals
 
         #============================================================================
@@ -462,7 +428,7 @@ def date_sheet_create_order_area(worksheet, first_row, first_column,
     the (row, col) as the bottom left hand corner
     of which the created area stops.
     """
-    curr_date = packaged_order_data.date
+    curr_date = packaged_order_data.datetime
     name = packaged_order_data.name
     data = packaged_order_data.data
 
@@ -643,3 +609,357 @@ def add_notification_item(worksheet, first_row, first_column, notification_date,
     worksheet.write(curr_row, first_column + 1, item_type, item_info_format)
 
     return curr_row + 1, first_column
+
+
+#====================================================================================
+# This block represents all functions that are used for generating data for the
+# date overview audit sheet which displays data gathered from orders for the
+# specific date. This includes order totals, item frequency, order rates etc.
+#
+#   These areas are known as:
+#
+#   1. main area: Displays the overview which represents the orders data totaled.
+# This area mirrors the area from the date sheet.
+#
+#   2. item frequency area: represents the items ordered as a percentage of a
+# total items ordered.
+#
+#   3. items ordered chart: represents the items ordered as a chart with the y
+# axis being number of orders and the x axis being time.
+#
+#   4. order total chart: represents the orders ordered as a chart with y axis
+# being the total and the x axis being the time.
+#
+#   5. order number chart: represents the number of orders as a char with y axis
+# representing the number of orders and x axis being time.
+#====================================================================================
+def date_overview_sheet_chart(workbook, worksheet, first_row, first_column, data):
+    """Generates a chart from the keys/values of the given data.
+
+    @param workbook: xlsxwriter.Workbook object that represents
+    the workbook that should have the chart created in it.
+
+    @param worksheet: xlsxwriter.Worksheet object that represents
+    the worksheet that should have the chart displayed in it.
+
+    @param first_row: int representing the starting row that
+    the chart should be displayed at.
+
+    @param first_column: int representing the starting column
+    that the chart should be displayed at.
+
+    @param data: dict that represents the key and values to
+    be formed into a chart. These keys will represent the values
+    displayed at the x axis, with the values of y displayed as
+    the function on the y axis. Data given is expected to be in
+    sorted order by dates.
+
+    @return: tuple of (int, int) representing the row and
+    column that the chart area terminates at and is safe to
+    add more data to the worksheet.
+    """
+    curr_date = data[0].date
+
+    #================================================================================
+    # Generate hidden data
+    #================================================================================
+    start_col = worksheet_data['col']
+    start_row = worksheet_data['row']
+
+    end_row, end_col = _add_values_to_data_worksheet(data)
+
+    rng = xlsxwriter.utility.xl_range_abs(start_row, start_col, end_row, end_col)
+    worksheet_data['items_data'][curr_date] = '=' + HIDDEN_WORKSHEET_NAME + '!' + rng
+
+    #================================================================================
+    # Generate base chart
+    #================================================================================
+    chart = _generate_item_chart(workbook)
+    worksheet.insert_chart(first_row, first_column, chart)
+
+def _generate_item_chart(workbook, data):
+    """
+
+    @param workbook:
+    @param data:
+    @return:
+    """
+
+    return chart
+
+def _generate_item_chart_data(curr_date):
+    """
+
+    @param curr_date:
+    @return:
+    """
+
+def _generate_item_chart_view(workbook, order_date):
+    """
+
+    @return:
+    """
+    chart = workbook.add_chart({'type': 'line'})
+
+    chart.add_series({
+        'categories': worksheet_data['time_keys_data'],
+        'values': worksheet_data['items_data'][order_date],
+    })
+
+    chart.set_x_axis({
+        'name': 'Items order by time',
+        'name_font': {'bold': True, 'size': 10},
+        'num_font': {'size': 5},
+    })
+
+    chart.set_size({
+        'width': DEFAULT_CHART_WIDTH,
+        'height': DEFAULT_CHART_HEIGHT,
+    })
+
+
+def date_overview_sheet_item_freq_area(worksheet, first_row, first_column,
+                                       curr_date, item_freq_data):
+    """Generates the item frequency area for the date overview sheet.
+
+    @param worksheet: xlsxwriter.Worksheet that the data
+    will be written to.
+
+    @param first_row: int representing the first row that
+    the area should be written to.
+
+    @param first_column: int representing the first column
+    that the area should be written to.
+
+    @param curr_date: datetime.date object that represents
+    the date associated with the item frequency data.
+
+    @param item_freq_data: collections.Counter object that
+    represents the total of MenuItems mapping str
+    representing the MenuItem name to int representing the
+    number of times it was used.
+
+    @return: tuple of (int, int) representing the row
+    and column values that this area terminates and is
+    safe to add data to.
+    """
+    last_column = first_column + AREA_COL_NUM
+    create_standard_worksheet_format(worksheet)
+    _format_columns(worksheet, first_column, last_column)
+    curr_row, col = _generate_title_area(worksheet, first_row, first_column,
+                                         curr_date, 'Item Frequency Data')
+
+    #================================================================================
+    # Constants to be used in generating totals area.
+    #================================================================================
+    totals_area = curr_row
+    totals = 0.0
+    curr_row += AREA_COL_NUM + 1
+
+    #================================================================================
+    # Generate item frequency
+    #================================================================================
+    total_item_nums = sum(item_freq_data.values())
+
+    start_freq_row = curr_row
+
+    for item_name, item_freq in item_freq_data.most_common():
+        p_freq = round(item_freq / total_item_nums, 2)
+        totals += p_freq
+
+        curr_row, col = _add_item_frequency_data(worksheet, curr_row, first_column,
+                                                 item_name, p_freq)
+
+    worksheet.conditional_format(start_freq_row, last_column, curr_row, last_column,
+                                 ITEM_FREQ_FORMAT)
+
+    #================================================================================
+    # Generate totals area
+    #================================================================================
+    total_data_format = format_dict['total_data_format']
+    subtotal_data_format = format_dict['subtotal_data_format']
+
+    totals_error = 1.0 - totals
+
+    worksheet.write(totals_area, first_column, 'Frequency Totals', total_data_format)
+    worksheet.write(totals_area, last_column, totals)
+    totals_area += 1
+
+    worksheet.write(totals_area, first_column, 'Frequency Totals Error', subtotal_data_format)
+    worksheet.write(totals_area, last_column, totals_error)
+    totals_area += 1
+
+    return curr_row, first_column
+
+
+def _add_item_frequency_data(worksheet, first_row, first_column, item_name,
+                            item_freq):
+    """Adds the given item frequency data to the given row and column.
+
+    @param worksheet: xlsxwriter.Worksheet that represents the worksheet
+    that the data should be written to.
+
+    @param first_row: int representing the row that the data
+    should be added to.
+
+    @param first_column: int representing the column that
+    the data should be added to.
+
+    @param item_name: str representing the name of
+    the item.
+
+    @param item_freq: float value representing the
+    percentage associated with the frequency of the
+    item being ordered.
+
+    @return: tuple (int, int) representing the
+    row and column beneath the generated data where
+    it would be safe to insert more data.
+    """
+    curr_row = first_row
+    last_column = first_column + AREA_COL_NUM
+
+    worksheet.write(curr_row, first_column, item_name)
+    worksheet.write(curr_row, last_column, item_freq)
+    worksheet.conditional_format(curr_row, last_column, curr_row,
+                                 last_column, {'type': 'data_bar'})
+
+    curr_row += 1
+
+    return curr_row, first_column
+
+
+def _add_values_to_data_worksheet(data):
+    """Adds the given value, obtained through the given
+    data func performed on one of its indices, to the
+    data worksheet.
+
+    @param data: deque of values that are to have
+    the data func performed on them if they are within
+    the given range. Each value is expected to have a
+    date property. Furthermore each value is expected
+    to be in sorted order according to the date property.
+
+    @return: tuple of (int, int) representing the
+    row and column respectively that the data list
+    encompasses.
+    """
+    global worksheet_data
+
+    data_worksheet = worksheet_data[HIDDEN_WORKSHEET_NAME]
+    data_col = worksheet_data['col']
+    data_row = worksheet_data['row']
+
+    values = _categorize_data(data)
+    data_worksheet.write_column(data_row, data_col, values)
+
+    worksheet_data['col'] += 1
+
+    return data_row + len(values), data_col
+
+
+def _categorize_data(order_data):
+    """Categorizes the data into
+    groups by the time steps in
+    time_keys.
+
+    @param data: deque of PackagedData
+    objects that represents the data
+    to be categorized.
+
+    @return: list of values that hold
+    a one to one correspondence with the
+    time keys stored in the worksheet data
+    area.
+    """
+    categorized_data = []
+    time_keys = worksheet_data['time_keys']
+
+    for time_step in time_keys:
+        next_time_step = _get_next_time_step(time_step)
+        value = _get_data_within_time_range(time_step, next_time_step, order_data)
+        categorized_data.append(value)
+
+    return categorized_data
+
+
+def _get_next_time_step(current_time, time_increment=CHANGE_IN_CHART_DATE_AXIS):
+    """Gets the next time value, which is obtained by incrementing
+    the given time by the increment value, up to time.max
+
+    @param current_time: datetime.time that represents the
+    time to be incremented.
+
+    @param time_increment: datetime.timedelta that represents
+    the time to be edited
+
+    @return:
+    """
+    next_time = datetime.combine(datetime.now(), current_time) + time_increment
+    next_time = next_time.time()
+
+    if next_time < current_time:
+        return time.max
+
+    return next_time
+
+
+def _get_data_within_time_range(time_step, next_time_step, data_deque):
+    """Gets the data that is within this current time
+    step but doesn't exceed the next uniform time step.
+
+    @param time_step: datetime.time object representing
+    the lower limit for the time range.
+
+    @param data_deque: collections.deque object of
+    PackagedData that represents the data to be
+    gathered.
+
+    @return: int representing the value assocaited
+    with the
+    """
+    if data_deque and (data_deque[0].time < next_time_step):
+        packaged_data = data_deque.popleft()
+        num_of_items = 0
+
+        if packaged_data.time >= time_step:
+            num_of_items = len(packaged_data)
+
+        return num_of_items + _get_data_within_time_range(time_step, next_time_step,
+                                                          data_deque)
+
+    return 0
+
+
+
+if __name__ == "__main__":
+
+    letters = 'abcdefghijklmnopqrstuvwxyz'
+
+    import random
+    from collections import Counter, deque
+
+
+    workbook = xlsxwriter.Workbook('test.xlsx')
+    worksheet = workbook.add_worksheet('testZOR')
+    create_formats(workbook)
+
+    c = deque([PackagedOrderData(
+        (random.randint(1, 100),
+         (datetime.now() + timedelta(minutes=x)).strftime(
+             SQLITE_DATE_TIME_FORMAT_STR),
+         random.choice(letters),
+         95.0,
+         5.0,
+         100.0,
+         False,
+         jsonpickle.encode([]),
+         jsonpickle.encode([]),
+         True,
+         False,
+         jsonpickle.encode([MenuItem(random.choice(letters), 10.0) for x in xrange(1)]))
+    ) for x in range(-1170, 24 * 60,  5)])
+
+    generate_data_worksheet(workbook)
+    date_overview_sheet_line_chart(workbook, worksheet, 0, 0, c)
+    workbook.close()

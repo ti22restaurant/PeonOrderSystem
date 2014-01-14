@@ -10,7 +10,7 @@ be adjusted.
 """
 import re
 import string
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 
 SYSTEM_TITLE = 'Fish Cake Factory'
 
@@ -55,6 +55,11 @@ SALES_TAX = .10
 #==============================================================================
 AUDIT_FILE_TYPE = '.xlsx'
 CLOSING_AUDIT_DEFAULT_NAME = 'closing_audit'
+
+OPEN_TIME = time.min
+CLOSE_TIME = time.max
+
+TIME_GROUPING = timedelta(minutes=15)
 
 #==============================================================================
 # This block represents constants that are utilized by the orders area for
