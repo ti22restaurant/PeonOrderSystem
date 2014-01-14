@@ -10,7 +10,7 @@ from collections import deque
 from datetime import datetime, date, time, timedelta
 
 from src.peonordersystem.worksheet import DataWorksheet, Worksheet, DisplayWorksheet
-from src.peonordersystem.SpreadsheetAreas import GeneralDateSheetOrderArea
+from src.peonordersystem.SpreadsheetAreas import GeneralDatesheetOrderArea
 from src.peonordersystem.PackagedData import PackagedDateData, PackagedItemData, \
     PackagedOrderData
 
@@ -213,7 +213,7 @@ class Workbook(xlsxwriter.Workbook):
         self.worksheets_objs.append(worksheet)
         self.sheetnames.append(init_data['name'])
 
-        g = GeneralDateSheetOrderArea(packaged_data, self.format_dict)
+        g = GeneralDatesheetOrderArea(packaged_data, self.format_dict)
         worksheet.add_area(g)
 
         return worksheet
