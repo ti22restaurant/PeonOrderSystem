@@ -102,10 +102,10 @@ SUBTOTAL_DATA_FORMAT = {'font_color': 'gray',
                         'right': 1,
                         'num_format': '$#,##0.00'}
 
-LEFT_COL_FORMAT = {'left': 2,
+LEFT_COL_FORMAT = {'left': 1,
                    'align': 'left'}
 
-RIGHT_COL_FORMAT = {'right': 2,
+RIGHT_COL_FORMAT = {'right': 1,
                     'align': 'right'}
 
 DATE_FORMAT = {'num_format': 'd mmmm yyyy',
