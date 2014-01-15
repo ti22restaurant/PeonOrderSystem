@@ -3,51 +3,115 @@
 """
 
 import xlsxwriter
-from copy import copy, deepcopy
 from abc import ABCMeta, abstractmethod
 
 
 class SpreadsheetArea(object):
-    """
+    """Abstract Base Class.
 
+    SpreadsheetArea class represents the abstract
+    base class that implements the base functionality
+    for any area. The base area provides the following
+    functionality:
+
+        1.  Formats the cells for the standard for the area.
+            including:
+
+            i.      Title area
+            ii.     Subtitle area
+            iii.    Totals area
+            iv.     Subtotals area
+            v.      Data area
+
+        2.  Provides functions for adding data to the title
+            and subtitle areas. Total and subtotal areas.
+
+        3.  Requires an add class that adds data to the
+            Data area.
+
+    @warning: This area class is relatively uncoupled from the worksheet prior
+    to using the connect method. Most functionality is inaccessible until a
+    worksheet has been coupled with the class. Upon coupling the worksheet
+    should be considered a permanent property of this area and not altered
+    in any way.
+
+    @var format_dict: dict that maps str to xlsxwriter.Formats. This
+    is used to access and utilize all format data.
+
+    @var worksheet: xlsxwriter.worksheet.Worksheet object that
+    represents the worksheet that this area is connected to. Once
+    coupled the worksheet shouldn't be changed.
+
+    @var row: int representing the current row that data can be
+    written to.
+
+    @var col: int representing the current col that data can be
+    written to.
+
+    @var initial_row: int representing the initial starting row
+    for this area on the worksheet.
+
+    @var initial_col: int representing the initial starting col
+    for this area on the worksheet.
+
+    @var area_end_col: int representing the final column that data
+    can be added to without exceeding the column boundaries for the
+    area.
     """
     #================================================================================
     # Constants used for generating the columns area.
     #================================================================================
     AREA_COL_NUM = 3
-    AREA_COL_WIDTH = 20
+    AREA_COL_WIDTH = 22
 
     #================================================================================
     # Constants used for generating the title area.
     #================================================================================
-    NUM_OF_MAIN_TITLE_ROWS = 1
+    NUM_OF_MAIN_TITLE_ROWS = 2
     NUM_OF_SUBTITLE_ROWS = 1
+    TITLE_AREA_ROW_HEIGHT = 40
 
+    #///////////////////////////////////////////////////////////////////////////////
+    # These constants shouldn't be edited. They are relative to other defined
+    # constants and any changes in the editable constants will be reflected here
+    #////////////////////////////////////////////////////////////////////////////////
     # Subtract one because of zero based indexing.
-    TITLE_AREA_START = 0
-    TITLE_AREA_END = TITLE_AREA_START + NUM_OF_MAIN_TITLE_ROWS + \
-                     NUM_OF_SUBTITLE_ROWS - 1
+    _TITLE_AREA_START = 0
+    _TITLE_AREA_END = _TITLE_AREA_START + NUM_OF_MAIN_TITLE_ROWS + \
+                      NUM_OF_SUBTITLE_ROWS - 1
 
-    TITLE_AREA_ROW_HEIGHT = 30
+    #////////////////////////////////////////////////////////////////////////////////
 
     #================================================================================
     # Constants used for generating the total area.
     #================================================================================
     NUM_OF_MAIN_TOTAL_ROWS = 1
     NUM_OF_SUBTOTAL_ROWS = 2
+    TOTAL_AREA_ROW_HEIGHT = 30
 
+    #////////////////////////////////////////////////////////////////////////////////
+    # These constants shouldn't be edited. They are relative to other defined
+    # constants and any changes in the editable constants will be reflected here
+    #////////////////////////////////////////////////////////////////////////////////
     # Alter by one because of zero based indexing
-    TOTAL_AREA_START = TITLE_AREA_END + 1
-    TOTAL_AREA_END = TOTAL_AREA_START + NUM_OF_MAIN_TOTAL_ROWS + \
+    _TOTAL_AREA_START = _TITLE_AREA_END + 1
+    _TOTAL_AREA_END = _TOTAL_AREA_START + NUM_OF_MAIN_TOTAL_ROWS + \
                      NUM_OF_SUBTOTAL_ROWS - 1
 
-    TOTAL_AREA_ROW_HEIGHT = 20
+    #////////////////////////////////////////////////////////////////////////////////
 
     #================================================================================
     # Constants used for generating the data area.
     #================================================================================
+
+    #////////////////////////////////////////////////////////////////////////////////
+    # These constants shouldn't be edited. They are relative to other defined
+    # constants and any changes in the editable constants will be reflected here
+    #////////////////////////////////////////////////////////////////////////////////
     # Alter by one because of zero based indexing
-    DATA_AREA_START = TOTAL_AREA_END + 1
+    _DATA_AREA_START = _TOTAL_AREA_END + 1
+
+    #////////////////////////////////////////////////////////////////////////////////
 
     __metaclass__ = ABCMeta
 
@@ -126,7 +190,6 @@ class SpreadsheetArea(object):
 
         self._worksheet = worksheet
         self.format_area()
-
         return self.row, self.col + self.AREA_COL_NUM
 
     def _check_worksheet(self, worksheet):
@@ -215,7 +278,7 @@ class SpreadsheetArea(object):
         that the title area terminates at.
         """
         self._format_title_area_cells()
-        return self.TITLE_AREA_END + self.initial_row + 1, self.initial_col
+        return self._TITLE_AREA_END + self.initial_row + 1, self.initial_col
 
     def _format_title_area_cells(self):
         """Formats the cells for the title
@@ -225,8 +288,8 @@ class SpreadsheetArea(object):
         """
         formats = self._get_row_title_formats()
 
-        area_start = self.TITLE_AREA_START + self.initial_row
-        area_end = self.TITLE_AREA_END + self.initial_row
+        area_start = self._TITLE_AREA_START + self.initial_row
+        area_end = self._TITLE_AREA_END + self.initial_row
 
         for row in range(area_start, area_end + 1):
             self._format_cells_row(row, formats)
@@ -242,7 +305,7 @@ class SpreadsheetArea(object):
         that the total area terminates at.
         """
         self._format_total_area_cells()
-        return self.TOTAL_AREA_END + self.initial_row + 1, self.initial_col
+        return self._TOTAL_AREA_END + self.initial_row + 1, self.initial_col
 
     def _format_total_area_cells(self):
         """Formats the total area cells
@@ -260,7 +323,7 @@ class SpreadsheetArea(object):
         """
         formats = self._get_row_title_formats()
 
-        area_start = self.TOTAL_AREA_START + self.initial_row
+        area_start = self._TOTAL_AREA_START + self.initial_row
         area_end = area_start + self.NUM_OF_MAIN_TOTAL_ROWS
 
         for row in range(area_start, area_end + 1):
@@ -275,7 +338,7 @@ class SpreadsheetArea(object):
         """
         formats = self._get_row_subtitle_formats()
 
-        area_start = self.TOTAL_AREA_START + self.initial_row
+        area_start = self._TOTAL_AREA_START + self.initial_row
         area_end = area_start + self.NUM_OF_SUBTOTAL_ROWS
 
         for row in range(area_start, area_end + 1):
@@ -365,6 +428,198 @@ class SpreadsheetArea(object):
         """
         pass
 
+    def update_title_data(self, title_data, date_data):
+        """Updates the displayed title data with the
+        given title and date data.
+
+        @param title_data: str representing the title
+        that should be displayed in this area.
+
+        @param date_data: datetime.datetime object
+        that represents the date that should be
+        displayed in this area.
+
+        @return: None
+        """
+        self._update_title_data_date(date_data)
+        self._update_title_data_main(title_data)
+
+    def _update_title_data_main(self, title_data):
+        """Updates the title areas main title data.
+
+        @return: None
+        """
+        title_start = self._TITLE_AREA_START + self.initial_row
+        title_end = self._TITLE_AREA_START + self.NUM_OF_MAIN_TITLE_ROWS - 1 +\
+                    self.initial_row
+
+        title_format = self._get_format_main_title()
+
+        self.worksheet.merge_range(title_start, self.initial_col,
+                                   title_end, self.area_end_col,
+                                   data=title_data, cell_format=title_format)
+
+    def _get_format_main_title(self):
+        """Gets the format for the main title.
+
+        @return: xlsxwriter.Format object that
+        represents the main title format.
+        """
+        return self.format_dict['main_title_data_format']
+
+    def _update_title_data_date(self, date_data):
+        """Updates the title data date area with the
+        given date data.
+
+        @return: None
+        """
+        date_row = self._TITLE_AREA_START + self.NUM_OF_MAIN_TITLE_ROWS + \
+                   self.initial_row
+
+        title_format = self._get_format_date_title()
+        datetime_format = self._get_format_date_data()
+
+        self.worksheet.write(date_row, self.initial_col, 'Date: ', title_format)
+        self.worksheet.write_datetime(date_row, self.initial_col + 1, date_data,
+                                      datetime_format)
+
+    def _get_format_date_data(self):
+        """Gets the format for the date data
+
+        @return: xlsxwriter.Format object that
+        represents the format for the displayed
+        date data.
+        """
+        return self.format_dict['datetime_format']
+
+    def _get_format_date_title(self):
+        """Gets the format for the date title
+
+        @return xlsxwriter.Format object that
+        represents the format for the displayed
+        date title.
+        """
+        return self.format_dict['title_format_left']
+
+    def update_total_data(self, totals_data, subtotals_data):
+        """Updates the displayed total data with the given
+        total and subtotal data respectively.
+
+        @raise ValueError: If the given totals data and subtotals data
+        do match the expected length of the totals and subtotals area
+        within this area.
+
+        @param totals_data: list of (string, float) tuples where
+        each index represents the name and number associated with
+        the totals data to be displayed.
+
+        @param subtotals_data: list of (string, float) tuples where
+        each index represents the name and number associated with
+        the subtotals data to be displayed.
+
+        @return: None
+        """
+        self._check_totals_data(totals_data, self.NUM_OF_MAIN_TOTAL_ROWS)
+        self._check_totals_data(subtotals_data, self.NUM_OF_SUBTOTAL_ROWS)
+
+        self._update_totals_data_total(totals_data)
+        self._update_totals_data_subtotal(subtotals_data)
+
+    def _check_totals_data(self, totals_data, expected_length):
+        """Checks that the given totals datas length is equal to
+        the given expected length.
+
+        @raise ValueError: If the length of the given totals data
+        doesn't match the given expected length.
+
+        @return: bool value representing if the test was passed.
+        """
+        if not totals_data or not len(totals_data) == expected_length:
+            exp_value = expected_length
+            curr_value = len(totals_data)
+            raise ValueError('Expected given totals data to contain an equal number '
+                             'of entries to the expected number of total rows. '
+                             'Expected: {}, Received: {}'.format(exp_value,
+                                                                 curr_value))
+        return True
+
+    def _update_totals_data_total(self, totals_data):
+        """Updates the total area with the given
+        totals data.
+
+        @param totals_data: list of tuple (str, float)
+        representing the name and total data associated
+        with the name and data that should be added to
+        the totals area.
+
+        @return: None
+        """
+        row = self._TOTAL_AREA_START + self.initial_row
+
+        for total_name, total_data in totals_data:
+
+            title_format = self._get_format_total_title()
+            self.worksheet.write(row, self.initial_col, total_name, title_format)
+
+            total_format = self._get_format_total_data()
+            self.worksheet.write(row, self.area_end_col, total_data, total_format)
+
+            row += 1
+
+    def _get_format_total_title(self):
+        """Gets the format for the total title.
+
+        @return: xlsxwriter.Format that represents
+        the format for the total title.
+        """
+        return self.format_dict['title_format_left']
+
+    def _get_format_total_data(self):
+        """Gets the format for the total data.
+
+        @return: xlsxwriter.Format that represents
+        the format for the total data.
+        """
+        return self.format_dict['total_data_format']
+
+    def _update_totals_data_subtotal(self, subtotals_data):
+        """Updates the subtotal data of the totals area.
+
+        @param subtotals_data: list of tuple (str, float)
+        representing the subtotal name and subtotal value
+        that is associated with the subtotals to be displayed.
+
+        @return: None
+        """
+        row = self._TOTAL_AREA_START + self.NUM_OF_MAIN_TOTAL_ROWS + self.initial_row
+
+        for subtotal_name, subtotal_data in subtotals_data:
+
+            subtitle_format = self._get_format_subtotal_title()
+            self.worksheet.write(row, self.initial_col, subtotal_name,
+                                 subtitle_format)
+
+            subtotal_format = self._get_format_subtotal_data()
+            self.worksheet.write(row, self.area_end_col, subtotal_data,
+                                 subtotal_format)
+
+            row += 1
+
+    def _get_format_subtotal_title(self):
+        """Gets the format to display the subtotal title.
+
+        @return: xlsxwriter.Format that represents
+        the subtotal title format.
+        """
+        return self.format_dict['subtitle_format_left']
+
+    def _get_format_subtotal_data(self):
+        """Gets the format for displaying the subtotal data.
+
+        @return: xlsxwriter.Format object that is used
+        to display the format of the subtotal data.
+        """
+        return self.format_dict['subtotal_data_format']
 
 
 class GeneralDatesheetOrderArea(SpreadsheetArea):
