@@ -68,6 +68,7 @@ class DisplayWorksheet(Worksheet):
         self.row, self.col = spreadsheet_area.connect(self)
 
 
+
 class DataWorksheet(Worksheet):
     """
 

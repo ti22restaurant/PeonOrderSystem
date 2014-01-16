@@ -3,6 +3,7 @@
 """
 
 import xlsxwriter
+from collections import Counter
 from abc import ABCMeta, abstractmethod
 
 from src.peonordersystem.MenuItem import is_menu_item, MenuItem
@@ -92,7 +93,7 @@ class SpreadsheetArea(object):
     #================================================================================
     NUM_OF_MAIN_TOTAL_ROWS = 1
     NUM_OF_SUBTOTAL_ROWS = 2
-    TOTAL_AREA_ROW_HEIGHT = 30
+    TOTAL_AREA_ROW_HEIGHT = 25
 
     #////////////////////////////////////////////////////////////////////////////////
     # These constants shouldn't be edited. They are relative to other defined
@@ -108,7 +109,7 @@ class SpreadsheetArea(object):
     #================================================================================
     # Constants used for generating the data area.
     #================================================================================
-    DATA_ROW_HEIGHT = 20
+    DATA_ROW_HEIGHT = 25
 
     #////////////////////////////////////////////////////////////////////////////////
     # These constants shouldn't be edited. They are relative to other defined
@@ -790,7 +791,7 @@ class GeneralDatesheetOrderArea(SpreadsheetArea):
         values = super(GeneralDatesheetOrderArea, self).connect(worksheet)
         self.update_title_data()
         self.update_total_data()
-        self.update_items_data()
+        self._update_items_data()
         return values
 
     def _update_items_data(self):
@@ -1173,3 +1174,209 @@ class GeneralDatesheetOrderArea(SpreadsheetArea):
         to display the item note data.
         """
         return self.format_dict['subitem_data_format_center']
+
+class GeneralDatesheetFrequencyArea(SpreadsheetArea):
+    """
+
+    """
+    NUM_OF_SUBTOTAL_ROWS = 1
+
+
+    def __init__(self, curr_date, item_data, format_dict):
+        """
+
+        @param packaged_data:
+        @param format_dict:
+        @return:
+        """
+        self.date = curr_date
+        self.item_data = Counter()
+        self.total_num_of_elements = 0.0
+        self._update_item_data(item_data)
+
+        self.freq_data = Counter()
+        self.freq_total = 0.0
+        self.freq_error = 0.0
+        self._update_freq_data()
+
+        super(GeneralDatesheetFrequencyArea, self).__init__(format_dict)
+
+    def _update_item_data(self, item_data):
+        """
+
+        @param item_data:
+        @return:
+        """
+        self.item_data += item_data
+        self.total_num_of_elements += self._get_total_num_of_elements(item_data)
+
+    def _update_freq_data(self):
+        """
+
+        @return:
+        """
+        self.freq_data = self._get_freq_data()
+        self.freq_total = self._get_freq_total(self.freq_data)
+        self.freq_error = self._get_freq_error(self.freq_total)
+
+    def _get_freq_data(self):
+        """
+
+        @return:
+        """
+        data = Counter()
+
+        for item_name, item_count in self.item_data.most_common():
+            data[item_name] = round(item_count / self.total_num_of_elements, 2)
+
+        return data
+
+    @staticmethod
+    def _get_freq_total(freq_data):
+        """
+
+        @return:
+        """
+        return sum(freq_data.values())
+
+    @staticmethod
+    def _get_freq_error(freq_total):
+        return 1 - freq_total
+
+    @staticmethod
+    def _get_total_num_of_elements(freq_data):
+        """
+
+        @return:
+        """
+        return float(len(list(freq_data.elements())))
+
+    def connect(self, worksheet):
+        """
+
+        @param worksheet:
+        @return:
+        """
+        values = super(GeneralDatesheetFrequencyArea, self).connect(worksheet)
+
+        self.update_header_data()
+        self._write_item_frequency_data()
+
+        return values
+
+    def update_header_data(self):
+        """
+
+        @return:
+        """
+        self.update_title_data()
+        self.update_total_data()
+
+    def update_title_data(self):
+        """
+
+        @return:
+        """
+        name = 'Item Frequency for {}'.format(self.date)
+
+        super(GeneralDatesheetFrequencyArea, self).update_title_data(name, self.date)
+
+    def update_total_data(self):
+        """
+
+        @return:
+        """
+        total_data = self._get_total_data()
+        subtotal_data = self._get_subtotal_data()
+
+        super(GeneralDatesheetFrequencyArea, self).update_total_data(total_data,
+                                                                     subtotal_data)
+
+    def _get_total_data(self):
+        """
+
+        @return:
+        """
+        return ('Total Frequency', self.freq_total),
+
+    def _get_format_total_data(self):
+        """
+
+        @return:
+        """
+        return self.format_dict['title_format_right']
+
+    def _get_subtotal_data(self):
+        """
+
+        @return:
+        """
+        return ('Frequency Error', self.freq_error),
+
+    def _get_format_subtotal_data(self):
+        """
+
+        @return:
+        """
+        return self.format_dict['subtitle_format_right']
+
+    def add(self, item_data):
+        """
+
+        @param item_data:
+        @return:
+        """
+        self._update_item_data(item_data)
+        self._update_freq_data()
+
+        self.update_header_data()
+        self._write_item_frequency_data
+
+    def _write_item_frequency_data(self):
+        """
+
+        @return:
+        """
+        self.row = self._DATA_AREA_START - 1
+        print self.row
+
+        for item_name, freq_value in self.freq_data.most_common():
+            self._write_item_name(item_name)
+            self._write_item_data(freq_value)
+            self.row += 1
+
+    def _write_item_name(self, item_name):
+        """
+
+        @param item_name:
+        @return:
+        """
+        format = self._get_item_name_format()
+        self.write_data(item_name, format=format)
+
+    def _get_item_name_format(self):
+        """
+
+        @return:
+        """
+        return self.format_dict['item_data_format_left']
+
+    def _write_item_data(self, value):
+        """
+
+        @param value:
+        @return:
+        """
+        format = self._get_item_data_format()
+        self.write_data(value, col=self.area_end_col, format=format)
+
+    def _get_item_data_format(self):
+        """
+
+        @return:
+        """
+        return self.format_dict['item_data_format_right']
+
+
+
+
