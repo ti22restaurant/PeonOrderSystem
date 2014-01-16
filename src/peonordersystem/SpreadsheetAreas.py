@@ -5,6 +5,11 @@
 import xlsxwriter
 from abc import ABCMeta, abstractmethod
 
+from src.peonordersystem.MenuItem import is_menu_item, MenuItem
+from src.peonordersystem.CheckOperations import (get_total,
+                                                 get_total_tax,
+                                                 get_order_subtotal)
+
 
 class SpreadsheetArea(object):
     """Abstract Base Class.
@@ -103,6 +108,7 @@ class SpreadsheetArea(object):
     #================================================================================
     # Constants used for generating the data area.
     #================================================================================
+    DATA_ROW_HEIGHT = 20
 
     #////////////////////////////////////////////////////////////////////////////////
     # These constants shouldn't be edited. They are relative to other defined
@@ -155,17 +161,6 @@ class SpreadsheetArea(object):
         """
         return self._initial_col
 
-    @property
-    def worksheet(self):
-        """Gets the worksheet associated
-        with the area.
-
-        @return: xlsxwriter.worksheet.Worksheet
-        object representing the worksheet associated
-        with this area.
-        """
-        return self._worksheet
-
     def connect(self, worksheet):
         """Connects the worksheet to the
         SpreadsheetArea. The worksheet will
@@ -190,7 +185,9 @@ class SpreadsheetArea(object):
 
         self._worksheet = worksheet
         self.format_area()
-        return self.row, self.col + self.AREA_COL_NUM
+
+        self.row = self._DATA_AREA_START + self.initial_row
+        return self.initial_row, self.initial_col + self.AREA_COL_NUM
 
     def _check_worksheet(self, worksheet):
         """Checks that the worksheet is
@@ -247,7 +244,8 @@ class SpreadsheetArea(object):
         @return: None
         """
         format = self.format_dict['left_column']
-        self.worksheet.set_column(self.col, self.col, self.AREA_COL_WIDTH, format)
+        self._set_worksheet_column(first_col=self.col, last_col=self.col,
+                                   width=self.AREA_COL_WIDTH, format=format)
 
     def _format_area_columns_ends_right(self):
         """Formats the right most end column for
@@ -256,8 +254,9 @@ class SpreadsheetArea(object):
         @return: None
         """
         format = self.format_dict['right_column']
-        self.worksheet.set_column(self.area_end_col, self.area_end_col,
-                                   self.AREA_COL_WIDTH, format)
+        self._set_worksheet_column(first_col=self.area_end_col,
+                                   last_col=self.area_end_col,
+                                   width=self.AREA_COL_WIDTH, format=format)
 
     def _format_area_columns_center(self):
         """Formats the center most columns for the
@@ -265,8 +264,9 @@ class SpreadsheetArea(object):
 
         @return: None
         """
-        self.worksheet.set_column(self.col + 1, self.area_end_col - 1,
-                                   self.AREA_COL_WIDTH)
+        self._set_worksheet_column(first_col=self.col + 1,
+                                   last_col=self.area_end_col - 1,
+                                   width=self.AREA_COL_WIDTH)
 
     def _format_title_area(self):
         """formats the title area which
@@ -372,7 +372,7 @@ class SpreadsheetArea(object):
 
         for j in range(self.AREA_COL_NUM):
             format = formats[j]
-            self.worksheet.write_blank(row, j + self.initial_col, '', format)
+            self.write_data('', row=row, col=j + self.initial_col, format=format)
 
     def _format_cells_row_height(self, row, row_height):
         """Formats the cell row height.
@@ -385,7 +385,7 @@ class SpreadsheetArea(object):
 
         @return: None
         """
-        self.worksheet.set_row(row, row_height)
+        self._set_worksheet_row(row=row, height=row_height)
 
     def _get_row_title_formats(self):
         """Gets the row title formats. This
@@ -455,9 +455,10 @@ class SpreadsheetArea(object):
 
         title_format = self._get_format_main_title()
 
-        self.worksheet.merge_range(title_start, self.initial_col,
-                                   title_end, self.area_end_col,
-                                   data=title_data, cell_format=title_format)
+        self._merge_worksheet_range(title_start, title_end,
+                                    first_col=self.initial_col,
+                                    last_col=self.area_end_col,
+                                    data=title_data, format=title_format)
 
     def _get_format_main_title(self):
         """Gets the format for the main title.
@@ -479,9 +480,10 @@ class SpreadsheetArea(object):
         title_format = self._get_format_date_title()
         datetime_format = self._get_format_date_data()
 
-        self.worksheet.write(date_row, self.initial_col, 'Date: ', title_format)
-        self.worksheet.write_datetime(date_row, self.initial_col + 1, date_data,
-                                      datetime_format)
+        self.write_data('Date: ', row=date_row, col=self.initial_col,
+                        format=title_format)
+        self.write_data(date_data, row=date_row, col=self.initial_col + 1,
+                        format=datetime_format)
 
     def _get_format_date_data(self):
         """Gets the format for the date data
@@ -559,10 +561,12 @@ class SpreadsheetArea(object):
         for total_name, total_data in totals_data:
 
             title_format = self._get_format_total_title()
-            self.worksheet.write(row, self.initial_col, total_name, title_format)
+            self.write_data(total_name, row=row, col=self.initial_col,
+                            format=title_format)
 
             total_format = self._get_format_total_data()
-            self.worksheet.write(row, self.area_end_col, total_data, total_format)
+            self.write_data(total_data, row=row, col=self.area_end_col,
+                            format=total_format)
 
             row += 1
 
@@ -596,12 +600,12 @@ class SpreadsheetArea(object):
         for subtotal_name, subtotal_data in subtotals_data:
 
             subtitle_format = self._get_format_subtotal_title()
-            self.worksheet.write(row, self.initial_col, subtotal_name,
-                                 subtitle_format)
+            self.write_data(subtotal_name, row=row, col=self.initial_col,
+                            format=subtitle_format)
 
             subtotal_format = self._get_format_subtotal_data()
-            self.worksheet.write(row, self.area_end_col, subtotal_data,
-                                 subtotal_format)
+            self.write_data(subtotal_data, row=row, col=self.area_end_col,
+                            format=subtotal_format)
 
             row += 1
 
@@ -621,39 +625,551 @@ class SpreadsheetArea(object):
         """
         return self.format_dict['subtotal_data_format']
 
+    #================================================================================
+    # This block represents functions that rely on the functionality of worksheet
+    # method to operate properly. Any chances in the worksheet functionality may
+    # require changes here.
+    #================================================================================
+    def write_data(self, data, row=-1, col=-1, format=None):
+        """Writes the given data to the row, col with the given format.
+
+        @param data: value to be added to the spreadsheet on the
+        row, col with the format.
+
+        @keyword row: int representing the row for the data
+        to be added at. By default is self.row
+
+        @keyword col: int representing the column for the
+        data to be added to. By default is self.col
+
+        @keyword format: xlsxwriter.Format that represents
+        the format the data will be written with.
+
+        @return: 2 tuple of (int, int) representing the
+        row and column boundary that it is safe to add
+        new data to, on the same column.
+        """
+        if row < 0:
+            row = self.row
+        if col < 0:
+            col = self.col
+        self._set_worksheet_row(row)
+        self._worksheet.write(row, col, data, format)
+
+        return row + 1, col
+
+    def _merge_worksheet_range(self, start_row, end_row, first_col=None,
+                                   last_col=None, data=None, format=None):
+        """Merges the given range of the worksheet between
+        the two rows and applies other added data.
+
+        @param start_row: int representing the starting
+        row to merge.
+
+        @param end_row: int representing the ending row
+        to merge.
+
+        @keyword first_col: int representing the first column
+        to be in the merged range. By default is the initial
+        column of the area.
+
+        @keyword last_col: int representing the last column
+        to be in the merged range. By default is the area
+        end col of the area.
+
+        @keyword data: data to be added to the merged range.
+        By default is empty string.
+
+        @keyword format: xlsxwriter.Format that the merged
+        range should be formatted under. Default is None.
+
+        @return: 2 tuple of (int, int) representing the
+        row and column that is the boundary of the merged
+        range where it is safe to add new data to.
+        """
+        if not first_col:
+            first_col = self.initial_col
+        if not last_col:
+            last_col = self.area_end_col
+        if not data:
+            data = ''
+
+        self._worksheet.merge_range(start_row, first_col, end_row, last_col,
+                                    data=data, cell_format=format)
+        return end_row, first_col
+
+    def _set_worksheet_row(self, row=-1, height=None, format=None):
+        """Sets the height and format of a worksheet row.
+
+        @keyword row: int representing the row that should be set.
+        By default is self.row.
+
+        @param height: int representing the height of the row that
+        is to be set. By default is self.DATA_ROW_HEIGHT
+
+        @param format: xlsxwriter.Format that is to be applied
+        to the row. By default is None.
+
+        @return: None
+        """
+        if row < 0:
+            row = self.row
+        if not height:
+            height = self.DATA_ROW_HEIGHT
+        self._worksheet.set_row(row, height, cell_format=format)
+
+    def _set_worksheet_column(self, first_col=-1, last_col=-1, width=None,
+                              format=None):
+        """Sets the worksheet column range to a width and format.
+
+        @keyword first_col: int representing the first column in the
+        range. By default this is self.initial_col
+
+        @keyword last_col: int representing the last column in
+        the range. By default this is self.area_end_col
+
+        @keyword width: int representing the width of columns. Default
+        is self.AREA_COL_WIDTH
+
+        @keyword format: xlsxwriter.Format object that represents the
+        formats to be applied to the worksheet column range.
+
+        @return None
+        """
+        if first_col < 0:
+            first_col = self.initial_col
+            print 'boom'
+        if last_col < 0:
+            last_col = self.area_end_col
+        if not width:
+            width = self.AREA_COL_WIDTH
+
+        self._worksheet.set_column(first_col, last_col, width, cell_format=format)
+
 
 class GeneralDatesheetOrderArea(SpreadsheetArea):
-    """
+    """GeneralDatesheetOrderArea represents a general
+    order that is described through a PackagedOrderData
+    object and stores information regarding a single order.
 
+    This order area is used to parse and display data from
+    the PackagedOrderData.
+
+    @var: packaged_data: PackagedOrderData information that
+    this area should display.
     """
 
     def __init__(self, packaged_data, format_dict):
-        """
+        """Initializes the GeneralDatesheetOrderArea
+        object with the packaged data.
 
-        @param packaged_data:
-        @param format_dict:
-        @return:
+        @param packaged_data: PackagedOrderData object
+        that represents the order areas data.
+
+        @param format_dict: dict that maps str to
+        xlsxwriter.Formats that represent the formats
+        for cells.
         """
         self.packaged_data = packaged_data
         super(GeneralDatesheetOrderArea, self).__init__(format_dict)
 
-    def create_title_area(self):
-        """
+    def connect(self, worksheet):
+        """Override Method.
 
-        @return:
-        """
-        super(GeneralDatesheetOrderArea, self).create_title_area()
+        Connects the area to the worksheet.
 
-    def create_total_area(self):
-        """
+        @param worksheet: xlsxwriter.worksheet.Worksheet
+        object that represents the worksheet where
+        the area will be added.
 
-        @return:
+        @return: 2 tuple of (int, int) representing the
+        row and column that the area terminates at. This
+        is the coordinates for the upper right hand corner
+        where another area could be added.
         """
-        super(GeneralDatesheetOrderArea, self).create_total_area()
+        values = super(GeneralDatesheetOrderArea, self).connect(worksheet)
+        self.update_title_data()
+        self.update_total_data()
+        self.update_items_data()
+        return values
 
-    def add(self):
-        """
+    def _update_items_data(self):
+        """Updates the items data by adding
+        all the data stored in the packaged
+        data to the data area.
 
-        @return:
+        @return: None
         """
-        pass
+        for item in self.packaged_data.data:
+            self._write_item(item)
+
+    def update_title_data(self):
+        """Override Method.
+
+        Updates the title data
+
+        @return: None
+        """
+        name = self.packaged_data.name
+        date = self.packaged_data.datetime
+
+        super(GeneralDatesheetOrderArea, self).update_title_data(name, date)
+
+    def update_total_data(self):
+        """Override Method.
+
+        Updates the total data.
+
+        @return: None
+        """
+        totals = self._get_total_data()
+        subtotals = self._get_subtotal_data()
+
+        super(GeneralDatesheetOrderArea, self).update_total_data(totals,subtotals)
+
+    def _get_total_data(self):
+        """Gets the total data stored in this
+        areas packaged data.
+
+        @return: tuple where each entry represents the
+        (str, float) where the values are the total name
+        and total data respectively.
+        """
+        return ('total', self.packaged_data.totals['total']),
+
+    def _get_subtotal_data(self):
+        """Gets the subtotal data stored in this
+        areas packaged data.
+
+        @return: tuple where each entry represents the
+        (str, float) where the values are the subtotal name
+        and the subtotal data respectively.
+        """
+        return (
+            ('tax', self.packaged_data.totals['tax']),
+            ('subtotal', self.packaged_data.totals['subtotal'])
+        )
+
+    def add(self, menu_item):
+        """Adds the given item to the
+        data area and updates the totals.
+
+        @raise ValueError: If non MenuItem
+        object is given.
+
+        @param menu_item: MenuItem object
+        that represents the item to be
+        displayed.
+
+        @return: None
+        """
+        is_menu_item(menu_item)
+        self._add_menu_item(menu_item)
+        self.update_total_data()
+
+    def _add_menu_item(self, menu_item):
+        """Adds the menu_item data to the
+        data area.
+
+        @param menu_item: MenuItem object
+        that is to be added to the data area.
+
+        @return: None
+        """
+        self._update_packaged_data(menu_item)
+        self._write_item(menu_item)
+
+    def _update_packaged_data(self, menu_item):
+        """Updates the packaged data item area
+        and data totals areas respectively.
+
+        @param menu_item: MenuItem object that
+        is to be used to update the packaged
+        data.
+
+        @return: None
+        """
+        self._update_packaged_data_item(menu_item)
+        self._update_packaged_data_totals(menu_item)
+
+    def _update_packaged_data_item(self, menu_item):
+        """Updates the packaged data item list with
+        the given MenuItem.
+
+        @param menu_item: MenuItem object that is
+        to be added to the packaged data's item list.
+
+        @return: MenuItem object that was added.
+        """
+        self.packaged_data.data.append(menu_item)
+        return menu_item
+
+    def _update_packaged_data_totals(self, menu_item):
+        """Updates the packaged data totals area with
+        the given MenuItems data.
+
+        @param menu_item: MenuItem object that is
+        used to update the totals.
+
+        @return: 3 tuple of (float, float, float)
+        representing the total, tax, and subtotal
+        associated with the MenuItem respectively.
+        """
+        subtotal = get_order_subtotal((menu_item,))
+        tax = get_total_tax(subtotal)
+        total = get_total((menu_item,))
+
+        self.packaged_data.totals['total'] += total
+        self.packaged_data.totals['tax'] += tax
+        self.packaged_data.totals['subtotal'] += subtotal
+
+        return total, tax, subtotal
+
+    def _write_item(self, menu_item):
+        """Writes the MenuItems data to the data
+        area.
+
+        @param menu_item: MenuItem object that is
+        to be added to the area.
+
+        @return: 2 tuple of (int, int) representing the
+        row and column that it is safe to append more data
+        to after the item has been written.
+        """
+        row, col = self._write_item_name(menu_item.get_name())
+        row, col = self._write_item_price(menu_item.get_price())
+        self.row = row
+
+        row, col = self._write_item_stars(menu_item.stars)
+        self.row = row
+
+        row, col = self._write_item_options(menu_item.options)
+        self.row = row
+
+        row, col = self._write_item_note(menu_item.notes)
+        self.row = row
+
+        return self.row, col
+
+    def _write_item_name(self, item_name):
+        """Writes the items name to the data
+        area.
+
+        @param item_name: str representing the
+        items name.
+
+        @return: 2 tuple of (int, int) representing
+        the row and column that it is safe to
+        append more data to after this procedure.
+        """
+        format = self._get_item_name_format()
+        self.write_data(item_name, format=format)
+        return self.row + 1, self.col
+
+    def _get_item_name_format(self):
+        """Gets the format associated with the
+        item name.
+
+        @return: xlsxwriter.Format that represents
+        the format for the name data.
+        """
+        return self.format_dict['item_data_format_left']
+
+    def _write_item_price(self, item_price):
+        """Writes the items price data to the
+        data area.
+
+        @param item_price: float representing
+        the items price.
+
+        @return:2 tuple of (int, int) representing
+        the row and column that it is safe to
+        append more data to after this procedure.
+        """
+        format = self._get_item_price_format()
+        self.write_data(item_price, col=self.area_end_col, format=format)
+        return self.row + 1, self.col
+
+    def _get_item_price_format(self):
+        """Gets the format for the item price.
+
+        @return: xlsxwriter.Format that represents
+        the format for the price to be written.
+        """
+        return self.format_dict['total_data_format']
+
+    def _write_item_stars(self, item_stars):
+        """Writes the item stars data to the
+        data area.
+
+        @param item_stars: int representing the
+        number of stars associated with the item.
+
+        @return:2 tuple of (int, int) representing
+        the row and column that it is safe to
+        append more data to after this procedure.
+        """
+        self._write_item_stars_name()
+        self._write_item_stars_value(item_stars)
+        return self.row + 1, self.col
+
+    def _write_item_stars_name(self):
+        """Writes the item stars name data.
+
+        @return: None
+        """
+        format = self._get_item_stars_name_format()
+        self.write_data('stars', format=format)
+
+    def _get_item_stars_name_format(self):
+        """Gets the format associated with the
+        item stars name.
+
+        @return: xlsxwriter.Format that represents
+        the format for displaying the item stars name.
+        """
+        return self.format_dict['subitem_data_format_left']
+
+    def _write_item_stars_value(self, value):
+        """Writes the item stars value to the
+        data area.
+
+        @param value: int representing the stars
+        value.
+
+        @return: None
+        """
+        format = self._get_item_stars_value_format()
+        self.write_data(value, col=self.col + 1, format=format)
+
+    def _get_item_stars_value_format(self):
+        """Gets the format for displaying the
+        item stars value.
+
+        @return: xlsxwriter.Format that represents
+        the format to display the item stars value.
+        """
+        return self.format_dict['subitem_data_format_center']
+
+    def _write_item_options(self, item_options):
+        """Writes the item options to the data area.
+
+        @param item_options: list of OptionItem
+        objects that represents the options to be
+        written to the data area.
+
+        @return:2 tuple of (int, int) representing
+        the row and column that it is safe to
+        append more data to after this procedure.
+        """
+        col = self.col + 1
+        row_counter = self.row
+
+        self._write_item_options_title()
+
+        for item in item_options:
+            name = item.get_name()
+            price = item.get_price()
+
+            format = self._get_item_option_name_format()
+            self.write_data(name, row=row_counter, col=col,
+                            format=format)
+
+            format = self._get_item_option_price_format()
+            self.write_data(price, row=row_counter, col=self.area_end_col,
+                            format=format)
+
+            row_counter += 1
+
+        return row_counter, self.col
+
+    def _write_item_options_title(self):
+        """Writes the item options title to
+        the data area.
+
+        @return: None
+        """
+        format = self._get_item_options_title_format()
+        self.write_data('options', format=format)
+
+    def _get_item_options_title_format(self):
+        """Gets the format associated with the
+        item options title.
+
+        @return: xlsxwriter.Format that is used
+        to display the item options title.
+        """
+        return self.format_dict['subitem_data_format_left']
+
+    def _get_item_option_name_format(self):
+        """Gets the format that is used to
+        display the item options name
+
+        @return: xlsxwriter.Format that represents
+        the format to display the item options name.
+        """
+        return self.format_dict['subitem_data_format_center']
+
+    def _get_item_option_price_format(self):
+        """Gets the format that is used to
+        display the item option price.
+
+        @return: xlsxwriter.Format that is used
+        to display the item option price.
+        """
+        return self.format_dict['subitem_data_total_format']
+
+    def _write_item_note(self, item_note):
+        """Writes the item note data to the
+        data area.
+
+        @param item_note: str representing the
+        note associated with the item
+
+        @return:2 tuple of (int, int) representing
+        the row and column that it is safe to
+        append more data to after this procedure.
+        """
+        self._write_item_note_title()
+        self._write_item_note_data(item_note)
+
+        return self.row + 1, self.col
+
+    def _write_item_note_title(self):
+        """Writes the item note title to the
+        data area.
+
+        @return: None
+        """
+        format = self._get_item_note_title_format()
+        self.write_data('note', format=format)
+
+    def _get_item_note_title_format(self):
+        """Gets the format used to display
+        the item note title.
+
+        @return: xlsxwriter.Format that is
+        used to display the item note title.
+        """
+        return self.format_dict['subitem_data_format_left']
+
+    def _write_item_note_data(self, data):
+        """Writes the item note data to the
+        data area.
+
+        @param data: str representing the item
+        note data to be written.
+
+        @return: None
+        """
+        format = self._get_item_note_data_format()
+        self.write_data(data, col=self.col + 1, format=format)
+
+    def _get_item_note_data_format(self):
+        """Gets the format used to display
+        the item note data.
+
+        @return: xlsxwriter.Format that is used
+        to display the item note data.
+        """
+        return self.format_dict['subitem_data_format_center']
