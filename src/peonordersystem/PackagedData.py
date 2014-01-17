@@ -258,10 +258,6 @@ class PackagedOrderData(PackagedData):
         order_date = datetime.datetime.strptime(unpacked_date,
                                                 SQLITE_DATE_TIME_FORMAT_STR)
 
-        if unpacked_type_is_standard:
-            order_type = 'standard'
-        else:
-            order_type = 'togo'
         self._date = order_date
         self.data = jsonpickle.decode(unpacked_data_json)
         self.notification_data = jsonpickle.decode(unpacked_notification_json)
@@ -271,7 +267,9 @@ class PackagedOrderData(PackagedData):
         self.totals = {'subtotal': unpacked_subtotal,
                        'tax': unpacked_tax,
                        'total': unpacked_total}
-        self.order_type = order_type
+
+        self.is_standard = unpacked_type_is_standard
+        self.is_togo = unpacked_type_is_togo
 
     @property
     def date(self):

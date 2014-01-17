@@ -6,7 +6,7 @@ GeneralDatesheet.
 """
 from collections import Counter
 
-from src.peonordersystem.MenuItem import is_menu_item
+from src.peonordersystem.MenuItem import is_menu_item, is_discount_item
 from src.peonordersystem.CheckOperations import (get_total, get_total_tax,
                                                  get_order_subtotal)
 from src.peonordersystem.SpreadsheetAreas import SpreadsheetArea
@@ -772,6 +772,147 @@ class FrequencyArea(SpreadsheetArea):
         display the item data.
         """
         return self.format_dict['item_data_format_right']
+
+
+class NotificationArea(SpreadsheetArea):
+    """
+
+    """
+
+    def __init__(self, date_data, notification_data, format_dict):
+        """
+
+        @param date_data:
+        @param notification_data:
+        @param format_dict:
+        @return:
+        """
+        self.date = date_data
+        self.data = notification_data
+
+        self.num_of_discounts = 0
+        self.num_of_comps = 0
+
+        super(NotificationArea, self).__init__(format_dict)
+
+    def update_title_data(self):
+        """Override Method.
+
+        @return:
+        """
+        title = 'Notification Items on {}'.format(self.date)
+        super(NotificationArea, self).update_title_data(title, self.date)
+
+    def update_total_data(self):
+        """Override Method.
+
+        @return:
+        """
+        totals_data = self._get_totals_data()
+        subtotals_data = self._get_subtotals_data()
+        super(NotificationArea, self).update_total_data(totals_data, subtotals_data)
+
+    def _get_totals_data(self):
+        """
+
+        @return:
+        """
+        return ('Total items', len(self.data)),
+
+    def _get_subtotals_data(self):
+        """
+
+        @return:
+        """
+        return (('Discount Items Total', self.num_of_discounts),
+                ('Comped Items Total', self.num_of_comps))
+
+    def connect(self, worksheet):
+        """
+
+        @param worksheet:
+        @return:
+        """
+        values = super(NotificationArea, self).connect(worksheet)
+        self.update_title_data()
+
+        for menu_item in self.data:
+            print menu_item
+            print menu_item.get_price()
+            self._add_item_data(menu_item)
+
+        self.update_total_data()
+
+        return values
+
+    def _write_item_data(self, menu_item):
+        """
+
+        @param menu_item:
+        @return:
+        """
+        self._write_item_data_name(menu_item.get_name())
+        self._write_item_data_price(menu_item.get_price())
+
+    def _write_item_data_name(self, item_name):
+        """
+
+        @param item_name:
+        @return:
+        """
+        format = self._get_item_data_name_format()
+        self.write_data(item_name, format=format)
+
+    def _get_item_data_name_format(self):
+        """
+
+        @return:
+        """
+        return self.format_dict['item_data_format_left']
+
+    def _write_item_data_price(self, item_price):
+        """
+
+        @param item_price:
+        @return:
+        """
+        format = self._get_item_data_price_format()
+        self.write_data(item_price, col=self.area_end_col, format=format)
+
+    def _get_item_data_price_format(self):
+        """
+
+        @return:
+        """
+        return self.format_dict['total_data_format']
+
+    def add(self, notification_item):
+        """
+
+        @param notification_item:
+        @return:
+        """
+        self._add_item_data(notification_item)
+        self.update_total_data()
+
+    def _add_item_data(self, item):
+        """
+
+        @param item:
+        @return:
+        """
+        self._write_item_data(item)
+        self.row += 1
+
+    def _add_item_data_type(self, item):
+        try:
+            if is_discount_item(item):
+                self.num_of_discounts += 1
+        except ValueError:
+            self.num_of_comps += 1
+
+        finally:
+            self.data.append(item)
 
 
 class OverviewArea(SpreadsheetArea):
