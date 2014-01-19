@@ -1,22 +1,19 @@
-"""
+"""Defines workbook classes that are
+used to generate workbooks that present
+data in an easy to digest format for users.
+
 @author: Carl McGraw
 @contact: cjmcgraw( at )u.washington.edu
+@version: 1.0
 """
-import random
-import jsonpickle
+
 import xlsxwriter
-from copy import copy
-from collections import deque
-from datetime import datetime, date, time, timedelta
+from collections import Counter
 
-from src.peonordersystem.worksheet import DataWorksheet, Worksheet, DisplayWorksheet
-from src.peonordersystem.SpreadsheetAreas import (GeneralDatesheetOrderArea,
-                                                  GeneralDatesheetFrequencyArea)
-from src.peonordersystem.PackagedData import PackagedDateData, PackagedItemData, \
-    PackagedOrderData
+from src.peonordersystem.worksheet import Worksheet
 
-from src.peonordersystem.Settings import SQLITE_DATE_TIME_FORMAT_STR
-from src.peonordersystem.MenuItem import MenuItem, OptionItem
+from src.peonordersystem.GeneralDatesheetAreas import (OrderArea, FrequencyArea,
+                                                       NotificationArea, OverviewArea)
 
 #====================================================================================
 # This block represents formatting constants used in the workbook.
@@ -155,41 +152,45 @@ SUBITEM_DATA_TOTAL_FORMAT = {'right': 1,
                              'align': 'center'}
 
 
-
-
 class Workbook(xlsxwriter.Workbook):
-    """
+    """Workbook class defines the basic workbook
+    that represents the xlsx file to be displayed.
 
+    @var format_dict: dict of str keys mapped to
+    values of xlsxwriter.Format that represent
+    the formats available to this workbook.
     """
     def __init__(self, file_name):
-        """
+        """Initializes the workbook with the given
+        name.
 
-        @return:
+        @param file_name: str representing the file
+        name that the workbook should be saved as.
         """
         super(Workbook, self).__init__(file_name)
-
-        self.default_init_data = {
-            'index': 0,
-            'str_table': self.str_table,
-            'worksheet_meta': self.worksheet_meta,
-            'optimization': self.optimization,
-            'tmpdir': self.tmpdir,
-            'date_1904': self.date_1904,
-            'strings_to_numbers': self.strings_to_numbers,
-            'strings_to_formulas': self.strings_to_formulas,
-            'strings_to_urls': self.strings_to_urls,
-            'default_date_format': self.default_date_format,
-            'default_url_format': self.default_url_format,
-        }
-
         self.format_dict = self._generate_format_data()
 
-        self.data_worksheet = self._add_data_worksheet()
+    def add_worksheet(self, *args):
+        """Adds a new worksheet to the workbook.
+
+        @param args: represents potential arguments
+        to be associated with the worksheet
+
+        @return: Worksheet class that represents
+        the worksheet. This wrapper is expected
+        to be interacted with by adding
+        SpreadsheetAreas directly to it.
+        """
+        ws = super(Workbook, self).add_worksheet(*args)
+        return Worksheet(ws)
 
     def _generate_format_data(self):
-        """
+        """Generates the format data used
+        for formating worksheet cells.
 
-        @return:
+        @return: dict of str keys mapped to
+        xlsxwriter.Format objects that represent
+        the associated display formats.
         """
         format_dict = {}
 
@@ -225,115 +226,228 @@ class Workbook(xlsxwriter.Workbook):
 
         return format_dict
 
-    def _add_data_worksheet(self):
+
+class AuditWorkbook(Workbook):
+    """AuditWorkbook class defines the standard
+    audit style workbook. This includes three
+    types of sheets:
+
+        1. Audit Overview Sheet :   which represents the overview
+                                    of the data covered in the audit.
+
+        2. Date Overview Sheet  :   which represents the overview
+                                    of the data covered on a specific
+                                    date.
+
+        3. Date Sheet          :    which represents the order data
+                                    for a specific date.
+
+    Each sheet is divided into multiple areas which are generated
+    and added in their respective methods.
+    """
+
+    def add_date_sheet(self, date_data, packaged_data):
+        """Adds a new date sheet to the workbook with the
+        given date and populates the sheet with the given
+        data.
+
+        @param date_data: datetime.date that represents the
+        date associated with this data.
+
+        @param packaged_data: PackagedOrderData that represents
+        the dat associated with this sheet.
+
+        @return: None
         """
+        name = str(date_data)
+        worksheet = self.add_worksheet(name)
+        self._add_date_sheet_areas(date_data, worksheet, packaged_data)
+
+    def _add_date_sheet_areas(self, date_data, worksheet, packaged_data):
+        """Creates and adds the date sheet areas to the given worksheet.
+
+        @param date_data: datetime.date that represents the date associated
+        with the packaged data.
+
+        @param worksheet: Worksheet object that represents the worksheet
+        that the areas that contain the data will be added to.
+
+        @param packaged_data: PackagedOrderData that represents
+        the data to be added to the areas.
 
         @return:
         """
-        init_data = copy(self.default_init_data)
-        init_data['name'] = self._check_sheetname('DataWorksheet', False)
+        overview_area = self._create_date_sheet_overview_area(date_data, worksheet)
+        freq_area = self._create_date_sheet_frequency_area(date_data, worksheet)
+        notif_area = self._create_date_sheet_notification_area(date_data, worksheet)
 
-        worksheet = DataWorksheet(self.format_dict)
-        worksheet._initialize(init_data)
+        item_freq = Counter()
+        notif_data = []
 
-        self.worksheets_objs.append(worksheet)
-        self.sheetnames.append(init_data['name'])
+        for packaged_order in self._generate_date_sheet_order_area(packaged_data,
+                                                                   worksheet):
+            item_freq.update(packaged_order.item_frequency)
+            notif_data += packaged_order.notification_data
+            overview_area.add(packaged_order)
 
-        return worksheet
+        freq_area.add(item_freq)
+        notif_area.add(notif_data)
 
-    def add_general_date_worksheet(self, name, d, c):
+    def _create_date_sheet_overview_area(self, date_data, worksheet):
+        """Creates the OverviewArea in the given worksheet.
+
+        @param date_data: datetime.date that represents the date that
+        the OverviewArea will be associated with.
+
+        @param worksheet: Worksheet object that the OverviewArea will
+        be added to.
+
+        @return: OverviewArea object that has been added to the
+        given worksheet.
         """
+        overview_area = OverviewArea(date_data, self.format_dict)
+        worksheet.add_area(overview_area)
+        return overview_area
 
-        @param name:
+    def _create_date_sheet_frequency_area(self, date_data, worksheet):
+        """Creates the FrequencyArea in the given worksheet.
+
+        @param date_data: datetime.date that represents the date
+        associated with the data.
+
+        @param worksheet: Worksheet object that the area is to be
+        added to.
+
+        @return: FrequencyArea that has been added to the given
+        worksheet.
+        """
+        freq_area = FrequencyArea(date_data, Counter(), self.format_dict)
+        worksheet.add_area(freq_area)
+        return freq_area
+
+    def _create_date_sheet_notification_area(self, date_data, worksheet):
+        """Creates the NotificationArea in the given worksheet.
+
+        @param date_data: datetime.date that represents the date
+        associated with the data.
+
+        @param worksheet: Worksheet object that the area is to be
+        added to.
+
+        @return:NotificationArea that has been added to the given
+        worksheet.
+        """
+        notif_area = NotificationArea(date_data, [], self.format_dict)
+        worksheet.add_area(notif_area)
+        return notif_area
+
+    def _generate_date_sheet_order_area(self, packaged_data, worksheet):
+        """Generates the order areas for the date sheet.
+
+        @param packaged_data: PackagedOrderData that represents data to
+        be added to the order areas.
+
+        @param worksheet: Worksheet that the areas should be added to.
+
+        @return: Generator object that yields packaged order data.
+        @yield: PackagedOrderData that has had an order area created
+        for it.
+        """
+        for packaged_order in packaged_data:
+            order_area = OrderArea(packaged_order, self.format_dict)
+            worksheet.add_area(order_area)
+            yield packaged_order
+
+    def add_overview_date_sheet(self):
+        """Adds a new date overview sheet to the workbook,
+        and populates the sheet with the given data.
+
         @return:
         """
-        init_data = copy(self.default_init_data)
-        init_data['name'] = self._check_sheetname('test', False)
+        pass
 
-        worksheet = DisplayWorksheet(self.format_dict)
-        worksheet._initialize(init_data)
+    def add_overview_audit_sheet(self):
+        """Adds a new audit overview sheet to the workbook,
+        and populates the sheet with the given data.
 
-        self.worksheets_objs.append(worksheet)
-        self.sheetnames.append(init_data['name'])
-
-        g = GeneralDatesheetFrequencyArea(datetime.now(), c, self.format_dict)
-        worksheet.add_area(g)
-
-        for packaged_data in d:
-            g = GeneralDatesheetOrderArea(packaged_data, self.format_dict)
-            worksheet.add_area(g)
-
-        return worksheet
+        @return:
+        """
+        pass
 
 
 
-if __name__ == '__main__':
-    letters = 'abcdefghijklmnopqrstuvwxyz'
-    workbook = Workbook('abcdefg.xlsx')
 
-    def _generate_random_name(num):
+if __name__ == "__main__":
+    import string
+    import jsonpickle
+    from random import randint
+    from datetime import datetime, timedelta, time
+
+    from src.peonordersystem.CheckOperations import (get_total, get_order_subtotal,
+                                                     get_total_tax)
+
+    from src.peonordersystem.PackagedData import PackagedOrderData
+    from src.peonordersystem.Settings import SQLITE_DATE_TIME_FORMAT_STR
+
+    from test.TestingFunctions import (generate_random_menu_items,
+                                       generate_random_times,
+                                       generate_random_names)
+
+    def generate_random_packaged_data():
+        rand_names = generate_random_names(from_chars=string.ascii_letters * 100)
+        rand_items = generate_random_menu_items()
+        curr_date = datetime.combine(datetime.today().date(), time.min)
+
         while True:
-            yield ''.join(random.sample(list(letters), num))
-
-    def _generate_menu_items():
-        rand_name = _generate_random_name(10)
-        other_rand_name = _generate_random_name(5)
-
-        while True:
-            name = rand_name.next()
-            price = random.randint(1, 100)
-
-            item = MenuItem(name, price)
-            item.notes = rand_name.next()
+            notification_data = []
+            item_frequency = Counter()
+            items = []
 
             for x in xrange(10):
-                name = other_rand_name.next()
-                category = 'Test'
-                price = random.randint(1, 100)
+                item = rand_items.next()
+                items.append(item)
 
-                option = OptionItem(name, category, price)
-                item.options.append(option)
+                if item.is_notification():
+                    notification_data.append(item)
 
-            yield item
+                item_frequency[item.get_name()] += 1
 
-    def _generate_random_datetime():
-        while True:
-            yield datetime.now() + timedelta(minutes=random.randint(-1000, 1000))
+            total = get_total(items)
+            subtotal = get_order_subtotal(items)
+            tax = get_total_tax(subtotal)
 
-    def _generate_packaged_data():
-        rand_date = _generate_random_datetime()
-        rand_name = _generate_random_name(7)
-        rand_items = _generate_menu_items()
+            standard_type = randint(0, 1)
+            togo_type = 1 - standard_type
 
-        while True:
-
+            curr_date += timedelta(minutes=1)
             data = (
-                random.randint(1, 100),
-                rand_date.next().strftime(SQLITE_DATE_TIME_FORMAT_STR),
-                rand_name.next(),
-                1000.0,
-                9.0,
-                910.0,
-                False,
-                jsonpickle.encode([]),
-                jsonpickle.encode([]),
-                1,
-                0,
-                jsonpickle.encode([rand_items.next() for x in range(12)])
+                randint(1, 100),
+                curr_date.strftime(SQLITE_DATE_TIME_FORMAT_STR),
+                rand_names.next(),
+                subtotal,
+                tax,
+                total,
+                len(notification_data) > 0,
+                jsonpickle.encode(notification_data),
+                jsonpickle.encode(item_frequency),
+                standard_type,
+                togo_type,
+                jsonpickle.encode(items)
             )
 
             yield PackagedOrderData(data)
 
-    rand_data = _generate_packaged_data()
-
-    d = [rand_data.next() for x in range(2)]
-
-    from collections import Counter
-
-    c = Counter()
-    for letter in letters:
-        c[letter] = random.randint(1, 100)
+    d = {}
 
 
-    workbook.add_general_date_worksheet('test', d, c)
+    rand_data = generate_random_packaged_data()
+
+    data = [rand_data.next() for x in range(338)]
+
+
+    workbook = AuditWorkbook('test_audit.xlsx')
+    t = datetime.now()
+
+    workbook.add_general_date_sheet(datetime.now().date(), data)
+    print datetime.now() - t
     workbook.close()

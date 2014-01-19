@@ -1,90 +1,93 @@
-"""
+"""Defines worksheet classes that are
+used to wrap worksheet data and allow
+worksheet data to be written to by
+SpreadsheetAreas.
+
 @author: Carl McGraw
 @contact: cjmcgraw( at )u.washington.edu
+@version: 1.0
 """
-from copy import copy, deepcopy
-from datetime import datetime, time, timedelta
-from xlsxwriter.worksheet import Worksheet as xlsx_Worksheet
-from xlsxwriter.utility import xl_rowcol_to_cell, xl_range_abs
+from copy import copy
+from datetime import datetime
+from xlsxwriter.utility import xl_range_abs
 
 from src.peonordersystem.Settings import (OPEN_TIME, CLOSE_TIME, TIME_GROUPING)
 
 
-class Worksheet(xlsx_Worksheet):
-    """Worksheet class used for writing Excel
-    data as XLSX and tracking row and column
-    data.
+class Worksheet(object):
+    """Worksheet object is used to contain
+    relevant worksheet data and provides the
+    functionality of adding areas to the worksheet.
 
-    @var row: int representing the row that it
-    is currently safe to append to.
+    @var row: int representing the current row
+    that is considered valid for the worksheet.
 
-    @var col: int representing the column that
-    it is currently safe to append to.
+    @var col: int representing the current column
+    that is considered valid for the worksheet.
+
+    @var areas: list of SpreadsheetArea objects
+    that represent the areas associated with this
+    worksheet.
     """
 
+    def __init__(self, xlsx_worksheet):
+        """Initialzies the Worksheet with
+        the given xlsxwriter.worksheet.
 
-
-    def __init__(self, format_dict):
-        """
-
-        @return:
-        """
-        self.format_dict = format_dict
-        super(Worksheet, self).__init__()
-
-    def _initialize(self, init_data):
-        """
-
-        @param init_data:
-        @return:
-        """
-        self.row = 0
-        self.col = 0
-        return super(Worksheet, self)._initialize(init_data)
-
-
-class DisplayWorksheet(Worksheet):
-    """
-
-    """
-
-    def __init__(self, format_dict):
-        """
+        @param xlsx_worksheet: xlsxwriter.worksheet.Worksheet
+        that this class will use as its baseline worksheet to
+        perform the functionality on.
         """
         self.areas = []
-        super(DisplayWorksheet, self).__init__(format_dict)
-
-    def _initialize(self, init_data):
-        """
-
-        @param init_data:
-        @return:
-        """
-        super(DisplayWorksheet, self)._initialize(init_data)
+        print xlsx_worksheet
+        self._worksheet = xlsx_worksheet
+        self.row = 0
+        self.col = 0
 
     def add_area(self, spreadsheet_area):
-        """
-        """
-        self.row, self.col = spreadsheet_area.connect(self)
+        """Adds the given SpreadsheetArea to
+        the worksheet.
 
+        @param spreadsheet_area: SpreadsheetArea
+        subclass that represents the area to be
+        added.
+
+        @return: None
+        """
+        self.areas.append(spreadsheet_area)
+        self.row, self.col = spreadsheet_area.connect(self._worksheet, row=self.row,
+                                                      col=self.col)
 
 
 class DataWorksheet(Worksheet):
-    """
-
+    """DataWorksheet class creates a hidden
+    worksheet that is used to store and access
+    data that represents intermediate steps for
+    display data in specific forms.
     """
     HIDDEN_WORKSHEET_NAME = 'HiddenDataWorksheet'
 
-    def __init__(self, format_dict):
+    def __init__(self, worksheet, format_dict):
         """ Initializes the DataWorksheet object.
+
+        @param worksheet: xlsxwriter.Worksheet subclass
+        that will provide this area with its base
+        functionality.
+
+        @param format_dict: dict of xlsxwriter.Format
+        objects that represent the formats for display
+        data.
         """
+        super(DataWorksheet, self).__init__(worksheet, format_dict)
+        self._worksheet.name = self.HIDDEN_WORKSHEET_NAME
+        self._worksheet.hide()
+
         self._time_keys = self._create_time_keys()
         self._time_keys_absolute_reference = None
         self._items_data_absolute_references = {}
         self._orders_data_absolute_referernces = {}
-        super(DataWorksheet, self).__init__(format_dict)
 
-    def _initialize(self, init_data):
+    def _generate_data(self, init_data):
         """Private Method
 
         initializes the Worksheet data.
@@ -95,9 +98,6 @@ class DataWorksheet(Worksheet):
 
         @return: None
         """
-        init_data['name'] = self.HIDDEN_WORKSHEET_NAME
-        super(DataWorksheet, self)._initialize(init_data)
-        #self.hide()
 
         time_keys_range = self._create_time_keys_area(self._time_keys)
         self._time_keys_data_absolute_reference = \
@@ -153,7 +153,7 @@ class DataWorksheet(Worksheet):
         @return: str representing a reference independent
         of the worksheet or relative cell range.
         """
-        return '=' + self.get_name() + '!' + cell_range
+        return '=' + self._worksheet.get_name() + '!' + cell_range
 
     @staticmethod
     def _create_time_keys(start_time=OPEN_TIME, end_time=CLOSE_TIME,
@@ -195,49 +195,11 @@ class DataWorksheet(Worksheet):
         """
         curr_row = self.row
         for time_step in time_keys:
-            self.write_datetime(curr_row, self.col, time_step,
-                                self.format_dict['time_format'])
+            self._worksheet.write_datetime(curr_row, self.col, time_step,
+                                          self.format_dict['time_format'])
             curr_row += 1
 
         data_range = xl_range_abs(self.row, self.col, curr_row, self.col)
         self.row = curr_row
 
         return data_range
-
-
-class GeneralDateWorksheet(Worksheet):
-    """
-
-    """
-
-    def __init__(self):
-        """
-
-        @return:
-        """
-        pass
-
-
-class OverviewDateWorksheet(Worksheet):
-    """
-
-    """
-
-    def __init__(self):
-        """
-
-        @return:
-        """
-        pass
-
-
-class OverviewAuditWorksheet(Worksheet):
-    """
-
-    """
-    def __init__(self):
-        """
-
-        @return:
-        """
-        pass

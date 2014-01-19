@@ -5,7 +5,6 @@
 """
 
 import xlsxwriter
-from collections import Counter
 from abc import ABCMeta, abstractmethod
 
 
@@ -170,7 +169,7 @@ class SpreadsheetArea(object):
         """
         return self._initial_col
 
-    def connect(self, worksheet):
+    def connect(self, worksheet, row=0, col=0):
         """Connects the worksheet to the
         SpreadsheetArea. The worksheet will
         be connected and coupled with the area.
@@ -186,8 +185,8 @@ class SpreadsheetArea(object):
         the area.
         """
         self._check_worksheet(worksheet)
-        self.row = worksheet.row
-        self.col = worksheet.col
+        self.row = row
+        self.col = col
 
         self._initial_row = self.row
         self._initial_col = self.col
@@ -210,12 +209,12 @@ class SpreadsheetArea(object):
         @return: bool value representing if
         the test was passed.
         """
-        if not worksheet or not isinstance(worksheet, xlsxwriter.worksheet.Worksheet):
+        exp_type = xlsxwriter.worksheet.Worksheet
+        if not worksheet or not isinstance(worksheet, exp_type):
             curr_type = type(worksheet)
-            exp_type = xlsxwriter.worksheet.Worksheet
-            raise ValueError('Expected connected worksheet to be an instance or'
-                             'subclass of {} ---> got {} instead'.format(curr_type,
-                                                                         exp_type))
+            raise ValueError('Expected connected worksheet to be an instance or '
+                             'subclass of {} got {} instead'.format(exp_type,
+                                                                    curr_type))
         return True
 
     def format_area(self):

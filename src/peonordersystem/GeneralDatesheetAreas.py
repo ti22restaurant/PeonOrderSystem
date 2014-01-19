@@ -38,7 +38,7 @@ class OrderArea(SpreadsheetArea):
         self.packaged_data = packaged_data
         super(OrderArea, self).__init__(format_dict)
 
-    def connect(self, worksheet):
+    def connect(self, worksheet, **kwargs):
         """Override Method.
 
         Connects the area to the worksheet.
@@ -52,7 +52,7 @@ class OrderArea(SpreadsheetArea):
         is the coordinates for the upper right hand corner
         where another area could be added.
         """
-        values = super(OrderArea, self).connect(worksheet)
+        values = super(OrderArea, self).connect(worksheet, **kwargs)
         self.update_title_data()
         self.update_total_data()
         self._update_items_data()
@@ -544,7 +544,7 @@ class FrequencyArea(SpreadsheetArea):
         data = Counter()
 
         for item_name, item_count in self.item_data.most_common():
-            data[item_name] = round(item_count / self.total_num_of_elements, 2)
+            data[item_name] = round(item_count / self.total_num_of_elements, 4)
 
         return data
 
@@ -574,7 +574,7 @@ class FrequencyArea(SpreadsheetArea):
         of the frequency total.
         """
         # simple error
-        return 1.00 - freq_total
+        return 1 - freq_total
 
     @staticmethod
     def _get_total_num_of_elements(freq_data):
@@ -590,7 +590,7 @@ class FrequencyArea(SpreadsheetArea):
         """
         return float(len(list(freq_data.elements())))
 
-    def connect(self, worksheet):
+    def connect(self, worksheet, **kwargs):
         """Override Method
 
         Connects the area to the
@@ -605,7 +605,7 @@ class FrequencyArea(SpreadsheetArea):
         hand boundary of the area. This is where it
         would be safe to add a new area.
         """
-        values = super(FrequencyArea, self).connect(worksheet)
+        values = super(FrequencyArea, self).connect(worksheet, **kwargs)
 
         self.update_header_data()
         self._write_item_frequency_data()
@@ -710,7 +710,7 @@ class FrequencyArea(SpreadsheetArea):
         self._update_freq_data()
 
         self.update_header_data()
-        self._write_item_frequency_data
+        self._write_item_frequency_data()
 
     def _write_item_frequency_data(self):
         """Writes the item frequency data to
@@ -884,7 +884,7 @@ class NotificationArea(SpreadsheetArea):
         return (('Discount Items Total', self.num_of_discounts),
                 ('Comped Items Total', self.num_of_comps))
 
-    def connect(self, worksheet):
+    def connect(self, worksheet, **kwargs):
         """Override Method
 
         Connects the area to the given
@@ -899,7 +899,7 @@ class NotificationArea(SpreadsheetArea):
         row and column that it is safe to add another
         area.
         """
-        values = super(NotificationArea, self).connect(worksheet)
+        values = super(NotificationArea, self).connect(worksheet, **kwargs)
         self.update_title_data()
         self.add(self.data)
         return values
@@ -1074,7 +1074,7 @@ class OverviewArea(SpreadsheetArea):
 
         return self._DATA_AREA_START + change_in_row
 
-    def connect(self, worksheet):
+    def connect(self, worksheet, **kwargs):
         """Override Method
 
         Connects the area to the given
@@ -1090,7 +1090,7 @@ class OverviewArea(SpreadsheetArea):
         the row and column that it is safe to add
         another area too.
         """
-        values = super(OverviewArea, self).connect(worksheet)
+        values = super(OverviewArea, self).connect(worksheet, **kwargs)
         self.update_title_data()
         return values
 
@@ -1212,9 +1212,31 @@ class OverviewArea(SpreadsheetArea):
 
         @return: None
         """
+        self._check_date(packaged_order.date)
         self._update_overview_data(packaged_order)
         self.update_total_data()
         self._write_order_data(packaged_order)
+
+    def _check_date(self, order_date):
+        """Checks that the given date is
+        within this overview areas date range.
+
+        @raise ValueError: If the given date is
+        not equal to the stored date.
+
+        @param order_date: datetime.date that
+        represents the date to be checked.
+
+        @return: bool value that represents
+        if the test was passed.
+        """
+        if not order_date or not order_date == self.date:
+            raise ValueError('Expected all values to be in the on'
+                             ' the same date. Some values within'
+                             ' the given packaged order data were'
+                             ' not.')
+
+        return True
 
     def _update_overview_data(self, packaged_order):
         """Updates the overview data which is used
