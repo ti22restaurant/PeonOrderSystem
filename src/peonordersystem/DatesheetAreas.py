@@ -1,5 +1,5 @@
 """Defines the areas that are part of a standard
-GeneralDatesheet.
+Datesheet.
 
 @author: Carl McGraw
 @contact: cjmcgraw( at )u.washington.edu

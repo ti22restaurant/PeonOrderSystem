@@ -4,8 +4,9 @@
 @contact: cjmcgraw( at )u.washington.edu
 """
 
-import xlsxwriter
 from abc import ABCMeta, abstractmethod
+
+from src.peonordersystem.worksheet import check_worksheet
 
 
 class SpreadsheetArea(object):
@@ -184,7 +185,7 @@ class SpreadsheetArea(object):
         represents the top right hand boundary of
         the area.
         """
-        self._check_worksheet(worksheet)
+        check_worksheet(worksheet)
         self.row = row
         self.col = col
 
@@ -196,26 +197,6 @@ class SpreadsheetArea(object):
 
         self.row = self.data_area_start + self.initial_row
         return self.initial_row, self.initial_col + self.AREA_COL_NUM
-
-    def _check_worksheet(self, worksheet):
-        """Checks that the worksheet is
-        an instance of xlsxwriter.Worksheet
-        class.
-
-        @raise ValueError: If the given
-        worksheet is not a subclass member or
-        instance or xlsxwriter.Worksheet
-
-        @return: bool value representing if
-        the test was passed.
-        """
-        exp_type = xlsxwriter.worksheet.Worksheet
-        if not worksheet or not isinstance(worksheet, exp_type):
-            curr_type = type(worksheet)
-            raise ValueError('Expected connected worksheet to be an instance or '
-                             'subclass of {} got {} instead'.format(exp_type,
-                                                                    curr_type))
-        return True
 
     def format_area(self):
         """Formats the rows and

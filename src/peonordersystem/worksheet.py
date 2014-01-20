@@ -39,7 +39,6 @@ class Worksheet(object):
         perform the functionality on.
         """
         self.areas = []
-        print xlsx_worksheet
         self._worksheet = xlsx_worksheet
         self.row = 0
         self.col = 0
@@ -55,8 +54,54 @@ class Worksheet(object):
         @return: None
         """
         self.areas.append(spreadsheet_area)
-        self.row, self.col = spreadsheet_area.connect(self._worksheet, row=self.row,
+        self.row, self.col = spreadsheet_area.connect(self, row=self.row,
                                                       col=self.col)
+
+    def write(self, row, column, data, format):
+        """
+
+        @param row:
+        @param column:
+        @param data:
+        @param format:
+        @return:
+        """
+        return self._worksheet.write(row, column, data, format)
+
+    def set_row(self, row_number, row_height, **kwargs):
+        """
+
+        @param row_number:
+        @param row_height:
+        @param kwargs:
+        @return:
+        """
+        return self._worksheet.set_row(row_number, row_height, **kwargs)
+
+    def set_column(self, first_column, last_column, col_width, **kwargs):
+        """
+
+        @param first_column:
+        @param last_column:
+        @param col_width:
+        @param kwargs:
+        @return:
+        """
+        return self._worksheet.set_column(first_column, last_column, col_width,
+                                          **kwargs)
+
+    def merge_range(self, first_row, first_column, last_row, last_column, **kwargs):
+        """
+
+        @param first_row:
+        @param first_column:
+        @param last_row:
+        @param last_column:
+        @param kwargs:
+        @return:
+        """
+        return self._worksheet.merge_range(first_row, first_column, last_row,
+                                           last_column, **kwargs)
 
 
 class DataWorksheet(Worksheet):
@@ -203,3 +248,24 @@ class DataWorksheet(Worksheet):
         self.row = curr_row
 
         return data_range
+
+
+def check_worksheet(worksheet):
+    """Checks that the worksheet is
+    an instance or subclass member
+    of the Worksheet class
+
+    @raise ValueError: If the given
+    worksheet is not a subclass member or
+    instance or Worksheet
+
+    @return: bool value representing if
+    the test was passed.
+    """
+    exp_type = Worksheet
+    if not worksheet or not isinstance(worksheet, exp_type):
+        curr_type = type(worksheet)
+        raise ValueError('Expected connected worksheet to be an instance or '
+                         'subclass of {} got {} instead'.format(exp_type,
+                                                                curr_type))
+    return True

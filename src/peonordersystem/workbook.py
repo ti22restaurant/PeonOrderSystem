@@ -12,7 +12,7 @@ from collections import Counter
 
 from src.peonordersystem.worksheet import Worksheet
 
-from src.peonordersystem.GeneralDatesheetAreas import (OrderArea, FrequencyArea,
+from src.peonordersystem.DatesheetAreas import (OrderArea, FrequencyArea,
                                                        NotificationArea, OverviewArea)
 
 #====================================================================================
@@ -448,6 +448,6 @@ if __name__ == "__main__":
     workbook = AuditWorkbook('test_audit.xlsx')
     t = datetime.now()
 
-    workbook.add_general_date_sheet(datetime.now().date(), data)
+    workbook.add_date_sheet(datetime.now().date(), data)
     print datetime.now() - t
     workbook.close()
