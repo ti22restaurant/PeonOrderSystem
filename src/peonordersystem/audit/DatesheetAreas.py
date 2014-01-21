@@ -9,7 +9,7 @@ from collections import Counter
 from src.peonordersystem.MenuItem import is_menu_item, is_discount_item
 from src.peonordersystem.CheckOperations import (get_total, get_total_tax,
                                                  get_order_subtotal)
-from src.peonordersystem.SpreadsheetAreas import SpreadsheetArea
+from peonordersystem.audit.SpreadsheetAreas import SpreadsheetArea
 
 
 class OrderArea(SpreadsheetArea):
@@ -1231,9 +1231,9 @@ class OverviewArea(SpreadsheetArea):
         if the test was passed.
         """
         if not order_date or not order_date == self.date:
-            raise ValueError('Expected all values to be in the on'
-                             ' the same date. Some values within'
-                             ' the given packaged order data were'
+            raise ValueError('Expected all values to be in the on ' + \
+                             ' the same date. Some values within ' + \
+                             ' the given packaged order data were' + \
                              ' not.')
 
         return True

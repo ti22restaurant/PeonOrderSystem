@@ -7,13 +7,12 @@ data in an easy to digest format for users.
 @version: 1.0
 """
 
-import xlsxwriter
 from collections import Counter
 
-from src.peonordersystem.worksheet import Worksheet
+import xlsxwriter
 
-from src.peonordersystem.DatesheetAreas import (OrderArea, FrequencyArea,
-                                                       NotificationArea, OverviewArea)
+from src.peonordersystem.audit.worksheet import Worksheet, DataWorksheet
+
 
 #====================================================================================
 # This block represents formatting constants used in the workbook.
@@ -152,7 +151,7 @@ SUBITEM_DATA_TOTAL_FORMAT = {'right': 1,
                              'align': 'center'}
 
 
-class Workbook(xlsxwriter.Workbook):
+class Workbook(object):
     """Workbook class defines the basic workbook
     that represents the xlsx file to be displayed.
 
@@ -167,22 +166,62 @@ class Workbook(xlsxwriter.Workbook):
         @param file_name: str representing the file
         name that the workbook should be saved as.
         """
-        super(Workbook, self).__init__(file_name)
+        self._workbook = xlsxwriter.Workbook(file_name)
         self.format_dict = self._generate_format_data()
+        self.datasheet = self._add_data_worksheet()
 
-    def add_worksheet(self, *args):
+    def _add_data_worksheet(self):
+        """Adds a hidden data worksheet to
+        the current workbook.
+
+        @return: DataWorksheet object that
+        represents the data worksheet.
+        """
+        ws = self.add_worksheet()
+        return DataWorksheet(ws, self.format_dict)
+
+    def add_worksheet(self, *args, **kwargs):
         """Adds a new worksheet to the workbook.
 
         @param args: represents potential arguments
         to be associated with the worksheet
+
+        @param kwargs: represents potential keyword
+        arguments to be associated with the worksheet.
 
         @return: Worksheet class that represents
         the worksheet. This wrapper is expected
         to be interacted with by adding
         SpreadsheetAreas directly to it.
         """
-        ws = super(Workbook, self).add_worksheet(*args)
+        ws = self._workbook.add_worksheet(*args, **kwargs)
         return Worksheet(ws)
+
+    def add_chart(self, *args, **kwargs):
+        """Adds a chart to the workbook
+
+        @param args: represents potential arguments
+        to be associated with the chart.
+
+        @param kwargs: represents potential keyword
+        arguments to be associated with the chart.
+
+        @return: xlsxwriter.Workbook
+        """
+        return self._workbook.add_chart(*args)
+
+    def add_format(self, format_data):
+        """Adds the given format information to
+        the workbook.
+
+        @param format_data: dict representing
+        the format data to be associated with
+        the format.
+
+        @return: xlsxwriter.Format that represents
+        the associated format.
+        """
+        return self._workbook.add_format(format_data)
 
     def _generate_format_data(self):
         """Generates the format data used
@@ -226,155 +265,13 @@ class Workbook(xlsxwriter.Workbook):
 
         return format_dict
 
-
-class AuditWorkbook(Workbook):
-    """AuditWorkbook class defines the standard
-    audit style workbook. This includes three
-    types of sheets:
-
-        1. Audit Overview Sheet :   which represents the overview
-                                    of the data covered in the audit.
-
-        2. Date Overview Sheet  :   which represents the overview
-                                    of the data covered on a specific
-                                    date.
-
-        3. Date Sheet          :    which represents the order data
-                                    for a specific date.
-
-    Each sheet is divided into multiple areas which are generated
-    and added in their respective methods.
-    """
-
-    def add_date_sheet(self, date_data, packaged_data):
-        """Adds a new date sheet to the workbook with the
-        given date and populates the sheet with the given
-        data.
-
-        @param date_data: datetime.date that represents the
-        date associated with this data.
-
-        @param packaged_data: PackagedOrderData that represents
-        the dat associated with this sheet.
+    def close(self):
+        """Closes the workbook and saves
+        it to the given name.
 
         @return: None
         """
-        name = str(date_data)
-        worksheet = self.add_worksheet(name)
-        self._add_date_sheet_areas(date_data, worksheet, packaged_data)
-
-    def _add_date_sheet_areas(self, date_data, worksheet, packaged_data):
-        """Creates and adds the date sheet areas to the given worksheet.
-
-        @param date_data: datetime.date that represents the date associated
-        with the packaged data.
-
-        @param worksheet: Worksheet object that represents the worksheet
-        that the areas that contain the data will be added to.
-
-        @param packaged_data: PackagedOrderData that represents
-        the data to be added to the areas.
-
-        @return:
-        """
-        overview_area = self._create_date_sheet_overview_area(date_data, worksheet)
-        freq_area = self._create_date_sheet_frequency_area(date_data, worksheet)
-        notif_area = self._create_date_sheet_notification_area(date_data, worksheet)
-
-        item_freq = Counter()
-        notif_data = []
-
-        for packaged_order in self._generate_date_sheet_order_area(packaged_data,
-                                                                   worksheet):
-            item_freq.update(packaged_order.item_frequency)
-            notif_data += packaged_order.notification_data
-            overview_area.add(packaged_order)
-
-        freq_area.add(item_freq)
-        notif_area.add(notif_data)
-
-    def _create_date_sheet_overview_area(self, date_data, worksheet):
-        """Creates the OverviewArea in the given worksheet.
-
-        @param date_data: datetime.date that represents the date that
-        the OverviewArea will be associated with.
-
-        @param worksheet: Worksheet object that the OverviewArea will
-        be added to.
-
-        @return: OverviewArea object that has been added to the
-        given worksheet.
-        """
-        overview_area = OverviewArea(date_data, self.format_dict)
-        worksheet.add_area(overview_area)
-        return overview_area
-
-    def _create_date_sheet_frequency_area(self, date_data, worksheet):
-        """Creates the FrequencyArea in the given worksheet.
-
-        @param date_data: datetime.date that represents the date
-        associated with the data.
-
-        @param worksheet: Worksheet object that the area is to be
-        added to.
-
-        @return: FrequencyArea that has been added to the given
-        worksheet.
-        """
-        freq_area = FrequencyArea(date_data, Counter(), self.format_dict)
-        worksheet.add_area(freq_area)
-        return freq_area
-
-    def _create_date_sheet_notification_area(self, date_data, worksheet):
-        """Creates the NotificationArea in the given worksheet.
-
-        @param date_data: datetime.date that represents the date
-        associated with the data.
-
-        @param worksheet: Worksheet object that the area is to be
-        added to.
-
-        @return:NotificationArea that has been added to the given
-        worksheet.
-        """
-        notif_area = NotificationArea(date_data, [], self.format_dict)
-        worksheet.add_area(notif_area)
-        return notif_area
-
-    def _generate_date_sheet_order_area(self, packaged_data, worksheet):
-        """Generates the order areas for the date sheet.
-
-        @param packaged_data: PackagedOrderData that represents data to
-        be added to the order areas.
-
-        @param worksheet: Worksheet that the areas should be added to.
-
-        @return: Generator object that yields packaged order data.
-        @yield: PackagedOrderData that has had an order area created
-        for it.
-        """
-        for packaged_order in packaged_data:
-            order_area = OrderArea(packaged_order, self.format_dict)
-            worksheet.add_area(order_area)
-            yield packaged_order
-
-    def add_overview_date_sheet(self):
-        """Adds a new date overview sheet to the workbook,
-        and populates the sheet with the given data.
-
-        @return:
-        """
-        pass
-
-    def add_overview_audit_sheet(self):
-        """Adds a new audit overview sheet to the workbook,
-        and populates the sheet with the given data.
-
-        @return:
-        """
-        pass
-
-
+        self._workbook.close()
 
 
 if __name__ == "__main__":
@@ -383,6 +280,8 @@ if __name__ == "__main__":
     from random import randint
     from datetime import datetime, timedelta, time
 
+    from src.peonordersystem.audit.AuditWorkbook import AuditWorkbook
+
     from src.peonordersystem.CheckOperations import (get_total, get_order_subtotal,
                                                      get_total_tax)
 
@@ -390,7 +289,6 @@ if __name__ == "__main__":
     from src.peonordersystem.Settings import SQLITE_DATE_TIME_FORMAT_STR
 
     from test.TestingFunctions import (generate_random_menu_items,
-                                       generate_random_times,
                                        generate_random_names)
 
     def generate_random_packaged_data():
@@ -442,12 +340,47 @@ if __name__ == "__main__":
 
     rand_data = generate_random_packaged_data()
 
-    data = [rand_data.next() for x in range(338)]
+    data = [rand_data.next() for x in range(1439)]
 
 
     workbook = AuditWorkbook('test_audit.xlsx')
+
+    print 'Adding date sheet...',
     t = datetime.now()
 
     workbook.add_date_sheet(datetime.now().date(), data)
     print datetime.now() - t
+
+    datesheet = workbook.datasheet
+
+    from src.peonordersystem.audit.ValueAreas import OrdersTimeArea, \
+        ItemsTimeArea, TotalsTimeArea
+
+    print 'Generating OrdersArea...',
+    t = datetime.now()
+
+    area1 = OrdersTimeArea(datesheet._time_keys_area.data)
+    area2 = ItemsTimeArea(datesheet._time_keys_area.data)
+    area3 = TotalsTimeArea(datesheet._time_keys_area.data)
+
+    print datetime.now() - t
+
+    print 'Populating OrdersArea...',
+
+    t = datetime.now()
+    for each in data:
+        area1.insert(each)
+        area2.insert(each)
+        area3.insert(each)
+
+    datesheet.add_area(area1)
+    datesheet.add_area(area2)
+
+    datesheet.add_area(area3)
+    print datetime.now() - t
+
+    print 'Closing workbook...',
+    t = datetime.now()
+
     workbook.close()
+    print datetime.now() - t

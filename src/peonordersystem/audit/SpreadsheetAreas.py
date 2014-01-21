@@ -6,7 +6,7 @@
 
 from abc import ABCMeta, abstractmethod
 
-from src.peonordersystem.worksheet import check_worksheet
+from src.peonordersystem.audit.worksheet import check_worksheet
 
 
 class SpreadsheetArea(object):

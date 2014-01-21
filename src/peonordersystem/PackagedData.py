@@ -81,6 +81,16 @@ class PackagedData(object):
         """
         return self.__dict__ == other.__dict__
 
+    def __cmp__(self, other):
+        """
+
+        @param other:
+        @return:
+        """
+        if self.date == other.date:
+            return cmp(self.datetime, other.datetime)
+        return cmp(self.date, other.date)
+
     @abc.abstractmethod
     def __len__(self):
         """Abstract method.
