@@ -12,16 +12,14 @@ class TimeKeys(DatasheetArea):
 
     """
 
-    def __init__(self, format_dict):
+    def __init__(self):
         """Initializes the object.
 
-        @param format_dict: dict of str keys
+        @param format_data: dict of str keys
         mapped to xlsxwriter.Format values
         representing the formats available
         for formating cells.
         """
-        self.format_dict = format_dict
-
         data = self._create_time_keys()
         super(TimeKeys, self).__init__(data)
 
@@ -95,5 +93,5 @@ class TimeKeys(DatasheetArea):
         that is used to format the
         cell data.
         """
-        return self.format_dict['time_format']
+        return self.format_data['time_format']
 
