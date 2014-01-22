@@ -87,7 +87,7 @@ class AuditWorkbook(Workbook):
         @return: OverviewArea object that has been added to the
         given worksheet.
         """
-        overview_area = OverviewArea(date_data, self.format_dict)
+        overview_area = OverviewArea(date_data)
         worksheet.add_area(overview_area)
         return overview_area
 
@@ -103,7 +103,7 @@ class AuditWorkbook(Workbook):
         @return: FrequencyArea that has been added to the given
         worksheet.
         """
-        freq_area = FrequencyArea(date_data, Counter(), self.format_dict)
+        freq_area = FrequencyArea(date_data, Counter())
         worksheet.add_area(freq_area)
         return freq_area
 
@@ -119,7 +119,7 @@ class AuditWorkbook(Workbook):
         @return:NotificationArea that has been added to the given
         worksheet.
         """
-        notif_area = NotificationArea(date_data, [], self.format_dict)
+        notif_area = NotificationArea(date_data, [])
         worksheet.add_area(notif_area)
         return notif_area
 
@@ -136,7 +136,7 @@ class AuditWorkbook(Workbook):
         for it.
         """
         for packaged_order in packaged_data:
-            order_area = OrderArea(packaged_order, self.format_dict)
+            order_area = OrderArea(packaged_order)
             worksheet.add_area(order_area)
             yield packaged_order
 

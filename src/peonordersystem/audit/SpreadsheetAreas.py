@@ -38,7 +38,7 @@ class SpreadsheetArea(object):
     should be considered a permanent property of this area and not altered
     in any way.
 
-    @var format_dict: dict that maps str to xlsxwriter.Formats. This
+    @var format_data: dict that maps str to xlsxwriter.Formats. This
     is used to access and utilize all format data.
 
     @var worksheet: xlsxwriter.worksheet.Worksheet object that
@@ -119,10 +119,10 @@ class SpreadsheetArea(object):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, format_dict):
+    def __init__(self):
         """Initializes a new SpreadsheetArea class
         """
-        self.format_dict = format_dict
+        self.format_data = None
         self._worksheet = None
         self.row = None
         self.col = None
@@ -170,7 +170,7 @@ class SpreadsheetArea(object):
         """
         return self._initial_col
 
-    def connect(self, worksheet, row=0, col=0):
+    def connect(self, worksheet, format_data, row=0, col=0):
         """Connects the worksheet to the
         SpreadsheetArea. The worksheet will
         be connected and coupled with the area.
@@ -188,6 +188,7 @@ class SpreadsheetArea(object):
         check_worksheet(worksheet)
         self.row = row
         self.col = col
+        self.format_data = format_data
 
         self._initial_row = self.row
         self._initial_col = self.col
@@ -232,7 +233,7 @@ class SpreadsheetArea(object):
 
         @return: None
         """
-        format = self.format_dict['left_column']
+        format = self.format_data['left_column']
         self._set_worksheet_column(first_col=self.col, last_col=self.col,
                                    width=self.AREA_COL_WIDTH, format=format)
 
@@ -242,7 +243,7 @@ class SpreadsheetArea(object):
 
         @return: None
         """
-        format = self.format_dict['right_column']
+        format = self.format_data['right_column']
         self._set_worksheet_column(first_col=self.area_end_col,
                                    last_col=self.area_end_col,
                                    width=self.AREA_COL_WIDTH, format=format)
@@ -386,9 +387,9 @@ class SpreadsheetArea(object):
         where n is the number of columns in this area.
         """
         cols = self.AREA_COL_NUM - 2
-        formats = [self.format_dict['title_format_left']] + \
-                  [self.format_dict['title_format_center'] for x in range(cols)] + \
-                  [self.format_dict['title_format_right']]
+        formats = [self.format_data['title_format_left']] + \
+                  [self.format_data['title_format_center'] for x in range(cols)] + \
+                  [self.format_data['title_format_right']]
         return formats
 
     def _get_row_subtitle_formats(self):
@@ -401,9 +402,9 @@ class SpreadsheetArea(object):
         where n is the number of columns in this area.
         """
         cols = self.AREA_COL_NUM - 2
-        formats = [self.format_dict['subtitle_format_left']] + \
-                  [self.format_dict['subtitle_format_center'] for x in range(cols)] + \
-                  [self.format_dict['subtitle_format_right']]
+        formats = [self.format_data['subtitle_format_left']] + \
+                  [self.format_data['subtitle_format_center'] for x in range(cols)] + \
+                  [self.format_data['subtitle_format_right']]
         return formats
 
     @abstractmethod
@@ -455,7 +456,7 @@ class SpreadsheetArea(object):
         @return: xlsxwriter.Format object that
         represents the main title format.
         """
-        return self.format_dict['main_title_data_format']
+        return self.format_data['main_title_data_format']
 
     def _update_title_data_date(self, date_data):
         """Updates the title data date area with the
@@ -481,7 +482,7 @@ class SpreadsheetArea(object):
         represents the format for the displayed
         date data.
         """
-        return self.format_dict['datetime_format']
+        return self.format_data['datetime_format']
 
     def _get_format_date_title(self):
         """Gets the format for the date title
@@ -490,7 +491,7 @@ class SpreadsheetArea(object):
         represents the format for the displayed
         date title.
         """
-        return self.format_dict['title_format_left']
+        return self.format_data['title_format_left']
 
     def update_total_data(self, totals_data, subtotals_data):
         """Updates the displayed total data with the given
@@ -565,7 +566,7 @@ class SpreadsheetArea(object):
         @return: xlsxwriter.Format that represents
         the format for the total title.
         """
-        return self.format_dict['title_format_left']
+        return self.format_data['title_format_left']
 
     def _get_format_total_data(self):
         """Gets the format for the total data.
@@ -573,7 +574,7 @@ class SpreadsheetArea(object):
         @return: xlsxwriter.Format that represents
         the format for the total data.
         """
-        return self.format_dict['total_data_format']
+        return self.format_data['total_data_format']
 
     def _update_totals_data_subtotal(self, subtotals_data):
         """Updates the subtotal data of the totals area.
@@ -604,7 +605,7 @@ class SpreadsheetArea(object):
         @return: xlsxwriter.Format that represents
         the subtotal title format.
         """
-        return self.format_dict['subtitle_format_left']
+        return self.format_data['subtitle_format_left']
 
     def _get_format_subtotal_data(self):
         """Gets the format for displaying the subtotal data.
@@ -612,7 +613,7 @@ class SpreadsheetArea(object):
         @return: xlsxwriter.Format object that is used
         to display the format of the subtotal data.
         """
-        return self.format_dict['subtotal_data_format']
+        return self.format_data['subtotal_data_format']
 
     #================================================================================
     # This block represents functions that rely on the functionality of worksheet

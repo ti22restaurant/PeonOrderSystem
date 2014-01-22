@@ -24,21 +24,17 @@ class OrderArea(SpreadsheetArea):
     this area should display.
     """
 
-    def __init__(self, packaged_data, format_dict):
+    def __init__(self, packaged_data):
         """Initializes the OrderArea
         object with the packaged data.
 
         @param packaged_data: PackagedOrderData object
         that represents the order areas data.
-
-        @param format_dict: dict that maps str to
-        xlsxwriter.Formats that represent the formats
-        for cells.
         """
         self.packaged_data = packaged_data
-        super(OrderArea, self).__init__(format_dict)
+        super(OrderArea, self).__init__()
 
-    def connect(self, worksheet, **kwargs):
+    def connect(self, worksheet, format_data, **kwargs):
         """Override Method.
 
         Connects the area to the worksheet.
@@ -52,7 +48,7 @@ class OrderArea(SpreadsheetArea):
         is the coordinates for the upper right hand corner
         where another area could be added.
         """
-        values = super(OrderArea, self).connect(worksheet, **kwargs)
+        values = super(OrderArea, self).connect(worksheet, format_data, **kwargs)
         self.update_title_data()
         self.update_total_data()
         self._update_items_data()
@@ -238,7 +234,7 @@ class OrderArea(SpreadsheetArea):
         @return: xlsxwriter.Format that represents
         the format for the name data.
         """
-        return self.format_dict['item_data_format_left']
+        return self.format_data['item_data_format_left']
 
     def _write_item_price(self, item_price):
         """Writes the items price data to the
@@ -261,7 +257,7 @@ class OrderArea(SpreadsheetArea):
         @return: xlsxwriter.Format that represents
         the format for the price to be written.
         """
-        return self.format_dict['total_data_format']
+        return self.format_data['total_data_format']
 
     def _write_item_stars(self, item_stars):
         """Writes the item stars data to the
@@ -293,7 +289,7 @@ class OrderArea(SpreadsheetArea):
         @return: xlsxwriter.Format that represents
         the format for displaying the item stars name.
         """
-        return self.format_dict['subitem_data_format_left']
+        return self.format_data['subitem_data_format_left']
 
     def _write_item_stars_value(self, value):
         """Writes the item stars value to the
@@ -314,7 +310,7 @@ class OrderArea(SpreadsheetArea):
         @return: xlsxwriter.Format that represents
         the format to display the item stars value.
         """
-        return self.format_dict['subitem_data_format_center']
+        return self.format_data['subitem_data_format_center']
 
     def _write_item_options(self, item_options):
         """Writes the item options to the data area.
@@ -364,7 +360,7 @@ class OrderArea(SpreadsheetArea):
         @return: xlsxwriter.Format that is used
         to display the item options title.
         """
-        return self.format_dict['subitem_data_format_left']
+        return self.format_data['subitem_data_format_left']
 
     def _get_item_option_name_format(self):
         """Gets the format that is used to
@@ -373,7 +369,7 @@ class OrderArea(SpreadsheetArea):
         @return: xlsxwriter.Format that represents
         the format to display the item options name.
         """
-        return self.format_dict['subitem_data_format_center']
+        return self.format_data['subitem_data_format_center']
 
     def _get_item_option_price_format(self):
         """Gets the format that is used to
@@ -382,7 +378,7 @@ class OrderArea(SpreadsheetArea):
         @return: xlsxwriter.Format that is used
         to display the item option price.
         """
-        return self.format_dict['subitem_data_total_format']
+        return self.format_data['subitem_data_total_format']
 
     def _write_item_note(self, item_note):
         """Writes the item note data to the
@@ -416,7 +412,7 @@ class OrderArea(SpreadsheetArea):
         @return: xlsxwriter.Format that is
         used to display the item note title.
         """
-        return self.format_dict['subitem_data_format_left']
+        return self.format_data['subitem_data_format_left']
 
     def _write_item_note_data(self, data):
         """Writes the item note data to the
@@ -437,7 +433,7 @@ class OrderArea(SpreadsheetArea):
         @return: xlsxwriter.Format that is used
         to display the item note data.
         """
-        return self.format_dict['subitem_data_format_center']
+        return self.format_data['subitem_data_format_center']
 
 
 class FrequencyArea(SpreadsheetArea):
@@ -471,7 +467,7 @@ class FrequencyArea(SpreadsheetArea):
     """
     NUM_OF_SUBTOTAL_ROWS = 1
 
-    def __init__(self, curr_date, item_data, format_dict):
+    def __init__(self, curr_date, item_data):
         """Initializes the area with the given data.
 
         @param curr_date: datetime.datetime object
@@ -481,10 +477,6 @@ class FrequencyArea(SpreadsheetArea):
         @param item_data: Counter that maps str that
         represent items to int that represent the number
         of occurrences.
-
-        @param format_dict: dict that maps str that
-        represent the format names to xlsxwriter.Format
-        objects.
         """
         self.date = curr_date
         self.item_data = Counter()
@@ -496,7 +488,7 @@ class FrequencyArea(SpreadsheetArea):
         self.freq_error = 0.0
         self._update_freq_data()
 
-        super(FrequencyArea, self).__init__(format_dict)
+        super(FrequencyArea, self).__init__()
 
     @property
     def data_area_start(self):
@@ -590,7 +582,7 @@ class FrequencyArea(SpreadsheetArea):
         """
         return float(len(list(freq_data.elements())))
 
-    def connect(self, worksheet, **kwargs):
+    def connect(self, worksheet, format_data, **kwargs):
         """Override Method
 
         Connects the area to the
@@ -605,7 +597,7 @@ class FrequencyArea(SpreadsheetArea):
         hand boundary of the area. This is where it
         would be safe to add a new area.
         """
-        values = super(FrequencyArea, self).connect(worksheet, **kwargs)
+        values = super(FrequencyArea, self).connect(worksheet, format_data, **kwargs)
 
         self.update_header_data()
         self._write_item_frequency_data()
@@ -668,7 +660,7 @@ class FrequencyArea(SpreadsheetArea):
         is to be used to display the
         total data.
         """
-        return self.format_dict['title_format_right']
+        return self.format_data['title_format_right']
 
     def _get_subtotal_data(self):
         """Get the subtotal data to
@@ -691,7 +683,7 @@ class FrequencyArea(SpreadsheetArea):
         @return: xlsxwriter.Format that is
         used to display the subtotal data.
         """
-        return self.format_dict['subtitle_format_right']
+        return self.format_data['subtitle_format_right']
 
     def add(self, item_data):
         """Override Method.
@@ -749,7 +741,7 @@ class FrequencyArea(SpreadsheetArea):
         @return: xlsxwriter.Format that
         represents the format to be displayed.
         """
-        return self.format_dict['item_data_format_left']
+        return self.format_data['item_data_format_left']
 
     def _write_item_data(self, value):
         """Writes the item value to the
@@ -771,7 +763,7 @@ class FrequencyArea(SpreadsheetArea):
         representing the format used to
         display the item data.
         """
-        return self.format_dict['item_data_format_right']
+        return self.format_data['item_data_format_right']
 
 
 class NotificationArea(SpreadsheetArea):
@@ -796,7 +788,7 @@ class NotificationArea(SpreadsheetArea):
     area.
     """
 
-    def __init__(self, date_data, notification_data, format_dict):
+    def __init__(self, date_data, notification_data):
         """Initializes the notifications area.
 
         @param date_data: datetime.date object
@@ -806,10 +798,6 @@ class NotificationArea(SpreadsheetArea):
         @param notification_data: list of MenuItems
         that represents the notification data to be
         displayed in this area.
-
-        @param format_dict: dict of str keys mapped
-        to xlsxwriter.Format objects representing
-        the formats for displaying data.
         """
         self.date = date_data
         self.data = notification_data
@@ -817,7 +805,7 @@ class NotificationArea(SpreadsheetArea):
         self.num_of_discounts = 0
         self.num_of_comps = 0
 
-        super(NotificationArea, self).__init__(format_dict)
+        super(NotificationArea, self).__init__()
 
     def update_title_data(self):
         """Override Method.
@@ -849,7 +837,7 @@ class NotificationArea(SpreadsheetArea):
         @return: xlsxwriter.Format used to
         display the total data.
         """
-        return self.format_dict['title_format_right']
+        return self.format_data['title_format_right']
 
     def _get_format_subtotal_data(self):
         """Override Method
@@ -860,7 +848,7 @@ class NotificationArea(SpreadsheetArea):
         @return: xlsxwriter.Format used to
         dispolay the subtotal data.
         """
-        return self.format_dict['subtitle_format_right']
+        return self.format_data['subtitle_format_right']
 
     def _get_totals_data(self):
         """Gets the total associated
@@ -884,7 +872,7 @@ class NotificationArea(SpreadsheetArea):
         return (('Discount Items Total', self.num_of_discounts),
                 ('Comped Items Total', self.num_of_comps))
 
-    def connect(self, worksheet, **kwargs):
+    def connect(self, worksheet, format_data, **kwargs):
         """Override Method
 
         Connects the area to the given
@@ -899,7 +887,8 @@ class NotificationArea(SpreadsheetArea):
         row and column that it is safe to add another
         area.
         """
-        values = super(NotificationArea, self).connect(worksheet, **kwargs)
+        values = super(NotificationArea, self).connect(worksheet, format_data,
+                                                       **kwargs)
         self.update_title_data()
         self.add(self.data)
         return values
@@ -938,7 +927,7 @@ class NotificationArea(SpreadsheetArea):
         used to display the item name to the
         data area.
         """
-        return self.format_dict['item_data_format_left']
+        return self.format_data['item_data_format_left']
 
     def _write_item_data_price(self, item_price):
         """Writes the item price data to the
@@ -961,7 +950,7 @@ class NotificationArea(SpreadsheetArea):
         used to format the data to display
         to the area.
         """
-        return self.format_dict['total_data_format']
+        return self.format_data['total_data_format']
 
     def add(self, notification_data):
         """Override Method
@@ -1046,7 +1035,7 @@ class OverviewArea(SpreadsheetArea):
 
     NUM_OF_SUBTOTAL_ROWS = 4
 
-    def __init__(self, date_data, format_dict):
+    def __init__(self, date_data):
         """Initializes the OverviewArea with the
         given date and format data.
         """
@@ -1057,7 +1046,7 @@ class OverviewArea(SpreadsheetArea):
 
         self.togo_orders = 0
         self.standard_orders = 0
-        super(OverviewArea, self).__init__(format_dict)
+        super(OverviewArea, self).__init__()
 
     @property
     def data_area_start(self):
@@ -1074,7 +1063,7 @@ class OverviewArea(SpreadsheetArea):
 
         return self._DATA_AREA_START + change_in_row
 
-    def connect(self, worksheet, **kwargs):
+    def connect(self, worksheet, format_data, **kwargs):
         """Override Method
 
         Connects the area to the given
@@ -1090,7 +1079,7 @@ class OverviewArea(SpreadsheetArea):
         the row and column that it is safe to add
         another area too.
         """
-        values = super(OverviewArea, self).connect(worksheet, **kwargs)
+        values = super(OverviewArea, self).connect(worksheet, format_data, **kwargs)
         self.update_title_data()
         return values
 
@@ -1150,7 +1139,7 @@ class OverviewArea(SpreadsheetArea):
         represents the display for the
         type name in the total area.
         """
-        return self.format_dict['subtitle_format_left']
+        return self.format_data['subtitle_format_left']
 
     def _get_type_data_value_format(self):
         """Gets the format used to display
@@ -1160,7 +1149,7 @@ class OverviewArea(SpreadsheetArea):
         used to display the type value in
         the total area.
         """
-        return self.format_dict['subtitle_format_right']
+        return self.format_data['subtitle_format_right']
 
     def _get_total_data(self):
         """Gets the total data to display.
@@ -1318,7 +1307,7 @@ class OverviewArea(SpreadsheetArea):
         used to display the order name in the
         data area.
         """
-        return self.format_dict['item_data_format_left']
+        return self.format_data['item_data_format_left']
 
     def _write_order_data_total(self, total):
         """Writes the order total in the data
@@ -1336,4 +1325,4 @@ class OverviewArea(SpreadsheetArea):
         @return: xlsxwriter.Format that is
         used to display the order total.
         """
-        return self.format_dict['total_data_format']
+        return self.format_data['total_data_format']

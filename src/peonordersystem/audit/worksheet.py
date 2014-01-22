@@ -25,7 +25,7 @@ class Worksheet(object):
     worksheet.
     """
 
-    def __init__(self, xlsx_worksheet):
+    def __init__(self, xlsx_worksheet, format_data):
         """Initialzies the Worksheet with
         the given xlsxwriter.worksheet.
 
@@ -35,7 +35,10 @@ class Worksheet(object):
         """
         self.areas = []
         self.charts = []
+
         self._worksheet = xlsx_worksheet
+        self.format_data = format_data
+
         self.row = 0
         self.col = 0
 
@@ -50,8 +53,8 @@ class Worksheet(object):
         @return: None
         """
         self.areas.append(spreadsheet_area)
-        self.row, self.col = spreadsheet_area.connect(self, row=self.row,
-                                                      col=self.col)
+        self.row, self.col = spreadsheet_area.connect(self, self.format_data,
+                                                      row=self.row, col=self.col)
 
     def add_chart(self, spreadsheet_chart):
         """Adds the given chart to the worksheet.
@@ -193,19 +196,19 @@ class DataWorksheet(Worksheet):
     """
     HIDDEN_WORKSHEET_NAME = 'HiddenDataWorksheet'
 
-    def __init__(self, worksheet, format_dict):
+    def __init__(self, worksheet, format_data):
         """ Initializes the DataWorksheet object.
 
         @param worksheet: xlsxwriter.Worksheet subclass
         that will provide this area with its base
         functionality.
 
-        @param format_dict: dict of xlsxwriter.Format
+        @param format_data: dict of xlsxwriter.Format
         objects that represent the formats for display
         data.
         """
-        super(DataWorksheet, self).__init__(worksheet)
-        self.format_dict = format_dict
+        super(DataWorksheet, self).__init__(worksheet, format_data)
+        self.format_data = format_data
 
         self._time_keys_area = self._create_time_keys()
         #self._date_keys_area = self._create_date_keys()
@@ -221,7 +224,7 @@ class DataWorksheet(Worksheet):
 
         @return:
         """
-        time_keys_area = TimeKeys(self.format_dict)
+        time_keys_area = TimeKeys()
         self.add_area(time_keys_area)
         return time_keys_area
 
