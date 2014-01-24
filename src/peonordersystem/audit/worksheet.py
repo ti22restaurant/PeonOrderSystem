@@ -7,7 +7,8 @@ SpreadsheetAreas.
 @contact: cjmcgraw( at )u.washington.edu
 @version: 1.0
 """
-from src.peonordersystem.audit.KeyAreas import TimeKeys
+from peonordersystem.audit.areas.KeyAreas import TimeKeys
+
 
 class Worksheet(object):
     """Worksheet object is used to contain
@@ -34,7 +35,6 @@ class Worksheet(object):
         perform the functionality on.
         """
         self.areas = []
-        self.charts = []
 
         self._worksheet = xlsx_worksheet
         self.format_data = format_data
@@ -42,8 +42,8 @@ class Worksheet(object):
         self.row = 0
         self.col = 0
 
-    def add_area(self, spreadsheet_area):
-        """Adds the given SpreadsheetArea to
+    def add_area(self, area):
+        """Adds the given Area to
         the worksheet.
 
         @param spreadsheet_area: SpreadsheetArea
@@ -52,20 +52,9 @@ class Worksheet(object):
 
         @return: None
         """
-        self.areas.append(spreadsheet_area)
-        self.row, self.col = spreadsheet_area.connect(self, self.format_data,
-                                                      row=self.row, col=self.col)
-
-    def add_chart(self, spreadsheet_chart):
-        """Adds the given chart to the worksheet.
-
-        @param spreadsheet_chart: xlsxwriter.Chart
-        that represents the chart to be displayed.
-
-        @return: None
-        """
-        self.charts.append(spreadsheet_chart)
-        self._worksheet.insert_chart(self.row, self.col, spreadsheet_chart)
+        self.areas.append(area)
+        self.row, self.col = area.connect(self, self.format_data, row=self.row,
+                                          col=self.col)
 
     def write(self, row, column, data, format):
         """Writes the given data to the specified area.
@@ -86,6 +75,14 @@ class Worksheet(object):
         was successfully added.
         """
         return self._worksheet.write(row, column, data, format)
+
+    def insert_chart(self, row, column, chart):
+        """
+
+        @param chart:
+        @return:
+        """
+        self._worksheet.insert_chart(self.row, self.col, chart)
 
     def set_row(self, row_number, row_height, **kwargs):
         """Sets the given row to the given height with the
@@ -210,11 +207,11 @@ class DataWorksheet(Worksheet):
         super(DataWorksheet, self).__init__(worksheet, format_data)
         self.format_data = format_data
 
-        self._time_keys_area = self._create_time_keys()
+        self.time_keys = self._create_time_keys()
         #self._date_keys_area = self._create_date_keys()
 
-        self._items_data_areas = {}
-        self._orders_data_areas = {}
+        self.items_data = {}
+        self.orders_data = {}
 
         self._worksheet.name = self.HIDDEN_WORKSHEET_NAME
         #self._worksheet.hide()
@@ -227,10 +224,6 @@ class DataWorksheet(Worksheet):
         time_keys_area = TimeKeys()
         self.add_area(time_keys_area)
         return time_keys_area
-
-
-
-
 
 
 def check_worksheet(worksheet):
