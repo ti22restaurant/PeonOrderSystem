@@ -9,7 +9,7 @@ from collections import Counter
 from src.peonordersystem.MenuItem import is_menu_item, is_discount_item
 from src.peonordersystem.CheckOperations import (get_total, get_total_tax,
                                                  get_order_subtotal)
-from peonordersystem.audit.SpreadsheetAreas import SpreadsheetArea
+from peonordersystem.audit.areas.SpreadsheetAreas import SpreadsheetArea
 
 
 class OrderArea(SpreadsheetArea):

@@ -7,9 +7,10 @@
 from abc import ABCMeta, abstractmethod
 
 from src.peonordersystem.audit.worksheet import check_worksheet
+from src.peonordersystem.audit.areas.Area import Area
 
 
-class SpreadsheetArea(object):
+class SpreadsheetArea(Area):
     """Abstract Base Class.
 
     SpreadsheetArea class represents the abstract

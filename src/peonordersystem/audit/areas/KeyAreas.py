@@ -1,15 +1,19 @@
-"""
+"""KeyAreas represents areas
+that specifically are used for
+storing key data.
+
 @author: Carl McGraw
 @contact: cjmcgraw( at )u.washington.edu
 """
-from datetime import time, datetime, timedelta
+from datetime import time, datetime
 
 from src.peonordersystem.Settings import OPEN_TIME, CLOSE_TIME, TIME_GROUPING
-from src.peonordersystem.audit.DatasheetAreas import DatasheetArea
+from peonordersystem.audit.areas.DatasheetAreas import DatasheetArea
+
 
 class TimeKeys(DatasheetArea):
-    """
-
+    """TimeKeys represents key data categorized
+    by time.
     """
 
     def __init__(self):

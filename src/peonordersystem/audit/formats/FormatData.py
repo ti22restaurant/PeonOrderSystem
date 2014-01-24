@@ -83,7 +83,7 @@ class FormatData(object):
 
         @return: None
         """
-        self._check_for_null_workbook()
+        self._check_null_workbook()
         self._workbook = workbook
         self._add_workbook_data()
 
