@@ -9,14 +9,14 @@ areas.
 from copy import copy
 from abc import ABCMeta, abstractmethod
 from xlsxwriter.utility import xl_range_abs
+from src.peonordersystem.audit.areas.Area import Area
+from peonordersystem.audit.parsers.PackagedDataParsers import (PackagedDataParser,
+                                                     ItemsTimePackagedDataParser,
+                                                     OrdersTimePackagedDataParser,
+                                                     TotalsTimePackagedDataParser)
 
-from src.peonordersystem.audit.PackageValues import (PackageValue,
-                                                     ItemsTimePackageValue,
-                                                     OrdersTimePackageValue,
-                                                     TotalsTimePackageValue)
 
-
-class DatasheetArea(object):
+class DatasheetArea(Area):
     """Abstract Base Class
 
     Represents an area used for displaying
@@ -37,6 +37,7 @@ class DatasheetArea(object):
         self.format_data = None
         self._data = data
         self.row = len(self._data)
+        self.col = None
 
         self._initial_row = None
         self._initial_col = None
@@ -133,8 +134,10 @@ class DatasheetArea(object):
         self._worksheet = worksheet
         self.format_data = format_data
 
+        self.col = col
+
         self._write_data_column()
-        return 0, col + 1
+        return row, col + 1
 
     def _write_data_column(self, format=None):
         """Writes the data column.
@@ -183,7 +186,7 @@ class DatasheetArea(object):
         """
         data_ref = xl_range_abs(self._initial_row, self._initial_col, self.row,
                                 self.col)
-        return self._worksheet.get_name + '!' + data_ref
+        return '=' + self._worksheet.get_name() + '!' + data_ref
 
 
 class KeyToValueDataArea(DatasheetArea):
@@ -195,21 +198,21 @@ class KeyToValueDataArea(DatasheetArea):
     key value's range it is within.
     """
 
-    def __init__(self, package_value, data_keys):
+    def __init__(self, packaged_data_parser, data_keys):
         """Initializes the KeyToValueDataArea with the
         given data keys.
 
-        @param package_value: PackageValue subclass
-        that represents the functions for pulling
-        values from given package data.
+        @param packaged_data_parser: PackagedDataParser
+        subclass that represents the functions for
+        pulling values from given package data.
 
         @param data_keys: list representing the
         data keys associated with the area. This
         list is expected to be in pre-categorized
         order.
         """
-        self._check_package_value(package_value)
-        self._package_value = package_value
+        self._check_package_value(packaged_data_parser)
+        self._data_parser = packaged_data_parser
         self._data_keys = tuple(data_keys)
         data = self._fill_data_list_values()
         super(KeyToValueDataArea, self).__init__(data)
@@ -229,14 +232,14 @@ class KeyToValueDataArea(DatasheetArea):
 
         @param package_value: object that is to be
         tested if it is an instance or subclass of
-        PackageValue
+        PackagedDataParser
 
         @return: bool representing if the test was
         passed.
         """
-        if not package_value or not isinstance(package_value, PackageValue):
+        if not package_value or not isinstance(package_value, PackagedDataParser):
             curr_type = type(package_value)
-            raise ValueError('Expected instance of PackageValue to be given for '
+            raise ValueError('Expected instance of PackagedDataParser to be given for '
                              'KeyToValueDataArea. Received {} instead.'.format(curr_type))
 
         return True
@@ -335,7 +338,7 @@ class KeyToValueDataArea(DatasheetArea):
 
             if value < mid_value:
                 return self._find_key_index_helper(sublist[:mid_index], value)
-            elif value >= mid_value:
+            else:
                 return mid_index + self._find_key_index_helper(sublist[mid_index:],
                                                                value)
 
@@ -351,7 +354,7 @@ class KeyToValueDataArea(DatasheetArea):
         @return: value associated with the
         PackagedData.
         """
-        return self._package_value.get_data_value(data)
+        return self._data_parser.get_data_value(data)
 
     def _get_data_comparison_value(self, data):
         """Gets the value associated with the
@@ -363,7 +366,7 @@ class KeyToValueDataArea(DatasheetArea):
         @return: value representing the data
         comparison.
         """
-        return self._package_value.get_data_comparison_value(data)
+        return self._data_parser.get_data_comparison_value(data)
 
 
 class ItemsTimeKeyToValueDataArea(KeyToValueDataArea):
@@ -372,16 +375,17 @@ class ItemsTimeKeyToValueDataArea(KeyToValueDataArea):
     keys
     """
 
-    def __init__(self, data_keys):
+    def __init__(self, keys_area):
         """Initializes a new ItemsTimeKeyToValueDataArea
         object.
 
-        @param data_keys: list of datetime.time
-        representing the keys associated with
-        the data.
+        @param keys_area: DatasheetArea that represents
+        the data area that stores the keys data.
         """
-        package_value = ItemsTimePackageValue()
-        super(ItemsTimeKeyToValueDataArea, self).__init__(package_value, data_keys)
+        package_value = ItemsTimePackagedDataParser()
+        self.keys_area = keys_area
+        super(ItemsTimeKeyToValueDataArea, self).__init__(package_value,
+                                                          keys_area.data)
 
 
 class OrdersTimeKeyToValueDataArea(KeyToValueDataArea):
@@ -389,15 +393,17 @@ class OrdersTimeKeyToValueDataArea(KeyToValueDataArea):
     for storing orders data by time keys.
     """
 
-    def __init__(self, data_keys):
+    def __init__(self, keys_area):
         """Initializes a new OrdersTimeKeyToValueDataArea
         object.
 
-        @param data_keys: list of datetime.time
-        representing the keys associated with the data.
+        @param keys_area: DatasheetArea that represents
+        the data area that stores the keys data.
         """
-        package_value = OrdersTimePackageValue()
-        super(OrdersTimeKeyToValueDataArea, self).__init__(package_value, data_keys)
+        package_value = OrdersTimePackagedDataParser()
+        self.keys_area = keys_area
+        super(OrdersTimeKeyToValueDataArea, self).__init__(package_value,
+                                                           keys_area.data)
 
 
 class TotalsTimeKeyToValueDataArea(KeyToValueDataArea):
@@ -406,12 +412,14 @@ class TotalsTimeKeyToValueDataArea(KeyToValueDataArea):
     keys.
     """
 
-    def __init__(self, data_keys, data=[]):
+    def __init__(self, keys_area, data=[]):
         """Initializes a new TotalsTimeKeyToValueDataArea
         object.
 
-        @param data_keys: list of datetime.time
-        representing the keys associated with the data.
+        @param keys_area: DatasheetArea that represents
+        the data area that stores the keys data.
         """
-        package_value = TotalsTimePackageValue()
-        super(TotalsTimeKeyToValueDataArea, self).__init__(package_value, data_keys)
+        package_value = TotalsTimePackagedDataParser()
+        self.keys_area = keys_area
+        super(TotalsTimeKeyToValueDataArea, self).__init__(package_value,
+                                                           keys_area.data)
