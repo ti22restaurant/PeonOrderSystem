@@ -12,7 +12,8 @@ from collections import Counter
 import xlsxwriter
 
 from src.peonordersystem.audit.worksheet import Worksheet, DataWorksheet
-from src.peonordersystem.audit.FormatData import StandardFormatData
+from peonordersystem.audit.formats.FormatData import StandardFormatData
+from peonordersystem.audit.areas.ChartArea import DataChartArea
 
 
 class Workbook(object):
@@ -69,18 +70,14 @@ class Workbook(object):
         ws = self._workbook.add_worksheet(*args, **kwargs)
         return Worksheet(ws, self.format_data)
 
-    def add_chart(self, *args, **kwargs):
+    def add_chart(self, chart_data, name=''):
         """Adds a chart to the workbook
 
-        @param args: represents potential arguments
-        to be associated with the chart.
-
-        @param kwargs: represents potential keyword
-        arguments to be associated with the chart.
-
-        @return: xlsxwriter.Workbook
+        @return: DataChartArea object
+        representing the chart.
         """
-        return self._workbook.add_chart(*args)
+        chart = self._workbook.add_chart(chart_data)
+        return DataChartArea(chart, name)
 
     def _add_format(self, format_data):
         """Adds the given format information to
@@ -181,18 +178,18 @@ if __name__ == "__main__":
     workbook.add_date_sheet(datetime.now().date(), data)
     print datetime.now() - t
 
-    datesheet = workbook.datasheet
+    datasheet = workbook.datasheet
 
-    from src.peonordersystem.audit.DatasheetAreas import (OrdersTimeKeyToValueDataArea,
+    from peonordersystem.audit.areas.DatasheetAreas import (OrdersTimeKeyToValueDataArea,
                                                           ItemsTimeKeyToValueDataArea,
                                                           TotalsTimeKeyToValueDataArea)
 
     print 'Generating OrdersArea...',
     t = datetime.now()
 
-    area1 = OrdersTimeKeyToValueDataArea(datesheet._time_keys_area.data)
-    area2 = ItemsTimeKeyToValueDataArea(datesheet._time_keys_area.data)
-    area3 = TotalsTimeKeyToValueDataArea(datesheet._time_keys_area.data)
+    area1 = OrdersTimeKeyToValueDataArea(datasheet.time_keys)
+    area2 = ItemsTimeKeyToValueDataArea(datasheet.time_keys)
+    area3 = TotalsTimeKeyToValueDataArea(datasheet.time_keys)
 
     print datetime.now() - t
 
@@ -204,11 +201,25 @@ if __name__ == "__main__":
         area2.insert(each)
         area3.insert(each)
 
-    datesheet.add_area(area1)
-    datesheet.add_area(area2)
+    datasheet.add_area(area1)
+    datasheet.add_area(area2)
 
-    datesheet.add_area(area3)
+    datasheet.add_area(area3)
     print datetime.now() - t
+
+    chart_sheet = workbook.add_worksheet('chart_sheet')
+
+    chart = workbook.add_chart({'type': 'line'}, name='Order Data')
+    chart.add_keys_and_data(datasheet.time_keys, area1)
+    chart_sheet.add_area(chart)
+
+    chart = workbook.add_chart({'type': 'line'}, name='Item Data')
+    chart.add_keys_and_data(datasheet.time_keys, area2)
+    chart_sheet.add_area(chart)
+
+    chart = workbook.add_chart({'type': 'line'}, name='Totals Data')
+    chart.add_keys_and_data(datasheet.time_keys, area3)
+    chart_sheet.add_area(chart)
 
     print 'Closing workbook...',
     t = datetime.now()
