@@ -5,17 +5,17 @@
 from abc import ABCMeta, abstractmethod
 
 
-class PackageValue(object):
+class PackagedDataParser(object):
     """Abstract Base Class.
 
-    Represents the PackageValue that
+    Represents the PackagedDataParser that
     determines how data is obtained
     from a PackagedData class.
     """
     __metaclass__ = ABCMeta
 
     def __init__(self):
-        """Initializes the PackageValue"""
+        """Initializes the PackagedDataParser"""
         pass
 
     @abstractmethod
@@ -42,8 +42,8 @@ class PackageValue(object):
         pass
 
 
-class OrdersTimePackageValue(PackageValue):
-    """This class represents the PackageValue
+class OrdersTimePackagedDataParser(PackagedDataParser):
+    """This class represents the PackagedDataParser
     for orders given that they are organized
     by time as keys.
     """
@@ -73,8 +73,8 @@ class OrdersTimePackageValue(PackageValue):
         return packaged_data.time
 
 
-class ItemsTimePackageValue(PackageValue):
-    """This class gets the PackageValue for
+class ItemsTimePackagedDataParser(PackagedDataParser):
+    """This class gets the PackagedDataParser for
     items as long as they are organized by
     time keys.
     """
@@ -104,8 +104,8 @@ class ItemsTimePackageValue(PackageValue):
         return packaged_data.time
 
 
-class TotalsTimePackageValue(PackageValue):
-    """This class gets the PackageValue for
+class TotalsTimePackagedDataParser(PackagedDataParser):
+    """This class gets the PackagedDataParser for
     totals as long as they are organized by
     time keys.
     """
