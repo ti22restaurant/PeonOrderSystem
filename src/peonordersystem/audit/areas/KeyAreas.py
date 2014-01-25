@@ -5,7 +5,7 @@ storing key data.
 @author: Carl McGraw
 @contact: cjmcgraw( at )u.washington.edu
 """
-from datetime import time, datetime
+from datetime import time, datetime, timedelta
 
 from src.peonordersystem.Settings import OPEN_TIME, CLOSE_TIME, TIME_GROUPING
 from peonordersystem.audit.areas.DatasheetAreas import DatasheetArea
@@ -99,3 +99,75 @@ class TimeKeys(DatasheetArea):
         """
         return self.format_data['time_format']
 
+
+class DateKeysArea(DatasheetArea):
+    """DatekeysArea represents the key data
+    categorized by date.
+    """
+
+    def __init__(self, start_date, end_date):
+        """Initializes the DateKeysArea object.
+
+        @param start_date: datetime.date representing
+        the start date that the date keys should be
+        generated over. Inclusive.
+
+        @param end_date: datetime.date representing the
+        end date that the date keys should be generated
+        over. Inclusive.
+        """
+        data = self._create_date_keys(start_date, end_date)
+        super(DateKeysArea, self).__init__(data)
+
+    def _get_data_value(self, data):
+        """Gets the value associated with
+        the relevant data.
+
+        @param data: datetime.datetime that
+        represents the data to be parsed
+
+        @return: datetime.date that represents
+        the value type associated with these
+        keys.
+        """
+        return data.date()
+
+    def _create_date_keys(self, start_date, end_date):
+        """Creates the date keys data.
+
+        @param start_date: datetime.date that represents
+        the start date for the date keys. Inclusive.
+
+        @param end_date: datetime.date that represents
+        the end date for the date keys. Inclusive.
+
+        @return: list of datetime.date that represents
+        the date keys.
+        """
+        date_keys = []
+
+        curr_date = start_date
+
+        while curr_date <= end_date:
+            date_keys.append(curr_date)
+            curr_date += timedelta(days=1)
+
+        return date_keys
+
+    def _write_data_column(self):
+        """Writes the data to the column
+        associated with the DatasheetArea.
+
+        @return: None
+        """
+        format = self._get_data_format()
+        super(DateKeysArea, self)._write_data_column(format)
+
+    def _get_data_format(self):
+        """Gets the format associated with
+        displaying the data.
+
+        @return: xlsxwriter.Format used to
+        display the date keys data.
+        """
+        return self.format_data['date_format']
