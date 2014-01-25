@@ -11,8 +11,8 @@ from src.peonordersystem.Settings import OPEN_TIME, CLOSE_TIME, TIME_GROUPING
 from peonordersystem.audit.areas.DatasheetAreas import DatasheetArea
 
 
-class TimeKeys(DatasheetArea):
-    """TimeKeys represents key data categorized
+class TimeKeysArea(DatasheetArea):
+    """TimeKeysArea represents key data categorized
     by time.
     """
 
@@ -25,7 +25,7 @@ class TimeKeys(DatasheetArea):
         for formating cells.
         """
         data = self._create_time_keys()
-        super(TimeKeys, self).__init__(data)
+        super(TimeKeysArea, self).__init__(data)
 
     def _get_data_value(self, data):
         """Gets the value associated
@@ -86,7 +86,7 @@ class TimeKeys(DatasheetArea):
         @return: None
         """
         format = self._get_data_format()
-        super(TimeKeys, self)._write_data_column(format=format)
+        super(TimeKeysArea, self)._write_data_column(format=format)
 
     def _get_data_format(self):
         """Gets the data format

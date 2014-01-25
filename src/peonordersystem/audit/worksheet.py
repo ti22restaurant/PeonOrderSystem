@@ -7,7 +7,7 @@ SpreadsheetAreas.
 @contact: cjmcgraw( at )u.washington.edu
 @version: 1.0
 """
-from peonordersystem.audit.areas.KeyAreas import TimeKeys
+from peonordersystem.audit.areas.KeyAreas import TimeKeysArea
 
 
 class Worksheet(object):
@@ -77,10 +77,19 @@ class Worksheet(object):
         return self._worksheet.write(row, column, data, format)
 
     def insert_chart(self, row, column, chart):
-        """
+        """Inserts at the given row and column the
+        given chart into the worksheet.
 
-        @param chart:
-        @return:
+        @param row: int representing the row that
+        the chart will be inserted at.
+
+        @param column: int representing the column
+        that the chart will be inserted at.
+
+        @param chart: xlsxwriter.Chart object
+        that is to be inserted.
+
+        @return: None
         """
         self._worksheet.insert_chart(self.row, self.col, chart)
 
@@ -221,7 +230,7 @@ class DataWorksheet(Worksheet):
 
         @return:
         """
-        time_keys_area = TimeKeys()
+        time_keys_area = TimeKeysArea()
         self.add_area(time_keys_area)
         return time_keys_area
 
