@@ -7,11 +7,11 @@ storing key data.
 """
 from datetime import time, datetime, timedelta
 
+from .DataAreas import DataArea
 from src.peonordersystem.Settings import OPEN_TIME, CLOSE_TIME, TIME_GROUPING
-from peonordersystem.audit.areas.DatasheetAreas import DatasheetArea
 
 
-class TimeKeysArea(DatasheetArea):
+class TimeKeysArea(DataArea):
     """TimeKeysArea represents key data categorized
     by time.
     """
@@ -100,7 +100,7 @@ class TimeKeysArea(DatasheetArea):
         return self.format_data['time_format']
 
 
-class DateKeysArea(DatasheetArea):
+class DateKeysArea(DataArea):
     """DatekeysArea represents the key data
     categorized by date.
     """
@@ -156,7 +156,7 @@ class DateKeysArea(DatasheetArea):
 
     def _write_data_column(self):
         """Writes the data to the column
-        associated with the DatasheetArea.
+        associated with the DataArea.
 
         @return: None
         """

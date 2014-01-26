@@ -213,15 +213,15 @@ class StandardFormatData(FormatData):
     RIGHT_COL_FORMAT = {'right': 1,
                         'align': 'center'}
 
-    DATE_FORMAT = {'num_format': 'd mmmm yyyy',
+    DATE_FORMAT = {'num_format': 'mmmm d yyyy',
                    'valign': 'vcenter',
                    'align': 'center'}
 
-    DATE_TIME_FORMAT = {'num_format': 'dd/mm/yy hh:mm:ss',
+    DATE_TIME_FORMAT = {'num_format': 'mm/dd/yy hh:mm',
                         'valign': 'vcenter',
                         'align': 'center'}
 
-    TIME_FORMAT = {'num_format': 'hh:mm:ss',
+    TIME_FORMAT = {'num_format': 'hh:mm',
                    'valign': 'vcenter',
                    'align': 'center'}
 

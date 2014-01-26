@@ -2,12 +2,10 @@
 @author: Carl McGraw
 @contact: cjmcgraw( at )u.washington.edu
 """
+from .components.KeyParsers import (TimeKeyParser, DateKeyParser)
+from .components.ValueParsers import (OrdersValueParser, ItemsValueParser,
+                                      TotalsValueParser)
 from .DataParser import DataParser
-from .packagedDataParserComponents.KeyParsers import (TimeKeyParser,
-                                                      DateKeyParser)
-from .packagedDataParserComponents.ValueParsers import (OrdersValueParser,
-                                                        ItemsValueParser,
-                                                        TotalsValueParser)
 
 
 class PackagedDataParser(DataParser):

@@ -4,9 +4,12 @@
 """
 from collections import Counter
 
-from peonordersystem.audit.workbook import Workbook
-from peonordersystem.audit.DatesheetAreas import (OverviewArea, FrequencyArea,
-                                                NotificationArea, OrderArea)
+from .workbook import Workbook
+from .generalsheet.areas.StandardAreas import (OverviewArea, FrequencyArea,
+                                               NotificationArea, OrderArea)
+
+from .datasheet.areas.StandardAreas import (OrdersTimeDataArea, ItemsTimeDataArea,
+                                            TotalsTimeDataArea)
 
 
 class AuditWorkbook(Workbook):
@@ -146,8 +149,21 @@ class AuditWorkbook(Workbook):
 
         @return:
         """
-        self._create_data_areas()
+        time_key_area = self.datasheet.time_keys
+        time_keys = time_key_area.data
 
+        orders = OrdersTimeDataArea(time_keys)
+        items = ItemsTimeDataArea(time_keys)
+        totals = TotalsTimeDataArea(time_keys)
+
+        for order in packaged_data:
+
+            orders.insert(order)
+            self.add_chart(orders)
+            items.insert(order)
+            self.add_chart(items)
+            totals.insert(order)
+            self.add_chart(totals)
 
     def add_overview_audit_sheet(self):
         """Adds a new audit overview sheet to the workbook,

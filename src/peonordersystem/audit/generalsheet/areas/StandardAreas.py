@@ -5,11 +5,11 @@ Datesheet.
 @contact: cjmcgraw( at )u.washington.edu
 """
 from collections import Counter
+from .SpreadsheetArea import SpreadsheetArea
 
 from src.peonordersystem.MenuItem import is_menu_item, is_discount_item
 from src.peonordersystem.CheckOperations import (get_total, get_total_tax,
                                                  get_order_subtotal)
-from peonordersystem.audit.areas.SpreadsheetArea import SpreadsheetArea
 
 
 class OrderArea(SpreadsheetArea):
@@ -768,7 +768,7 @@ class FrequencyArea(SpreadsheetArea):
 
 class NotificationArea(SpreadsheetArea):
     """NotificationArea represents the area where
-    that may be added to a Datasheet. This area
+    that may be added to a datasheet. This area
     is for displaying MenuItems that are are
     considered a notification type.
 

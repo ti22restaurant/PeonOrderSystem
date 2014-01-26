@@ -6,8 +6,8 @@ ChartAreas to Worksheet classes.
 @contact: cjmcgraw( at )u.washington.edu
 @version: 1.0
 """
-from src.peonordersystem.audit.parsers.ChartParser import ChartParser
-from src.peonordersystem.audit.areas.Area import Area
+from peonordersystem.audit.Area import Area
+from peonordersystem.audit.generalsheet.parsers.ChartParser import ChartParser
 
 
 class ChartArea(Area):
@@ -37,10 +37,10 @@ class ChartArea(Area):
     def add_keys_and_data(self, keys, data):
         """Adds the keys and data to the chart.
 
-        @param keys: DatasheetArea that represents
+        @param keys: DataArea that represents
         the area storing the keys data.
 
-        @param data: DatasheetArea that represents
+        @param data: DataArea that represents
         the area storing the values data.
 
         @return: None
@@ -52,10 +52,10 @@ class ChartArea(Area):
         """Updates the stored keys and data to
         be displayed in this chart area.
 
-        @param keys: DatasheetArea object that
+        @param keys: DataArea object that
         represents the data to be stored in the keys.
 
-        @param data: DatasheetArea object that
+        @param data: DataArea object that
         represents the data to be stored in the
         as the values.
 

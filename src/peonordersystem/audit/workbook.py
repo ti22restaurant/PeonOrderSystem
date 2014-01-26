@@ -11,9 +11,11 @@ from collections import Counter
 
 import xlsxwriter
 
-from src.peonordersystem.audit.worksheet import Worksheet, DataWorksheet
-from peonordersystem.audit.formats.FormatData import StandardFormatData
-from peonordersystem.audit.areas.ChartArea import DataChartArea
+
+from src.peonordersystem.audit.worksheet import Worksheet
+from src.peonordersystem.audit.datasheet.DataWorksheet import DataWorksheet
+from src.peonordersystem.audit.formats.FormatData import StandardFormatData
+from peonordersystem.audit.generalsheet.areas.ChartArea import DataChartArea
 
 
 class Workbook(object):
@@ -180,16 +182,15 @@ if __name__ == "__main__":
 
     datasheet = workbook.datasheet
 
-    from peonordersystem.audit.areas.DatasheetAreas import (OrdersTimeKeyToValueDataArea,
-                                                          ItemsTimeKeyToValueDataArea,
-                                                          TotalsTimeKeyToValueDataArea)
+    from peonordersystem.audit.datasheet.areas.StandardAreas import (
+        OrdersTimeDataArea, ItemsTimeDataArea, TotalsTimeDataArea)
 
     print 'Generating OrdersArea...',
     t = datetime.now()
 
-    area1 = OrdersTimeKeyToValueDataArea(datasheet.time_keys)
-    area2 = ItemsTimeKeyToValueDataArea(datasheet.time_keys)
-    area3 = TotalsTimeKeyToValueDataArea(datasheet.time_keys)
+    area1 = OrdersTimeDataArea(datasheet.time_keys)
+    area2 = ItemsTimeDataArea(datasheet.time_keys)
+    area3 = TotalsTimeDataArea(datasheet.time_keys)
 
     print datetime.now() - t
 
