@@ -8,7 +8,7 @@ format for displaying in charts.
 """
 
 
-class ChartDataParser(object):
+class ChartParser(object):
     """Defines a class that stores
     functionality for obtaining chart
     data.
@@ -26,7 +26,7 @@ class ChartDataParser(object):
     X_AXIS_FONT_ROTATION = 45
 
     def __init__(self, chart_name):
-        """Initializes the ChartDataParser
+        """Initializes the ChartParser
 
         @param chart_name: str representing
         the name associated with this object.
