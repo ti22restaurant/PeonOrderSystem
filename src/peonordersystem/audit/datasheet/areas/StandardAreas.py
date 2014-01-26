@@ -1,6 +1,10 @@
-"""
+"""This module provides concrete classes that
+are used for creating an area for storing data
+keys and values on the datasheet.
+
 @author: Carl McGraw
 @contact: cjmcgraw( at )u.washington.edu
+@version: 1.0
 """
 from .ValueDataArea import ValueDataArea
 
@@ -49,7 +53,7 @@ class TotalsTimeDataArea(ValueDataArea):
     keys.
     """
 
-    def __init__(self, keys_area, data=[]):
+    def __init__(self, keys_area):
         """Initializes a new TotalsTimeDataArea
         object.
 
@@ -62,48 +66,47 @@ class TotalsTimeDataArea(ValueDataArea):
 
 
 class ItemsDateDataArea(ValueDataArea):
+    """This class represents an area used
+    for storing item data by date keys.
     """
     
-    """
-    
-    def __init__(self, keys_area, data=[]):
-        """
+    def __init__(self, keys_area):
+        """Initializes a new ItemsDateDataArea.
         
-        @param keys_area: 
-        @param data: 
-        @return:
+        @param keys_area: DataArea that represents
+        the data area that stores the keys data.
         """
         package_value = PackagedDataParser('DATE', 'ITEMS')
         self.keys_area = keys_area
         super(ItemsTimeDataArea, self).__init__(package_value, keys_area.data)
 
+
 class OrdersDateDataArea(ValueDataArea):
+    """This class represents an area used
+    for storing orders data by date keys.
     """
 
-    """
+    def __init__(self, keys_area):
+        """Initializes a new OrdersDateDataArea.
 
-    def __init__(self, keys_area, data=[]):
-        """
-
-        @param keys_area:
-        @param data:
-        @return:
+        @param keys_area: DataArea that represents
+        the data area that stores the keys data.
         """
         package_value = PackagedDataParser('DATE', 'ORDERS')
         self.keys_area = keys_area
         super(OrdersDateDataArea, self).__init__(package_value, keys_area.data)
 
+
 class TotalsDateDataArea(ValueDataArea):
+    """This class represents an area used
+    for storing totals data by date keys.
     """
 
-    """
+    def __init__(self, keys_area):
+        """Initializes a new TotalsDateDataArea.
 
-    def __init__(self, keys_area, data=[]):
-        """
-
-        @param keys_area:
-        @param data:
-        @return:
+        @param keys_area: DataArea that represents
+        the data area that stores the keys data.
         """
         package_value = PackagedDataParser('DATE', 'TOTALS')
         self.keys_area = keys_area
