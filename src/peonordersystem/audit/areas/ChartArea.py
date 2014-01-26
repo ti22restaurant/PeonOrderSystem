@@ -6,7 +6,7 @@ ChartAreas to Worksheet classes.
 @contact: cjmcgraw( at )u.washington.edu
 @version: 1.0
 """
-from src.peonordersystem.audit.parsers.ChartDataParser import ChartDataParser
+from src.peonordersystem.audit.parsers.ChartParser import ChartParser
 from src.peonordersystem.audit.areas.Area import Area
 
 
@@ -25,7 +25,7 @@ class ChartArea(Area):
         represents the chart to be created
         and have data written to it.
 
-        @param chart_data_parser: ChartDataParser
+        @param chart_data_parser: ChartParser
         object that is used to format chart
         data.
         """
@@ -254,5 +254,5 @@ class DataChartArea(ChartArea):
         value to be displayed as the charts name.
         By default is empty string.
         """
-        data_parser = ChartDataParser(chart_name)
+        data_parser = ChartParser(chart_name)
         super(DataChartArea, self).__init__(chart, data_parser)
