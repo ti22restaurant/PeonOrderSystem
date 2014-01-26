@@ -193,7 +193,7 @@ class Worksheet(object):
         return self._worksheet.get_name()
 
 
-def check_worksheet(worksheet):
+def check_worksheet(worksheet, message=None):
     """Checks that the worksheet is
     an instance or subclass member
     of the Worksheet class
@@ -208,7 +208,11 @@ def check_worksheet(worksheet):
     exp_type = Worksheet
     if not worksheet or not isinstance(worksheet, exp_type):
         curr_type = type(worksheet)
-        raise ValueError('Expected connected worksheet to be an instance or '
-                         'subclass of {} got {} instead'.format(exp_type,
-                                                                curr_type))
+        msg = 'Expected connected worksheet to be an instance or ' \
+              'subclass of {} got {} instead'.format(exp_type, curr_type)
+
+        if message:
+            msg = message
+
+        raise TypeError(msg)
     return True

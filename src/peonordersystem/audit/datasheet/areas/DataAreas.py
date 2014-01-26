@@ -95,8 +95,10 @@ class DataArea(Area):
 
         @return: None
         """
-        if self._worksheet:
+        try:
             self._write_row_data(self._data[row], row=row)
+        except TypeError:
+            pass
 
     def _write_row_data(self, value, row=-1):
         """Writes the given value to the respective
@@ -112,6 +114,7 @@ class DataArea(Area):
         """
         if row < 0:
             row = self.row
+        self._check_worksheet_write_data()
         self._worksheet.write(row, self._initial_col, value)
 
     def connect(self, worksheet, format_data, row=0, col=0):
@@ -125,6 +128,7 @@ class DataArea(Area):
         the row and column that this data area
         terminates and is safe to add another area.
         """
+        self._check_worksheet(worksheet)
         self._initial_row = row
         self._initial_col = col
         self._worksheet = worksheet
@@ -140,8 +144,22 @@ class DataArea(Area):
 
         @return: None
         """
+        self._check_worksheet_write_data()
         self._worksheet.write_column(self._initial_row, self._initial_col,
                                      self._data, cell_format=format)
+
+    def _check_worksheet_write_data(self):
+        """Checks if the worksheet may have the data
+        written to it.
+
+        @raise TypeError: if the stored worksheet is not
+        an instance or subclass of Worksheet.
+
+        @return: bool value representing if the test was
+        passed.
+        """
+        error_msg = 'Worksheet must be connected before this area can be written!'
+        self._check_worksheet(self._worksheet, message=error_msg)
 
     def __iter__(self):
         """Gets an iter over the
@@ -160,18 +178,6 @@ class DataArea(Area):
         """
         return len(self._data)
 
-    def __str__(self):
-        """Gets a str representation
-        that represents an absolute
-        reference to the worksheet and
-        data cells associated with this
-        area.
-
-        @return: str representing the
-        data.
-        """
-        return self.get_data_cells_reference()
-
     def get_data_cells_reference(self):
         """Gets an absolute cell reference
         to the cells and worksheet stored
@@ -180,6 +186,21 @@ class DataArea(Area):
         @return: str representing the data
         stored in the area.
         """
+        self._check_worksheet_data_cells_reference()
         data_ref = xl_range_abs(self._initial_row, self._initial_col, self.row,
                                 self.col)
         return '=' + self._worksheet.get_name() + '!' + data_ref
+
+    def _check_worksheet_data_cells_reference(self):
+        """Checks if the worksheet data cells reference may
+        be obtained.
+
+        @raise TypeError: if the current worksheet is not
+        an instance or subclass of Worksheet
+
+        @return: bool value representing if the test was passed.
+        """
+        error_msg = 'Worksheet must be connected to this area before an absolute ' \
+                    'reference the cells may be created!'
+        return self._check_worksheet(self._worksheet, message=error_msg)
+

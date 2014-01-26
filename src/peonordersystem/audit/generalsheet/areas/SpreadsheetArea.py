@@ -7,7 +7,6 @@
 from abc import ABCMeta, abstractmethod
 
 from src.peonordersystem.audit.Area import Area
-from src.peonordersystem.audit.worksheet import check_worksheet
 
 
 class SpreadsheetArea(Area):
@@ -186,7 +185,7 @@ class SpreadsheetArea(Area):
         represents the top right hand boundary of
         the area.
         """
-        check_worksheet(worksheet)
+        self._check_worksheet(worksheet)
         self.row = row
         self.col = col
         self.format_data = format_data
@@ -616,6 +615,20 @@ class SpreadsheetArea(Area):
         """
         return self.format_data['subtotal_data_format']
 
+    def _check_worksheet_write_data(self):
+        """Checks that a valid worksheet that allows
+        writeable data is currently connected to the
+        area.
+
+        @raise TypeError: If the stored worksheet is
+        not an instance or subclass of Worksheet.
+
+        @return: bool value representing if the test
+        was passed.
+        """
+        error_msg = 'Worksheet must be connected before this area can write data!'
+        return self._check_worksheet(self._worksheet, message=error_msg)
+
     #================================================================================
     # This block represents functions that rely on the functionality of worksheet
     # method to operate properly. Any chances in the worksheet functionality may
@@ -644,6 +657,7 @@ class SpreadsheetArea(Area):
             row = self.row
         if col < 0:
             col = self.col
+        self._check_worksheet_write_data()
         self._set_worksheet_row(row)
         self._worksheet.write(row, col, data, format)
 
@@ -684,7 +698,7 @@ class SpreadsheetArea(Area):
             last_col = self.area_end_col
         if not data:
             data = ''
-
+        self._check_worksheet_write_data()
         self._worksheet.merge_range(start_row, first_col, end_row, last_col,
                                     data=data, cell_format=format)
         return end_row, first_col
@@ -707,6 +721,7 @@ class SpreadsheetArea(Area):
             row = self.row
         if not height:
             height = self.DATA_ROW_HEIGHT
+        self._check_worksheet_write_data()
         self._worksheet.set_row(row, height, cell_format=format)
 
     def _set_worksheet_column(self, first_col=-1, last_col=-1, width=None,
@@ -733,7 +748,7 @@ class SpreadsheetArea(Area):
             last_col = self.area_end_col
         if not width:
             width = self.AREA_COL_WIDTH
-
+        self._check_worksheet_write_data()
         self._worksheet.set_column(first_col, last_col, width, cell_format=format)
 
 

@@ -9,6 +9,8 @@ to Worksheets.
 """
 from abc import ABCMeta, abstractmethod
 
+from .worksheet import check_worksheet
+
 
 class Area(object):
     """Abstract Base Class for
@@ -22,3 +24,19 @@ class Area(object):
     @abstractmethod
     def connect(self, worksheet, format_data, row, col):
         pass
+
+    @staticmethod
+    def _check_worksheet(worksheet, message=None):
+        """Checks that the given data is a valid
+        worksheet subclass.
+
+        @param worksheet: data to be tested if it
+        is a Worksheet instance or subclass.
+
+        @param message: str representing the message
+        to display in-lieu of the default message.
+
+        @return: bool value representing if the
+        test was passed.
+        """
+        check_worksheet(worksheet, message=message)
