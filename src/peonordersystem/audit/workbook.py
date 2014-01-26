@@ -12,10 +12,10 @@ from collections import Counter
 import xlsxwriter
 
 
-from src.peonordersystem.audit.worksheet import Worksheet
-from src.peonordersystem.audit.datasheet.DataWorksheet import DataWorksheet
-from src.peonordersystem.audit.formats.FormatData import StandardFormatData
-from peonordersystem.audit.generalsheet.areas.ChartArea import DataChartArea
+from .worksheet import Worksheet
+from .datasheet.DataWorksheet import DataWorksheet
+from .formats.FormatData import StandardFormatData
+from .generalsheet.areas.ChartArea import DataChartArea
 
 
 class Workbook(object):

@@ -5,8 +5,8 @@
 """
 
 from abc import ABCMeta, abstractmethod
-from peonordersystem.audit.Area import Area
 
+from src.peonordersystem.audit.Area import Area
 from src.peonordersystem.audit.worksheet import check_worksheet
 
 

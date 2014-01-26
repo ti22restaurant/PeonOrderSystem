@@ -5,6 +5,7 @@ Datesheet.
 @contact: cjmcgraw( at )u.washington.edu
 """
 from collections import Counter
+
 from .SpreadsheetArea import SpreadsheetArea
 
 from src.peonordersystem.MenuItem import is_menu_item, is_discount_item
