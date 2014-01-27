@@ -209,7 +209,7 @@ class OverviewArea(GeneralArea):
         Adds the packaged_order data
         to the data area.
 
-        @param packaged_order: PackagedOrderData
+        @param packaged_order: OrderDataBundle
         object that represents the order data to
         be added to the area.
 
@@ -245,48 +245,41 @@ class OverviewArea(GeneralArea):
         """Updates the overview data which is used
         to store both totals and type data.
 
-        @param packaged_order: PackagedOrderData
+        @param packaged_order: OrderDataBundle
         object that represents the the data to
         update with.
 
         @return: None
         """
-        self._update_overview_data_totals(packaged_order.totals)
+        self._update_overview_data_totals(packaged_order)
         self._update_overview_data_type(packaged_order)
 
-    def _update_overview_data_totals(self, totals_data):
+    def _update_overview_data_totals(self, data):
         """Updates the overview data's stored totals.
 
-        @param totals_data: dict of str to values
-        where each key that represents the total type
-        is mapped to a value that represents the total.
-
-        Expected values are:
-
-            'total'     :   float representing order total data
-            'tax'       :   float representing order tax data
-            'subtotal   :   float representing the order subtotal data.
+        @param data: CollectionDataBundle subclass that
+        has access the necessary total properties.
 
         @return: 3 tuple of (float, float, float) representing the
         total, tax and subtotal data respectively.
         """
-        self.date_totals += totals_data['total']
-        self.date_tax += totals_data['tax']
-        self.date_subtotals += totals_data['subtotal']
+        self.date_totals += data.total
+        self.date_tax += data.tax
+        self.date_subtotals += data.subtotal
 
         return self.date_totals, self.date_tax, self.date_subtotals
 
     def _update_overview_data_type(self, packaged_order):
         """Updates the stored overview data's type data.
 
-        @param packaged_order: PackagedOrderData that
+        @param packaged_order: OrderDataBundle that
         represents the data to be used to update the
         stored data.
 
         @return: None
         """
-        self.standard_orders += packaged_order.is_standard
-        self.togo_orders += packaged_order.is_togo
+        self.standard_orders += packaged_order.standard_orders
+        self.togo_orders += packaged_order.togo_orders
 
     def _write_order_data(self, packaged_order):
         """Writes the order data to the data area.
@@ -296,7 +289,7 @@ class OverviewArea(GeneralArea):
         data.
         """
         self._write_order_data_name(packaged_order.name)
-        self._write_order_data_total(packaged_order.totals['total'])
+        self._write_order_data_total(packaged_order.total)
 
         self.row += 1
 
