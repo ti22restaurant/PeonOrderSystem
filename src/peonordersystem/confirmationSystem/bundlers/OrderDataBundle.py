@@ -47,12 +47,12 @@ class OrderDataBundle(CollectionDataBundle):
         self.item_frequency = jsonpickle.decode(unpacked_item_freq_json)
         self._name = unpacked_name
         self.order_number = unpacked_number
-        self.totals = {'subtotal': unpacked_subtotal,
+        self._totals = {'subtotal': unpacked_subtotal,
                        'tax': unpacked_tax,
                        'total': unpacked_total}
 
-        self.is_standard = unpacked_type_is_standard
-        self.is_togo = unpacked_type_is_togo
+        self._is_standard = unpacked_type_is_standard
+        self._is_togo = unpacked_type_is_togo
 
     @property
     def date(self):
@@ -93,6 +93,36 @@ class OrderDataBundle(CollectionDataBundle):
         return self._name
 
     @property
+    def total(self):
+        """Gets the total associated
+        with the OrderDataBundle.
+
+        @return: float representing
+        the total.
+        """
+        return self._totals['total']
+
+    @property
+    def subtotal(self):
+        """Gets the subtotal associated
+        with the OrderDataBundle
+
+        @return: float representing
+        the subtotal
+        """
+        return self._totals['subtotal']
+
+    @property
+    def tax(self):
+        """Gets the tax associated with
+        the OrderDataBundle.
+
+        @return: float representing the
+        tax.
+        """
+        return self._totals['tax']
+
+    @property
     def togo_orders(self):
         """Gets the value representing
         if this OrderDataBundle is a togo
@@ -101,7 +131,7 @@ class OrderDataBundle(CollectionDataBundle):
         @return: int representing if the
         OrderDataBundle is a togo order.
         """
-        return self.is_togo
+        return self._is_togo
 
     @property
     def standard_orders(self):
@@ -112,7 +142,7 @@ class OrderDataBundle(CollectionDataBundle):
         @return: int representing if the
         OrderDataBundle is a standard order.
         """
-        return self.is_standard
+        return self._is_standard
 
     def __len__(self):
         """Get the length of the OrderDataBundle,

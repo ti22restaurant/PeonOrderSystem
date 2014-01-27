@@ -29,12 +29,12 @@ class DateDataBundle(CollectionDataBundle):
          unpacked_tax,
          unpacked_total) = database_stored_data
 
-        self.num_of_order_types = {'standard': unpacked_num_of_orders_standard,
-                                   'togo': unpacked_num_of_orders_togo}
+        self._num_of_order_types = {'standard': unpacked_num_of_orders_standard,
+                                    'togo': unpacked_num_of_orders_togo}
 
-        self.totals = {'subtotal': unpacked_subtotal,
-                       'tax': unpacked_tax,
-                       'total': unpacked_total}
+        self._totals = {'subtotal': unpacked_subtotal,
+                        'tax': unpacked_tax,
+                        'total': unpacked_total}
 
         curr_date = datetime.datetime.strptime(unpacked_date, SQLITE_DATE_FORMAT_STR)
         self._date = curr_date.date()
@@ -77,6 +77,36 @@ class DateDataBundle(CollectionDataBundle):
         return 'Date: ' + str(self.date)
 
     @property
+    def total(self):
+        """Gets the total associated
+        with the DateDataBundle
+
+        @return: float representing
+        the total.
+        """
+        return self._totals['total']
+
+    @property
+    def subtotal(self):
+        """Gets the subtotal associated
+        with the DateDataBundle
+
+        @return: float representing the
+        subtotal.
+        """
+        return self._totals['subtotal']
+
+    @property
+    def tax(self):
+        """Gets the tax associated with
+        the DateDataBundle.
+
+        @return: float representing the
+        tax.
+        """
+        return self._totals['tax']
+
+    @property
     def togo_orders(self):
         """Gets the number of togo orders
         in this DateDataBundle.
@@ -84,7 +114,7 @@ class DateDataBundle(CollectionDataBundle):
         @return: int representing the
         number of togo orders.
         """
-        return self.num_of_order_types['togo']
+        return self._num_of_order_types['togo']
 
     @property
     def standard_orders(self):
@@ -94,7 +124,7 @@ class DateDataBundle(CollectionDataBundle):
         @return: int representing the
         number of standard orders.
         """
-        return self.num_of_order_types['standard']
+        return self._num_of_order_types['standard']
 
     def __len__(self):
         """Get the length of the DateDataBundle,

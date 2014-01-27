@@ -6,29 +6,13 @@
 import datetime
 import jsonpickle
 from peonordersystem.Settings import SQLITE_DATE_TIME_FORMAT_STR
-from peonordersystem.confirmationSystem.bundlers.abc.DataBundle import DataBundle
+from peonordersystem.confirmationSystem.bundlers.abc.ItemDataBundle import \
+    ItemDataBundle
 
 
-class ItemDataBundle(DataBundle):
+class ItemDataBundle(ItemDataBundle):
     """ItemDataBundle class is used to wrap the database columns
     data into an easier to use format.
-
-    @var data: MenuItem object associated with the item
-
-    @var number: int representing the order number
-    under which this item was called.
-
-    @var name: str representing the name of this MenuItem
-    object.
-
-    @var is_notification: bool value representing of the MenuItem
-    was a notification item.
-
-    @group DataBundle: subclass member of packaged
-    data as such they are expected to have:
-
-        @var date: datetime.date object that represents
-        the date associated with the data.
     """
 
     def __init__(self, database_stored_data):
@@ -97,6 +81,16 @@ class ItemDataBundle(DataBundle):
         item.
         """
         return self.data.is_notification()
+
+    @property
+    def total(self):
+        """Gets the total associated with
+        the ItemDataBundle.
+
+        @return: float representing the
+        total of the MenuItem stored here.
+        """
+        return self.data.get_price()
 
     def __len__(self):
         """Gets the length of this ItemDataBundle,

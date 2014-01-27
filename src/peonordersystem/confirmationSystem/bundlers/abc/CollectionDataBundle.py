@@ -6,7 +6,7 @@ a bundle.
 @contact: cjmcgraw( at )u.washington.edu
 @version: 1.0
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractproperty
 
 from .DataBundle import DataBundle
 
@@ -18,6 +18,26 @@ class CollectionDataBundle(DataBundle):
     """
 
     __metaclass__ = ABCMeta
+
+    @abstractproperty
+    def tax(self):
+        """Gets the taxes associated with
+        the CollectionDataBundle.
+
+        @return: float representing the
+        tax.
+        """
+        pass
+
+    @abstractproperty
+    def subtotal(self):
+        """Gets the subtotal associated
+        with the CollectionDataBundle
+
+        @return: float representing the
+        subtotal.
+        """
+        pass
 
     @abstractproperty
     def togo_orders(self):

@@ -56,6 +56,18 @@ class DataBundle(object):
         """
         pass
 
+    @abstractproperty
+    def total(self):
+        """Abstract Method
+
+        gets the total property associated
+        with the DataBundle.
+
+        @return: float representing the total
+        associated with the DataBundle.
+        """
+        pass
+
     def __eq__(self, other):
         """Compares this item to another
         item for equality.
