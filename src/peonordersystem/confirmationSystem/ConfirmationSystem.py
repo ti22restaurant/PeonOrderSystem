@@ -17,24 +17,24 @@ usage.
 """
 import os
 import sqlite3
-import jsonpickle
 from datetime import datetime
 from collections import Counter, deque
+
+import jsonpickle
+from peonordersystem.confirmationSystem.bundlers.DateDataBundle import DateDataBundle
+from peonordersystem.confirmationSystem.bundlers.ItemDataBundle import ItemDataBundle
+from peonordersystem.confirmationSystem.bundlers.OrderDataBundle import \
+    OrderDataBundle
+
 from src.peonordersystem import path
 from src.peonordersystem import CheckOperations
-from src.peonordersystem.PackagedData import (PackagedDateData,
-                                              PackagedOrderData,
-                                              PackagedItemData)
-
 from src.peonordersystem.standardoperations import (check_date,
                                                     check_datetime,
                                                     check_date_range,
                                                     check_datetime_range,
                                                     check_directory,
                                                     check_database)
-
 from src.peonordersystem.Settings import (TOGO_SEPARATOR,
-                                          FILE_TYPE_SEPARATOR,
                                           TYPE_SUFFIX_STANDARD_ORDER,
                                           TYPE_SUFFIX_CHECKOUT,
                                           UNDONE_CHECKOUT_SEPARATOR,
@@ -46,6 +46,7 @@ from src.peonordersystem.Settings import (TOGO_SEPARATOR,
                                           as CHARS_TO_BLACKLIST,
                                           FILENAME_PATTERN,
                                           FILENAME_TEMPLATE)
+
 
 jsonpickle.set_encoder_options('simplejson', sort_keys=True, indent=4)
 
@@ -825,7 +826,7 @@ def get_stored_date_data(start_date, end_date, database=ORDERS_DATABASE):
     the database that is to have the data pulled from
     it.
 
-    @return: deque of PackagedDateData classes that
+    @return: deque of DateDataBundle classes that
     holds the data for a row. Each entry is ordered in
     ascending order according to their date.
     """
@@ -846,7 +847,7 @@ def get_stored_date_data(start_date, end_date, database=ORDERS_DATABASE):
                          '     Date <= ? '
                          'ORDER BY '
                          '     Date;', dates)
-    return _package_data(row_data.fetchall(), PackagedDateData)
+    return _package_data(row_data.fetchall(), DateDataBundle)
 
 
 def get_stored_order_data(start_date, end_date, database=ORDERS_DATABASE):
@@ -865,7 +866,7 @@ def get_stored_order_data(start_date, end_date, database=ORDERS_DATABASE):
     for the data to be pulled from. By default is
     ORDERS_DATABASE.
 
-    @return: deque of PackagedOrderData classes
+    @return: deque of OrderDataBundle classes
     that holds the data for a row. Each entry
     is ordered in ascending order according to
     their date.
@@ -888,7 +889,7 @@ def get_stored_order_data(start_date, end_date, database=ORDERS_DATABASE):
                          'ORDER BY '
                          '      OrderDate;', dates)
 
-    return _package_data(row_data.fetchall(), PackagedOrderData)
+    return _package_data(row_data.fetchall(), OrderDataBundle)
 
 
 def get_stored_item_data(start_date, end_date, database=ORDERS_DATABASE):
@@ -907,7 +908,7 @@ def get_stored_item_data(start_date, end_date, database=ORDERS_DATABASE):
     @keyword database: Testing keyword argument.
     Default is ORDERS_DATABASE
 
-    @return: deque of PackagedItemData that represent
+    @return: deque of ItemDataBundle that represent
     the rows of data that was pulled from the database.
     Each entry is ordered in ascending order
     according to their date.
@@ -930,7 +931,7 @@ def get_stored_item_data(start_date, end_date, database=ORDERS_DATABASE):
                           'ORDER BY '
                           '      ItemDate;', dates)
 
-    return _package_data(row_data.fetchall(), PackagedItemData)
+    return _package_data(row_data.fetchall(), ItemDataBundle)
 
 
 def _package_data(row_data, packaged_cls):
