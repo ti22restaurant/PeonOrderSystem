@@ -2,8 +2,11 @@
 @author: Carl McGraw
 @contact: cjmcgraw( at )u.washington.edu
 """
-from .areas.KeyAreas import TimeKeysArea, DateKeysArea
+from datetime import datetime, timedelta
+from areas.containers.KeyContainer import KeyContainer
 from src.peonordersystem.audit.worksheet import Worksheet
+from .areas.TimeKeyDataAreas import TimeKeyDataArea
+from .areas.DateKeyDataAreas import DateKeyDataArea
 
 
 class DataWorksheet(Worksheet):
@@ -41,6 +44,9 @@ class DataWorksheet(Worksheet):
 
         @return:
         """
-        time_keys_area = TimeKeysArea()
+        key_container = KeyContainer('TIMES')
+        time_keys_area = TimeKeyDataArea(key_container)
+
         self.add_area(time_keys_area)
+
         return time_keys_area
