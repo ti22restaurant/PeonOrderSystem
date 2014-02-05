@@ -1,4 +1,4 @@
-"""THis module contains classes
+"""This module contains classes
 used for generating Datasheet
 areas.
 
@@ -6,10 +6,9 @@ areas.
 @contact: cjmcgraw( at )u.washington.edu
 @version: 1.0
 """
-from copy import copy
-from abc import ABCMeta, abstractmethod
 from xlsxwriter.utility import xl_range_abs
-from src.peonordersystem.audit.Area import Area
+from .containers.abc.Container import check_container
+from src.peonordersystem.audit.abc.Area import Area
 
 
 class DataArea(Area):
@@ -19,73 +18,43 @@ class DataArea(Area):
     data inside of the data sheet.
     """
 
-    __metaclass__ = ABCMeta
+    def __init__(self, container):
+        """Initializes a new DataArea with
+        the given container.
 
-    def __init__(self, data):
-        """Initializes the DataArea with the
-        given data keys.
-
-        @keyword data: list representing the data
-        associated with the area. The data is expected
-        to already have been parsed such that it holds
-        a one to one correspondence with the keys.
+        @param container: Container object
+        that stores and accesses the data.
         """
-        self.format_data = None
-        self._data = data
-        self.row = len(self._data)
-        self.col = None
+        check_container(container)
+        self._container = container
 
+        self.format_data = None
+        self._worksheet = None
         self._initial_row = None
         self._initial_col = None
-        self._worksheet = None
 
     @property
     def data(self):
+        """Gets the data associated
+        with the DataArea.
+
+        @return: tuple of values
+        representing the data stored
+        in this DataArea.
         """
+        return self._container.data
 
-        @return:
-        """
-        return copy(self._data)
+    def insert(self, data):
+        """Inserts the given data
+        into the data area.
 
-    def __getitem__(self, index):
-        """Gets the stored value at the
-        given index.
-
-        @param index: int representing the associated
-        index that data should be gathered from.
-
-        @return: data stored at the specified index.
-        """
-        return self._data[index]
-
-    def __setitem__(self, key, value):
-        """Sets the item value at the given
-        index.
-
-        @param key: int representing the index
-
-        @param data: data representing the
-        value to be set.
+        @param data: DataBundle representing
+        the data to be added to the given area.
 
         @return: None
         """
-        self._data[key] = value
-        self._update_row(key)
-
-    @abstractmethod
-    def _get_data_value(self, data):
-        """Abstract Method.
-
-        Gets the associated data from the
-        value.
-
-        @param data: representing the
-        data to have its value extracted.
-
-        @return: value representing the
-        value associated with the data.
-        """
-        pass
+        row = self._container.add(data)
+        self._update_row(row)
 
     def _update_row(self, row):
         """Updates the worksheets row.
@@ -96,11 +65,11 @@ class DataArea(Area):
         @return: None
         """
         try:
-            self._write_row_data(self._data[row], row=row)
+            self._write_row_data(self.data[row], row=row)
         except TypeError:
             pass
 
-    def _write_row_data(self, value, row=-1):
+    def _write_row_data(self, value, row):
         """Writes the given value to the respective
         row.
 
@@ -112,8 +81,6 @@ class DataArea(Area):
 
         @return: None
         """
-        if row < 0:
-            row = self.row
         self._check_worksheet_write_data()
         self._worksheet.write(row, self._initial_col, value)
 
@@ -134,19 +101,28 @@ class DataArea(Area):
         self._worksheet = worksheet
         self.format_data = format_data
 
-        self.col = col
-
         self._write_data_column()
         return row, col + 1
 
-    def _write_data_column(self, format=None):
+    def _write_data_column(self):
         """Writes the data column.
 
         @return: None
         """
         self._check_worksheet_write_data()
+
+        format = self._get_data_format()
         self._worksheet.write_column(self._initial_row, self._initial_col,
-                                     self._data, cell_format=format)
+                                     self.data, cell_format=format)
+
+    def _get_data_format(self):
+        """Gets the format for displaying
+        the containers data.
+
+        @return: format used to displaying
+        the data.
+        """
+        return self._container.get_data_format(self.format_data)
 
     def _check_worksheet_write_data(self):
         """Checks if the worksheet may have the data
@@ -161,23 +137,6 @@ class DataArea(Area):
         error_msg = 'Worksheet must be connected before this area can be written!'
         self._check_worksheet(self._worksheet, message=error_msg)
 
-    def __iter__(self):
-        """Gets an iter over the
-        data values.
-
-        @return iter over data values.
-        """
-        return iter(self._data)
-
-    def __len__(self):
-        """Gets the length of
-        the data values.
-
-        @return: int representing
-        the length of the data values.
-        """
-        return len(self._data)
-
     def get_data_cells_reference(self):
         """Gets an absolute cell reference
         to the cells and worksheet stored
@@ -187,8 +146,9 @@ class DataArea(Area):
         stored in the area.
         """
         self._check_worksheet_data_cells_reference()
-        data_ref = xl_range_abs(self._initial_row, self._initial_col, self.row,
-                                self.col)
+        data_ref = xl_range_abs(self._initial_row, self._initial_col,
+                                len(self.data), self._initial_col)
+
         return '=' + self._worksheet.get_name() + '!' + data_ref
 
     def _check_worksheet_data_cells_reference(self):
