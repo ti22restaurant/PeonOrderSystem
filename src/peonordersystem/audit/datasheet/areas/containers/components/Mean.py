@@ -6,9 +6,11 @@ mean data based on categories.
 @contact: cjmcgraw( at )u.washington.edu
 @version: 1.0
 """
+from .abc.Component import Component
+from .abc.Updater import Updater
 
 
-class CategoryMean(object):
+class CategoryMean(Component, Updater):
     """This class stores the mean data for a
     single category by storing the number of occurrences
     of that category and the sum of all category values.
@@ -56,10 +58,17 @@ class CategoryMean(object):
         return self.data - prev_mean
 
     def _check_data(self, data):
-        """
+        """Checks if the given data
+        is null.
 
-        @param data:
-        @return:
+        @raise ValueError: if the data
+        was null.
+
+        @param data: object representing
+        the data.
+
+        @return: bool value if the test
+        was passed.
         """
         if data == None:
             raise ValueError('Mean cannot be update given a null value or category')
