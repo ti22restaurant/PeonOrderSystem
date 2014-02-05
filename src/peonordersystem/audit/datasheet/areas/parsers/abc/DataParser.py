@@ -6,8 +6,7 @@ value and key comparisons.
 @contact: cjmcgraw( at )u.washington.edu
 @version: 1.0
 """
-
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 
 
 class DataParser(object):
@@ -15,15 +14,15 @@ class DataParser(object):
 
     Represents the DataParser that
     determines how data is obtained
-    from a PackagedData class.
+    from a DataBundle class.
     """
 
     __metaclass__ = ABCMeta
 
     def __init__(self, key_parser, value_parser):
         """Initializes the DataParser"""
-        self._key_parser = key_parser
-        self._value_parser = value_parser
+        self.key_parser = key_parser
+        self.value_parser = value_parser
 
     def get_data_value(self, data):
         """Gets the value associated with the
@@ -35,7 +34,7 @@ class DataParser(object):
         @return: value representing the value associated
         with the data
         """
-        return self._value_parser.get_value(data)
+        return self.value_parser.get_value(data)
 
     def get_data_comparison_value(self, data):
         """Gets the comparison value for the given
@@ -47,4 +46,4 @@ class DataParser(object):
         @return: value to be used for comparing
         the data.
         """
-        return self._key_parser.get_key(data)
+        return self.key_parser.get_key(data)
