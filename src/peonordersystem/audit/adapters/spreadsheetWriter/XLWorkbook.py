@@ -108,7 +108,22 @@ class XLWorkbook(AuditWorkbook):
         the created worksheet.
         """
         ws = self._workbook.add_worksheet(sheet_name)
+        self._check_hide_datasheet(ws)
         return XLWorksheet(ws, self.formats)
+
+    def _check_hide_datasheet(self, worksheet):
+        """Checks and hides the datasheet.
+
+        @param worksheet: xlsxwriter.Worksheet
+        to be hidden.
+
+        @return: None
+        """
+        if self._datasheet._worksheet.hidden:
+            worksheet.activate()
+            worksheet.select()
+            worksheet.set_first_sheet()
+            self._datasheet._worksheet.hide()
 
     def add_chart(self, name=''):
         """Adds a chart with the given options
