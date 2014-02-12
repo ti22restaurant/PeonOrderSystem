@@ -90,6 +90,7 @@ class AuditbookBuilder(Builder):
         self._auditsheet_container = None
 
         self._flags = self.__parse_flags(**flags)
+        print self._flags
         self._build_creators()
 
     def __parse_flags(self, **flags):
@@ -104,17 +105,17 @@ class AuditbookBuilder(Builder):
         parsed flags with all non-entries
         as default.
         """
-        flags = {'stats_charts': True,
-                 'order_charts': True,
-                 'audit_charts': True,
-                 'auditsheet': True,
-                 'datesheets': True,
-                 'orders': True,
-                 'frequency': True,
-                 'notification': True}
+        new_flags = {'stats_charts': True,
+                     'order_charts': True,
+                     'audit_charts': True,
+                     'auditsheet': True,
+                     'datesheets': True,
+                     'orders': True,
+                     'frequency': True,
+                     'notification': True}
 
-        flags.update(flags)
-        return flags
+        new_flags.update(flags)
+        return new_flags
 
     def _build_creators(self):
         """builds the creators which
