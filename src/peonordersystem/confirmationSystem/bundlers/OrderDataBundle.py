@@ -7,8 +7,7 @@ import datetime
 import jsonpickle
 from peonordersystem.Settings import SQLITE_DATE_TIME_FORMAT_STR
 
-from peonordersystem.confirmationSystem.bundlers.abc.CollectionDataBundle import \
-    CollectionDataBundle
+from .abc.CollectionDataBundle import CollectionDataBundle
 
 
 class OrderDataBundle(CollectionDataBundle):
@@ -25,6 +24,7 @@ class OrderDataBundle(CollectionDataBundle):
         the database columns that is to be interpreted
         and stored in this class.
         """
+        super(OrderDataBundle, self).__init__()
         (unpacked_number,
         unpacked_date,
         unpacked_name,

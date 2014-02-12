@@ -4,7 +4,7 @@
 @version: 1.0
 """
 import datetime
-from peonordersystem.Settings import SQLITE_DATE_FORMAT_STR
+from peonordersystem.Settings import SQLITE_DATE_TIME_FORMAT_STR
 from peonordersystem.confirmationSystem.bundlers.abc.CollectionDataBundle import \
     CollectionDataBundle
 
@@ -36,8 +36,8 @@ class DateDataBundle(CollectionDataBundle):
                         'tax': unpacked_tax,
                         'total': unpacked_total}
 
-        curr_date = datetime.datetime.strptime(unpacked_date, SQLITE_DATE_FORMAT_STR)
-        self._date = curr_date.date()
+        curr_date = datetime.datetime.strptime(unpacked_date, SQLITE_DATE_TIME_FORMAT_STR)
+        self._date = curr_date
 
     @property
     def date(self):
@@ -55,7 +55,7 @@ class DateDataBundle(CollectionDataBundle):
 
         @return:
         """
-        return None
+        return self._date
 
     @property
     def time(self):
@@ -64,7 +64,7 @@ class DateDataBundle(CollectionDataBundle):
 
         @return: datetime.time object
         """
-        return None
+        return datetime.time.min
 
     @property
     def name(self):
