@@ -198,10 +198,8 @@ class XLWorksheet(AuditWorksheet):
 
         @return: None
         """
-        print 'what?'
         frmt = self._get_format(format)
         self._worksheet.write_column(row, col, data, frmt)
-        print 'yup'
 
     def merge_range(self, first_row, first_col, last_row, last_col, data=None,
                     format=None):

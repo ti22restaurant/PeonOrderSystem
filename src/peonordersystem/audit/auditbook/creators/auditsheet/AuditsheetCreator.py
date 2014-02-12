@@ -89,7 +89,6 @@ class AuditsheetCreator(Creator):
 
         @return: None
         """
-        print self._flags
         if self._flags['stats_charts']:
             container = StatsChartsAuditAreaContainer(self.workbook)
             self._containers.append(container)

@@ -1,4 +1,6 @@
-"""
+"""This module defines the special worksheet
+that is defined as a Datasheet.
+
 @author: Carl McGraw
 @contact: cjmcgraw( at )u.washington.edu
 """
@@ -42,9 +44,11 @@ class Datasheet(XLWorksheet):
         self._worksheet.hide()
 
     def _create_time_keys(self):
-        """
+        """Creates the time keys
+        and stores them in this
+        datasheet as an area.
 
-        @return:
+        @return: None
         """
         key_container = KeyContainer('TIMES')
         time_keys_area = DataArea(key_container)
@@ -52,9 +56,11 @@ class Datasheet(XLWorksheet):
         return time_keys_area
 
     def create_date_keys(self, start_date, end_date):
-        """
+        """Creates the date keys spanning the given
+        dates and stores them in this datasheet
+        as an area.
 
-        @return:
+        @return: None
         """
         key_container = KeyContainer('DATES', start_date, end_date)
         date_keys_area = DataArea(key_container)

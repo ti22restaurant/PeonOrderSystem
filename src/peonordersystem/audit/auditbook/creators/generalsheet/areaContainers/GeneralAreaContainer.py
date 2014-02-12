@@ -97,7 +97,6 @@ class GeneralAreaContainer(AreaContainer):
         @return: None
         """
         for component in self._components:
-            print component
             component.update(data)
 
     def finalize(self):
