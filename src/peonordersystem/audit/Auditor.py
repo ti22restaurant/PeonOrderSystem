@@ -80,7 +80,6 @@ class Auditor(object):
         start_date = data[0].datetime
         end_date = data[-1].datetime
         self._data = data
-        print flags
         self._builder = AuditbookBuilder(filename, start_date, end_date, **flags)
         self._create_auditbook()
 

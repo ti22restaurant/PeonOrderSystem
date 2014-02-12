@@ -90,7 +90,6 @@ class AuditbookBuilder(Builder):
         self._auditsheet_container = None
 
         self._flags = self.__parse_flags(**flags)
-        print self._flags
         self._build_creators()
 
     def __parse_flags(self, **flags):

@@ -41,7 +41,6 @@ class Datasheet(XLWorksheet):
         self.orders_data = {}
 
         self._worksheet.name = self.HIDDEN_WORKSHEET_NAME
-        self._worksheet.hide()
 
     def _create_time_keys(self):
         """Creates the time keys
