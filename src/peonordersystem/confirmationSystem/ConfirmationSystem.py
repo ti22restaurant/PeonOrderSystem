@@ -21,10 +21,12 @@ from datetime import datetime
 from collections import Counter, deque
 
 import jsonpickle
-from peonordersystem.confirmationSystem.bundlers.DateDataBundle import DateDataBundle
-from peonordersystem.confirmationSystem.bundlers.ItemDataBundle import ItemDataBundle
-from peonordersystem.confirmationSystem.bundlers.OrderDataBundle import \
-    OrderDataBundle
+from src.peonordersystem.confirmationSystem.bundlers.DateDataBundle \
+    import DateDataBundle
+from src.peonordersystem.confirmationSystem.bundlers.ItemDataBundle \
+    import ItemDataBundle
+from src.peonordersystem.confirmationSystem.bundlers.OrderDataBundle \
+    import OrderDataBundle
 
 from src.peonordersystem import path
 from src.peonordersystem import CheckOperations
@@ -89,7 +91,7 @@ global current_order_counter
 #   The following are the names of the tables set up in the database:
 #
 #       1. DateData: Represents all Order totals and data (without regard to the
-#                specific MenuItems for any order). This is used for quick audits.
+#                specific MenuItems for any order).
 #
 #       2. OrderData: Represents all potential information regarding any specific
 #                 order. Stores the full menu item information for the order in the
@@ -220,8 +222,8 @@ def standardize_file_name(order_name, is_checkout=False, set_time=None):
     else:
         file_type = TYPE_SUFFIX_STANDARD_ORDER
 
-    data = {'order_name': order_name,
-            'order_datetime': set_time.strftime(STANDARD_TIME_FORMAT),
+    data = {'name': order_name,
+            'timestamp': set_time.strftime(STANDARD_TIME_FORMAT),
             'file_type': file_type}
 
     return FILENAME_TEMPLATE.format(**data)
@@ -256,10 +258,9 @@ def parse_standardized_file_name(file_name, togo_separator=' '):
     is_parseable_file_name(file_name)
     match = FILENAME_PATTERN.match(file_name)
     order_data = match.groupdict()
-    order_datetime = datetime.strptime(order_data['order_datetime'],
-                                       STANDARD_TIME_FORMAT)
+    order_datetime = datetime.strptime(order_data['timestamp'], STANDARD_TIME_FORMAT)
 
-    order_name = order_data['order_name'].translate(BLACKLIST_TO_CHARS)
+    order_name = order_data['name'].translate(BLACKLIST_TO_CHARS)
 
     return order_datetime, order_name, order_data['file_type']
 
@@ -761,7 +762,6 @@ def _update_item_table(curr_date, menu_item, database=ORDERS_DATABASE):
             curr_date.strftime(SQLITE_DATE_TIME_FORMAT_STR),
             int(menu_item.is_notification()),
             jsonpickle.encode(menu_item))
-
     db = database.cursor()
     db.execute('INSERT INTO ItemData '
                '    VALUES'
@@ -826,9 +826,10 @@ def get_stored_date_data(start_date, end_date, database=ORDERS_DATABASE):
     the database that is to have the data pulled from
     it.
 
-    @return: deque of DateDataBundle classes that
-    holds the data for a row. Each entry is ordered in
-    ascending order according to their date.
+    @return: Generator
+
+    @yield: DateDataBundle that represents the
+    data at any given date sorted by date.
     """
     check_date_range(start_date, end_date)
     check_database(database)
@@ -847,7 +848,9 @@ def get_stored_date_data(start_date, end_date, database=ORDERS_DATABASE):
                          '     Date <= ? '
                          'ORDER BY '
                          '     Date;', dates)
-    return _package_data(row_data.fetchall(), DateDataBundle)
+
+    for data in row_data:
+        yield DateDataBundle(data)
 
 
 def get_stored_order_data(start_date, end_date, database=ORDERS_DATABASE):
@@ -866,10 +869,10 @@ def get_stored_order_data(start_date, end_date, database=ORDERS_DATABASE):
     for the data to be pulled from. By default is
     ORDERS_DATABASE.
 
-    @return: deque of OrderDataBundle classes
-    that holds the data for a row. Each entry
-    is ordered in ascending order according to
-    their date.
+    @return: Generator
+
+    @yield: OrderDataBundle objects that represent
+    rows in sorted order by date.
     """
     check_datetime_range(start_date, end_date)
     check_database(database)
@@ -888,8 +891,8 @@ def get_stored_order_data(start_date, end_date, database=ORDERS_DATABASE):
                          '      OrderDate <= ? '
                          'ORDER BY '
                          '      OrderDate;', dates)
-
-    return _package_data(row_data.fetchall(), OrderDataBundle)
+    for data in row_data:
+        yield OrderDataBundle(data)
 
 
 def get_stored_item_data(start_date, end_date, database=ORDERS_DATABASE):
@@ -908,10 +911,10 @@ def get_stored_item_data(start_date, end_date, database=ORDERS_DATABASE):
     @keyword database: Testing keyword argument.
     Default is ORDERS_DATABASE
 
-    @return: deque of ItemDataBundle that represent
-    the rows of data that was pulled from the database.
-    Each entry is ordered in ascending order
-    according to their date.
+    @return: Generator
+
+    @yield: ItemDataBundle that represents the
+    data at any given row ordered by the date.
     """
     check_datetime_range(start_date, end_date)
     check_database(database)
@@ -931,28 +934,8 @@ def get_stored_item_data(start_date, end_date, database=ORDERS_DATABASE):
                           'ORDER BY '
                           '      ItemDate;', dates)
 
-    return _package_data(row_data.fetchall(), ItemDataBundle)
-
-
-def _package_data(row_data, packaged_cls):
-    """Packages the data into its respective
-    packaged class. The data is assumed to be
-    in sorted order.
-
-    @param row_data: list of tuples. Each tuple
-    represents the data associated with a specific
-    row.
-
-    @return: deque of packaged_cls type where each
-    entry represents a row in the row data.
-    """
-    data = deque()
-
-    for row in row_data:
-        data.append(packaged_cls(row))
-
-    return data
-
+    for data in row_data:
+        yield ItemDataBundle(data)
 
 #====================================================================================
 # This blocks represents functions that are used for temporary storage prior to
