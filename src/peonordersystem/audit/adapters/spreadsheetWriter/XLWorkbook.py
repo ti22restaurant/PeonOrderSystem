@@ -120,10 +120,8 @@ class XLWorkbook(AuditWorkbook):
         @return: None
         """
         if self._datasheet._worksheet.hidden:
-            worksheet.activate()
-            worksheet.select()
-            worksheet.set_first_sheet()
             self._datasheet._worksheet.hide()
+            worksheet.activate()
 
     def add_chart(self, name=''):
         """Adds a chart with the given options
