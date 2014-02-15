@@ -174,3 +174,32 @@ def check_database(db):
                          'a ' + cls_type + ' got ' + curr_type +
                          ' instead.')
     return True
+
+
+def check_time(time):
+    """
+
+    @param time:
+    @return:
+    """
+    if time == None or not isinstance(time, datetime.time):
+        exp = datetime.time
+        cur = type(time)
+        raise TypeError('Expected instance of {} got {} instead'.format(exp, cur))
+    return True
+
+
+def check_time_range(start_time, end_time):
+    """
+
+    @param start_time:
+    @param end_time:
+    @return:
+    """
+    check_time(start_time)
+    check_time(end_time)
+    if start_time > end_time:
+        raise ValueError('Expected the given start time to be less than or equal '
+                         'to the given ending time! Please provide valid values '
+                         'for the start and end time.')
+    return True

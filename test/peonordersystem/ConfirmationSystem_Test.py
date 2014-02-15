@@ -14,6 +14,10 @@ import string
 import unittest
 import jsonpickle
 
+from peonordersystem.confirmationSystem.bundlers.DateDataBundle import DateDataBundle
+from peonordersystem.confirmationSystem.bundlers.ItemDataBundle import ItemDataBundle
+from peonordersystem.confirmationSystem.bundlers.OrderDataBundle import OrderDataBundle
+
 jsonpickle.set_encoder_options('simplejson', sort_keys=True, indent=4)
 
 import heapq
@@ -23,18 +27,14 @@ from datetime import date, time, datetime, timedelta
 
 from src.peonordersystem import path
 from src.peonordersystem.interface.Reservations import Reserver
-from src.peonordersystem.MenuItem import MenuItem, DiscountItem
+from src.peonordersystem.MenuItem import MenuItem
 
 from src.peonordersystem.CheckOperations import (get_order_subtotal,
                                                  get_total_tax,
                                                  get_total)
-from src.peonordersystem.PackagedData import (PackagedDateData,
-                                              PackagedOrderData,
-                                              PackagedItemData)
 
 from src.peonordersystem.Settings import (TOGO_SEPARATOR,
                                           TYPE_SUFFIX_CHECKOUT,
-                                          TYPE_SUFFIX_STANDARD_ORDER,
                                           DATE_DATA_COLS,
                                           ORDER_DATA_COLS,
                                           ITEM_DATA_COLS,
@@ -46,9 +46,8 @@ from src.peonordersystem.Settings import (TOGO_SEPARATOR,
                                           MIN_DATETIME)
 
 from test.TestingFunctions import (save_data_to_file,
-                                   get_data_from_file,
                                    generate_random_names,
-                                   generate_random_times,
+                                   generate_random_datetimes,
                                    generate_random_menu_items,
                                    generate_random_reservations)
 
@@ -90,7 +89,7 @@ if os.path.exists(path.SYSTEM_ORDERS_CHECKOUT_DIRECTORY):
 if os.path.exists(path.SYSTEM_ORDERS_CONFIRMED_DIRECTORY):
     shutil.rmtree(path.SYSTEM_ORDERS_CONFIRMED_DIRECTORY)
 
-from src.peonordersystem import ConfirmationSystem
+from src.peonordersystem.confirmationSystem import ConfirmationSystem
 
 #====================================================================================
 # Case 1: Testing creation of the Confirmed directory.
@@ -236,7 +235,7 @@ def _generate_random_order(num_of_chars=NUM_OF_CHARS,
     representing the standardized name and
     the order data.
     """
-    rand_times = generate_random_times()
+    rand_times = generate_random_datetimes()
     rand_names = generate_random_names(num_of_chars=num_of_chars)
     rand_items = generate_random_menu_items(n=n*30, is_notification=notification)
 
@@ -350,7 +349,7 @@ def _get_random_stored_date_data(generated_stored_data,
             expect data set to match those whose date range they span.
 
     @param generated_stored_data: collection of
-    PackagedData subclasses that represent
+    DataBundle subclasses that represent
     the data.
 
     @param n: number of items to generate. Will
@@ -365,8 +364,9 @@ def _get_random_stored_date_data(generated_stored_data,
     itr = iter(generated_stored_data)
     subsection_range = int(len(generated_stored_data) / n)
 
-    begin_date = generated_stored_data[0].date
-    end_date = generated_stored_data[-1].date
+    print generated_stored_data
+    begin_date = generated_stored_data[0].datetime
+    end_date = generated_stored_data[-1].datetime
 
     #add data that exceeds both bounds. Expect it to match all data.
     data[begin_date - timedelta(days=100),
@@ -391,7 +391,7 @@ def _get_random_stored_date_data(generated_stored_data,
         info = itr.next()
         curr_data.append(info)
 
-        date1 = info.date
+        date1 = info.datetime
 
         counter = 1
         while counter < (subsection_range - 2):
@@ -399,7 +399,7 @@ def _get_random_stored_date_data(generated_stored_data,
             counter += 1
 
         info = itr.next()
-        date2 = info.date
+        date2 = info.datetime
         curr_data.append(info)
 
         data[date1, date2] = curr_data
@@ -553,7 +553,7 @@ class ConfirmationSystemTest(unittest.TestCase):
         #============================================================================
         # Generate data for testing Case 2
         #============================================================================
-        rand_time = generate_random_times()
+        rand_time = generate_random_datetimes()
 
         #============================================================================
         # Case 2: Testing first that the standardized data matches the parsed data.
@@ -1715,8 +1715,7 @@ class ConfirmationSystemTest(unittest.TestCase):
                                  database=db)
 
                 date_data = update(order_time, database=db)
-
-                data.append(PackagedDateData(date_data))
+                data.append(DateDataBundle(date_data))
 
             return data
 
@@ -1879,7 +1878,7 @@ class ConfirmationSystemTest(unittest.TestCase):
                                                                    [], [],
                                                                    database=db)
 
-                curr_data = PackagedOrderData(curr_data)
+                curr_data = OrderDataBundle(curr_data)
                 data.append(curr_data)
 
             return data
@@ -2027,7 +2026,7 @@ class ConfirmationSystemTest(unittest.TestCase):
                 row_data = ConfirmationSystem._update_item_table(rand_date.next(),
                                                                  rand_item.next(),
                                                                  database=db)
-                data.append(PackagedItemData(row_data))
+                data.append(ItemDataBundle(row_data))
 
             return data
 
@@ -2925,7 +2924,7 @@ class ConfirmationSystemTest(unittest.TestCase):
             dates = []
 
             rand_name = generate_random_names()
-            rand_time = generate_random_times()
+            rand_time = generate_random_datetimes()
             rand_item = generate_random_menu_items()
 
             for x in xrange(n):
@@ -3077,7 +3076,7 @@ class ConfirmationSystemTest(unittest.TestCase):
                                                 notification_data=False,
                                                 item_frequency=False):
             rand_name = generate_random_names(n=n)
-            rand_time = generate_random_times(n=n)
+            rand_time = generate_random_datetimes(n=n)
             rand_item = generate_random_menu_items(n=n)
 
             counter = _get_current_num_database_rows(db, 'OrderData')
@@ -3301,7 +3300,7 @@ class ConfirmationSystemTest(unittest.TestCase):
 
         def generate_and_add_item_data(db, n=GENERATOR_MAX, is_notification=0.5):
             rand_item = generate_random_menu_items(is_notification=is_notification)
-            rand_time = generate_random_times()
+            rand_time = generate_random_datetimes()
 
             counter = ConfirmationSystem.current_order_counter
 
@@ -3699,7 +3698,7 @@ class ConfirmationSystemTest(unittest.TestCase):
             checkout_data = {}
 
             rand_order = _generate_random_order(is_checkout=True)
-            rand_time = generate_random_times()
+            rand_time = generate_random_datetimes()
 
             for x in xrange(n):
                 std_name, order_data = rand_order.next()

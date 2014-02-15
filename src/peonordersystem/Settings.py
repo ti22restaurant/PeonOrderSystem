@@ -54,12 +54,11 @@ SALES_TAX = .10
 # generating audit files.
 #==============================================================================
 AUDIT_FILE_TYPE = '.xlsx'
-CLOSING_AUDIT_DEFAULT_NAME = 'closing_audit'
 
 OPEN_TIME = time.min
 CLOSE_TIME = time.max
 
-TIME_GROUPING = timedelta(minutes=15)
+TIME_GROUPING = timedelta(minutes=60)
 
 #==============================================================================
 # This block represents constants that are utilized by the orders area for
@@ -80,8 +79,8 @@ FILE_TYPE_SEPARATOR = '.'
 TYPE_SUFFIX_STANDARD_ORDER = FILE_TYPE_SEPARATOR + 'order'
 TYPE_SUFFIX_CHECKOUT = FILE_TYPE_SEPARATOR + 'checkout'
 
-FILENAME_PATTERN = re.compile('^(?P<order_name>.*)\[(?P<order_datetime>.*)\](?P<file_type>.*)')
-FILENAME_TEMPLATE = '{order_name}[{order_datetime}]{file_type}'
+FILENAME_PATTERN = re.compile('^(?P<name>.*)\[(?P<timestamp>.*)\](?P<file_type>.*)')
+FILENAME_TEMPLATE = '{name}[{timestamp}]{file_type}'
 
 #BLACKLIST REQUIRES THE FOLLOWING CHARACTERS BY DEFAULT
 # '\', '[', ']', '.'

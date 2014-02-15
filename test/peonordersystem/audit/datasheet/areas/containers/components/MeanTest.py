@@ -8,7 +8,7 @@ for the Mean objects.
 import unittest
 from random import randint
 
-from src.peonordersystem.audit.datasheet.areas.containers.components.Mean import \
+from peonordersystem.audit.auditbook.areas.datasheet.containers.components.Mean import \
     CategoryMean
 
 

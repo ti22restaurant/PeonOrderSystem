@@ -404,7 +404,7 @@ class OptionItem(object):
         @param other: OptionItem object that
         is to be compared to this object.
 
-        @return: Value representing the
+        @return: int representing the
         comparison of the two objects. If
         positive this object is considered
         greater than the other, if 0 then

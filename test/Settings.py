@@ -24,4 +24,4 @@ TABS = '    '
 #====================================================================================
 #This block represents constants used for defining the number of tests to run
 #====================================================================================
-NUMBER_OF_ITEMS_TO_GENERATE = 500
+NUMBER_OF_ITEMS_TO_GENERATE = 50

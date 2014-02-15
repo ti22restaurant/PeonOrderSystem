@@ -22,7 +22,7 @@ from gi.repository import Gtk
 
 from src.peonordersystem import ErrorLogger
 from src.peonordersystem.standardoperations import tree_view_changed
-from src.peonordersystem.ConfirmationSystem import TOGO_SEPARATOR
+from peonordersystem.confirmationSystem.ConfirmationSystem import TOGO_SEPARATOR
 from src.peonordersystem.CustomExceptions import NoSuchSelectionError
 
 

@@ -8,9 +8,8 @@ object for proper functionality.
 import unittest
 from random import randint
 from datetime import datetime, date, timedelta
-
-from src.peonordersystem.audit.datasheet.areas.containers.components.DateCreator \
-    import DateCreator
+from peonordersystem.audit.auditbook.areas.datasheet.containers.components import \
+    DateCreator
 
 
 class DateCreatorTest(unittest.TestCase):

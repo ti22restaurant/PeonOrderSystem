@@ -7,7 +7,7 @@ import unittest
 from random import randint
 from bisect import insort
 
-from src.peonordersystem.audit.datasheet.areas.containers.components.Median \
+from peonordersystem.audit.auditbook.areas.datasheet.containers.components.Median \
     import CategoryMedian
 
 

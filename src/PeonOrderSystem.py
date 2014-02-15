@@ -15,11 +15,12 @@ the PeonOrderSystem GUI.
 
 from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 
+from src.peonordersystem.confirmationSystem import ConfirmationSystem
+from src.peonordersystem.audit import Auditor
+
 from src.peonordersystem.interface import Editor
 from src.peonordersystem.interface.UI import UI
-from src.peonordersystem import ConfirmationSystem
 from src.peonordersystem import ErrorLogger
-from src.peonordersystem import DataAudit
 from src.peonordersystem.Settings import SYSTEM_TITLE
 
 @ErrorLogger.error_logging
@@ -41,6 +42,8 @@ class PeonOrderSystem(UI):
 
         super(PeonOrderSystem, self).__init__(title, load_data=load_data,
                                               reservation_data=reservation_data)
+
+        self._auditor = Auditor.Auditor()
         ErrorLogger.initializing_fencepost_finish()
     
     def order_confirmed(self, priority_order, non_priority_order):
@@ -186,15 +189,9 @@ class PeonOrderSystem(UI):
         @param end_date: datetime.date object that represents the
         ending date to end the audit.
 
-        @param location: str representing the directory to which
-        the generated audit spreadsheet should be saved to.
-
-        @param name: str representing the file name to which
-        the generated audit spreadsheet should be saved as.
-
         @return: None
         """
-        DataAudit.request_audit(start_date, end_date, **kwargs)
+        self._auditor.audit_range(start_date, end_date, **kwargs)
 
     def run(self):
         """Runs the thread to execute the UI
@@ -218,7 +215,7 @@ class PeonOrderSystem(UI):
 
         if self.run_warning_dialog(message_title, message):
             ConfirmationSystem.update_orders_database()
-            DataAudit.closing_audit()
+            self._auditor.closing_audit()
 
     
 if __name__ == '__main__':

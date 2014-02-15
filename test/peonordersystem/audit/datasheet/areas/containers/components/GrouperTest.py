@@ -6,7 +6,7 @@
 import unittest
 from random import randint
 
-from src.peonordersystem.audit.datasheet.areas.containers.components.Grouper \
+from peonordersystem.audit.auditbook.areas.datasheet.containers.components.Grouper \
     import KeyGrouper
 
 

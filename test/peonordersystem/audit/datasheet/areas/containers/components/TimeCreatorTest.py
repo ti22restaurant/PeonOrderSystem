@@ -9,8 +9,8 @@ import unittest
 from random import randint
 from datetime import date, datetime, time
 
-from src.peonordersystem.audit.datasheet.areas.containers.components.TimeCreator \
-    import TimeCreator
+from peonordersystem.audit.auditbook.areas.datasheet.containers.components import \
+    TimeCreator
 
 
 class TimeCreatorTest(unittest.TestCase):
