@@ -45,6 +45,12 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-fullscreen</property>
   </object>
+  <object class="GtkImage" id="image9">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="ypad">2</property>
+    <property name="stock">gtk-dnd</property>
+  </object>
   <object class="GtkWindow" id="POS_main_window">
     <property name="can_focus">False</property>
     <child>
@@ -116,6 +122,18 @@
                                 <property name="use_stock">False</property>
                                 <property name="always_show_image">True</property>
                                 <signal name="activate" handler="update_discount_templates" swapped="no"/>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkImageMenuItem" id="menuitem8">
+                                <property name="label" translatable="yes">Audit Request</property>
+                                <property name="use_action_appearance">False</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="image">image9</property>
+                                <property name="use_stock">False</property>
+                                <property name="always_show_image">True</property>
+                                <signal name="activate" handler="request_audit" swapped="no"/>
                               </object>
                             </child>
                           </object>

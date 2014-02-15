@@ -17,7 +17,7 @@ from src.peonordersystem.interface.Reservations import Reservations
 from src.peonordersystem.interface import Editor
 from src.peonordersystem.interface.UpcomingOrders import UpcomingOrders
 
-from src.peonordersystem.interface.Dialog import run_warning_dialog
+from src.peonordersystem.interface import Dialog
 
 from src.peonordersystem import ErrorLogger
 from src.peonordersystem import CustomExceptions
@@ -106,7 +106,7 @@ class UI(object):
     """
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
-    def __init__(self, title, load_data=None):
+    def __init__(self, title, load_data=None, reservation_data=None):
         """Initializes a new object. Generates the base GUI
         from XML file obtained from Path. Instantiates the
         component objects.
@@ -124,7 +124,8 @@ class UI(object):
         self.builder.set_menu_item_view(self.orders.get_display_view())
         
         # These objects control secondary displays
-        self.reservations = Reservations(self.builder.reservation_window)
+        self.reservations = Reservations(self.builder.reservation_window,
+                                         reservation_data=reservation_data)
         self.upcoming_orders = UpcomingOrders(self.builder.upcoming_orders_window,
                                               load_data=load_data)
         
@@ -219,9 +220,9 @@ class UI(object):
         for selected widget 
         """
         self.update_status('Removing selected reservation...')
-        name, number, arrival_time = self.reservations.remove_selected_reservation()
-        self.update_status('Removed reservation for {} at {}'.format(name,
-                                                                     arrival_time))
+        reserver = self.reservations.remove_selected_reservation()
+        self.update_status('Removed reservation for '
+                           '{} at {}'.format(reserver.name,reserver._arrival_time))
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
@@ -533,8 +534,8 @@ class UI(object):
         checked out orders and return them to the UI.
 
         @param checkout_data: dict where each key is represented
-        by a tuple of (str, str) -> (name, date), and each value
-        mapped is a list of MenuItem objects.
+        by a tuple of (str, time.struct_time) -> (name, date),
+        and each value mapped is a list of MenuItem objects.
 
         @return: None
         """
@@ -625,7 +626,7 @@ class UI(object):
         number = new_reservation[1]
         arrival = new_reservation[2]
 
-        self.reservations.add_reservation(name, number, arrival)
+        return self.reservations.add_reservation(name, number, arrival)
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
@@ -662,7 +663,7 @@ class UI(object):
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
-    def add_checkout_order(self, imported_order):
+    def add_checkout_order(self, imported_order, checkout_keys):
         """Adds the given, previously checked out
         order to the current orders displayed.
 
@@ -670,6 +671,10 @@ class UI(object):
         objects that represents an order that
         was previously checked out and is being
         imported.
+
+        @param checkout_keys: list of tuples that
+        represents the keys that are associated
+        with each stored checkout order.
 
         @return: None
         """
@@ -721,8 +726,7 @@ class UI(object):
                 message += '    ' + reservation + '\n'
 
             message += '\n\nOk?'
-            response = run_warning_dialog(self.builder.window, message_title,
-                                          message)
+            response = self.run_warning_dialog(message_title, message)
 
             if response:
                 self.reservations.clear_reservation_notifications()
@@ -750,11 +754,72 @@ class UI(object):
         """
         return self.builder.update_status(message, styles)
 
-    #==============================================================================
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def run_warning_dialog(self, message_title, message):
+        """Runs a warning dialog to prompt the user of a yes
+        no question that is given by the given message, with
+        the descriptor as the message title.
+
+        @param message_title: str representing the title to be
+        displayed to the user with this warning dialog. This
+        message should be short and very informative to give
+        a one sentence of overview of what is occurring.
+
+        @param message: str representing the message to be displayed
+        this should be a message that is a simple yes no question that
+        displays the relevant information and is more descriptive than
+        the message title.
+
+        @return: bool representing if the dialog window was confirmed
+        or not.
+        """
+        window = self.builder.window
+        return Dialog.run_warning_dialog(window, message_title, message)
+
+    #==========================================================================
     # This block contains methods that relate to the functioning of the
     # error logging system for the GUI. This includes dumping, debugging and
     # other logging methods.
-    #==============================================================================
+    #==========================================================================
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def request_audit(self, *args):
+        """This method is called when an associated Gtk.Widget
+        is clicked. THis method calls the associated audit
+        request.
+
+        @param args: wildcard catchall that is used to catch
+        the Gtk.WIdget that called this method.
+
+        @return: None
+        """
+        response = self.editor.get_audit_info(self.perform_audit)
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def perform_audit(self, start_date, end_date, **kwargs):
+        """This represents a place holder method that is expected
+        to be overriden by a subclass.
+
+        As such this method simply notifies the user that the audit
+        is being performed from the given date period.
+
+        @param start_date: datetime.date object that represents
+        the starting date of the audit, inclusive.
+
+        @param end_date: datetime.date object that represents
+        the ending date of the audit, inclusive.
+
+        @keyword kwargs: Keyword args associated with the audit.
+            location: str representing directory
+            name: str representing file name to be saved.
+
+        @return: None
+        """
+        message = 'Performing audit. This may take a moment...'
+        message += ' AUDIT: from {} to {} '.format(start_date, end_date)
+        self.update_status(message)
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data

@@ -15,36 +15,35 @@ the PeonOrderSystem GUI.
 
 from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
 
-# Path import unused. Imported to set working directory
-# as the one that PeonOrderSystem object is placed in.
+from src.peonordersystem.confirmationSystem import ConfirmationSystem
+from src.peonordersystem.audit import Auditor
 
-from src.peonordersystem import path  # IGNORE:W0611
 from src.peonordersystem.interface import Editor
 from src.peonordersystem.interface.UI import UI
-from src.peonordersystem import ConfirmationSystem
 from src.peonordersystem import ErrorLogger
+from src.peonordersystem.Settings import SYSTEM_TITLE
 
 @ErrorLogger.error_logging
 class PeonOrderSystem(UI):
     """Generates and controls the PeonOrderSystem GUI and
     establishes its functionality.
     """
-    def __init__(self, title='Fish Cake Factory'):
+    def __init__(self, title=SYSTEM_TITLE):
         """Initializes and displays PeonOrderSystem GUI
         
-        @keyword load_data: Keyword argument that accepts a
-        2 tuple representing a dict of lists for the table orders
-        and togo orders respectively. This Keyword argument is
-        only to be used in cases of failure.
-        
         @keyword title: Keyword argument that sets the title
-        of the main GUI window. Default value is 'Fish Cake
-        Factory'
+        of the main GUI window. Default value is title constant
+        given by Settings module.
         """
         ErrorLogger.initializing_fencepost_begin()
-        load_data = ConfirmationSystem.generate_files()
-        print load_data
-        super(PeonOrderSystem, self).__init__(title, load_data=load_data)
+
+        load_data = ConfirmationSystem.unpack_order_data()
+        reservation_data = ConfirmationSystem.unpack_reservations_data()
+
+        super(PeonOrderSystem, self).__init__(title, load_data=load_data,
+                                              reservation_data=reservation_data)
+
+        self._auditor = Auditor.Auditor()
         ErrorLogger.initializing_fencepost_finish()
     
     def order_confirmed(self, priority_order, non_priority_order):
@@ -77,6 +76,55 @@ class PeonOrderSystem(UI):
         """
         order_name, order_list = super(PeonOrderSystem, self).checkout_confirm()
         ConfirmationSystem.checkout_confirmed(order_name, order, order_list)
+
+    def add_reservation_confirmed(self, new_reservation):
+        """Override Method
+
+        Updates the reservation data by passing it to the
+        confirmation system so that it may be serialized and
+        persist.
+
+        @param new_reservation: data representing the
+        reservation.
+
+        @warning: This data is not used. Instead it is
+        expected that the call to the super class will
+        return an instance of the reservation that may
+        be used instead.
+
+        @return: Reservation object that was yielded
+        from the call on super.
+        """
+        reserver = super(PeonOrderSystem, self).add_reservation_confirmed(
+            new_reservation)
+        ConfirmationSystem.add_reservation_to_database(reserver)
+        return reserver
+
+    def add_checkout_order(self, imported_order, undone_checkouts):
+        """Override Method.
+
+        Passes the given data to the ConfirmationSystem to
+        remove any stored keys that have been undone.
+
+        @param imported_order: dict of tuple
+        (str, str, time.struct_time) that represent
+        the order name, filler info, and time of undo.
+        These keys are mapped to values of list of MenuItem
+        objects that represent the associated undone order.
+
+        @param checkout_keys: list of tuples that
+        (str, str, time.struct_time) that represent
+        the order_name, the new order name, and
+        the order time of the orders that were undone.
+
+        @return: None
+        """
+        super(PeonOrderSystem, self).add_checkout_order(imported_order,
+                                                        undone_checkouts)
+
+        for original_name, original_time, new_name in undone_checkouts:
+            ConfirmationSystem.undo_checkout_file(original_name, original_time,
+                                                  new_name)
 
     def undo_checkout_order(self, *args):
         """Override Method
@@ -128,6 +176,23 @@ class PeonOrderSystem(UI):
         order_name, order_list = self.get_order_info()
         ConfirmationSystem.print_check(order_name, order_list)
 
+    def perform_audit(self, start_date, end_date, **kwargs):
+        """Override Method.
+
+        Performs an audit over the specified period from start date
+        until end date. The audited file is stored in a spread sheet
+        and saved at the location given, with the given name.
+
+        @param start_date: datetime.date object that represents the
+        beginning date to start the audit.
+
+        @param end_date: datetime.date object that represents the
+        ending date to end the audit.
+
+        @return: None
+        """
+        self._auditor.audit_range(start_date, end_date, **kwargs)
+
     def run(self):
         """Runs the thread to execute the UI
         built by this object.
@@ -137,7 +202,21 @@ class PeonOrderSystem(UI):
         running this object.
         """
         Gtk.main()
-        ConfirmationSystem.update_notification_data()
+
+        message_title = "Do you want to perform a closing audit?"
+
+        message = 'You are about to close the POS UI.\n\n Do you want to '
+        message += 'perform a closing audit?\n\n'
+        message += 'This audit will compile all the data for the today ' + \
+                   'and store it in an easy to read excel file in the ' + \
+                   'standard audit area. \n\n' \
+                   ' This make take a minute though, are you sure you ' + \
+                   'want to perform the audit?'
+
+        if self.run_warning_dialog(message_title, message):
+            ConfirmationSystem.update_orders_database()
+            self._auditor.closing_audit()
+
     
 if __name__ == '__main__':
     

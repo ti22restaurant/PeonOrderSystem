@@ -69,7 +69,7 @@ class MenuItem(object):
         if this menu item has been comped or
         not.
         """
-        return self._price_scalar == 0.0 and self._notification_message
+        return self._price_scalar == 0.0 and bool(self._notification_message)
 
     def get_comp_message(self):
         """Gets the comp message associated
@@ -145,6 +145,15 @@ class MenuItem(object):
         false otherwise.
         """
         return self.editable and not self._locked
+
+    def is_notification(self):
+        """Checks if the current MenuItem
+        object is a notification item.
+
+        @return: bool representing if the
+        MenuItem is a notification item.
+        """
+        return self.is_comped()
     
     def get_option_choices(self):
         """Gets a copy of the current options choices dict.
@@ -233,6 +242,17 @@ class DiscountItem(MenuItem):
         associated with this DiscountItem.
         """
         return self._notification_message
+
+    def is_notification(self):
+        """Checks if the DiscountItem is
+        a notification item.
+
+        By default always returns true.
+
+        @return: True because all DiscountItems
+        by definition are notification items.
+        """
+        return True
 
 
 class OptionItem(object):
@@ -384,7 +404,7 @@ class OptionItem(object):
         @param other: OptionItem object that
         is to be compared to this object.
 
-        @return: Value representing the
+        @return: int representing the
         comparison of the two objects. If
         positive this object is considered
         greater than the other, if 0 then
@@ -398,3 +418,58 @@ class OptionItem(object):
             cmp_value = cmp(self._name, other._name)
 
         return cmp_value
+
+
+#====================================================================================
+# This block represents tests that may be performed to ensure that a given object
+# is one of the objects defined in this module
+#====================================================================================
+def is_menu_item(menu_item):
+    """Checks if the given item is a MenuItem.
+
+    @raise ValueError: If the given item is not
+    a MenuItem instance or subclass.
+
+    @param menu_item: object to be tested.
+
+    @return: bool value representing if the test
+    was passed.
+    """
+    if not menu_item or not isinstance(menu_item, MenuItem):
+        raise ValueError('Expected a MenuItem instance or subclass. Got '
+                         '{} instead'.format(type(menu_item)))
+    return True
+
+
+def is_option_item(option_item):
+    """Checks if the given item is an OptionItem
+
+    @raise ValueError: If the given item is not
+    an OptionItem instance or subclass.
+
+    @param option_item: object to be tested.
+
+    @return: bool value representing if the test
+    was passed.
+    """
+    if not option_item or not isinstance(option_item, OptionItem):
+        raise ValueError('Expected an OptionItem instance or subclass. Got '
+                         '{} instead.'.format(type(option_item)))
+    return True
+
+
+def is_discount_item(discount_item):
+    """Checks if the given item is a DiscountItem.
+
+    @raise ValueError: If the given item is
+    not a DiscountItem or subclass.
+
+    @param discount_item: object to be tested.
+
+    @return: bool value representing if the test
+    was passed.
+    """
+    if not discount_item or not isinstance(discount_item, DiscountItem):
+        raise ValueError('Expected a DiscountItem instance or subclass. Got '
+                         '{} instead.'.format(type(discount_item)))
+    return True
