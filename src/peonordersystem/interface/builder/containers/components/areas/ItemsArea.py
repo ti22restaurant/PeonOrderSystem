@@ -77,6 +77,7 @@ class ItemsArea(AbstractArea):
         """
         if self._title_flag:
             return self._create_title_area()
+        return Gtk.VBox()
 
     def _create_title_area(self):
         """Creates the title area.
