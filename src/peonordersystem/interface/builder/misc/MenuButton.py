@@ -62,4 +62,5 @@ class MenuButton(AbstractMenuButton):
 
         @return: None
         """
+        args += (self.menu_item,)
         self._widget.connect(*args)
