@@ -58,7 +58,7 @@ class AbstractBuilder(object):
         pass
 
     @abstractmethod
-    def set_menu_item_view(self, display_view):
+    def set_order_view(self, display_view):
         """Sets the view used to display the
         MenuItems.
 
@@ -70,7 +70,7 @@ class AbstractBuilder(object):
         pass
 
     @abstractmethod
-    def set_table(self, table_value):
+    def set_table_display(self, table_value):
         """Sets the currently displayed
         table.
 
@@ -83,7 +83,7 @@ class AbstractBuilder(object):
         pass
 
     @abstractmethod
-    def update_status(self, status_msg, styles=[]):
+    def update_status_display(self, status_msg, styles=[]):
         """Updates the main status
         message with the given str.
 
