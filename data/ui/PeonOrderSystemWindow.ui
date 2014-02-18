@@ -809,6 +809,7 @@ the selected menu item.</property>
                                 <property name="receives_default">True</property>
                                 <property name="use_action_appearance">False</property>
                                 <property name="focus_on_click">False</property>
+                                <signal name="clicked" handler="confirm_selected_upcoming_order" swapped="no"/>
                                 <child>
                                   <object class="GtkLabel" id="upcomingOrdersConfirmPriorityButtonLabel">
                                     <property name="visible">True</property>
@@ -837,6 +838,7 @@ the selected menu item.</property>
                                 <property name="receives_default">True</property>
                                 <property name="use_action_appearance">False</property>
                                 <property name="focus_on_click">False</property>
+                                <signal name="clicked" handler="remove_selected_upcoming_order" swapped="no"/>
                                 <child>
                                   <object class="GtkLabel" id="removeUpcomingOrdersButtonLabel">
                                     <property name="visible">True</property>
