@@ -194,6 +194,21 @@ class Builder(AbstractBuilder):
             self._register_table_button(button)
             yield button
 
+    def _register_table_button(self, button):
+        """Registers the given button as
+        a table button.
+
+        @param button: Gtk.Button that
+        represents the table button to
+        be registered.
+
+        @return: None
+        """
+        flag = self._data_parser.FLAGS['button']
+        func = self._data_parser.FUNC_NAMES['table_button']
+        label = button.get_label()
+        self._connector.register(button, flag, func, label)
+
     def _create_misc_buttons(self):
         """Creates the misc buttons.
 
@@ -214,23 +229,23 @@ class Builder(AbstractBuilder):
         """
         button = Gtk.Button('MISC ORDERS')
         button.set_focus_on_click(False)
-        self._register_table_button(button)
+        self._register_misc_button(button)
         yield button
 
-    def _register_table_button(self, button):
-        """Registers the given button as
-        a table button.
+    def _register_misc_button(self, button):
+        """Registers the given buton
+        as a misc button.
 
         @param button: Gtk.Button that
-        represents the table button to
-        be registered.
+        represents the misc button to be
+        registered.
 
         @return: None
         """
         flag = self._data_parser.FLAGS['button']
-        func = self._data_parser.FUNC_NAMES['table_button']
-        label = button.get_label()
-        self._connector.register(button, flag, func, label)
+        func = self._data_parser.FUNC_NAMES['misc_button']
+        self._connector.register(button, flag, func)
+
 
     def _create_menu_notebook(self):
         """Creates the notebook that
