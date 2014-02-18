@@ -29,7 +29,8 @@ class DataParser(AbstractDataParser):
 
     # Expected function names in the class that the signals will be connected to.
     FUNC_NAMES = {'table_button': 'table_button_clicked',
-                  'menu_button': 'menu_button_clicked'}
+                  'menu_button': 'menu_button_clicked',
+                  'misc_button': 'select_misc_order'}
 
     # Gtk.Widget flags that are useful.
     FLAGS = {'button': 'clicked',
