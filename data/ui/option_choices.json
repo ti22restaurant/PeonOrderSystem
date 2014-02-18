@@ -1,33 +1,33 @@
 {
-    "option8": [
+    "MISC": [
         "DESSERT", 
         "MISC"
     ], 
-    "option6": [
+    "NOODLES/RICE": [
         "NOODLES", 
         "FRIED RICE", 
         "SPECIAL"
     ], 
-    "option7": [
+    "DRINKS": [
         "DRINKS", 
         "BEER", 
         "WINE"
     ], 
-    "option4": [
+    "CURRIES/APTZ": [
         "APPETIZER", 
         "CURRIES"
     ], 
-    "option5": [
+    "SALAD": [
         "SOUP", 
         "SALAD"
     ], 
-    "option2": [
+    "PLATTER": [
         "LUNCH PLATTER"
     ], 
-    "option3": [
+    "FISH": [
         "FISH"
     ], 
-    "option1": [
+    "CAKES": [
         "CAKES"
     ]
 }
