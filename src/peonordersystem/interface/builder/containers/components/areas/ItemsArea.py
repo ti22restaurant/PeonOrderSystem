@@ -17,8 +17,10 @@ class ItemsArea(AbstractArea):
     display MenuButtons.
     """
 
-    def __init__(self, area_data, area_name, num_of_subareas=2,
-                 has_title_area=False):
+    DEFAULT_NUM_OF_SUB_AREAS = 2
+    ITEMS_PER_AREA = 3
+
+    def __init__(self, area_data, area_name,has_title_area=True):
         """Initializes the ItemsArea.
 
         @param area_data: list of MenuButtons that represents
@@ -27,20 +29,14 @@ class ItemsArea(AbstractArea):
         @param area_name: str representing the name to
         be associated with the area.
 
-        @keyword num_of_subareas: int representing the number
-        of sub areas that this area should be divided into.
-        Each sub area is a column for the boxes, this number
-        represents the number of columns to display the buttons
-        data on. Default is 2.
-
         @keyword has_title_area: bool value representing if the
          title area should be displayed. Default is False.
         """
         self._title_flag = has_title_area
-        self._num_subareas = num_of_subareas
-
         self._data = area_data
         self._name = area_name
+
+        self._num_subareas = self._get_number_of_sub_areas()
         self._widget = self._set_up_main_area()
 
     @property
@@ -51,6 +47,16 @@ class ItemsArea(AbstractArea):
         @return: Gtk.Widget
         """
         return self._widget
+
+    def _get_number_of_sub_areas(self):
+        """Gets the number of sub areas that
+        should be displayed in this items area.
+
+        @return: int representing the number
+        of sub areas.
+        """
+        n = len(self._data) / self.ITEMS_PER_AREA
+        return max(n, self.DEFAULT_NUM_OF_SUB_AREAS)
 
     def _set_up_main_area(self):
         """Sets up the main area.
