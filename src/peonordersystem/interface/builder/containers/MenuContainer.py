@@ -73,7 +73,7 @@ class MenuContainer(AbstractContainer):
         """
         widget = component.main_widget
         title = component.name
-        self._notebook.append_page(widget, tab_label=title)
+        self._notebook.append_page(widget, tab_label=Gtk.Label(title))
 
     @staticmethod
     def _check_component(component):
