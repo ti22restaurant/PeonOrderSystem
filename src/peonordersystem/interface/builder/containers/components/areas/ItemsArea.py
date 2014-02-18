@@ -112,7 +112,7 @@ class ItemsArea(AbstractArea):
 
         for item in self._data:
             box = box_queue.popleft()
-            box.pack_start(item, True, True, 5.0)
+            box.pack_start(item.main_widget, True, True, 5.0)
             box_queue.append(box)
 
         return box_queue
