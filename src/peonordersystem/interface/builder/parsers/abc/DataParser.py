@@ -34,8 +34,8 @@ class AbstractDataParser(object):
         pass
 
     @abstractmethod
-    def unpack_menu_item_data(self):
-        """Unpacks the menu item data
+    def unpack_menu_data(self):
+        """Unpacks the menu data
         from its source.
 
         @return: dict
