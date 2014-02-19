@@ -17,6 +17,9 @@ class PropertiesView(AbstractView):
     generates widgets for display.
     """
 
+    DEFAULT_BUTTON_HEIGHT = 50
+    DEFAULT_BUTTON_WIDTH = 80
+
     def __init__(self, title):
         """Initializes the view.
 
@@ -81,10 +84,7 @@ class PropertiesView(AbstractView):
         main_box = Gtk.HBox()
 
         pull_button = self._set_up_push_button()
-        main_box.pack_start(pull_button, True, True, 5.0)
-
-        main_box.pack_start(Gtk.Fixed(), True, True, 5.0)
-        main_box.pack_start(Gtk.Fixed(), True, True, 5.0)
+        main_box.pack_start(pull_button, False, False, 5.0)
 
         return main_box
 
@@ -98,6 +98,9 @@ class PropertiesView(AbstractView):
         """
         button = Gtk.Button('<')
         button.set_focus_on_click(False)
+        button.set_size_request(self.DEFAULT_BUTTON_WIDTH,
+                                self.DEFAULT_BUTTON_HEIGHT)
+
         self._register_push_button(button)
         return button
 
