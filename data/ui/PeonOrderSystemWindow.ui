@@ -1,16 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <!-- interface-requires gtk+ 3.0 -->
-  <object class="GtkImage" id="image1">
+  <object class="GtkImage" id="image10">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="xalign">0.55000001192092896</property>
-    <property name="stock">gtk-go-forward</property>
+    <property name="yalign">0.49000000953674316</property>
+    <property name="stock">gtk-fullscreen</property>
   </object>
   <object class="GtkImage" id="image2">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-fullscreen</property>
+  </object>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="xalign">0.55000001192092896</property>
+    <property name="stock">gtk-go-forward</property>
   </object>
   <object class="GtkImage" id="image3">
     <property name="visible">True</property>
@@ -22,16 +28,16 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-fullscreen</property>
   </object>
-  <object class="GtkImage" id="image5">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-fullscreen</property>
-  </object>
   <object class="GtkImage" id="image6">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-fullscreen</property>
     <property name="icon-size">5</property>
+  </object>
+  <object class="GtkImage" id="image5">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-fullscreen</property>
   </object>
   <object class="GtkImage" id="image7">
     <property name="visible">True</property>
@@ -122,6 +128,18 @@
                                 <property name="use_stock">False</property>
                                 <property name="always_show_image">True</property>
                                 <signal name="activate" handler="update_discount_templates" swapped="no"/>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkImageMenuItem" id="updateMenuDisplayItem">
+                                <property name="label" translatable="yes">Update Menu Display Data</property>
+                                <property name="use_action_appearance">False</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="image">image10</property>
+                                <property name="use_stock">False</property>
+                                <property name="always_show_image">True</property>
+                                <signal name="activate" handler="update_menu_display_data" swapped="no"/>
                               </object>
                             </child>
                             <child>
