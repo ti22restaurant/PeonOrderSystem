@@ -19,6 +19,10 @@ class SecondaryView(AbstractView):
     values pushed from it.
     """
 
+    DEFAULT_BUTTON_WIDTH = 80
+    DEFAULT_BUTTON_HEIGHT = 50
+
+
     def __init__(self, title):
         """Initializes the view.
 
@@ -97,7 +101,9 @@ class SecondaryView(AbstractView):
         """
         button = Gtk.Button('>')
         button.set_focus_on_click(False)
-        button.set_size_request(70, 80)
+        button.set_size_request(self.DEFAULT_BUTTON_WIDTH,
+                                self.DEFAULT_BUTTON_HEIGHT)
+
         self._register_push_button(button)
         return button
 
