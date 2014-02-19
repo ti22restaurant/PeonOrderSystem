@@ -12,7 +12,6 @@ from gi.repository import Gtk
 
 from .abc.Builder import AbstractBuilder
 from .parsers.DataParser import DataParser
-from .connectors.Connector import Connector
 from .misc.MenuButton import MenuButton
 
 from .containers.MenuContainer import MenuContainer
@@ -21,6 +20,7 @@ from .containers.components.areas.ItemsArea import ItemsArea
 
 from src.peonordersystem.path import MAIN_UI_PATH
 from src.peonordersystem.Settings import NUM_OF_TABLES_TO_DISPLAY
+from src.peonordersystem.interface.connectors.Connector import Connector
 
 
 class Builder(AbstractBuilder):
@@ -245,7 +245,6 @@ class Builder(AbstractBuilder):
         flag = self._data_parser.FLAGS['button']
         func = self._data_parser.FUNC_NAMES['misc_button']
         self._connector.register(button, flag, func)
-
 
     def _create_menu_notebook(self):
         """Creates the notebook that
