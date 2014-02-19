@@ -544,7 +544,6 @@ class UI(object):
     # This block contains methods that are called via callback only when a
     # dialog window has been confirmed.
     #===========================================================================
-
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
     def order_confirmed(self, priority_order, *args):
@@ -875,7 +874,7 @@ class UI(object):
         self.update_status('Awaiting editing of menu display...')
         response = self.editor.update_menu_display_data(menu_display_data,
                                                         menu_data.keys(),
-                                                        self.dump_menu_display_data)
+                                                        self.dump_updated_menu_display_data)
 
         if response:
             msg = 'Editing display data. Restart to see changes!'
