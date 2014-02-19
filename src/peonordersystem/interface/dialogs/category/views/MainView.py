@@ -17,7 +17,7 @@ from src.peonordersystem.interface.connectors.Connector import Connector
 
 
 class MainView(AbstractView, AbstractSelectionObservable):
-    """Provides the necessary functionality for
+    """Provides the functionality for
     a main view area which includes a view for
     displaying data and the buttons to alter said
     view.
