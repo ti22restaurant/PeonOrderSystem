@@ -5,17 +5,15 @@ dialog window present in the dialog module.
 @contact: cjmcgraw@u.washington.edu
 @version: 1.0
 """
-from src.peonordersystem import path
-from src.peonordersystem.interface import Dialog
-
-from test.peonordersystem.standardoperations_test import generate_random_date, \
-    MAXIMUM_POTENTIAL_DATE_SHIFT_IN_DAYS
-
 from gi.repository import Gtk # IGNORE:E0611 @UnresolvedImport
-
 import unittest
 import datetime
 import random
+
+from peonordersystem.interface.dialogs import Dialog
+from src.peonordersystem import path
+from test.peonordersystem.standardoperations_test import generate_random_date, \
+    MAXIMUM_POTENTIAL_DATE_SHIFT_IN_DAYS
 
 
 TEST_CASE_FAILURE = 'Dialog_Test.py'

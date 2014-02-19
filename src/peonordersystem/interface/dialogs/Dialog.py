@@ -665,6 +665,7 @@ class SelectionDialog(Dialog):
 
         @return: None
         """
+        pass
 
     def confirm_button_clicked(self, *args):
         """Override Method.

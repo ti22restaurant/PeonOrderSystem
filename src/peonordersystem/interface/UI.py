@@ -7,23 +7,19 @@ the main GUI is utilized as components in UI object.
 @contact: cjmcgraw.u.washington.edu
 @version: 1.0
 """
-from src.peonordersystem.path import MAIN_UI_PATH
-
 import copy
+from time import strftime
 
-from src.peonordersystem.interface import Builder
-from src.peonordersystem.interface.Orders import Orders
-from src.peonordersystem.interface.Reservations import Reservations
-from src.peonordersystem.interface import Editor
-from src.peonordersystem.interface.UpcomingOrders import UpcomingOrders
-
-from src.peonordersystem.interface import Dialog
+from .dialogs import Dialog
+from .builder.Builder import Builder
+from .Orders import Orders
+from .Reservations import Reservations
+from .UpcomingOrders import UpcomingOrders
+import Editor
 
 from src.peonordersystem import ErrorLogger
 from src.peonordersystem import CustomExceptions
 from src.peonordersystem import Settings
-
-from time import strftime
 
 
 def non_fatal_error_notification(func):
@@ -66,20 +62,16 @@ def non_fatal_error_notification(func):
             return result
 
         except CustomExceptions.InvalidItemError:
-            self.update_status(CustomExceptions.INVALID_ITEM_MESSAGE,
-                               ['error'])
+            self.update_status(CustomExceptions.INVALID_ITEM_MESSAGE, ['error'])
 
         except CustomExceptions.InvalidOrderError:
-            self.update_status(CustomExceptions.INVALID_ORDER_MESSAGE,
-                               ['error'])
+            self.update_status(CustomExceptions.INVALID_ORDER_MESSAGE, ['error'])
 
         except CustomExceptions.InvalidReservationError:
-            self.update_status(CustomExceptions.INVALID_RESERVATION_MESSAGE,
-                               ['error'])
+            self.update_status(CustomExceptions.INVALID_RESERVATION_MESSAGE, ['error'])
 
         except CustomExceptions.NoSuchSelectionError:
-            self.update_status(CustomExceptions.NO_SELECTION_MESSAGE,
-                               ['error'])
+            self.update_status(CustomExceptions.NO_SELECTION_MESSAGE, ['error'])
 
     return error_checker
 
@@ -114,14 +106,12 @@ class UI(object):
         @param title: str representing the current title to
         be displayed on the GUI
         """
-        self.builder = Builder.Builder()
-        
-        self.builder.add_from_file(MAIN_UI_PATH, title)
+        self.builder = Builder(title)
         self.builder.connect_signals(self)
         
         # These objects control the main orders and their displays
         self.orders = Orders(load_data=load_data)
-        self.builder.set_menu_item_view(self.orders.get_display_view())
+        self.builder.set_order_view(self.orders.get_display_view())
         
         # These objects control secondary displays
         self.reservations = Reservations(self.builder.reservation_window,
@@ -152,7 +142,7 @@ class UI(object):
         @param table: str representing the stored text on the
         table button.
         """
-        self.builder.set_table(table)
+        self.builder.set_table_display(table)
         self.orders.set_current_table(table)
         self.update_status('Order set to {}'.format(table))
 
@@ -360,7 +350,7 @@ class UI(object):
         name = menu_item.get_name()
         self.update_status('Opening general options to edit ' +
                            '{}'.format(name))
-        option_data = Builder.get_options_item_data()
+        option_data = self.builder.get_options_data()
         response = self.editor.edit_general_options(option_data, menu_item)
 
         message = ''
@@ -515,7 +505,7 @@ class UI(object):
         """
         self.update_status('Waiting for discount confirmation...')
         current_order = self.orders.get_current_order()
-        discount_templates = Builder.get_discount_templates_data()
+        discount_templates = self.builder.get_discount_templates_data()
         confirmed = self.editor.discount_item_order(current_order, self.edit_order,
                                                     discount_templates)
 
@@ -554,7 +544,6 @@ class UI(object):
     # This block contains methods that are called via callback only when a
     # dialog window has been confirmed.
     #===========================================================================
-
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
     def order_confirmed(self, priority_order, *args):
@@ -592,7 +581,7 @@ class UI(object):
         self.upcoming_orders.remove_by_name(curr_name)
         self.orders.clear_order()
         self.notify_pending_reservations()
-        self.builder.set_table('')
+        self.builder.set_table_display('')
         return curr_name, curr_order
 
     @non_fatal_error_notification
@@ -607,7 +596,7 @@ class UI(object):
         """
         if type(curr_order) is tuple:
             self.orders.select_togo_order(curr_order)
-            self.builder.set_table(curr_order[0])
+            self.builder.set_table_display(curr_order[0])
         else:
             self.table_button_clicked(None, curr_order)
 
@@ -752,7 +741,7 @@ class UI(object):
         @return: bool value if the status was updated. True
         if yes, false if no.
         """
-        return self.builder.update_status(message, styles)
+        return self.builder.update_status_display(message, styles)
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
@@ -833,8 +822,8 @@ class UI(object):
 
         @return: None
         """
-        menu_data = Builder.load_menu_items()
-        options_data = Builder.get_options_item_data()
+        menu_data = self.builder.get_menu_data()
+        options_data = self.builder.get_options_data()
 
         self.update_status('Awaiting editing of raw MenuItem data...')
         response = self.editor.update_menu_items_data(menu_data, options_data,
@@ -858,7 +847,7 @@ class UI(object):
 
         @return: None
         """
-        discount_templates = Builder.get_discount_templates_data()
+        discount_templates = self.builder.get_discount_templates_data()
 
         self.update_status('Awaiting editing of raw Discount Templates...')
         response = self.editor.update_discount_templates(self.dump_discount_templates,
@@ -867,6 +856,32 @@ class UI(object):
             self.update_status('Edited Discount templates.')
         else:
             self.update_status('Cancelled Discount templates update.')
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def update_menu_display_data(self, *args):
+        """Initiates a dialog window that allows for editing
+        the menu display.
+
+        @param args: Wildcard catchall used to catch the
+        widget that called this method.
+
+        @return: None
+        """
+        menu_display_data = self.builder.get_categories_data()
+        menu_data = self.builder.get_menu_data()
+
+        self.update_status('Awaiting editing of menu display...')
+        response = self.editor.update_menu_display_data(menu_display_data,
+                                                        menu_data.keys(),
+                                                        self.dump_updated_menu_display_data)
+
+        if response:
+            msg = 'Editing display data. Restart to see changes!'
+        else:
+            msg = 'Cancelled editing of menu display. Reverting to ' \
+                  'normal menu display'
+        self.update_status(msg)
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
@@ -881,7 +896,7 @@ class UI(object):
 
         @return: None
         """
-        option_data = Builder.get_options_item_data()
+        option_data = self.builder.get_options_data()
 
         self.update_status('Awaiting editing of raw OptionItem data...')
         response = self.editor.update_option_items_data(option_data,
@@ -908,7 +923,7 @@ class UI(object):
 
         @return: None
         """
-        Builder.update_menu_items_data(updated_menu_data)
+        self.builder.update_menu_data(updated_menu_data)
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
@@ -924,7 +939,7 @@ class UI(object):
 
         @return: None
         """
-        Builder.update_discount_templates_data(updated_discount_templates)
+        self.builder.update_discount_templates_data(updated_discount_templates)
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
@@ -934,13 +949,27 @@ class UI(object):
         methods necessary to dump the General OptionItem
         data into its associated file.
 
-        @param update_option_data: str of keys representing
+        @param updated_option_data: str of keys representing
         the OptionItem categories, mapped to list of OptionItems
         that represent the options associated with that category.
 
         @return: None
         """
-        Builder.update_options_item_data(updated_option_data)
+        self.builder.update_options_data(updated_option_data)
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def dump_updated_menu_display_data(self, updated_menu_display_data):
+        """Updates the menu display data.
+
+        @param updated_menu_display_data: dict of
+        str keys mapped to list of str representing
+        the page labels and associated categories to
+        be displayed respectively.
+
+        @return: None
+        """
+        self.builder.update_categories_data(updated_menu_display_data)
 
     def _dump(self):
         """Dumps the information regarding the

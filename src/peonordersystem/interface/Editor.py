@@ -9,7 +9,8 @@ confirm Orders.
 """
 
 from gi.repository import Gtk
-from src.peonordersystem.interface import Dialog
+from .dialogs import Dialog
+from .dialogs.display.MenuDisplaySelectionDialog import MenuDisplaySelectionDialog
 from src.peonordersystem import ErrorLogger
 from src.peonordersystem.CustomExceptions import InvalidItemError, \
     InvalidOrderError
@@ -368,6 +369,34 @@ class Editor(object):
         dialog = Dialog.UpdateGeneralOptionSelectionDialog(self.parent,
                                                            confirm_func,
                                                            options_data)
+        response = dialog.run_dialog()
+        del dialog
+        return response == ACCEPT_RESPONSE
+
+    def update_menu_display_data(self, menu_display_data, categories, confirm_func):
+        """Calls a dialog window that is used to
+        update the displayed menu.
+
+        @note: Calls the confirm func with the
+        returned menu display data that should
+        be stored.
+
+        @param menu_display_data: dict of str
+        keys to list of str representing the
+        page labels and the categories to be
+        associated with the pages respectively.
+
+        @param categories: list of str representing
+        all categories that can be displayed.
+
+        @param confirm_func: function that is to be
+        called upon confirmation
+
+        @return: bool value representing if the
+        dialog confirmation occurred.
+        """
+        dialog = MenuDisplaySelectionDialog(self.parent, confirm_func,
+                                            menu_display_data, categories)
         response = dialog.run_dialog()
         del dialog
         return response == ACCEPT_RESPONSE

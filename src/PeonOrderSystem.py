@@ -191,6 +191,7 @@ class PeonOrderSystem(UI):
 
         @return: None
         """
+        super(PeonOrderSystem, self).perform_audit(start_date, end_date, **kwargs)
         self._auditor.audit_range(start_date, end_date, **kwargs)
 
     def run(self):
