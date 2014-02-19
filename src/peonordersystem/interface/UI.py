@@ -10,12 +10,13 @@ the main GUI is utilized as components in UI object.
 import copy
 from time import strftime
 
-from peonordersystem.interface.dialogs import Dialog
-from src.peonordersystem.interface.builder.Builder import Builder
-from src.peonordersystem.interface.Orders import Orders
-from src.peonordersystem.interface.Reservations import Reservations
-from src.peonordersystem.interface import Editor
-from src.peonordersystem.interface.UpcomingOrders import UpcomingOrders
+from .dialogs import Dialog
+from .builder.Builder import Builder
+from .Orders import Orders
+from .Reservations import Reservations
+from .UpcomingOrders import UpcomingOrders
+import Editor
+
 from src.peonordersystem import ErrorLogger
 from src.peonordersystem import CustomExceptions
 from src.peonordersystem import Settings
@@ -859,6 +860,32 @@ class UI(object):
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
+    def update_menu_display_data(self, *args):
+        """Initiates a dialog window that allows for editing
+        the menu display.
+
+        @param args: Wildcard catchall used to catch the
+        widget that called this method.
+
+        @return: None
+        """
+        menu_display_data = self.builder.get_categories_data()
+        menu_data = self.builder.get_menu_data()
+
+        self.update_status('Awaiting editing of menu display...')
+        response = self.editor.update_menu_display_data(menu_display_data,
+                                                        menu_data.keys(),
+                                                        self.dump_menu_display_data)
+
+        if response:
+            msg = 'Editing display data. Restart to see changes!'
+        else:
+            msg = 'Cancelled editing of menu display. Reverting to ' \
+                  'normal menu display'
+        self.update_status(msg)
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def update_option_items(self, *args):
         """This method is called when the associated
         widget is pressed. This method displays a dialog
@@ -923,13 +950,27 @@ class UI(object):
         methods necessary to dump the General OptionItem
         data into its associated file.
 
-        @param update_option_data: str of keys representing
+        @param updated_option_data: str of keys representing
         the OptionItem categories, mapped to list of OptionItems
         that represent the options associated with that category.
 
         @return: None
         """
         self.builder.update_options_data(updated_option_data)
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def dump_updated_menu_display_data(self, updated_menu_display_data):
+        """Updates the menu display data.
+
+        @param updated_menu_display_data: dict of
+        str keys mapped to list of str representing
+        the page labels and associated categories to
+        be displayed respectively.
+
+        @return: None
+        """
+        self.builder.update_categories_data(updated_menu_display_data)
 
     def _dump(self):
         """Dumps the information regarding the
