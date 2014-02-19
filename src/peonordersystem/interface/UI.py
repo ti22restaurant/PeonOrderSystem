@@ -8,20 +8,17 @@ the main GUI is utilized as components in UI object.
 @version: 1.0
 """
 import copy
+from time import strftime
 
+from peonordersystem.interface.dialogs import Dialog
 from src.peonordersystem.interface.builder.Builder import Builder
 from src.peonordersystem.interface.Orders import Orders
 from src.peonordersystem.interface.Reservations import Reservations
 from src.peonordersystem.interface import Editor
 from src.peonordersystem.interface.UpcomingOrders import UpcomingOrders
-
-from src.peonordersystem.interface import Dialog
-
 from src.peonordersystem import ErrorLogger
 from src.peonordersystem import CustomExceptions
 from src.peonordersystem import Settings
-
-from time import strftime
 
 
 def non_fatal_error_notification(func):
