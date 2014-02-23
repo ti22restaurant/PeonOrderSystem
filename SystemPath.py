@@ -3,7 +3,8 @@ for generating the UI and its components.
 """
 import os
 
-SYSTEM_DIRECTORY_PATH = os.getcwd()
+curr_dir = os.path.dirname(os.path.realpath(__file__))
+SYSTEM_DIRECTORY_PATH = curr_dir
 
 SYSTEM_DATA_PATH = SYSTEM_DIRECTORY_PATH + '/data'
 
