@@ -1,0 +1,8 @@
+pkipplib
+jsonpickle
+xlsxwriter
+
+# [OS requirements]
+# Linux:
+#   1.  Cups installed for printer
+#   2.  Gtk+3
