@@ -17,18 +17,17 @@ usage.
 """
 import os
 import sqlite3
-from datetime import datetime
-from collections import Counter, deque
-
 import jsonpickle
+from datetime import datetime
+from collections import Counter
+
+import SystemPath
 from src.peonordersystem.confirmationSystem.bundlers.DateDataBundle \
     import DateDataBundle
 from src.peonordersystem.confirmationSystem.bundlers.ItemDataBundle \
     import ItemDataBundle
 from src.peonordersystem.confirmationSystem.bundlers.OrderDataBundle \
     import OrderDataBundle
-
-from src.peonordersystem import path
 from src.peonordersystem import CheckOperations
 from src.peonordersystem.standardoperations import (check_date,
                                                     check_datetime,
@@ -58,17 +57,17 @@ jsonpickle.set_encoder_options('simplejson', sort_keys=True, indent=4)
 # necessary for the ConfirmationSystem module to work.
 #====================================================================================
 
-DIRECTORY = path.SYSTEM_ORDERS_PATH
+DIRECTORY = SystemPath.SYSTEM_ORDERS_PATH
 
-ORDERS_DATABASE_PATH = path.SYSTEM_ORDERS_DATABASE
-RESERVATIONS_DATABASE_PATH = path.SYSTEM_RESERVATIONS_DATABASE
+ORDERS_DATABASE_PATH = SystemPath.SYSTEM_ORDERS_DATABASE
+RESERVATIONS_DATABASE_PATH = SystemPath.SYSTEM_RESERVATIONS_DATABASE
 
-CONFIRMED_DIRECTORY = path.SYSTEM_ORDERS_CONFIRMED_DIRECTORY
-CHECKOUT_DIRECTORY = path.SYSTEM_ORDERS_CHECKOUT_DIRECTORY
+CONFIRMED_DIRECTORY = SystemPath.SYSTEM_ORDERS_CONFIRMED_DIRECTORY
+CHECKOUT_DIRECTORY = SystemPath.SYSTEM_ORDERS_CHECKOUT_DIRECTORY
 
 
 for dirs in (DIRECTORY, CHECKOUT_DIRECTORY, CONFIRMED_DIRECTORY,
-             path.SYSTEM_DATABASE_PATH):
+             SystemPath.SYSTEM_DATABASE_PATH):
     if not os.path.exists(dirs):
         os.mkdir(dirs)
 

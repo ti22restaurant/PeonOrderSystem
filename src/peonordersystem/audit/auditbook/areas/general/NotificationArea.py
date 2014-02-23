@@ -2,7 +2,7 @@
 @author: Carl McGraw
 @contact: cjmcgraw( at )u.washington.edu
 """
-from peonordersystem.MenuItem import is_discount_item
+from src.peonordersystem.MenuItem import is_discount_item
 from .abc.GeneralArea import GeneralArea
 
 

@@ -18,7 +18,7 @@ from .containers.MenuContainer import MenuContainer
 from .containers.components.MenuComponent import MenuComponent
 from .containers.components.areas.ItemsArea import ItemsArea
 
-from src.peonordersystem.path import MAIN_UI_PATH
+from SystemPath import MAIN_UI_PATH
 from src.peonordersystem.Settings import NUM_OF_TABLES_TO_DISPLAY
 from src.peonordersystem.interface.connectors.Connector import Connector
 

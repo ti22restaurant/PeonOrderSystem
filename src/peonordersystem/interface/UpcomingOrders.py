@@ -22,7 +22,7 @@ from gi.repository import Gtk
 
 from src.peonordersystem import ErrorLogger
 from src.peonordersystem.standardoperations import tree_view_changed
-from peonordersystem.confirmationSystem.ConfirmationSystem import TOGO_SEPARATOR
+from src.peonordersystem.confirmationSystem.ConfirmationSystem import TOGO_SEPARATOR
 from src.peonordersystem.CustomExceptions import NoSuchSelectionError
 
 
@@ -61,9 +61,8 @@ class UpcomingOrdersView(Gtk.TreeView):
         selection = self.get_selection()
         selection.select_iter(itr)
     
-    def generate_columns(self, column_names=['Order Name',
-                            'Order Confirmed At',
-                            'Incoming Priorty']):
+    def generate_columns(self, column_names=['Order Name', 'Order Confirmed At',
+                                             'Incoming Priorty']):
         """Generates the columns for the View. By default generates
         two columns 'Order Name', and 'Order Confirmed At' and
         expects type str for all.

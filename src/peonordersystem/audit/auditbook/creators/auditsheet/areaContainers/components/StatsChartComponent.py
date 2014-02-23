@@ -8,8 +8,8 @@ the mean and median in a single component.
 """
 from .abc.ChartComponent import ChartComponent
 
-from peonordersystem.audit.auditbook.areas.datasheet.DataAreas import DataArea
-from peonordersystem.audit.auditbook.areas.datasheet.containers.StatsContainer \
+from src.peonordersystem.audit.auditbook.areas.datasheet.DataAreas import DataArea
+from src.peonordersystem.audit.auditbook.areas.datasheet.containers.StatsContainer \
     import TimeCategoryStatsContainer
 
 

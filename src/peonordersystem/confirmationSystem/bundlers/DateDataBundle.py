@@ -4,9 +4,8 @@
 @version: 1.0
 """
 import datetime
-from peonordersystem.Settings import SQLITE_DATE_TIME_FORMAT_STR
-from peonordersystem.confirmationSystem.bundlers.abc.CollectionDataBundle import \
-    CollectionDataBundle
+from src.peonordersystem.Settings import SQLITE_DATE_TIME_FORMAT_STR
+from .abc.CollectionDataBundle import CollectionDataBundle
 
 
 class DateDataBundle(CollectionDataBundle):

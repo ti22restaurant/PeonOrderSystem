@@ -9,7 +9,7 @@ Auditor object.
 import os
 from datetime import datetime, date, time
 
-from src.peonordersystem.path import SYSTEM_AUDIT_PATH
+from SystemPath import SYSTEM_AUDIT_PATH
 
 from src.peonordersystem.Settings import FILENAME_TEMPLATE
 from src.peonordersystem.Settings import AUDIT_FILE_TYPE

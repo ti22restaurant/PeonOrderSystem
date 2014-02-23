@@ -7,11 +7,11 @@ by the builder object.
 @contact: cjmcgraw( at )u.washington.edu
 @version: 1.0
 """
+from SystemPath import (MENU_DATA, OPTION_DATA, DISCOUNT_DATA, CATEGORIES_DISPLAY_DATA)
+
 import jsonpickle
 
 from .abc.Unpacker import AbstractUnpacker
-from src.peonordersystem.path import (MENU_DATA, OPTION_DATA,
-                                      DISCOUNT_DATA, CATEGORIES_DISPLAY_DATA)
 
 
 class Unpacker(AbstractUnpacker):

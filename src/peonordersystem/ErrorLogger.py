@@ -4,14 +4,14 @@
 @version: 1.0
 '''
 
-from src.peonordersystem.path import SYSTEM_LOG_PATH
+from SystemPath import SYSTEM_LOG_PATH
+import traceback
+import logging
+import inspect
+
 from src.peonordersystem.CustomExceptions import NoSuchSelectionError,\
     InvalidReservationError, InvalidOrderError, InvalidItemError
 
-import traceback
-
-import logging
-import inspect
 
 def generate_logger(log_type=logging.DEBUG, file_name='debug.log'):
     """Generates the logger object and stores it in the

@@ -6,7 +6,7 @@ ChartAreas to Worksheet classes.
 @contact: cjmcgraw( at )u.washington.edu
 @version: 1.0
 """
-from peonordersystem.audit.auditbook.areas.abc.Area import Area
+from src.peonordersystem.audit.auditbook.areas.abc.Area import Area
 
 
 class ChartArea(Area):

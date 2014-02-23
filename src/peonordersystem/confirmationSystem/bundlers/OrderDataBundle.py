@@ -5,7 +5,7 @@
 """
 import datetime
 import jsonpickle
-from peonordersystem.Settings import SQLITE_DATE_TIME_FORMAT_STR
+from src.peonordersystem.Settings import SQLITE_DATE_TIME_FORMAT_STR
 
 from .abc.CollectionDataBundle import CollectionDataBundle
 

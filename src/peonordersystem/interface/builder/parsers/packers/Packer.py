@@ -11,8 +11,7 @@ import jsonpickle
 jsonpickle.set_encoder_options('simplejson', sort_keys=True, indent=4)
 
 from .abc.Packer import AbstractPacker
-from src.peonordersystem.path import (MENU_DATA, OPTION_DATA,
-                                      DISCOUNT_DATA, CATEGORIES_DISPLAY_DATA)
+from SystemPath import (MENU_DATA, OPTION_DATA, DISCOUNT_DATA, CATEGORIES_DISPLAY_DATA)
 
 
 class Packer(AbstractPacker):
