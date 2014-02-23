@@ -1,33 +1,69 @@
 {
-    "MISC": [
-        "DESSERT", 
-        "MISC"
-    ], 
-    "NOODLES/RICE": [
-        "NOODLES", 
-        "FRIED RICE", 
-        "SPECIAL"
-    ], 
-    "DRINKS": [
-        "DRINKS", 
-        "BEER", 
-        "WINE"
-    ], 
-    "CURRIES/APTZ": [
-        "APPETIZER", 
-        "CURRIES"
-    ], 
-    "SALAD": [
-        "SOUP", 
-        "SALAD"
-    ], 
-    "PLATTER": [
-        "LUNCH PLATTER"
-    ], 
-    "FISH": [
-        "FISH"
-    ], 
-    "CAKES": [
-        "CAKES"
-    ]
+    "__reduce__": [
+        {
+            "py/type": "collections.OrderedDict"
+        },
+        {
+            "py/tuple": [
+                [
+                    [
+                        "NOODLES/RICE",
+                        [
+                            "NOODLES",
+                            "FRIED RICE",
+                            "SPECIAL"
+                        ]
+                    ],
+                    [
+                        "CAKES",
+                        [
+                            "CAKES"
+                        ]
+                    ],
+                    [
+                        "SALAD",
+                        [
+                            "SOUP",
+                            "SALAD"
+                        ]
+                    ],
+                    [
+                        "FISH",
+                        [
+                            "FISH"
+                        ]
+                    ],
+                    [
+                        "MISC",
+                        [
+                            "DESSERT",
+                            "MISC"
+                        ]
+                    ],
+                    [
+                        "CURRIES/APTZ",
+                        [
+                            "APPETIZER",
+                            "CURRIES"
+                        ]
+                    ],
+                    [
+                        "PLATTER",
+                        [
+                            "LUNCH PLATTER"
+                        ]
+                    ],
+                    [
+                        "DRINKS",
+                        [
+                            "DRINKS",
+                            "BEER",
+                            "WINE"
+                        ]
+                    ]
+                ]
+            ]
+        }
+    ],
+    "py/object": "collections.OrderedDict"
 }
