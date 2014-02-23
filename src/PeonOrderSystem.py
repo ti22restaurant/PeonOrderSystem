@@ -1,10 +1,4 @@
-#! /usr/bin/env python
-# -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
-# ## BEGIN LICENSE
-# This file is in the public domain
-# ## END LICENSE
-
-"""This module contains the PeonOrderSystem class which 
+"""This module contains the PeonOrderSystem class which
 is the top level object that generates and controls
 the PeonOrderSystem GUI.
 
@@ -217,9 +211,3 @@ class PeonOrderSystem(UI):
         if self.run_warning_dialog(message_title, message):
             ConfirmationSystem.update_orders_database()
             self._auditor.closing_audit()
-
-    
-if __name__ == '__main__':
-    
-    USER = PeonOrderSystem()
-    USER.run()
