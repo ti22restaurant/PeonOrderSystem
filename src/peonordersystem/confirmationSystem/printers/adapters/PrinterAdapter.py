@@ -17,16 +17,14 @@ class PrinterAdapter(AbstractPrinterAdapter):
     the printer and allowing data to be printed.
     """
 
-    def __init__(self):
+    def __init__(self, printer_name):
         """Initializes the adapter"""
+        self._printer_name = printer_name
         self._connection = Connection()
 
-    def print_data(self, printer_str, data_file_str, title_str, options):
+    def print_data(self, data_file_str, title_str, options):
         """Prints the given data with the given
         information.
-
-        @param printer_str: str representing the
-        printer name to be printed to.
 
         @param data_file_str: str representing the
         file to be printed.
@@ -42,6 +40,6 @@ class PrinterAdapter(AbstractPrinterAdapter):
         printer was successful in scheduling the
         job.
         """
-        value = self._connection.printFile(printer_str, data_file_str,
+        value = self._connection.printFile(self._printer_name, data_file_str,
                                            title_str, options)
         return value > 0

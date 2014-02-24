@@ -19,11 +19,8 @@ class AbstractPrinterAdapter(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def print_data(self, printer_str, data_file_str, title_str, options):
+    def print_data(self, data_file_str, title_str, options):
         """Prints the data.
-
-        @param printer_str: str representing the printer
-        to be printed to.
 
         @param data_file_str: str representing the file
         name of the data to be printed.
