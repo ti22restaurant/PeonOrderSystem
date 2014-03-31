@@ -2,8 +2,8 @@
 Version=1.0
 Name=PeonOrderSystem
 Comment=Point-of-sales Ordering system
-Exec=/home/carl-m/bin/POS
+Exec=/home/devious/bin/POS
 Terminal=False
-Icon=/home/carl-m/workspace/python/PeonOrderSystem/data/media/peon-order-system.svg
+Icon=/home/devious/lib/PeonOrderSystem/data/media/peon-order-system.svg
 Type=Application
 Categories=Application;
