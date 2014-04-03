@@ -1,0 +1,30 @@
+2014-04-03, 16:05:57 | DEBUG: peonordersystem.src.PeonOrderSystem.PeonOrderSystem.__init__ : Entering __init__
+2014-04-03, 16:05:57 | INFO: Beginning Initialization
+2014-04-03, 16:05:57 | DEBUG: __init__ : Entering __init__
+2014-04-03, 16:05:58 | DEBUG: peonordersystem.src.interface.Orders.Orders.__init__ : Entering __init__
+2014-04-03, 16:05:58 | DEBUG: peonordersystem.src.interface.Orders.Orders._load_data : Entering _load_data
+2014-04-03, 16:05:58 | DEBUG: peonordersystem.src.interface.Orders.Orders._set_model : Entering _set_model
+2014-04-03, 16:05:58 | DEBUG: peonordersystem.src.interface.Orders.Orders._set_model : Exiting _set_model
+2014-04-03, 16:05:58 | DEBUG: peonordersystem.src.interface.Orders.Orders._load_data : Exiting _load_data
+2014-04-03, 16:05:58 | DEBUG: peonordersystem.src.interface.Orders.Orders.__init__ : Exiting __init__
+2014-04-03, 16:05:58 | DEBUG: peonordersystem.src.interface.Orders.Orders.get_display_view : Entering get_display_view
+2014-04-03, 16:05:58 | DEBUG: peonordersystem.src.interface.Orders.Orders.get_display_view : Exiting get_display_view
+2014-04-03, 16:05:58 | DEBUG: peonordersystem.src.interface.UpcomingOrders.UpcomingOrders.__init__ : Entering __init__
+2014-04-03, 16:05:58 | DEBUG: peonordersystem.src.interface.UpcomingOrders.UpcomingOrders._load_data : Entering _load_data
+2014-04-03, 16:05:58 | DEBUG: peonordersystem.src.interface.UpcomingOrders.UpcomingOrders._load_data : Exiting _load_data
+2014-04-03, 16:05:58 | DEBUG: peonordersystem.src.interface.UpcomingOrders.UpcomingOrders.__init__ : Exiting __init__
+2014-04-03, 16:05:58 | DEBUG: peonordersystem.src.interface.Editor.Editor.__init__ : Entering __init__
+2014-04-03, 16:05:58 | DEBUG: peonordersystem.src.interface.Editor.Editor.__init__ : Exiting __init__
+2014-04-03, 16:05:58 | DEBUG: peonordersystem.src.PeonOrderSystem.PeonOrderSystem.error_checker : Entering error_checker
+2014-04-03, 16:05:58 | DEBUG: update_status : Entering update_status
+2014-04-03, 16:05:58 | DEBUG: update_status : Exiting update_status
+2014-04-03, 16:05:58 | DEBUG: peonordersystem.src.PeonOrderSystem.PeonOrderSystem.error_checker : Exiting error_checker
+2014-04-03, 16:05:58 | DEBUG: __init__ : Exiting __init__
+2014-04-03, 16:05:58 | INFO: End initialization
+2014-04-03, 16:05:58 | DEBUG: peonordersystem.src.PeonOrderSystem.PeonOrderSystem.__init__ : Exiting __init__
+2014-04-03, 16:05:58 | DEBUG: peonordersystem.src.PeonOrderSystem.PeonOrderSystem.run : Entering run
+2014-04-03, 16:05:59 | DEBUG: peonordersystem.src.PeonOrderSystem.PeonOrderSystem.error_checker : Entering error_checker
+2014-04-03, 16:05:59 | DEBUG: run_warning_dialog : Entering run_warning_dialog
+2014-04-03, 16:06:00 | DEBUG: run_warning_dialog : Exiting run_warning_dialog
+2014-04-03, 16:06:00 | DEBUG: peonordersystem.src.PeonOrderSystem.PeonOrderSystem.error_checker : Exiting error_checker
+2014-04-03, 16:06:00 | DEBUG: peonordersystem.src.PeonOrderSystem.PeonOrderSystem.run : Exiting run
