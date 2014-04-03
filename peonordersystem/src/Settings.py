@@ -18,7 +18,6 @@ SYSTEM_TITLE = 'Fish Cake Factory'
 # This block represents constants used for Reserver objects and displaying those
 # Reserver objects.
 #====================================================================================
-
 # in milliseconds, 10 seconds by default
 RESERVATION_UPDATE_TIME_FRAME = 1000 * 10
 # default is 10 minutes
@@ -35,7 +34,6 @@ RESERVATION_NOTIFICATION_TIME_FRAME_STR = \
 # This block represents constants used for MenuItem objects and the displaying of
 # those MenuItem objects.
 #====================================================================================
-
 STANDARD_TEXT = 500
 STANDARD_TEXT_BOLD = STANDARD_TEXT + 300
 STANDARD_TEXT_LIGHT = STANDARD_TEXT - 300
@@ -53,7 +51,8 @@ SALES_TAX = .10
 # This block represents constants that are utilized by the audit dialogs when
 # generating audit files.
 #==============================================================================
-AUDIT_FILE_TYPE = '.xlsx'
+DEFAULT_AUDIT_NAME = 'audit'
+AUDIT_FILE_TYPE = 'xlsx'
 
 OPEN_TIME = time.min
 CLOSE_TIME = time.max
@@ -64,7 +63,6 @@ TIME_GROUPING = timedelta(minutes=60)
 # This block represents constants that are utilized by the orders area for
 # generating displayed information to the user.
 #==============================================================================
-
 STANDARD_TABLE_NAME = 'TABLE'
 # Expected less than 12 for ease of use.
 NUM_OF_TABLES_TO_DISPLAY = 10
@@ -76,11 +74,11 @@ NUM_OF_TABLES_TO_DISPLAY = 10
 TOGO_SEPARATOR = chr(127)
 FILE_TYPE_SEPARATOR = '.'
 
-TYPE_SUFFIX_STANDARD_ORDER = FILE_TYPE_SEPARATOR + 'order'
-TYPE_SUFFIX_CHECKOUT = FILE_TYPE_SEPARATOR + 'checkout'
+TYPE_SUFFIX_STANDARD_ORDER = 'order'
+TYPE_SUFFIX_CHECKOUT = 'checkout'
 
 FILENAME_PATTERN = re.compile('^(?P<name>.*)\[(?P<timestamp>.*)\](?P<file_type>.*)')
-FILENAME_TEMPLATE = '{name}[{timestamp}]{file_type}'
+FILENAME_TEMPLATE = '{name}[{timestamp}]' + FILE_TYPE_SEPARATOR + '{file_type}'
 
 #BLACKLIST REQUIRES THE FOLLOWING CHARACTERS BY DEFAULT
 # '\', '[', ']', '.'

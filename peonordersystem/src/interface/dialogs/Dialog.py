@@ -43,24 +43,28 @@ subclass members of the Dialog group
 @contact: cjmcgraw@u.washington.edu
 @version: 1.0
 """
-import time
+import os
 import math
 from gi.repository import Gtk  # IGNORE:E0611 @UnresolvedImport
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date, time
 from copy import copy, deepcopy
 from abc import ABCMeta, abstractmethod
 
-from src.peonordersystem import CheckOperations
-from src.peonordersystem.standardoperations import tree_view_changed
-from src.peonordersystem.MenuItem import MenuItem, DiscountItem
-from src.peonordersystem.MenuItem import OptionItem
-from src.peonordersystem.interface.Orders import Orders
-from src.peonordersystem.Settings import (STANDARD_TEXT,
+from peonordersystem.src import CheckOperations
+from peonordersystem.src.standardoperations import tree_view_changed
+from peonordersystem.src.MenuItem import MenuItem, DiscountItem
+from peonordersystem.src.MenuItem import OptionItem
+from peonordersystem.src.interface.Orders import Orders
+from peonordersystem.src.Settings import (STANDARD_TEXT,
                                           STANDARD_TEXT_BOLD,
                                           STANDARD_TEXT_LIGHT,
                                           TOGO_SEPARATOR,
                                           UNDONE_CHECKOUT_SEPARATOR,
-                                          CTIME_STR)
+                                          CTIME_STR,
+                                          DEFAULT_AUDIT_NAME,
+                                          AUDIT_FILE_TYPE,
+                                          FILE_TYPE_SEPARATOR)
+from peonordersystem.SystemPath import SYSTEM_AUDIT_REQUESTS_PATH
 
 #========================================================
 # This block represents module wide constants that are
@@ -2071,7 +2075,7 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
 
         while itr and non_repeat:
 
-            stored_name, stored_number, _, _ = self.model[itr]
+            stored_name, stored_number, _ = self.model[itr]
             if stored_name == name and stored_number == number:
                 message_title = 'Invalid name and number selected!'
                 message = '\nYou have selected an invalid name and number ' \
@@ -2086,7 +2090,9 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
             itr = self.model.iter_next(itr)
 
         if len(name) > 0 and len(number) > 0 and non_repeat:
-            new_order = (name, number, datetime.now())
+            time = datetime.now().strftime(CTIME_STR)
+            time = datetime.strptime(time, CTIME_STR)
+            new_order = (name, number, time)
 
             self.confirm_button_clicked(None, order=new_order)
 
@@ -2120,7 +2126,6 @@ class OrderSelectionConfirmationDialog(ConfirmationDialog):
 
         if itr:
             name, number, display_time = model[itr]
-
             return name, number, datetime.strptime(display_time, CTIME_STR)
 
         return None
@@ -3882,8 +3887,8 @@ class AuditDataSelectionDialog(SelectionDialog):
     as the last index[1].
     """
 
-    DEFAULT_FILE_PATH = 'Default Location'
-    DEFAULT_FILE_NAME = 'Audit'
+    DEFAULT_FILE_PATH = SYSTEM_AUDIT_REQUESTS_PATH
+    DEFAULT_FILE_NAME = DEFAULT_AUDIT_NAME
 
     def __init__(self, parent, confirm_func, title='Data Auditor'):
         """Initializes a new AuditDataSelectionDialog window.
@@ -3959,7 +3964,7 @@ class AuditDataSelectionDialog(SelectionDialog):
         self.name_entry.set_text(self.DEFAULT_FILE_NAME)
         self.name_entry.set_sensitive(False)
 
-        sub_box.pack_start(Gtk.Label('_(m1:d1-m2:d2)'), False, False, 5.0)
+        sub_box.pack_start(Gtk.Label('.xlsx'), False, False, 5.0)
 
         main_box.pack_start(sub_box, False, False, 5.0)
         sub_box = Gtk.HBox()
@@ -4154,9 +4159,10 @@ class AuditDataSelectionDialog(SelectionDialog):
 
         year, month, day = self.selection_calendar.get_date()
 
-        start_date = datetime.date(year, month + 1, day)
+        start_date = date(year, month + 1, day)
+
         self.from_date_display.set_text(self._get_date_str(start_date))
-        self.date_bounds[0] = start_date
+        self.date_bounds[0] = datetime.combine(start_date, time.min)
 
     def set_end_date(self, *args):
         """Sets the currently selected date in the
@@ -4175,9 +4181,9 @@ class AuditDataSelectionDialog(SelectionDialog):
 
         year, month, day = self.selection_calendar.get_date()
 
-        end_date = datetime.date(year, month + 1, day)
+        end_date = date(year, month + 1, day)
         self.until_date_display.set_text(self._get_date_str(end_date))
-        self.date_bounds[1] = end_date
+        self.date_bounds[1] = datetime.combine(end_date, time.max)
 
     def _get_date_str(self, date):
         """Gets the str associated with the
@@ -4257,11 +4263,8 @@ class AuditDataSelectionDialog(SelectionDialog):
 
         @return: None
         """
-        kwargs = {}
-        if not location == self.DEFAULT_FILE_PATH:
-            kwargs['location'] = location
-        if not name == self.DEFAULT_FILE_NAME:
-            kwargs['name'] = name
+        name += FILE_TYPE_SEPARATOR + AUDIT_FILE_TYPE
+        kwargs = {'file_path': os.path.join(location, name)}
         self.confirm_func(start_date, end_date, **kwargs)
 
 

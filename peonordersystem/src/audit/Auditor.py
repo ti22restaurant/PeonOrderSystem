@@ -9,15 +9,15 @@ Auditor object.
 import os
 from datetime import datetime, date, time
 
-from SystemPath import SYSTEM_AUDIT_PATH
+from peonordersystem.SystemPath import SYSTEM_AUDIT_PATH
+from peonordersystem.src.Settings import (FILENAME_TEMPLATE,
+                                          DEFAULT_AUDIT_NAME,
+                                          AUDIT_FILE_TYPE,
+                                          FILE_TYPE_SEPARATOR)
+from peonordersystem.src.confirmationSystem.ConfirmationSystem import \
+    get_stored_order_data
 
-from src.peonordersystem.Settings import FILENAME_TEMPLATE
-from src.peonordersystem.Settings import AUDIT_FILE_TYPE
-
-from src.peonordersystem.confirmationSystem.ConfirmationSystem \
-    import get_stored_order_data
-
-from AuditBuilder import AuditBuilder
+from .AuditBuilder import AuditBuilder
 
 
 class Auditor(object):
@@ -36,7 +36,6 @@ class Auditor(object):
                            'notification': True,
                            'order_charts': True}
 
-    DEFAULT_AUDIT_NAME = 'audit'
     DEFAULT_CLOSING_AUDIT_NAME = 'closing_' + DEFAULT_AUDIT_NAME
 
     def closing_audit(self):

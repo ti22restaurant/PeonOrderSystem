@@ -77,6 +77,7 @@ class AuditBuilder(object):
                                         data for any given date should
                                         be generated.
         """
+        print filename
         start_date = start_date
         end_date = end_date
         self._data_generator = data_generator
