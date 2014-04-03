@@ -1,0 +1,7 @@
+*.pyc
+*.checkout
+*.confirmed
+*.togo
+*.xlsx
+*.log
+

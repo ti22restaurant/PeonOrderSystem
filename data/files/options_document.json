@@ -6,7 +6,7 @@
             "_price": 2.0,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "DAIRY",
@@ -14,7 +14,7 @@
             "_price": 0.0,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         }
     ],
     "FRUIT": [
@@ -24,7 +24,7 @@
             "_price": 0.25,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "FRUIT",
@@ -32,7 +32,7 @@
             "_price": 0.25,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         }
     ],
     "MISC": [
@@ -42,7 +42,7 @@
             "_price": 0.25,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "MISC",
@@ -50,7 +50,7 @@
             "_price": 0.0,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "MISC",
@@ -58,7 +58,7 @@
             "_price": 0.0,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         }
     ],
     "NOODLES": [
@@ -68,7 +68,7 @@
             "_price": 1.0,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "NOODLES",
@@ -76,7 +76,7 @@
             "_price": 1.0,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "NOODLES",
@@ -84,7 +84,7 @@
             "_price": 1.0,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         }
     ],
     "NUTS": [
@@ -94,7 +94,7 @@
             "_price": 0.25,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         }
     ],
     "RICE": [
@@ -104,7 +104,7 @@
             "_price": 1.0,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         }
     ],
     "SAUCE": [
@@ -114,7 +114,7 @@
             "_price": 0.0,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "SAUCE",
@@ -122,7 +122,7 @@
             "_price": 0.0,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "SAUCE",
@@ -130,7 +130,7 @@
             "_price": 0.0,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "SAUCE",
@@ -138,7 +138,7 @@
             "_price": 0.5,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "SAUCE",
@@ -146,7 +146,7 @@
             "_price": 0.0,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         }
     ],
     "SPICES": [
@@ -156,7 +156,7 @@
             "_price": 0.25,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "SPICES",
@@ -164,7 +164,7 @@
             "_price": 0.0,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "SPICES",
@@ -172,7 +172,7 @@
             "_price": 0.0,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "SPICES",
@@ -180,7 +180,7 @@
             "_price": 0.0,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "SPICES",
@@ -188,7 +188,7 @@
             "_price": 0.25,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "SPICES",
@@ -196,7 +196,7 @@
             "_price": 0.0,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         }
     ],
     "VEGETABLES": [
@@ -206,7 +206,7 @@
             "_price": 0.0,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "VEGETABLES",
@@ -214,7 +214,7 @@
             "_price": 0.0,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "VEGETABLES",
@@ -222,7 +222,7 @@
             "_price": 0.5,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "VEGETABLES",
@@ -230,7 +230,7 @@
             "_price": 0.5,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "VEGETABLES",
@@ -238,7 +238,7 @@
             "_price": 0.25,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "VEGETABLES",
@@ -246,7 +246,7 @@
             "_price": 0.25,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "VEGETABLES",
@@ -254,7 +254,7 @@
             "_price": 0.0,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "VEGETABLES",
@@ -262,7 +262,7 @@
             "_price": 0.25,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "VEGETABLES",
@@ -270,7 +270,7 @@
             "_price": 0.25,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "VEGETABLES",
@@ -278,7 +278,7 @@
             "_price": 0.5,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "VEGETABLES",
@@ -286,7 +286,7 @@
             "_price": 0.25,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "VEGETABLES",
@@ -294,7 +294,7 @@
             "_price": 0.25,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "VEGETABLES",
@@ -302,7 +302,7 @@
             "_price": 0.25,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "VEGETABLES",
@@ -310,7 +310,7 @@
             "_price": 0.5,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "VEGETABLES",
@@ -318,7 +318,7 @@
             "_price": 0.25,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "VEGETABLES",
@@ -326,7 +326,7 @@
             "_price": 0.5,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         },
         {
             "_category": "VEGETABLES",
@@ -334,7 +334,7 @@
             "_price": 0.25,
             "_price_scalar": 1.0,
             "_relation": null,
-            "py/object": "src.peonordersystem.MenuItem.OptionItem"
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
         }
     ]
 }
