@@ -8,7 +8,7 @@ printer name representing the location.
 """
 from datetime import datetime
 
-from .abc.LocationPrinter import AbstractLocationPrinter
+from .confirmationSystem.printers.components.abc.LocationPrinter import AbstractLocationPrinter
 from src.peonordersystem.confirmationSystem.printers.adapters.PrinterAdapter \
     import PrinterAdapter
 

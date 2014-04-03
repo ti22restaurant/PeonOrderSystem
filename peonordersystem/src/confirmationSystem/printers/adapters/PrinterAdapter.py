@@ -9,7 +9,8 @@ methods print_data.
 @version: 1.0
 """
 from cups import Connection
-from .abc.PrinterAdapter import AbstractPrinterAdapter
+
+from .confirmationSystem.printers.adapters.abc.PrinterAdapter import AbstractPrinterAdapter
 
 
 class PrinterAdapter(AbstractPrinterAdapter):
