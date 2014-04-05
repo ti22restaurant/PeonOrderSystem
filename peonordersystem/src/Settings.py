@@ -15,6 +15,30 @@ from datetime import datetime, timedelta, time
 SYSTEM_TITLE = 'Fish Cake Factory'
 
 #====================================================================================
+# This block represents constants used for printing receipt information.
+#====================================================================================
+RECEIPT_IMAGE_FILE_NAME = 'fish_cake_logo_receipt.jpg'
+RECEIPT_IMAGE_WIDTH = 250
+RECEIPT_IMAGE_HEIGHT = 150
+
+# This area represents the RML and config files used to generate the
+# header for the receipt.
+RECEIPT_HEADER_TITLE_TEMPLATE_FILE_NAME = 'receipt_header_title.rml'
+RECEIPT_HEADER_TITLE_CFG_FILE_NAME = 'receipt_header_title.cfg'
+RECEIPT_HEADER_TIMESTAMP_TEMPLATE_FILE_NAME = 'receipt_header_timestamp.rml'
+RECEIPT_HEADER_TIMESTAMP_CFG_TIME_FILE_NAME = 'receipt_header_timestamp.cfg'
+
+# This area represents the RML and config files used to generate the
+# footer for the receipt.
+RECEIPT_FOOTER_TEMPLATE_FILE_NAME = 'receipt_footer.rml'
+RECEIPT_FOOTER_CFG_FILE_NAME = 'receipt_footer.cfg'
+
+# This area represents the RML and config files used to generate the
+# main body for the receipt
+RECEIPT_MAIN_TEMPLATE_FILE_NAME = 'receipt_main.rml'
+RECEIPT_MAIN_CFG_FILE_NAME = 'receipt_main.cfg'
+
+#====================================================================================
 # This block represents constants used for Reserver objects and displaying those
 # Reserver objects.
 #====================================================================================
