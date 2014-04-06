@@ -32,6 +32,7 @@ RECEIPT_HEADER_TIMESTAMP_CFG_TIME_FILE_NAME = 'receipt_header_timestamp.cfg'
 # footer for the receipt.
 RECEIPT_FOOTER_TEMPLATE_FILE_NAME = 'receipt_footer.rml'
 RECEIPT_FOOTER_CFG_FILE_NAME = 'receipt_footer.cfg'
+RECEIPT_FOOTER_MSG_FILE_NAME = 'receipt_footer_msg.rml'
 
 # This area represents the RML and config files used to generate the
 # main body for the receipt
