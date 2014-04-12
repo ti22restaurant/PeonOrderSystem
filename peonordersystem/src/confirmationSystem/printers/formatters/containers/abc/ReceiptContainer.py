@@ -9,7 +9,7 @@ from json import loads
 from abc import ABCMeta, abstractmethod
 
 from reportlab.platypus.frames import Frame
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import ParagraphStyle
 
 from .Container import Container
 
@@ -22,7 +22,9 @@ class ReceiptContainer(Container):
 
     __metaclass__ = ABCMeta
 
-    DEFAULT_STYLE = getSampleStyleSheet()['Normal']
+    DEFAULT_STYLE = ParagraphStyle({'wordWrap': 1})
+    CENTER_STYLE = ParagraphStyle({'wordWrap': 1,
+                                   'alignment': 'TA_CENTER'})
 
     def __init__(self, x, y, width, height):
         """Initializes the ReceiptContainer.
