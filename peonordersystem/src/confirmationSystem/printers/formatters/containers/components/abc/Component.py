@@ -23,15 +23,12 @@ class Component(object):
     DEFAULT_PARAGRAPH_STYLE = getSampleStyleSheet()['Normal']
     DEFAULT_WIDTH = DEFAULT_FRONT_PRINTER_WIDTH
 
-    def __init__(self, flowables=[]):
-        """Initializes the new Component.
+    # determined experimentally
+    ROW_SPACE_MULTIPLIER = 2.0
 
-        @keyword flowables: list of
-        reportlab.platypus.flowable.Flowable
-        objects that represent the flowables
-        to be associated with this component.
-        """
-        self._flowables = flowables
+    def __init__(self):
+        """Initializes the new Component."""
+        self._flowables = []
 
     @abstractproperty
     def width(self):
