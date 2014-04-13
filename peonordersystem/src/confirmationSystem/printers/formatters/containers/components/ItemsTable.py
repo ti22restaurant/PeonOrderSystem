@@ -89,10 +89,10 @@ class ItemsTable(Component):
         @return: float representing
         the height.
         """
-        item_lines = self.ITEM_SIZE * self._item_rows * 2
-        option_lines = self.OPTION_SIZE * self._option_rows * 2
+        item_lines = self.ITEM_SIZE * self._item_rows
+        option_lines = self.OPTION_SIZE * self._option_rows
 
-        return item_lines + option_lines
+        return (item_lines + option_lines) * self.ROW_SPACE_MULTIPLIER
 
     def _generate_tables(self, items):
         """Generates the tables for display.

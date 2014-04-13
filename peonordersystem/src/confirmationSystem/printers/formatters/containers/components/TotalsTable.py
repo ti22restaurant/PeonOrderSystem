@@ -67,9 +67,9 @@ class TotalsTable(Component):
         @return: float representing the
         height of this component.
         """
-        total_lines = self.TOTAL_SIZE * self.TOTAL_LINES * 2
-        subtotal_lines = self.SUBTOTAL_LINES * self.SUBTOTAL_SIZE * 2
-        return total_lines + subtotal_lines
+        total_lines = self.TOTAL_SIZE * self.TOTAL_LINES
+        subtotal_lines = self.SUBTOTAL_LINES * self.SUBTOTAL_SIZE
+        return (total_lines + subtotal_lines) * self.ROW_SPACE_MULTIPLIER
 
     @property
     def width(self):

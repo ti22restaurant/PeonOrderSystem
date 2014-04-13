@@ -30,7 +30,7 @@ class Divider(Component):
         </para>
     """.format(size=LINE_SIZE, divider=DIVIDER)
 
-    DEFAULT_FONT_SIZE = 12
+    DEFAULT_FONT_SIZE = 10
 
     def __init__(self):
         """Initializes the divider."""
@@ -57,7 +57,7 @@ class Divider(Component):
         @return: float representing
         the height
         """
-        return self.LINE_SIZE * self.NUM_OF_LINES * 2
+        return self.LINE_SIZE * self.NUM_OF_LINES
 
     def _create_divider(self):
         """Creates the divider flowables.

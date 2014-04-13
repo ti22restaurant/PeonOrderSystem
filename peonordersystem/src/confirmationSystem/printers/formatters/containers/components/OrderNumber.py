@@ -17,7 +17,7 @@ class OrderNumber(Component):
     that can be used to display an
     the order number on a receipt.
     """
-    DEFAULT_HEIGHT = 12
+    DEFAULT_HEIGHT = 8
 
     ORDER_NUMBER_FORMAT = """
         <para align=left size=%s>
@@ -43,7 +43,7 @@ class OrderNumber(Component):
         @return: float representing
         the height.
         """
-        return self.DEFAULT_HEIGHT * 2
+        return self.DEFAULT_HEIGHT
 
     @property
     def width(self):
