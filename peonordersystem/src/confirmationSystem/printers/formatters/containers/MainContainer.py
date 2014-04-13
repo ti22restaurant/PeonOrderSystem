@@ -87,9 +87,6 @@ class MainContainer(ReceiptContainer):
         components += divider.flowables
         self._update_area(divider.height, divider.width)
 
-        components += [self.SPACER]
-        self._update_area(self.SPACER_HEIGHT, self.SPACER_WIDTH)
-
         components += items_table.flowables
         self._update_area(items_table.height, items_table.width)
 
@@ -101,9 +98,6 @@ class MainContainer(ReceiptContainer):
 
         components += [self.SPACER]
         self._update_area(self.SPACER_HEIGHT, self.SPACER_WIDTH)
-
-        components += divider.flowables
-        self._update_area(divider.height, divider.width)
 
         return components
 
