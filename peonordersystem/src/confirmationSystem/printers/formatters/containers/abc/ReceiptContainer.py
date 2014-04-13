@@ -47,7 +47,7 @@ class ReceiptContainer(Container):
         """
         self._area = (width, height)
         self._start_point = (x, y)
-        self._frame = Frame(x, y, width, height)
+        self._frame = Frame(x, y, width, height, topPadding=0, bottomPadding=0)
         self._header = self.create_header()
 
     @abstractmethod
