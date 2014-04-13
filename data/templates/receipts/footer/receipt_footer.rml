@@ -1,5 +1,4 @@
 <para align="center">
-    <br/>
     <font size=15>
         Thank you for coming!
         <br/>
@@ -10,7 +9,4 @@
     <font size=10>
         {FOOTER_MSG}
     </font>
-    <br/>
-    <br/>
-    <br/>
 </para>
