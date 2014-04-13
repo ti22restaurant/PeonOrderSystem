@@ -34,7 +34,8 @@ class HeaderContainer(ReceiptContainer):
     CFG_DATE_KEY = 'DATE'
     CFG_TIME_KEY = 'TIME'
 
-    DEFAULT_HEADER_HEIGHT = 250
+    # Determined experimentally
+    DEFAULT_HEADER_HEIGHT = 164
     HEADER_IMAGE_PATH = join(SYSTEM_MEDIA_PATH, RECEIPT_IMAGE_FILE_NAME)
 
     def __init__(self, x, y, width=DEFAULT_FRONT_PRINTER_WIDTH):

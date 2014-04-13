@@ -26,7 +26,8 @@ class FooterContainer(ReceiptContainer):
     messages for a receipt.
     """
     CFG_MSG_KEY = "FOOTER_MSG"
-    DEFAULT_FOOTER_HEIGHT = 250
+    # Determined experimentally
+    DEFAULT_FOOTER_HEIGHT = 185
 
     RML_FILE_PATH = join(SYSTEM_TEMPLATE_RECEIPT_FOOT_PATH,
                          RECEIPT_FOOTER_TEMPLATE_FILE_NAME)
