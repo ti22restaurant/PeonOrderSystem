@@ -11,10 +11,10 @@ from reportlab.platypus import Paragraph, Table
 from peonordersystem.src.confirmationSystem.printers.formatters.PrinterSettings \
     import DEFAULT_FRONT_PRINTER_WIDTH
 
-from .abc.Component import Component
+from .abc.TableComponent import TableComponent
 
 
-class ItemsTable(Component):
+class ItemsTable(TableComponent):
     """Generates the display for
     MenuItems.
     """
@@ -29,30 +29,6 @@ class ItemsTable(Component):
 
     DEFAULT_TABLE_COL_WIDTH = ([15] + 4 * [(DEFAULT_FRONT_PRINTER_WIDTH - 15) / 4])
 
-    NUMBER_SIZE = 10
-
-    NUMBER_FORMAT = """
-        <para align=center size=%s>
-            <super>{number}.</super>
-        </para>
-     """ % str(NUMBER_SIZE)
-
-    ITEM_SIZE = 10
-
-    ITEM_DATA_FORMAT = """
-        <para align=left size=%s>
-            <b>{data}</b>
-        </para>
-     """ % str(ITEM_SIZE)
-
-    OPTION_SIZE = 9
-
-    OPTION_DATA_FORMAT = """
-        <para align=left leftIndent=10 size=%s>
-            <i>{data}</i>
-        </para>
-    """ % str(OPTION_SIZE)
-
     def __init__(self, items_data):
         """Initializes the items table.
 
@@ -60,8 +36,6 @@ class ItemsTable(Component):
         objects that represents the order to
         be displayed.
         """
-        super(ItemsTable, self).__init__()
-
         # Stateful fields
         self._item_number = 0
         self._current_style = []
@@ -69,17 +43,7 @@ class ItemsTable(Component):
         self._item_rows = len(items_data)
         self._option_rows = 0
 
-        self._generate_tables(items_data)
-
-    @property
-    def width(self):
-        """Gets the width taken
-        up by the components area.
-
-        @return: float representing
-        the width.
-        """
-        return self.DEFAULT_WIDTH
+        super(ItemsTable, self).__init__(items_data)
 
     @property
     def height(self):
@@ -89,12 +53,12 @@ class ItemsTable(Component):
         @return: float representing
         the height.
         """
-        item_lines = self.ITEM_SIZE * self._item_rows
-        option_lines = self.OPTION_SIZE * self._option_rows
+        item_lines = self.MAIN_SIZE * self._item_rows
+        option_lines = self.SUB_SIZE * self._option_rows
 
         return (item_lines + option_lines) * self.ROW_SPACE_MULTIPLIER
 
-    def _generate_tables(self, items):
+    def generate_tables(self, items):
         """Generates the tables for display.
 
         @param items: list of MenuItem objects
@@ -105,7 +69,7 @@ class ItemsTable(Component):
         """
         for item in items:
             table = self._generate_table(item)
-            self._flowables.append(table)
+            self.add_table(table)
 
     def _generate_table(self, item):
         """Generates a table for the
@@ -168,7 +132,7 @@ class ItemsTable(Component):
         row.append(p_num)
 
         name = item.get_name()
-        text = self.ITEM_DATA_FORMAT.format(data=name)
+        text = self.MAIN_FORMAT.format(data=name)
         p_name = Paragraph(text, self.DEFAULT_PARAGRAPH_STYLE)
         row.append(p_name)
 
@@ -177,7 +141,7 @@ class ItemsTable(Component):
         row.append('')
 
         price = item.get_price()
-        text = self.ITEM_DATA_FORMAT.format(data=price)
+        text = self.MAIN_FORMAT.format(data=price)
         p_price = Paragraph(text, self.DEFAULT_PARAGRAPH_STYLE)
         row.append(p_price)
 
@@ -201,7 +165,7 @@ class ItemsTable(Component):
         self._update_style()
 
         name = option.get_name()
-        text = self.OPTION_DATA_FORMAT.format(data=name)
+        text = self.SUB_FORMAT.format(data=name)
         p_name = Paragraph(text, self.DEFAULT_PARAGRAPH_STYLE)
         row.append(p_name)
 
@@ -210,7 +174,7 @@ class ItemsTable(Component):
         row.append('')
 
         price = option.get_price()
-        text = self.OPTION_DATA_FORMAT.format(data=price)
+        text = self.SUB_FORMAT.format(data=price)
         p_price = Paragraph(text, self.DEFAULT_PARAGRAPH_STYLE)
         row.append(p_price)
 
