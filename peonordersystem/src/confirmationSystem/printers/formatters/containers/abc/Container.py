@@ -27,15 +27,32 @@ class Container(object):
         """
         pass
 
-    @abstractproperty
+    # This is an abstract property. Unable to declare
+    # as such though because of the setter!
+    @property
     def start_point(self):
         """Gets the starting
-        point of this frame.
+        point of this container.
 
         @return: 2 tuple of (float, float)
         representing the x and y area where
         this frame begins on a cartesian
         plane.
+        """
+        return None
+
+    @start_point.setter
+    def start_point(self, coord):
+        """Sets the starting
+        point for the container.
+
+        @param coord: 2 tuple of
+        (float, float) representing
+        the x and y area where the
+        container begins on a cartesian
+        plane.
+
+        @return: None
         """
         pass
 
