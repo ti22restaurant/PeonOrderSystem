@@ -9,8 +9,12 @@ from json import loads
 
 from reportlab.platypus.frames import Frame
 from reportlab.lib.styles import ParagraphStyle
+from reportlab.platypus import Spacer
 
 from .Container import Container
+
+from peonordersystem.src.confirmationSystem.printers.formatters.PrinterSettings \
+    import DEFAULT_FRONT_PRINTER_WIDTH
 
 
 class ReceiptContainer(Container):
@@ -18,8 +22,22 @@ class ReceiptContainer(Container):
     for an object to be a useable
     ReceiptContainer.
     """
+    DEFAULT_WIDTH = DEFAULT_FRONT_PRINTER_WIDTH
     DEFAULT_STYLE = ParagraphStyle({'wordWrap': 1})
     CENTER_STYLE = ParagraphStyle({'wordWrap': 1, 'alignment': 'TA_CENTER'})
+
+    TITLE_FORMAT = """
+        <para size={size}>
+            <b>{title}</b>
+        </para>
+    """
+    TITLE_SIZE = 12
+
+    SPACER_HEIGHT = 10
+    SPACER_WIDTH = DEFAULT_WIDTH
+    SPACER = Spacer(SPACER_WIDTH, SPACER_HEIGHT)
+
+    SPACER_ARGS = [SPACER], SPACER_WIDTH, SPACER_HEIGHT
 
     def __init__(self):
         """Initializes the ReceiptContainer"""
