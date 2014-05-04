@@ -9,8 +9,8 @@ from abc import ABCMeta, abstractmethod
 
 
 class AbstractFormatter(object):
-    """
-
+    """This class defines the requirements
+    for an object to be a useable Formatter.
     """
 
     __metaclass__ = ABCMeta
