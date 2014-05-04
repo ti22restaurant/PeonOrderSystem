@@ -63,16 +63,6 @@ class TableComponent(Component):
         super(TableComponent, self).__init__()
         self.generate_tables(data)
 
-    @property
-    def width(self):
-        """Gets the width associated
-        with the table.
-
-        @return: float representing the
-        width of the table.
-        """
-        return self.DEFAULT_WIDTH
-
     @abstractproperty
     def height(self):
         """Gets the height associated
