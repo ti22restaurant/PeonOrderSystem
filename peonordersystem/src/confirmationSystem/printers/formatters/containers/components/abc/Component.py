@@ -30,7 +30,7 @@ class Component(object):
         """Initializes the new Component."""
         self._flowables = []
 
-    @abstractproperty
+    @property
     def width(self):
         """Gets the width
         of the Component area.
@@ -38,7 +38,7 @@ class Component(object):
         @return: float representing
         the width.
         """
-        pass
+        return self.DEFAULT_WIDTH
 
     @abstractproperty
     def height(self):
