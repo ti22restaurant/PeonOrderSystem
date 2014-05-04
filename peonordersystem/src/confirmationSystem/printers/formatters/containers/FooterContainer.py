@@ -38,40 +38,21 @@ class FooterContainer(ReceiptContainer):
     MSG_FILE_PATH = join(SYSTEM_TEMPLATE_RECEIPT_FOOT_PATH,
                          RECEIPT_FOOTER_MSG_FILE_NAME)
 
-    def __init__(self, x, y, width=DEFAULT_FRONT_PRINTER_WIDTH):
-        """Initializes the FooterContainer.
+    def __init__(self):
+        """Initializes the FooterContainer"""
+        super(FooterContainer, self).__init__()
+        self._generate_components()
 
-        @param x: int representing the initial
-        x value that the container frame should
-        be written at.
-
-        @param y: int representing the initial
-        y value that the container frame should
-        be written at.
-
-        @keyword width: int representing the
-        width of the header container. By default
-        this value is equal to the width of
-        the printer page.
+    def _generate_components(self):
         """
-        super(FooterContainer, self).__init__(x, y, width,
-                                              self.DEFAULT_FOOTER_HEIGHT)
 
-    def create_header(self):
-        """Creates the header that represents
-        the data this container will write in
-        its frame.
-
-        @return: list of reportlab.Flowable
-        objects that represents the data to
-        be written by the container.
+        @return:
         """
-        header = []
+        footer = self._get_footer()
+        width = DEFAULT_FRONT_PRINTER_WIDTH
+        height = self.DEFAULT_FOOTER_HEIGHT
 
-        footer_para = self._get_footer()
-        header.append(footer_para)
-
-        return header
+        self.add_flowables([footer], width, height)
 
     def _get_footer(self):
         """Gets the footer data to

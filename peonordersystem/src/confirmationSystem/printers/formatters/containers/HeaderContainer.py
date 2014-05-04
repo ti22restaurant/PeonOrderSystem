@@ -15,10 +15,10 @@ from peonordersystem.src.confirmationSystem.printers.formatters.PrinterSettings 
 from peonordersystem.src.Settings import (RECEIPT_IMAGE_FILE_NAME,
                                           RECEIPT_IMAGE_HEIGHT,
                                           RECEIPT_IMAGE_WIDTH,
-                                          RECEIPT_HEADER_TITLE_TEMPLATE_FILE_NAME,
-                                          RECEIPT_HEADER_TITLE_CFG_FILE_NAME,
-                                          RECEIPT_HEADER_TIMESTAMP_TEMPLATE_FILE_NAME,
-                                          RECEIPT_HEADER_TIMESTAMP_CFG_TIME_FILE_NAME)
+                                          RECEIPT_COMPONENT_TITLE_TEMPLATE_FILE_NAME,
+                                          RECEIPT_COMPONENT_TITLE_CFG_FILE_NAME,
+                                          RECEIPT_COMPONENT_TIMESTAMP_TEMPLATE_FILE_NAME,
+                                          RECEIPT_COMPONENT_TIMESTAMP_CFG_TIME_FILE_NAME)
 
 from peonordersystem.SystemPath import (SYSTEM_MEDIA_PATH,
                                         SYSTEM_TEMPLATE_RECEIPT_HEADER_PATH)
@@ -38,26 +38,12 @@ class HeaderContainer(ReceiptContainer):
     DEFAULT_HEADER_HEIGHT = 164
     HEADER_IMAGE_PATH = join(SYSTEM_MEDIA_PATH, RECEIPT_IMAGE_FILE_NAME)
 
-    def __init__(self, x, y, width=DEFAULT_FRONT_PRINTER_WIDTH):
-        """Initializes the HeaderContainer.
+    def __init__(self):
+        """Initializes the HeaderContainer"""
+        super(HeaderContainer, self).__init__()
+        self._create_components()
 
-        @param x: int representing the initial
-        x value that the container frame should
-        be written at.
-
-        @param y: int representing the initial
-        y value that the container frame should
-        be written at.
-
-        @keyword width: int representing the
-        width of the header container. By default
-        this value is equal to the width of
-        the printer page.
-        """
-        super(HeaderContainer, self).__init__(x, y, width,
-                                              self.DEFAULT_HEADER_HEIGHT)
-
-    def create_header(self):
+    def _create_components(self):
         """Creates the header that represents
         the data this container will write in
         its frame.
@@ -66,21 +52,25 @@ class HeaderContainer(ReceiptContainer):
         objects that represents the data to
         be written by the container.
         """
-        container = []
-        img = self._create_header_image()
-        container.append(img)
+        flowables = []
 
-        title = self._create_header_title()
-        container.append(title)
+        img = self._create_component_image()
+        flowables.append(img)
 
-        timestamp = self._create_header_timestamp()
-        container.append(timestamp)
+        title = self._create_component_title()
+        flowables.append(title)
 
-        return container
+        timestamp = self._create_component_timestamp()
+        flowables.append(timestamp)
 
-    def _create_header_image(self):
+        width = DEFAULT_FRONT_PRINTER_WIDTH
+        height = self.DEFAULT_HEADER_HEIGHT
+
+        self.add_flowables(flowables, width, height)
+
+    def _create_component_image(self):
         """Creates the image for the
-        header.
+        component.
 
         @return: reportlab.platypus.Image
         that represents the image to be
@@ -90,33 +80,33 @@ class HeaderContainer(ReceiptContainer):
                      width=RECEIPT_IMAGE_WIDTH,
                      height=RECEIPT_IMAGE_HEIGHT)
 
-    def _create_header_title(self):
+    def _create_component_title(self):
         """Creates the text that represents
-        the title data for the header.
+        the title data for the component.
 
         @return: reportlab.platypus.Paragraph
         object that represents the text to be
         displayed.
         """
         rml_path = join(SYSTEM_TEMPLATE_RECEIPT_HEADER_PATH,
-                        RECEIPT_HEADER_TITLE_TEMPLATE_FILE_NAME)
+                        RECEIPT_COMPONENT_TITLE_TEMPLATE_FILE_NAME)
         cfg_path = join(SYSTEM_TEMPLATE_RECEIPT_HEADER_PATH,
-                        RECEIPT_HEADER_TITLE_CFG_FILE_NAME)
+                        RECEIPT_COMPONENT_TITLE_CFG_FILE_NAME)
         paragraph_text = self.format_rml_file(rml_path, cfg_path)
         return Paragraph(paragraph_text, self.DEFAULT_STYLE)
 
-    def _create_header_timestamp(self):
+    def _create_component_timestamp(self):
         """Creates the timestamp that represents
-        the timestamp data for the header.
+        the timestamp data for the component
 
         @return: reportlab.platypus.Paragraph
         object that represents the text to be
         displayed.
         """
         rml_path = join(SYSTEM_TEMPLATE_RECEIPT_HEADER_PATH,
-                        RECEIPT_HEADER_TIMESTAMP_TEMPLATE_FILE_NAME)
+                        RECEIPT_COMPONENT_TIMESTAMP_TEMPLATE_FILE_NAME)
         cfg_path = join(SYSTEM_TEMPLATE_RECEIPT_HEADER_PATH,
-                        RECEIPT_HEADER_TIMESTAMP_CFG_TIME_FILE_NAME)
+                        RECEIPT_COMPONENT_TIMESTAMP_CFG_TIME_FILE_NAME)
         cfg_data = self._get_cfg_data(cfg_path)
         rml_data = self._get_rml_data(rml_path)
 

@@ -26,18 +26,14 @@ class MainContainer(ReceiptContainer):
     SPACER_HEIGHT = 10
     SPACER = Spacer(10, 10)
 
-    def __init__(self, x, y, order_data):
+    SPACER_ARGS = [SPACER], SPACER_WIDTH, SPACER_HEIGHT
+
+    DIVIDER = Divider()
+
+    def __init__(self, order_data):
         """Initializes the MainContainer
         setting up the display at the given
         area with the given data.
-
-        @param x: int representing the x
-        coordinate that the container frame
-        should be placed at.
-
-        @param y: int representing the y
-        coordinate that the container frame
-        should be placed at.
 
         @param order_data: dict representing
         the order data. The following key and
@@ -55,14 +51,9 @@ class MainContainer(ReceiptContainer):
 
             'total'     :   float representing the total
         """
+        super(MainContainer, self).__init__()
         self._order_data = order_data
-        self._expected_height = 0.0
-        self._expected_width = 0.0
-
-        self._components = self._generate_and_assemble_components()
-
-        super(MainContainer, self).__init__(x, y, self._expected_width,
-                                            self._expected_height)
+        self._generate_and_assemble_components()
 
     def _generate_and_assemble_components(self):
         """Generates and assembles the
@@ -72,69 +63,16 @@ class MainContainer(ReceiptContainer):
         objects representing the data to be displayed.
         """
         order_number = self._create_order_num_display()
-        divider = self._create_divider()
         items_table = self._create_items_display()
         total_table = self._create_total_display()
 
-        components = []
-
-        components += divider.flowables
-        self._update_area(divider.height, divider.width)
-
-        components += order_number.flowables
-        self._update_area(order_number.height, order_number.width)
-
-        components += divider.flowables
-        self._update_area(divider.height, divider.width)
-
-        components += items_table.flowables
-        self._update_area(items_table.height, items_table.width)
-
-        components += [self.SPACER]
-        self._update_area(self.SPACER_HEIGHT, self.SPACER_WIDTH)
-
-        components += total_table.flowables
-        self._update_area(total_table.height, total_table.width)
-
-        components += [self.SPACER]
-        self._update_area(self.SPACER_HEIGHT, self.SPACER_WIDTH)
-
-        return components
-
-    def _update_area(self, height, width):
-        """Updates the area with the given
-        values.
-
-        @param height: int representing the
-        height value to update. This value is
-        added to the current height.
-
-        @param width: int representing the
-        width value to update. This value will
-        replace the current width if it is greater.
-        But the width value will not be added.
-
-        @return: None
-        """
-        self._expected_height += height
-        self._expected_width = max(width, self._expected_width)
-
-    def create_header(self):
-        """Creates the header for
-        the container.
-
-        @return: list of reportlab.platypus.Flowable
-        objects that are to be displayed in the
-        container frame.
-        """
-        return self._components
-
-    def _create_divider(self):
-        """Creates the divider component.
-
-        @return: Divider
-        """
-        return Divider()
+        self.add_component(self.DIVIDER)
+        self.add_component(order_number)
+        self.add_component(self.DIVIDER)
+        self.add_component(items_table)
+        self.add_flowables(*self.SPACER_ARGS)
+        self.add_component(total_table)
+        self.add_flowables(*self.SPACER_ARGS)
 
     def _create_order_num_display(self):
         """Creates the order number
