@@ -7,7 +7,6 @@ items data.
 @contact: cjmcgraw( at )u.washington.edu
 @version: 1.0
 """
-from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Paragraph
 
 from .abc.ReceiptContainer import ReceiptContainer
@@ -15,27 +14,12 @@ from .abc.ReceiptContainer import ReceiptContainer
 from .components.KitchenTable import KitchenTable
 from .components.Divider import Divider
 
-from peonordersystem.src.confirmationSystem.printers.formatters.PrinterSettings \
-    import DEFAULT_FRONT_PRINTER_WIDTH
-
 
 class PriorityContainer(ReceiptContainer):
     """Provides the functionality for
     displaying priority items.
     """
     DIVIDER = Divider()
-
-    TITLE_SIZE = 12
-    TITLE_FORMAT = """
-        <para size=%s>
-            <b>PRIORITY : </b>
-        </para>
-    """ % TITLE_SIZE
-
-    PARAGRAPH_STYLE = getSampleStyleSheet()['Normal']
-
-    TITLE = Paragraph(TITLE_FORMAT, PARAGRAPH_STYLE)
-    TITLE_ARGS = [TITLE], DEFAULT_FRONT_PRINTER_WIDTH, TITLE_SIZE
 
     def __init__(self, order_data):
         """Initializes the PriorityContainer
@@ -62,12 +46,23 @@ class PriorityContainer(ReceiptContainer):
 
         @return: None
         """
+        priority_title = self._create_priority_title()
         priority_table = self._create_priority_table()
 
-        self.add_flowables(*self.TITLE_ARGS)
+        self.add_flowables([priority_title], self.DEFAULT_WIDTH, self.TITLE_SIZE)
+
         self.add_component(self.DIVIDER)
         self.add_component(priority_table)
         self.add_component(self.DIVIDER)
+
+    def _create_priority_title(self):
+        """
+
+        @return:
+        """
+        ptext = self.TITLE_FORMAT.format(size=self.TITLE_SIZE,
+                                         title="PRIORITY : ")
+        return Paragraph(ptext, self.DEFAULT_STYLE)
 
     def _create_priority_table(self):
         """Creates the priority table
