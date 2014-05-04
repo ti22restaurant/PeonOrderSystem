@@ -22,12 +22,6 @@ class MainContainer(ReceiptContainer):
     includes displaying item, options
     and totals data.
     """
-    SPACER_WIDTH = 10
-    SPACER_HEIGHT = 10
-    SPACER = Spacer(10, 10)
-
-    SPACER_ARGS = [SPACER], SPACER_WIDTH, SPACER_HEIGHT
-
     DIVIDER = Divider()
 
     def __init__(self, order_data):
