@@ -6,8 +6,6 @@ main part of a receipt.
 @contact: cjmcgraw( at )u.washington.edu
 @version: 1.0
 """
-from reportlab.platypus import Spacer
-
 from .abc.ReceiptContainer import ReceiptContainer
 
 from .components.TotalsTable import TotalsTable
