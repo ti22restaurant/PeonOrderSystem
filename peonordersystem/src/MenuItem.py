@@ -47,6 +47,7 @@ class MenuItem(object):
         self._locked = False
         self._price_scalar = 1.0
         self._notification_message = None
+        self._default_stars = int(stars)
         
         self.editable = bool(editable)
         self.stars = int(stars)
@@ -187,6 +188,18 @@ class MenuItem(object):
         selected for the MenuItem
         """
         return len(self.options) > 0
+
+    def has_stars(self):
+        """Checks if the MenuItem
+        has a new stars rating
+        associated with it.
+
+        @return: bool value
+        representing if a
+        new stars rating has
+        been attached.
+        """
+        return not self.stars == self._default_stars
     
     def __repr__(self):
         """Gets a string representation of the MenuItem.
