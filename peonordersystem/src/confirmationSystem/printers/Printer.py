@@ -7,6 +7,8 @@ data.
 @contact: cjmcgraw( at )u.washington.edu
 @version: 1.0
 """
+from .adapters.abc.AbstractDataAdapter import AbstractDataAdapter
+
 from .formatters.FrontFormatter import FrontFormatter
 from .formatters.KitchenFormatter import KitchenFormatter
 
@@ -42,6 +44,7 @@ class Printer(AbstractPrinter):
         @return: bool value representing
         if the job succeeded or not.
         """
+        self._check_data_type(data)
         self._front_formatter.format_data(data)
         file_path = self._front_formatter.file_path
         return self._front_printer.send_to_printer(file_path)
@@ -57,6 +60,26 @@ class Printer(AbstractPrinter):
         @return: bool value representing
         if the job succeeded or not.
         """
+        self._check_data_type(data)
         self._kitchen_formatter.format_data(data)
         file_path = self._kitchen_formatter.file_path
         return self._kitchen_printer.send_to_printer(file_path)
+
+    def _check_data_type(self, data):
+        """Checks if the given data
+        is of the AbstractDataAdapter
+        type.
+
+        @param data: object to be tested.
+
+        @raise TypeError: if the object
+        given is not an instance of
+        AbstractDataAdapter.
+
+        @return: bool value representing
+        if the test was passed or not.
+        """
+        if not isinstance(data, AbstractDataAdapter):
+            raise TypeError("Cannot format and print data unless it is an instance "
+                            "of AbstractDataAdapter!")
+        return True
