@@ -75,4 +75,4 @@ class TicketContainer(ReceiptContainer):
         that is used for displaying
         the items data.
         """
-        return KitchenTable(self._order_data['order'])
+        return KitchenTable(self._order_data.order)

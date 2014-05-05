@@ -71,4 +71,4 @@ class PriorityContainer(ReceiptContainer):
         @return: Component that represents
         the priority table.
         """
-        return KitchenTable(self._order_data['priority'])
+        return KitchenTable(self._order_data.priority_order)

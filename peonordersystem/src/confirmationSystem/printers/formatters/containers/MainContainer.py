@@ -74,7 +74,7 @@ class MainContainer(ReceiptContainer):
 
         @return: OrderNumber
         """
-        return OrderNumber(self._order_data['number'])
+        return OrderNumber(self._order_data.number)
 
     def _create_items_display(self):
         """Creates the items display
@@ -82,7 +82,7 @@ class MainContainer(ReceiptContainer):
 
         @return: ItemsTable
         """
-        return ItemsTable(self._order_data['order'])
+        return ItemsTable(self._order_data.order)
 
     def _create_total_display(self):
         """Creates the total display
@@ -90,4 +90,4 @@ class MainContainer(ReceiptContainer):
 
         @return: TotalsTable
         """
-        return TotalsTable(self._order_data)
+        return TotalsTable(self._order_data.totals)
