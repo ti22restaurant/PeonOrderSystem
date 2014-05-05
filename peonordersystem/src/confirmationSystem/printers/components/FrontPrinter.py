@@ -6,7 +6,7 @@ area.
 @contact: cjmcgraw( at )u.washington.edu
 @version: 1.0
 """
-from confirmationSystem.printers.components import LocationPrinter
+from .LocationPrinter import LocationPrinter
 
 
 class FrontPrinter(LocationPrinter):
