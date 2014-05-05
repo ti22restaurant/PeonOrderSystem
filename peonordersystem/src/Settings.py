@@ -23,10 +23,10 @@ RECEIPT_IMAGE_HEIGHT = 90
 
 # This area represents the RML and config files used to generate the
 # header for the receipt.
-RECEIPT_HEADER_TITLE_TEMPLATE_FILE_NAME = 'receipt_header_title.rml'
-RECEIPT_HEADER_TITLE_CFG_FILE_NAME = 'receipt_header_title.cfg'
-RECEIPT_HEADER_TIMESTAMP_TEMPLATE_FILE_NAME = 'receipt_header_timestamp.rml'
-RECEIPT_HEADER_TIMESTAMP_CFG_TIME_FILE_NAME = 'receipt_header_timestamp.cfg'
+RECEIPT_COMPONENT_TITLE_TEMPLATE_FILE_NAME = 'receipt_header_title.rml'
+RECEIPT_COMPONENT_TITLE_CFG_FILE_NAME = 'receipt_header_title.cfg'
+RECEIPT_COMPONENT_TIMESTAMP_TEMPLATE_FILE_NAME = 'receipt_header_timestamp.rml'
+RECEIPT_COMPONENT_TIMESTAMP_CFG_TIME_FILE_NAME = 'receipt_header_timestamp.cfg'
 
 # This area represents the RML and config files used to generate the
 # footer for the receipt.
