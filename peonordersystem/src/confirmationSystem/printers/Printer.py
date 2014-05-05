@@ -13,7 +13,7 @@ from .formatters.KitchenFormatter import KitchenFormatter
 from .components.FrontPrinter import FrontPrinter
 from .components.KitchenPrinter import KitchenPrinter
 
-from .abc.printer import AbstractPrinter
+from .abc.AbstractPrinter import AbstractPrinter
 
 
 class Printer(AbstractPrinter):

@@ -10,7 +10,7 @@ methods print_data.
 """
 from cups import Connection
 
-from .abc.PrinterAdapter import AbstractPrinterAdapter
+from .abc.AbstractPrinterAdapter import AbstractPrinterAdapter
 
 
 class PrinterAdapter(AbstractPrinterAdapter):
