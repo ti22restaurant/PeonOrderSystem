@@ -6,6 +6,8 @@ area.
 @contact: cjmcgraw( at )u.washington.edu
 @version: 1.0
 """
+from peonordersystem.src.Settings import FRONT_PRINTER_NAME
+
 from .LocationPrinter import LocationPrinter
 
 
@@ -14,8 +16,7 @@ class FrontPrinter(LocationPrinter):
     sending printer data to the front
     area.
     """
-    FRONT_PRINTER_NAME = 'FRONT_PRINTER'
 
     def __init__(self):
         """Initializes the printer"""
-        super(FrontPrinter, self).__init__(self.FRONT_PRINTER_NAME)
+        super(FrontPrinter, self).__init__(FRONT_PRINTER_NAME)

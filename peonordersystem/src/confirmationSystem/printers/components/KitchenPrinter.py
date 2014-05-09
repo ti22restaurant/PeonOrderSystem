@@ -6,7 +6,9 @@ the kitchen printer.
 @contact: cjmcgraw( at )u.washington.edu
 @version: 1.0
 """
-from confirmationSystem.printers.components import LocationPrinter
+from peonordersystem.src.Settings import KITCHEN_PRINTER_NAME
+
+from .LocationPrinter import LocationPrinter
 
 
 class KitchenPrinter(LocationPrinter):
@@ -14,11 +16,9 @@ class KitchenPrinter(LocationPrinter):
     sending data to kitchen printer.
     """
 
-    KITCHEN_PRINTER_NAME = "KITCHEN_PRINTER"
-
     def __init__(self):
         """Initializes the printer"""
-        super(KitchenPrinter, self).__init__(self.KITCHEN_PRINTER_NAME)
+        super(KitchenPrinter, self).__init__(KITCHEN_PRINTER_NAME)
 
     def _get_title(self):
         """Gets the title data associated
