@@ -19,6 +19,7 @@ class TicketContainer(ReceiptContainer):
     the display tables for the Ticket
     showing the normal orders MenuItems.
     """
+    NUM_OF_TRAILING_WHITESPACE_ROWS = 30
 
     def __init__(self, order_data):
         """Initializes the container
