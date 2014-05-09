@@ -16,6 +16,7 @@ from .abc.AreaFormatter import AreaFormatter
 
 from .containers.PriorityContainer import PriorityContainer
 from .containers.TicketContainer import TicketContainer
+from .containers.HeaderContainer import TicketHeaderContainer
 
 
 class KitchenFormatter(AreaFormatter):
@@ -59,8 +60,13 @@ class KitchenFormatter(AreaFormatter):
 
         @return: None
         """
-        priority = PriorityContainer(data)
-        ticket = TicketContainer(data)
+        if data.has_order:
+            ticket = TicketContainer(data)
+            self.add_display(ticket)
 
-        self.add_display(ticket)
-        self.add_display(priority)
+        if data.has_priority:
+            priority = PriorityContainer(data)
+            self.add_display(priority)
+
+        header = TicketHeaderContainer(data)
+        self.add_display(header)
