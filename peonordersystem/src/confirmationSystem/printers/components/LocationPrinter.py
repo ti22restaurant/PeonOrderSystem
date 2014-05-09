@@ -8,9 +8,7 @@ printer name representing the location.
 """
 from datetime import datetime
 
-from .confirmationSystem.printers.components.abc.LocationPrinter import AbstractLocationPrinter
-from src.peonordersystem.confirmationSystem.printers.adapters.PrinterAdapter \
-    import PrinterAdapter
+from .abc.LocationPrinter import AbstractLocationPrinter
 
 
 class LocationPrinter(AbstractLocationPrinter):
@@ -26,8 +24,8 @@ class LocationPrinter(AbstractLocationPrinter):
         @param printer_name: str representing
         the printer name to be printed to.
         """
-        self._printer = PrinterAdapter(printer_name)
         self._order_counter = 0
+        super(LocationPrinter, self).__init__(printer_name)
 
     def send_to_printer(self, data):
         """Sends the data to the printer
