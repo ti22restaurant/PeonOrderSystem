@@ -65,6 +65,18 @@ class AbstractDataAdapter(object):
         """
         pass
 
+    @property
+    def has_priority(self):
+        """Gets if the data has
+        a valid priority list.
+
+        @return: bool value
+        representing if the
+        priority list is non
+        empty.
+        """
+        return len(self.priority_order) != 0
+
     @abstractproperty
     def order(self):
         """Gets a list of items
@@ -74,3 +86,14 @@ class AbstractDataAdapter(object):
         @return: list of MenuItems
         """
         pass
+
+    @property
+    def has_order(self):
+        """Gets if the order has
+        a valid order list.
+
+        @return: bool value
+        representing if the
+        order list is non empty.
+        """
+        return len(self.order) != 0
