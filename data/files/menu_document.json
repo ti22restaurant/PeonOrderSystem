@@ -1,6 +1,7 @@
 {
     "APPETIZER": [
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "PORK SHORT RIBS",
             "_option_choices": [],
@@ -15,6 +16,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "FRIED SPRING ROLLS",
             "_option_choices": [],
@@ -29,6 +31,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "MOO YANG PORK ON SKEWERS",
             "_option_choices": [],
@@ -43,6 +46,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "CHICKEN SATAY",
             "_option_choices": [],
@@ -57,6 +61,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "GAR/PEPP CHICKEN WINGS",
             "_option_choices": [],
@@ -71,6 +76,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "FRIED TARO",
             "_option_choices": [],
@@ -87,6 +93,7 @@
     ],
     "BEER": [
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "SIERRA NEVADA PALE ALE",
             "_option_choices": [],
@@ -101,6 +108,7 @@
             "stars": 0
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "PIKE INDIA PALE ALE",
             "_option_choices": [],
@@ -115,6 +123,7 @@
             "stars": 0
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "PIKE HEIRLOOM AMBER",
             "_option_choices": [],
@@ -129,6 +138,7 @@
             "stars": 0
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "TSINGTAO",
             "_option_choices": [],
@@ -143,6 +153,7 @@
             "stars": 0
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "PIKE NAUGHTY NELLIE",
             "_option_choices": [],
@@ -157,6 +168,7 @@
             "stars": 0
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "SINGHA LAGER",
             "_option_choices": [],
@@ -171,6 +183,7 @@
             "stars": 0
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "DESCHUTES BLACK BUTTE",
             "_option_choices": [],
@@ -185,6 +198,7 @@
             "stars": 0
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "PIKE KILT LIFTER",
             "_option_choices": [],
@@ -199,6 +213,7 @@
             "stars": 0
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "HALES ALE",
             "_option_choices": [],
@@ -215,6 +230,7 @@
     ],
     "CAKES": [
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "SPICY CATFISH CAKES",
             "_option_choices": [],
@@ -229,6 +245,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "GARLIC SHRIMP/PORK CAKES",
             "_option_choices": [],
@@ -243,6 +260,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "CALIFORNIA SEAFOOD CAKES",
             "_option_choices": [],
@@ -257,6 +275,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "SALMON CROQUETTES",
             "_option_choices": [],
@@ -271,6 +290,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "INDIAN CURRY SALMON CAKES",
             "_option_choices": [],
@@ -285,6 +305,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "TARO CAKES",
             "_option_choices": [],
@@ -299,6 +320,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "THAI FISH CAKES",
             "_option_choices": [],
@@ -313,6 +335,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "CHILI/BASIL SNAPPER CAKES",
             "_option_choices": [],
@@ -327,6 +350,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "CORN/GROUND PORK CAKES",
             "_option_choices": [],
@@ -341,6 +365,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "SAMPLER PLATE",
             "_option_choices": [],
@@ -355,6 +380,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "OUR CHEFS CRAB CAKES",
             "_option_choices": [],
@@ -369,6 +395,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "GARLIC TROUT CAKES",
             "_option_choices": [],
@@ -385,6 +412,7 @@
     ],
     "CURRIES": [
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "MASSAMUN CURRY",
             "_option_choices": [],
@@ -399,6 +427,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "PINEAPPLE PRAWN CURRY",
             "_option_choices": [],
@@ -413,6 +442,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "GREEN CURRY",
             "_option_choices": [],
@@ -427,6 +457,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "RED CURRY",
             "_option_choices": [],
@@ -441,6 +472,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "PANANG CURRY",
             "_option_choices": [],
@@ -455,6 +487,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "YELLOW CURRY",
             "_option_choices": [],
@@ -471,6 +504,7 @@
     ],
     "DESSERT": [
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "ICE CREAM ONE SCOOP",
             "_option_choices": [],
@@ -485,6 +519,7 @@
             "stars": 0
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "ICE CREAM TWO SCOOPS",
             "_option_choices": [],
@@ -499,6 +534,7 @@
             "stars": 0
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "FRIED BANANA/ICE CREAM",
             "_option_choices": [],
@@ -513,6 +549,7 @@
             "stars": 0
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "BROWNIE",
             "_option_choices": [],
@@ -530,6 +567,7 @@
     "DRINKS": [],
     "FISH": [
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "THREE MUSKETEERS",
             "_option_choices": [],
@@ -544,6 +582,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "SALMON PANANG CURRY",
             "_option_choices": [],
@@ -558,6 +597,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "GARLIC PEPPER PRAWNS",
             "_option_choices": [],
@@ -572,6 +612,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "CRISPY TROUT SALAD",
             "_option_choices": [],
@@ -586,6 +627,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "FRIED TILAPIA FILLET",
             "_option_choices": [],
@@ -600,6 +642,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "BEER BATTERED POLLOCK",
             "_option_choices": [],
@@ -614,6 +657,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "RED SNAPPER",
             "_option_choices": [],
@@ -630,6 +674,7 @@
     ],
     "FRIED RICE": [
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "HAWAIIAN FRIED RICE",
             "_option_choices": [],
@@ -644,6 +689,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "CHEFS CRAB FRIED RICE",
             "_option_choices": [],
@@ -658,6 +704,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "PRAWN FRIED RICE",
             "_option_choices": [],
@@ -674,6 +721,7 @@
     ],
     "LUNCH PLATTER": [
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "PANANG CURRY",
             "_option_choices": [],
@@ -688,6 +736,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "ORANGE CHICKEN",
             "_option_choices": [],
@@ -702,6 +751,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "CASHEW NUT CHICKEN",
             "_option_choices": [],
@@ -716,6 +766,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "HOUSE FRIED RICE",
             "_option_choices": [],
@@ -730,6 +781,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "HOUSE BEEF/MUSHROOM",
             "_option_choices": [],
@@ -744,6 +796,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "SESAME HONEY BEEF",
             "_option_choices": [],
@@ -758,6 +811,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "THAI CHICKEN CURRY",
             "_option_choices": [],
@@ -772,6 +826,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "CHILI BASIL PLATE",
             "_option_choices": [],
@@ -786,6 +841,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "SWEET/SOUR VEGGIES",
             "_option_choices": [],
@@ -800,6 +856,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "CHICKEN VEGGIE DELIGHT",
             "_option_choices": [],
@@ -814,6 +871,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "HOUSE GARLIC DELIGHT",
             "_option_choices": [],
@@ -831,6 +889,7 @@
     "MISC": [],
     "NOODLES": [
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "PRA RAM NOODLE",
             "_option_choices": [],
@@ -845,6 +904,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "PHAD THAI FAVORITE",
             "_option_choices": [],
@@ -859,6 +919,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "PAD KEE MAO",
             "_option_choices": [],
@@ -873,6 +934,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "PAD SEE LEW",
             "_option_choices": [],
@@ -887,6 +949,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "LARD NA NOODLE",
             "_option_choices": [],
@@ -903,6 +966,7 @@
     ],
     "SALAD": [
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "PRAWN SALAD",
             "_option_choices": [],
@@ -917,6 +981,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "BEEF SALAD",
             "_option_choices": [],
@@ -931,6 +996,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "CRISPY TROUT SALAD",
             "_option_choices": [],
@@ -945,6 +1011,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "GREEN PAPAYA/PRAWN SALAD",
             "_option_choices": [],
@@ -957,24 +1024,11 @@
             "options": [],
             "py/object": "peonordersystem.src.MenuItem.MenuItem",
             "stars": 3
-        },
-        {
-            "_locked": false,
-            "_name": "MY NEW ITEM",
-            "_notification_message": null,
-            "_option_choices": [],
-            "_price": 0.03,
-            "_price_scalar": 1.0,
-            "confirmed": false,
-            "editable": false,
-            "notes": "",
-            "options": [],
-            "py/object": "peonordersystem.src.MenuItem.MenuItem",
-            "stars": 0
         }
     ],
     "SOUP": [
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "TOM YUM SPICY SOUP",
             "_option_choices": [],
@@ -989,6 +1043,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "TOFU SPINACH SOUP",
             "_option_choices": [],
@@ -1003,6 +1058,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "NOODLE SOUP",
             "_option_choices": [],
@@ -1017,6 +1073,7 @@
             "stars": 3
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "TOM KA CHICKEN",
             "_option_choices": [],
@@ -1033,6 +1090,7 @@
     ],
     "SPECIAL": [
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "CRISPY CALAMARI",
             "_option_choices": [],
@@ -1049,6 +1107,7 @@
     ],
     "WINE": [
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "LONE BIRCH SAUVIGNON BLANC",
             "_option_choices": [],
@@ -1063,6 +1122,7 @@
             "stars": 0
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "AIRFIELD RED",
             "_option_choices": [],
@@ -1077,6 +1137,7 @@
             "stars": 0
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "LONE BIRCH RIESLING",
             "_option_choices": [],
@@ -1091,6 +1152,7 @@
             "stars": 0
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "AIRFIELD SAUVIGNON BLANC",
             "_option_choices": [],
@@ -1105,6 +1167,7 @@
             "stars": 0
         },
         {
+            "_default_stars": 3,
             "_locked": false,
             "_name": "C.M., PINOT NOIR",
             "_option_choices": [],
