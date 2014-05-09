@@ -23,6 +23,7 @@ class ItemsTable(TableComponent):
 
     DEFAULT_TABLE_STYLE = (
         ('SPAN', (TABLE_SPAN_COLS[0], 0), (TABLE_SPAN_COLS[1], 0)),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ('LEFTPADDING', (0, 0), (-1, -1), -1),
         ('RIGHTPADDING', (0, 0), (-1, -1), -1)
     )
@@ -40,8 +41,8 @@ class ItemsTable(TableComponent):
         self._item_number = 0
         self._current_style = []
 
-        self._item_rows = len(items_data)
-        self._option_rows = 0
+        self._item_rows = 0.0
+        self._option_rows = 0.0
 
         super(ItemsTable, self).__init__(items_data)
 
@@ -126,6 +127,7 @@ class ItemsTable(TableComponent):
         """
         row = []
         self._item_number += 1
+        self._item_rows += self._get_row_number(item.get_name())
 
         text = self.NUMBER_FORMAT.format(number=self._item_number)
         p_num = Paragraph(text, self.DEFAULT_PARAGRAPH_STYLE)
@@ -161,7 +163,7 @@ class ItemsTable(TableComponent):
         """
         # initial filler column for item number
         row = ['']
-        self._option_rows += 1
+        self._option_rows += self._get_row_number(option.get_name())
         self._update_style()
 
         name = option.get_name()
@@ -179,6 +181,20 @@ class ItemsTable(TableComponent):
         row.append(p_price)
 
         return row
+
+    def _get_row_number(self, name):
+        """Gets the number of rows to
+        set given the name value to be
+        displayed in the row.
+
+        @param name: str representing the
+        name associated with the row.
+
+        @return: float value representing
+        the number of rows to add.
+        """
+        row_length = len(name) / 15.0
+        return max(row_length, 1.0)
 
     def _update_style(self):
         """Updates the table style to
