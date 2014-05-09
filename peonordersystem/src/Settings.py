@@ -42,6 +42,9 @@ RECEIPT_MAIN_CFG_FILE_NAME = 'receipt_main.cfg'
 FRONT_RECEIPT_FILE_NAME = 'front.receipt'
 KITCHEN_TICKET_FILE_NAME = 'back.ticket'
 
+KITCHEN_PRINTER_NAME = "KITCHEN_PRINTER"
+FRONT_PRINTER_NAME = "FRONT_PRINTER"
+
 #====================================================================================
 # This block represents constants used for Reserver objects and displaying those
 # Reserver objects.
