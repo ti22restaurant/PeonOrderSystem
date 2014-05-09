@@ -72,7 +72,7 @@ class MainContainer(ReceiptContainer):
 
         @return: OrderNumber
         """
-        return OrderNumber(self._order_data.number)
+        return OrderNumber(self._order_data.order_number)
 
     def _create_items_display(self):
         """Creates the items display
