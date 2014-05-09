@@ -54,6 +54,7 @@ class PriorityContainer(ReceiptContainer):
         self.add_component(self.DIVIDER)
         self.add_component(priority_table)
         self.add_component(self.DIVIDER)
+        self.add_flowables(*self.SPACER_ARGS)
 
     def _create_priority_title(self):
         """
