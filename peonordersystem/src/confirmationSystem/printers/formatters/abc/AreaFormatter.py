@@ -40,19 +40,6 @@ class AreaFormatter(AbstractFormatter):
         pass
 
     @property
-    def required_keys(self):
-        """Gets a set of keys
-        that are required for
-        the formatter to perform
-        its formatting operation.
-
-        @return: Set of str values
-        representing the required
-        data keys.
-        """
-        return set()
-
-    @property
     def area(self):
         """Gets the area of the
         formatted file as a 2 tuple
@@ -103,7 +90,6 @@ class AreaFormatter(AbstractFormatter):
         the given data.
         """
         self._clear_state()
-        self._check_keys(data)
         self.generate_display_areas(data)
         self._create_file()
         self._clear_state()
@@ -169,25 +155,6 @@ class AreaFormatter(AbstractFormatter):
         """
         self._x = max(self._x, width)
         self._y += height
-
-    def _check_keys(self, data):
-        """Checks if the required keys
-        are contained within the given
-        data.
-
-        @param data: dict of str keys
-        mapped to values.
-
-        @throws KeyError: If the required
-        keys were not contained within the
-        given data dict
-
-        @return: bool value representing if
-        the test was passed.
-        """
-        if not self.required_keys.issubset(data):
-            raise KeyError("Expected keys were not present in data!")
-        return True
 
     def _create_file(self):
         """Creates the file and
