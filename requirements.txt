@@ -1,3 +1,4 @@
 pycups>=1.9.66
 jsonpickle>=0.6.1
 xlsxwriter>=0.5.3
+git+https://github.com/cjmcgraw/xhtml2pdf

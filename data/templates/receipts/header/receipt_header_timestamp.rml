@@ -1,0 +1,8 @@
+<para align="right" size={SIZE}>
+    <br/>
+    {DATE}
+    <br/>
+    {TIME}
+    <br/>
+    {NAME}
+</para>

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=PeonOrderSystem
+Comment=Point-of-sales Ordering system
+Exec=/home/devious/bin/POS
+Terminal=False
+Icon=/home/devious/lib/PeonOrderSystem/data/media/peon-order-system.svg
+Type=Application
+Categories=Application;
