@@ -42,14 +42,6 @@ class FrontFormatter(AreaFormatter):
         """
         return self.DEFAULT_FILE
 
-    @property
-    def required_keys(self):
-        """
-
-        @return:
-        """
-        return self.REQUIRED_KEYS
-
     def generate_display_areas(self, data):
         """Generates the areas for display
         from the given data
@@ -65,5 +57,5 @@ class FrontFormatter(AreaFormatter):
         main = MainContainer(data)
         self.add_display(main)
 
-        header = HeaderContainer()
+        header = HeaderContainer(data)
         self.add_display(header)
