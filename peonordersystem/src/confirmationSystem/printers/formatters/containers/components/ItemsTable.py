@@ -163,11 +163,10 @@ class ItemsTable(TableComponent):
         """
         # initial filler column for item number
         row = ['']
-        self._option_rows += self._get_row_number(option.get_name())
+        self._option_rows += self._get_row_number(str(option))
         self._update_style()
 
-        name = option.get_name()
-        text = self.SUB_FORMAT.format(data=name)
+        text = self.SUB_FORMAT.format(data=option)
         p_name = Paragraph(text, self.DEFAULT_PARAGRAPH_STYLE)
         row.append(p_name)
 
