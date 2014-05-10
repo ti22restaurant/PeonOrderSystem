@@ -3335,6 +3335,7 @@ class UpdateMenuItemsDialog(SelectionDialog):
             model[itr][1] = price
 
             menu_item.stars = stars
+            menu_item._default_stars = stars
             menu_item.editable = editable
             menu_item.confirmed = confirmed
 
