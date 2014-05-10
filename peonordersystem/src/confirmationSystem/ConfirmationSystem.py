@@ -48,6 +48,9 @@ from .bundlers.OrderDataBundle import OrderDataBundle
 from .bundlers.DateDataBundle import DateDataBundle
 from .bundlers.ItemDataBundle import ItemDataBundle
 
+from .printers.adapters.DataAdapter import DataAdapter
+from .printers.Printer import Printer
+
 #====================================================================================
 # This block represents constants that are utilized throughout the module.
 # Furthermore this block also ensures the basic structure of the directories
@@ -72,8 +75,8 @@ for dirs in (DIRECTORY, CHECKOUT_DIRECTORY, CONFIRMED_DIRECTORY,
 # valid format for time.strftime function.
 STANDARD_TIME_FORMAT = SQLITE_DATE_TIME_FORMAT_STR
 
-# global module wide variable utilized for counting the number of orders.
-global current_order_counter
+# global module wide variables
+ticket_printer = Printer()
 
 
 #====================================================================================
@@ -346,6 +349,7 @@ def _get_current_order_number(database=ORDERS_DATABASE):
     return counter.next()[0]
 
 current_order_counter = _get_current_order_number()
+ticket_number = current_order_counter
 
 
 #====================================================================================
@@ -933,6 +937,7 @@ def get_stored_item_data(start_date, end_date, database=ORDERS_DATABASE):
     for data in row_data:
         yield ItemDataBundle(data)
 
+
 #====================================================================================
 # This blocks represents functions that are used for temporary storage prior to
 # being processed by the databases. These functions are used to store their
@@ -1021,7 +1026,7 @@ def checkout_confirmed(order_name, orders, order_list, set_time=None):
 # This block represents functions that are used to send the data to external
 # procedures such as printing.
 #====================================================================================
-def print_order(order_name, order_list, priority_list=None, print_data=False):
+def print_order(order_name, order_list, priority_list=()):
     """Send the given order to the order
     printer. If given a priority order the
     priority order is given special priority
@@ -1041,18 +1046,11 @@ def print_order(order_name, order_list, priority_list=None, print_data=False):
 
     @return: None
     """
-    #TODO print order to order printer
-    if print_data:
-        print 'TO ORDER'
-        print order_name
-        if priority_list:
-            print priority_list
-
-        print order_list
-        print ''
+    data = _wrap_printer_data(order_name, order_list, priority_data=priority_list)
+    ticket_printer.print_to_kitchen(data)
 
 
-def print_check(order_name, order_data, print_data=False):
+def print_check(order_name, order_data):
     """Send the given order to the check
     printer.
 
@@ -1065,16 +1063,42 @@ def print_check(order_name, order_data, print_data=False):
 
     @return: None
     """
-    #TODO send order to checkout printer
+    global ticket_number
+    ticket_number += 1
+
     for order in order_data:
-        if print_data:
-            print 'TO CHECK'
-            print order_name
-            print order
-            print''
+        data = _wrap_printer_data(order_name, order)
+        ticket_printer.print_to_front(data)
 
-            subtotal = CheckOperations.get_order_subtotal(order)
 
-            print 'Subtotal : ' + str(subtotal)
-            print 'Tax : ' + str(CheckOperations.get_total_tax(subtotal))
-            print 'Total : ' + str(CheckOperations.get_total(order))
+def _wrap_printer_data(order_name, order_data, priority_data=()):
+    """Wraps the given order data into
+    printer data that is capable of being
+    passed to the printer system
+
+    @param order_name: str representing the
+    name of the order.
+
+    @param order_data: list of MenuItem objects
+    representing the order.
+
+    @keyword priority_data: list of MenuItem objects
+    representing the priority order.
+
+    @return: DataAdapter object that encapsulates the
+    given data for passed to the printer to format
+    and print.
+    """
+    subtotal, tax, total = CheckOperations.get_totals(order_data)
+
+    data = {
+        'name'          :   order_name,
+        'number'        :   ticket_number,
+        'order'         :   order_data,
+        'priority_order':   priority_data,
+        'total'         :   total,
+        'tax'           :   tax,
+        'subtotal'      :   subtotal
+    }
+
+    return DataAdapter(data)
