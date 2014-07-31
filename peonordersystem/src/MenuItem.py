@@ -51,10 +51,29 @@ class MenuItem(object):
         
         self.editable = bool(editable)
         self.stars = int(stars)
-        self.notes = ''
+        self._notes = ''
         self.options = []
         self.confirmed = bool(confirmed)
-    
+
+    @property
+    def notes(self):
+        """Property getter for notes.
+
+        @return: str representing the
+        note.
+        """
+        return self._notes
+
+    @notes.setter
+    def notes(self, note):
+        """Property setter for notes.
+
+        @param note: str representing
+        the note to be added. All whitespace
+        will be trimmed.
+        """
+        self._notes = note.strip()
+
     def toggle_lock_menu_item(self):
         """Toggles if the MenuItem is locked.
         If true toggles to false, if false toggles
@@ -178,7 +197,7 @@ class MenuItem(object):
         @return: bool, True if there is a non-empty note.
         False otherwise.
         """
-        return self.notes is not ''
+        return len(self.notes) > 0
     
     def has_options(self):
         """Checks if the item has had options chosen for
