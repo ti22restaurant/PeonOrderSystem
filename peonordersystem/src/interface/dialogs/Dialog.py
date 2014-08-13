@@ -2246,9 +2246,13 @@ class UndoCheckoutSelectionDialog(SelectionDialog):
         frame = Gtk.Frame(label='Order Selection')
         main_box = Gtk.VBox()
 
+        scrolled_window = Gtk.ScrolledWindow()
+
         self.orders_view = self._generate_orders_view()
         self.orders_view.set_model(self._generate_orders_model())
-        main_box.pack_start(self.orders_view, True, True, 5.0)
+
+        scrolled_window.add(self.orders_view)
+        main_box.pack_start(scrolled_window, True, True, 5.0)
 
         frame.add(main_box)
         return frame
@@ -2390,7 +2394,11 @@ class UndoCheckoutSelectionDialog(SelectionDialog):
         view for self.orders widget.
         """
         main_box = Gtk.VBox()
-        main_box.pack_start(self.orders.get_display_view(), True, True, 5.0)
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.add(self.orders.get_display_view())
+
+        main_box.pack_start(scrolled_window, True, True, 5.0)
+
 
         for order_name, order_time in self.checkout_information:
             data = self.checkout_information[order_name, order_time]
@@ -2410,7 +2418,6 @@ class UndoCheckoutSelectionDialog(SelectionDialog):
         the import area.
         """
         main_box = Gtk.VBox()
-
         sub_box = Gtk.HBox()
         self.name_entry = Gtk.Entry()
         sub_box.pack_start(self.name_entry, True, True, 5.0)
@@ -2421,10 +2428,14 @@ class UndoCheckoutSelectionDialog(SelectionDialog):
 
         main_box.pack_start(sub_box, False, False, 5.0)
 
+        scrolled_window = Gtk.ScrolledWindow()
+
         self.imported_view = self._generate_imported_view()
         self.imported_view.set_model(self._generate_imported_model())
 
-        main_box.pack_start(self.imported_view, True, True, 5.0)
+        scrolled_window.add(self.imported_view)
+
+        main_box.pack_start(scrolled_window, True, True, 5.0)
 
         sub_box = Gtk.HBox()
         remove_button = Gtk.Button('Remove Import')
