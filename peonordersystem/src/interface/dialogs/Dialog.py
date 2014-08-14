@@ -2883,7 +2883,7 @@ class UpdateMenuItemsDialog(SelectionDialog):
 
         self.categories_name_entry.set_text('')
 
-        if len(text) > 0:
+        if text and text not in self.model_data:
             model = self.categories_view.get_model()
 
             new_model = Gtk.ListStore(str, float)
