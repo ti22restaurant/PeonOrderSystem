@@ -5292,6 +5292,7 @@ class DiscountCheckoutConfirmationDialog(CheckoutConfirmationDialog):
         the widgets to be displayed.
         """
         main_box = Gtk.VBox()
+
         properties_selection_area = self.generate_properties_selection_area()
         main_box.pack_start(properties_selection_area, True, True, 5.0)
 
@@ -5319,12 +5320,17 @@ class DiscountCheckoutConfirmationDialog(CheckoutConfirmationDialog):
         discount_message_box = Gtk.VBox()
 
         discount_message_box.pack_start(Gtk.Label('Message: '), False, False, 0.0)
+
+        scrolled_window = Gtk.ScrolledWindow()
+
         text_view_frame = Gtk.Frame()
         self.message_entry = Gtk.TextView()
         self.message_entry.set_size_request(250, 150)
         self.message_entry.set_wrap_mode(Gtk.WrapMode.WORD)
-        text_view_frame.add(self.message_entry)
-        discount_message_box.pack_start(text_view_frame, False, False, 0.0)
+
+        scrolled_window.add(self.message_entry)
+        text_view_frame.add(scrolled_window)
+        discount_message_box.pack_start(text_view_frame, False, False, 5.0)
 
         add_discount_button = Gtk.Button('Add Discount To Order')
         add_discount_button.set_size_request(200, 50)
