@@ -57,8 +57,6 @@ from peonordersystem.src.MenuItem import OptionItem
 from peonordersystem.src.interface.Orders import Orders
 from peonordersystem.src.Settings import (STANDARD_TEXT,
                                           STANDARD_TEXT_BOLD,
-                                          STANDARD_TEXT_LIGHT,
-                                          TOGO_SEPARATOR,
                                           UNDONE_CHECKOUT_SEPARATOR,
                                           CTIME_STR,
                                           DEFAULT_AUDIT_NAME,
@@ -5621,6 +5619,7 @@ class UpdateTemplateDiscountCheckoutConfirmationDialog(DiscountCheckoutConfirmat
         dialog window.
         """
         self.name_entry = None
+        self._discount_name_set = {name for name, _, _, _ in discount_templates}
         super(UpdateTemplateDiscountCheckoutConfirmationDialog, self).__init__(parent, confirm_func,
                                                                                [], discount_templates)
         self.tree_view.set_model(self.discount_view.get_model())
@@ -5713,7 +5712,7 @@ class UpdateTemplateDiscountCheckoutConfirmationDialog(DiscountCheckoutConfirmat
         name = name.strip()
 
         self.name_entry.set_text('')
-        if len(name) > 0:
+        if name and name not in self._discount_name_set:
             value, is_percentage = self.parse_discount_data()
 
             value_str = str(value)
@@ -5727,6 +5726,7 @@ class UpdateTemplateDiscountCheckoutConfirmationDialog(DiscountCheckoutConfirmat
 
             tree_model = self.tree_view.get_model()
             tree_model.append(data)
+            self._discount_name_set.add(name)
 
     def remove_selected_item(self, *args):
         """Override Method.
@@ -5742,7 +5742,9 @@ class UpdateTemplateDiscountCheckoutConfirmationDialog(DiscountCheckoutConfirmat
         model, itr = self.get_selected()
 
         if itr:
+            name = model[itr][0]
             model.remove(itr)
+            self._discount_name_set.remove(name)
 
     def confirm_data(self):
         """Override Method.
