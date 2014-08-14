@@ -2219,7 +2219,7 @@ class UndoCheckoutSelectionDialog(SelectionDialog):
         @param title: str representing the
         """
         self.checkout_information = checkout_information
-        self._prev_imports = set()
+        self._prev_imports = {}
         self.orders = Orders(num_of_tables=0)
 
         self.name_entry = None
@@ -2504,19 +2504,19 @@ class UndoCheckoutSelectionDialog(SelectionDialog):
         @return: None
         """
         selection = self.orders_view.get_selection()
-        model, itr = selection.get_selected()
+        view, itr = selection.get_selected()
 
         name = self.name_entry.get_text().strip()
         self.name_entry.set_text('')
 
         if itr and name and name not in self._prev_imports:
-            self._prev_imports.add(name)
-            order_name, order_time_str = model[itr]
-
-            order_time = datetime.strptime(order_time_str, CTIME_STR)
-
+            order_name, order_time_str = view[itr]
             imported_model = self.imported_view.get_model()
             imported_model.append((order_name, name, order_time_str))
+
+            self._prev_imports[name] = order_name, order_time_str
+
+            view.remove(itr)
 
     def _remove_import_data(self, *args):
         """Removes the currently selected import
@@ -2528,10 +2528,21 @@ class UndoCheckoutSelectionDialog(SelectionDialog):
         @return: None
         """
         selection = self.imported_view.get_selection()
-        model, itr = selection.get_selected()
+        view, itr = selection.get_selected()
 
         if itr:
-            model.remove(itr)
+            name = view[itr][1]
+            view.remove(itr)
+
+            self._update_order(self._prev_imports[name])
+            self._clear_prev_import(name)
+
+    def _update_order(self, data):
+        model = self.orders_view.get_model()
+        model.append(data)
+
+    def _clear_prev_import(self, name):
+        del self._prev_imports[name]
 
     def confirm_data(self, *args):
         """Override Method.
