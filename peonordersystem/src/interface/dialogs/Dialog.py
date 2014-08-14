@@ -2221,6 +2221,7 @@ class UndoCheckoutSelectionDialog(SelectionDialog):
         @param title: str representing the
         """
         self.checkout_information = checkout_information
+        self._prev_imports = set()
         self.orders = Orders(num_of_tables=0)
 
         self.name_entry = None
@@ -2510,7 +2511,8 @@ class UndoCheckoutSelectionDialog(SelectionDialog):
         name = self.name_entry.get_text().strip()
         self.name_entry.set_text('')
 
-        if itr and name:
+        if itr and name and name not in self._prev_imports:
+            self._prev_imports.add(name)
             order_name, order_time_str = model[itr]
 
             order_time = datetime.strptime(order_time_str, CTIME_STR)
