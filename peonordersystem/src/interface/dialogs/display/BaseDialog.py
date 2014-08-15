@@ -19,7 +19,7 @@ class BaseDialog(AbstractDialog):
     DEFAULT_CANCEL_BUTTON_NAME = "cancel"
     DEFAULT_CONFIRM_BUTTON_NAME = "confirm"
 
-    ERROR_MSG = "Invalid State: Layout of dialog hasn't been set!"
+    ERROR_MSG = "Invalid State: BaseLayout of dialog hasn't been set!"
 
     def __init__(self, parent, title, dialog=None, default_size=(400, 400)):
         """initializes the dialog window"""
@@ -44,7 +44,7 @@ class BaseDialog(AbstractDialog):
         layout to the dialog.
         """
         content_area = self._dialog.get_content_area()
-        content_layout = self._layout.main_component
+        content_layout = self._layout.main_widget
         content_area.pack_start(content_layout, *PACK_ARGS)
 
     def _clear_layout(self):
@@ -165,26 +165,4 @@ class BaseDialog(AbstractDialog):
         Gtk.ResponseType signal emitted
         """
         if self._validate_layout():
-            self.run()
-
-    def run(self):
-        """Runs the stored dialog window.
-
-        @return: int representing the
-        Gtk.ResponseType signal emitted
-        """
-        if self.ACCEPT_RESPONSE is self._dialog.run():
-            return self._confirmed()
-        return self._cancelled()
-
-    def _confirmed(self):
-        """Gets the confirmed data stored in
-        the layout.
-        """
-        return self._layout.confirm()
-
-    def _cancelled(self):
-        """Gets the cancelled data stored in
-        the layout.
-        """
-        return self._layout.cancelled()
+            self._dialog.run()
