@@ -1,3 +1,11 @@
+"""This module encapsulates the base functionality
+for creating new widgets
+
+@author: Carl McGraw
+@email: cjmcgraw@u.washington.edu
+@version: 1.1
+"""
+
 from gi.repository import Gtk
 
 PACK_ARGS = (True, True, 5.0)
