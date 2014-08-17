@@ -2,7 +2,7 @@
 window.
 
 @author: Carl McGraw
-@email: cjmcgraw@u.washington.edu
+@contact: cjmcgraw@u.washington.edu
 @version: 1.1
 """
 
@@ -21,7 +21,7 @@ class BaseDialog(AbstractDialog):
 
     ERROR_MSG = "Invalid State: BaseLayout of dialog hasn't been set!"
 
-    def __init__(self, parent, title, dialog=None, default_size=(400, 400)):
+    def __init__(self, parent, title, default_size=(400, 400)):
         """initializes the dialog window"""
         self._parent = parent
         self._title = title
@@ -76,7 +76,7 @@ class BaseDialog(AbstractDialog):
     def _validate_layout(self):
         """validates the layout.
 
-        @throws NameError: when layout
+        @raise NameError: when layout
         is empty.
         """
         if not self._layout:
@@ -96,6 +96,12 @@ class BaseDialog(AbstractDialog):
         return dialog
 
     def _update_dialog_window(self, dialog):
+        """Updates the data associated with
+        the dialog window from the state
+
+        @param dialog: Gtk.Dialog representing
+        the window.
+        """
         dialog.set_title(self._title)
         dialog.set_default_size(*self._default_size)
         dialog.set_transient_for(self._parent)
