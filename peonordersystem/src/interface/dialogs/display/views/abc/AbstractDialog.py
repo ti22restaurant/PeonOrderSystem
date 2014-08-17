@@ -2,7 +2,7 @@
 class.
 
 @author: Carl McGraw
-@email: cjmcgraw@u.washington.edu
+@contact: cjmcgraw@u.washington.edu
 @version: 1.1
 """
 
