@@ -12,7 +12,6 @@ from gi.repository import Gtk
 from .abc.View import AbstractView
 from .abc.SelectionObserver import AbstractObserver
 from .abc.SelectionObservable import AbstractSelectionObservable
-
 from peonordersystem.src.interface.connectors.Connector import Connector
 
 

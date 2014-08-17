@@ -9,10 +9,10 @@ confirm Orders.
 """
 from gi.repository import Gtk
 
-from .dialogs import Dialog
-from .dialogs.display.MenuDisplaySelectionDialog import MenuDisplaySelectionDialog
 from peonordersystem.src import ErrorLogger
 from peonordersystem.src.CustomExceptions import InvalidItemError, InvalidOrderError
+from .dialogs.depreciated import Dialog
+from .dialogs.depreciated.MenuDisplaySelectionDialog import MenuDisplaySelectionDialog
 
 
 PRINT_RESPONSE = Dialog.PRINT_DIALOG_RESPONSE

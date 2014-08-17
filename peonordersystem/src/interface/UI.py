@@ -11,15 +11,14 @@ import copy
 from time import strftime
 
 from . import Editor
-from .dialogs import Dialog
 from .builder.Builder import Builder
 from .Reservations import Reservations
 from .UpcomingOrders import UpcomingOrders
 from .Orders import Orders
-
 from peonordersystem.src import ErrorLogger
 from peonordersystem.src import CustomExceptions
 from peonordersystem.src import Settings
+from peonordersystem.src.interface.dialogs.depreciated import Dialog
 
 
 def non_fatal_error_notification(func):
