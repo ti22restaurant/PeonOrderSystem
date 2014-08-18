@@ -30,7 +30,7 @@ class SignalMapper(object):
         """
         if signal not in self._signals_to_funcs:
             self._signals_to_funcs[signal] = set()
-        self._signals_to_funcs[signal].add(signal)
+        self._signals_to_funcs[signal].add(func)
 
         return signal
 
@@ -74,5 +74,5 @@ class SignalMapper(object):
         """
         result = True
         for func in funcs:
-            result &= func(*args)
+            result &= bool(func(*args))
         return result
