@@ -27,11 +27,13 @@ class ReprintOrderView(View):
         self._dialog = BaseDialog()
         self._layout = BaseLayout()
         self._component = OrderDisplayComponent()
+        self._build_view()
 
     def _build_view(self):
         """Builds the view"""
         self._layout.add_component(self._component)
         self._dialog.set_layout(self._layout)
+        self._set_up_mappings()
 
     def set_models(self, *args):
         """Sets the models associated
@@ -55,7 +57,7 @@ class ReprintOrderView(View):
         """Sets up the mappings
         to be used by this view
         """
-        self._component.set_selection_func(self._mapper.signal)
+        self._component.set_selection_func(self._function_signal)
 
     def _function_signal(self, selection, model, path, path_currently_selected, *args):
         """Maps the set selection function call
