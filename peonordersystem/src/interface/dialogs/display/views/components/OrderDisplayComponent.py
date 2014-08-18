@@ -8,6 +8,7 @@ order display class
 from .abc.TreeViewComponent import TreeViewComponent
 from peonordersystem.src.interface.dialogs.DialogBuilder import (PACK_ARGS,
                                                                  generate_hbox,
+                                                                 generate_scrolled_window,
                                                                  generate_treeview,
                                                                  generate_text_columns)
 
@@ -66,7 +67,7 @@ class OrderDisplayComponent(TreeViewComponent):
         function when called.
         """
         selection = self._view.get_selection()
-        selection.set_selection_func(func, *args)
+        selection.set_select_function(func, *args)
 
     def set_model(self, model):
         """Sets the current display
@@ -84,7 +85,9 @@ class OrderDisplayComponent(TreeViewComponent):
         """
         container = self._create_container()
         self._create_view()
-        container.pack_start(self._view, *PACK_ARGS)
+        scrolled_window = generate_scrolled_window()
+        scrolled_window.add(self._view)
+        container.pack_start(scrolled_window, *PACK_ARGS)
         return container
 
     def _create_view(self):
@@ -109,7 +112,7 @@ class OrderDisplayComponent(TreeViewComponent):
 
         self._columns = []
         for column in columns:
-            self._view.append(column)
+            self._view.append_column(column)
             self._columns.append(column)
 
     def _generate_columns(self):
