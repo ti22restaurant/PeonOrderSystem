@@ -25,6 +25,16 @@ class View(object):
         pass
 
     @abstractmethod
+    def set_models(self, *args):
+        """Sets the models associated
+        with the view
+
+        @param args: catchall that
+        catches all models passed in.
+        """
+        pass
+
+    @abstractmethod
     def run(self):
         """Runs the main dialog
         window.
