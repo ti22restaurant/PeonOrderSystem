@@ -5,7 +5,7 @@ which is the basic implementation of a model.
 @contact: cjmcgraw(- at -)u.washington.edu
 @version: 1.x
 """
-from itertools import chain, izip
+from itertools import chain
 
 from .abc.AbstractModel import AbstractModel
 from peonordersystem.src.interface.dialogs.DialogBuilder import generate_liststore
@@ -43,7 +43,7 @@ class StandardModel(AbstractModel):
         @return: Gtk.TreeIter pointing
         to the values added
         """
-        return self._model.append(values=values)
+        return self._model.append(values)
 
     def insert(self, row, values):
         """Inserts the given values
@@ -78,7 +78,7 @@ class StandardModel(AbstractModel):
         @param values:
         @return:
         """
-        args = chain.from_iterable(izip(range(0, len(values)), values))
+        args = chain.from_iterable(zip(range(0, len(values)), values))
         return self._model.set(row, *args)
 
     def __iter__(self):
