@@ -33,6 +33,16 @@ class ReprintOrderView(View):
         self._layout.add_component(self._component)
         self._dialog.set_layout(self._layout)
 
+    def set_models(self, *args):
+        """Sets the models associated
+        with the views.
+
+        @param args: list of Gtk.TreeModels
+        where the first model is to be used
+        """
+        model = args[0].model
+        self._component.set_model(model)
+
     def set_mapper(self, mapper):
         """ Sets the current mapper
         used by the view.
