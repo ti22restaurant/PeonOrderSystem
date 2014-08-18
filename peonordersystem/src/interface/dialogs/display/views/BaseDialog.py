@@ -44,7 +44,7 @@ class BaseDialog(AbstractDialog):
         layout to the dialog.
         """
         content_area = self._dialog.get_content_area()
-        content_layout = self._layout.main_widget
+        content_layout = self._layout.main_container
         content_area.pack_start(content_layout, *PACK_ARGS)
 
     def _clear_layout(self):
@@ -91,8 +91,6 @@ class BaseDialog(AbstractDialog):
         dialog = generate_default_dialog()
         self._update_dialog_window(dialog)
         self._create_action_area(dialog)
-        dialog.show_all()
-
         return dialog
 
     def _update_dialog_window(self, dialog):
@@ -103,7 +101,7 @@ class BaseDialog(AbstractDialog):
         the window.
         """
         dialog.set_title(self._title)
-        dialog.set_default_size(*self._default_size)
+        dialog.resize(*self._default_size)
         dialog.set_transient_for(self._parent)
 
     def _create_action_area(self, dialog):
@@ -119,7 +117,6 @@ class BaseDialog(AbstractDialog):
 
         action_area.pack_start(confirm_button, *PACK_ARGS)
         action_area.pack_start(cancel_button, *PACK_ARGS)
-        action_area.show_all()
 
     def _create_confirm_button(self):
         """Creates the confirm button
