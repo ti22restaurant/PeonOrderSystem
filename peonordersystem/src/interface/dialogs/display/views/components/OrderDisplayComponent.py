@@ -133,7 +133,7 @@ class OrderDisplayComponent(TreeViewComponent):
 
         @return: list of str
         """
-        return ["Order", "Time"]
+        return ["Order Name"]
 
     def _create_container(self):
         """Creates the container.
