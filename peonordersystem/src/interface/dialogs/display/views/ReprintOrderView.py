@@ -21,10 +21,10 @@ class ReprintOrderView(View):
     columns are order and time.
     """
 
-    def __init__(self):
+    def __init__(self, parent, title="Reprint Order Dialog"):
         """Initializes the view"""
         self._mapper = SignalMapper()
-        self._dialog = BaseDialog()
+        self._dialog = BaseDialog(parent, title)
         self._layout = BaseLayout()
         self._component = OrderDisplayComponent()
         self._build_view()
