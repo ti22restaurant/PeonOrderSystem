@@ -59,6 +59,12 @@ class StandardModel(AbstractModel):
         """
         return self._model.insert_before(row, values)
 
+    def clear(self):
+        """Clears all entries from
+        the model
+        """
+        self._model.clear()
+
     def __getitem__(self, row):
         """Gets the item at the given
         row
