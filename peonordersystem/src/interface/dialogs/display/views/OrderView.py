@@ -14,7 +14,7 @@ from peonordersystem.src.interface.dialogs.DialogBuilder import PRIMARY_SELECTIO
 from peonordersystem.src.interface.dialogs.display.mappers.SignalMapper import SignalMapper
 
 
-class ReprintOrderView(View):
+class OrderView(View):
     """Provides the basic functionality
     for display a tree view in a simple
     dialog window expected titles of the
