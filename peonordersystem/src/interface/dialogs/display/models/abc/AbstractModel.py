@@ -39,7 +39,7 @@ class AbstractModel(object):
 
     @abstractmethod
     def insert(self, itr, row):
-        """Insers the given row
+        """Inserts the given row
         at the given iter
 
         @param itr: Gtk.TreeIter
@@ -50,6 +50,13 @@ class AbstractModel(object):
 
         @return: Gtk.TreeIter pointing
         to the row inserted
+        """
+        pass
+
+    @abstractmethod
+    def clear(self):
+        """Clears the model of
+        all data
         """
         pass
 
