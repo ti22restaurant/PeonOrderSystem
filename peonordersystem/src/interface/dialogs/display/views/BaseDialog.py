@@ -168,4 +168,8 @@ class BaseDialog(AbstractDialog):
         Gtk.ResponseType signal emitted
         """
         if self._validate_layout():
+            self._dialog.show_all()
             self._dialog.run()
+            self._dialog.hide()
+
+        return self._response
