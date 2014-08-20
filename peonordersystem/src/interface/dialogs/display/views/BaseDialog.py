@@ -29,6 +29,7 @@ class BaseDialog(AbstractDialog):
         self._dialog = self._create_dialog_window()
         self._response = self.CANCEL_RESPONSE
         self._layout = None
+        self._dialog.hide()
 
     def set_layout(self, layout):
         """Sets the layout to the given
