@@ -7,6 +7,7 @@ a collection of unique keys.
 @version: 1.0
 """
 from gi.repository import Gtk
+
 from .abc.Model import AbstractModel
 
 

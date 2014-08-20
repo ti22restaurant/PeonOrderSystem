@@ -12,7 +12,6 @@ from gi.repository import Gtk
 from .abc.View import AbstractView
 from .abc.SelectionObserver import AbstractObserver
 from .abc.SelectionObservable import AbstractSelectionObservable
-
 from peonordersystem.src.interface.connectors.Connector import Connector
 
 
@@ -59,7 +58,9 @@ class MainView(AbstractView, AbstractSelectionObservable):
         """
         frame = Gtk.Frame(label=self._title)
         main_box = Gtk.VBox()
-        main_box.pack_start(self._view, True, True, 5.0)
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.add(self._view)
+        main_box.pack_start(scrolled_window, True, True, 5.0)
         control_area = self._create_control_area()
 
         main_box.pack_start(control_area, False, False, 5.0)

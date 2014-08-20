@@ -1047,7 +1047,7 @@ def print_order(order_name, order_list, priority_list=()):
     @return: None
     """
     data = _wrap_printer_data(order_name, order_list, priority_data=priority_list)
-    ticket_printer.print_to_kitchen(data)
+    #ticket_printer.print_to_kitchen(data)
 
 
 def print_check(order_name, order_data):
@@ -1068,7 +1068,7 @@ def print_check(order_name, order_data):
 
     for order in order_data:
         data = _wrap_printer_data(order_name, order)
-        ticket_printer.print_to_front(data)
+        #ticket_printer.print_to_front(data)
 
 
 def _wrap_printer_data(order_name, order_data, priority_data=()):

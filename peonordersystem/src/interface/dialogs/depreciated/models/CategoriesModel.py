@@ -9,8 +9,9 @@ is given.
 @contact: cjmcgraw( at )u.washington.edu
 @version: 1.0
 """
-from gi.repository import Gtk
 from collections import OrderedDict
+
+from gi.repository import Gtk
 
 from .abc.Model import AbstractModel
 

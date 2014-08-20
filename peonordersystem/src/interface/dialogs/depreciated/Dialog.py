@@ -57,8 +57,6 @@ from peonordersystem.src.MenuItem import OptionItem
 from peonordersystem.src.interface.Orders import Orders
 from peonordersystem.src.Settings import (STANDARD_TEXT,
                                           STANDARD_TEXT_BOLD,
-                                          STANDARD_TEXT_LIGHT,
-                                          TOGO_SEPARATOR,
                                           UNDONE_CHECKOUT_SEPARATOR,
                                           CTIME_STR,
                                           DEFAULT_AUDIT_NAME,
@@ -153,8 +151,7 @@ class Dialog(object):
             # set_transient_for method operates appropriately
             self.dialog.set_transient_for(parent)
             self.dialog.set_modal(True)
-            self.dialog.set_default_size(default_size[0],
-                                        default_size[1])
+            self.dialog.resize(default_size[0], default_size[1])
 
             action_area = self.dialog.get_action_area()
             
@@ -2221,6 +2218,7 @@ class UndoCheckoutSelectionDialog(SelectionDialog):
         @param title: str representing the
         """
         self.checkout_information = checkout_information
+        self._prev_imports = {}
         self.orders = Orders(num_of_tables=0)
 
         self.name_entry = None
@@ -2246,9 +2244,13 @@ class UndoCheckoutSelectionDialog(SelectionDialog):
         frame = Gtk.Frame(label='Order Selection')
         main_box = Gtk.VBox()
 
+        scrolled_window = Gtk.ScrolledWindow()
+
         self.orders_view = self._generate_orders_view()
         self.orders_view.set_model(self._generate_orders_model())
-        main_box.pack_start(self.orders_view, True, True, 5.0)
+
+        scrolled_window.add(self.orders_view)
+        main_box.pack_start(scrolled_window, True, True, 5.0)
 
         frame.add(main_box)
         return frame
@@ -2390,7 +2392,11 @@ class UndoCheckoutSelectionDialog(SelectionDialog):
         view for self.orders widget.
         """
         main_box = Gtk.VBox()
-        main_box.pack_start(self.orders.get_display_view(), True, True, 5.0)
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.add(self.orders.get_display_view())
+
+        main_box.pack_start(scrolled_window, True, True, 5.0)
+
 
         for order_name, order_time in self.checkout_information:
             data = self.checkout_information[order_name, order_time]
@@ -2410,7 +2416,6 @@ class UndoCheckoutSelectionDialog(SelectionDialog):
         the import area.
         """
         main_box = Gtk.VBox()
-
         sub_box = Gtk.HBox()
         self.name_entry = Gtk.Entry()
         sub_box.pack_start(self.name_entry, True, True, 5.0)
@@ -2421,10 +2426,14 @@ class UndoCheckoutSelectionDialog(SelectionDialog):
 
         main_box.pack_start(sub_box, False, False, 5.0)
 
+        scrolled_window = Gtk.ScrolledWindow()
+
         self.imported_view = self._generate_imported_view()
         self.imported_view.set_model(self._generate_imported_model())
 
-        main_box.pack_start(self.imported_view, True, True, 5.0)
+        scrolled_window.add(self.imported_view)
+
+        main_box.pack_start(scrolled_window, True, True, 5.0)
 
         sub_box = Gtk.HBox()
         remove_button = Gtk.Button('Remove Import')
@@ -2494,18 +2503,19 @@ class UndoCheckoutSelectionDialog(SelectionDialog):
         @return: None
         """
         selection = self.orders_view.get_selection()
-        model, itr = selection.get_selected()
+        view, itr = selection.get_selected()
 
         name = self.name_entry.get_text().strip()
         self.name_entry.set_text('')
 
-        if itr and name:
-            order_name, order_time_str = model[itr]
-
-            order_time = datetime.strptime(order_time_str, CTIME_STR)
-
+        if itr and name and name not in self._prev_imports:
+            order_name, order_time_str = view[itr]
             imported_model = self.imported_view.get_model()
             imported_model.append((order_name, name, order_time_str))
+
+            self._prev_imports[name] = order_name, order_time_str
+
+            view.remove(itr)
 
     def _remove_import_data(self, *args):
         """Removes the currently selected import
@@ -2517,10 +2527,21 @@ class UndoCheckoutSelectionDialog(SelectionDialog):
         @return: None
         """
         selection = self.imported_view.get_selection()
-        model, itr = selection.get_selected()
+        view, itr = selection.get_selected()
 
         if itr:
-            model.remove(itr)
+            name = view[itr][1]
+            view.remove(itr)
+
+            self._update_order(self._prev_imports[name])
+            self._clear_prev_import(name)
+
+    def _update_order(self, data):
+        model = self.orders_view.get_model()
+        model.append(data)
+
+    def _clear_prev_import(self, name):
+        del self._prev_imports[name]
 
     def confirm_data(self, *args):
         """Override Method.
@@ -2658,7 +2679,7 @@ class UpdateMenuItemsDialog(SelectionDialog):
         self.options_view = None
 
         super(UpdateMenuItemsDialog, self).__init__(parent, title,
-                                                    default_size=(1100, 600))
+                                                    default_size=(100, 600))
 
     def generate_main_selection_area(self):
         """Generates the area associated
@@ -2870,7 +2891,7 @@ class UpdateMenuItemsDialog(SelectionDialog):
 
         self.categories_name_entry.set_text('')
 
-        if len(text) > 0:
+        if text and text not in self.model_data:
             model = self.categories_view.get_model()
 
             new_model = Gtk.ListStore(str, float)
@@ -3163,7 +3184,7 @@ class UpdateMenuItemsDialog(SelectionDialog):
         price_box.pack_start(Gtk.Label("Price: "), False, False, 5.0)
         self.price_spin_button = Gtk.SpinButton()
         self.price_spin_button.set_digits(2)
-        adjustment = Gtk.Adjustment(0.0, 0, 100**100, .01, 1, 1)
+        adjustment = Gtk.Adjustment(0.0, 0, 100**10, .01, 1, 1)
         self.price_spin_button.set_adjustment(adjustment)
         price_box.pack_start(self.price_spin_button, True, True, 5.0)
         price_box.pack_start(Gtk.Fixed(), True, True, 5.0)
@@ -5281,6 +5302,7 @@ class DiscountCheckoutConfirmationDialog(CheckoutConfirmationDialog):
         the widgets to be displayed.
         """
         main_box = Gtk.VBox()
+
         properties_selection_area = self.generate_properties_selection_area()
         main_box.pack_start(properties_selection_area, True, True, 5.0)
 
@@ -5308,12 +5330,17 @@ class DiscountCheckoutConfirmationDialog(CheckoutConfirmationDialog):
         discount_message_box = Gtk.VBox()
 
         discount_message_box.pack_start(Gtk.Label('Message: '), False, False, 0.0)
+
+        scrolled_window = Gtk.ScrolledWindow()
+
         text_view_frame = Gtk.Frame()
         self.message_entry = Gtk.TextView()
         self.message_entry.set_size_request(250, 150)
         self.message_entry.set_wrap_mode(Gtk.WrapMode.WORD)
-        text_view_frame.add(self.message_entry)
-        discount_message_box.pack_start(text_view_frame, False, False, 0.0)
+
+        scrolled_window.add(self.message_entry)
+        text_view_frame.add(scrolled_window)
+        discount_message_box.pack_start(text_view_frame, False, False, 5.0)
 
         add_discount_button = Gtk.Button('Add Discount To Order')
         add_discount_button.set_size_request(200, 50)
@@ -5602,6 +5629,7 @@ class UpdateTemplateDiscountCheckoutConfirmationDialog(DiscountCheckoutConfirmat
         dialog window.
         """
         self.name_entry = None
+        self._discount_name_set = {name for name, _, _, _ in discount_templates}
         super(UpdateTemplateDiscountCheckoutConfirmationDialog, self).__init__(parent, confirm_func,
                                                                                [], discount_templates)
         self.tree_view.set_model(self.discount_view.get_model())
@@ -5694,7 +5722,7 @@ class UpdateTemplateDiscountCheckoutConfirmationDialog(DiscountCheckoutConfirmat
         name = name.strip()
 
         self.name_entry.set_text('')
-        if len(name) > 0:
+        if name and name not in self._discount_name_set:
             value, is_percentage = self.parse_discount_data()
 
             value_str = str(value)
@@ -5708,6 +5736,7 @@ class UpdateTemplateDiscountCheckoutConfirmationDialog(DiscountCheckoutConfirmat
 
             tree_model = self.tree_view.get_model()
             tree_model.append(data)
+            self._discount_name_set.add(name)
 
     def remove_selected_item(self, *args):
         """Override Method.
@@ -5723,7 +5752,9 @@ class UpdateTemplateDiscountCheckoutConfirmationDialog(DiscountCheckoutConfirmat
         model, itr = self.get_selected()
 
         if itr:
+            name = model[itr][0]
             model.remove(itr)
+            self._discount_name_set.remove(name)
 
     def confirm_data(self):
         """Override Method.

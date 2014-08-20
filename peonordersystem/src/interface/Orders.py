@@ -438,6 +438,18 @@ class OrderStore(Gtk.TreeStore):
                 self.update_item(tree_iter, has_priority=has_priority)
             self.confirm_order(self.iter_next(tree_iter), priority_order)
 
+    def unconfirm_order(self):
+        """unconfirms the order"""
+        for row in self:
+            item = self.get_menu_item(row.iter)
+            item.confirmed = False
+            item.editable = True
+
+            if item.is_locked():
+                item.toggle_lock_menu_item()
+
+            self.update_item(row.iter)
+
     def edit_order(self, updated_order):
         """Edits the displayed order to
         the updated_order given.
@@ -813,6 +825,12 @@ class Orders(object):
             tree_iter = self.current_order.get_iter_first()
             self.current_order.confirm_order(tree_iter, priority_order[:])
 
+    def unconfirm_order(self):
+        """unconfirms the currently
+        selected order
+        """
+        self.current_order.unconfirm_order()
+
     def update_order(self):
         """Updates every item in the
         currently selected order.
@@ -892,6 +910,17 @@ class Orders(object):
             dump_dict[key] = curr_order._dump
 
         return dump_dict
+
+    def __iter__(self):
+        """Iterates over the available
+        order names
+
+        @return: generator that yields
+        available order names
+        """
+        for name, model in self.orders_dict.items() + self.to_go_dict.items():
+            if len(model):
+                yield name
     
     def __repr__(self):
         """Gets a string representation of the
