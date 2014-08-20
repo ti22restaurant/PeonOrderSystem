@@ -66,6 +66,8 @@ class Editor(object):
             key = SelectionDialogController.PROP_NAME_SELECTION
             selection = self._selection_dialog_controller.get_properties()[key]
             confirm_func(selection)
+            return True
+        return False
 
 
     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
