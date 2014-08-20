@@ -14,6 +14,8 @@ from peonordersystem.src.CustomExceptions import InvalidItemError, InvalidOrderE
 from .dialogs.depreciated import Dialog
 from .dialogs.depreciated.MenuDisplaySelectionDialog import MenuDisplaySelectionDialog
 
+from .dialogs.display.SelectionDialogController import SelectionDialogController
+
 
 PRINT_RESPONSE = Dialog.PRINT_DIALOG_RESPONSE
 COMP_RESPONSE = Dialog.COMP_DIALOG_RESPONSE
@@ -44,6 +46,32 @@ class Editor(object):
         Expecting Gtk.Window
         """
         self.parent = parent
+        self._selection_dialog_controller = SelectionDialogController()
+
+    def selection_dialog(self, data, confirm_func):
+        """Runs a dialog window to select a value
+        from the given selections
+
+        @param data: list of str values
+        that represents the potential
+        selections
+
+        @param confirm_func: function that
+        is to be called upon confirmation
+        and have the selection passed to
+        it.
+        """
+        self._selection_dialog_controller.set_properties(orders=data)
+        if self._selection_dialog_controller.run() is ACCEPT_RESPONSE:
+            key = SelectionDialogController.PROP_NAME_SELECTION
+            selection = self._selection_dialog_controller.get_properties()[key]
+            confirm_func(selection)
+
+
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # All methods and functionality beneath this block is depreciated and will
+    # be updated to a new structure of dialog windows in the future
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     #==========================================================================
     # This block is what I refer to as the editor/confirmer section. This block
