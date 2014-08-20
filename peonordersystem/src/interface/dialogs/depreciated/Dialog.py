@@ -151,8 +151,7 @@ class Dialog(object):
             # set_transient_for method operates appropriately
             self.dialog.set_transient_for(parent)
             self.dialog.set_modal(True)
-            self.dialog.set_default_size(default_size[0],
-                                        default_size[1])
+            self.dialog.resize(default_size[0], default_size[1])
 
             action_area = self.dialog.get_action_area()
             
@@ -2680,7 +2679,7 @@ class UpdateMenuItemsDialog(SelectionDialog):
         self.options_view = None
 
         super(UpdateMenuItemsDialog, self).__init__(parent, title,
-                                                    default_size=(1100, 600))
+                                                    default_size=(100, 600))
 
     def generate_main_selection_area(self):
         """Generates the area associated
@@ -3185,7 +3184,7 @@ class UpdateMenuItemsDialog(SelectionDialog):
         price_box.pack_start(Gtk.Label("Price: "), False, False, 5.0)
         self.price_spin_button = Gtk.SpinButton()
         self.price_spin_button.set_digits(2)
-        adjustment = Gtk.Adjustment(0.0, 0, 100**100, .01, 1, 1)
+        adjustment = Gtk.Adjustment(0.0, 0, 100**10, .01, 1, 1)
         self.price_spin_button.set_adjustment(adjustment)
         price_box.pack_start(self.price_spin_button, True, True, 5.0)
         price_box.pack_start(Gtk.Fixed(), True, True, 5.0)
