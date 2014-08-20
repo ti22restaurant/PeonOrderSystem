@@ -10,6 +10,7 @@ class SignalMapper(object):
     """Maps signals to registered
     functions
     """
+    DEFAULT_SIGNAL_RESULT = True
 
     def __init__(self):
         """Initializes the signal mapper"""
@@ -34,23 +35,23 @@ class SignalMapper(object):
 
         return signal
 
-    def signal(self, signal, *args, default=True):
+    def signal(self, signal, *args):
         """Signals the mapped functions to be called
 
         @param signal: int representing the signal
         to be emitted
 
-        @param args: wildcard catchall that passes
-         the given arguments to the mapped function
-
         @keyword default: return value to be given
         if no return value is supplied by the mapping
         function
 
+        @param args: wildcard catchall that passes
+         the given arguments to the mapped function
+
         @return: bool representing the state of the
         function called
         """
-        result = default
+        result = self.DEFAULT_SIGNAL_RESULT
 
         if signal in self._signals_to_funcs:
             result = self._execute_funcs(self._signals_to_funcs[signal], *args)
