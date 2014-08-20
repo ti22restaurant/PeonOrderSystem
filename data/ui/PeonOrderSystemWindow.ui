@@ -1,22 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.16.1 -->
 <interface>
-  <!-- interface-requires gtk+ 3.0 -->
+  <requires lib="gtk+" version="3.0"/>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="xalign">0.55000001192092896</property>
+    <property name="stock">gtk-go-forward</property>
+  </object>
   <object class="GtkImage" id="image10">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="yalign">0.49000000953674316</property>
     <property name="stock">gtk-fullscreen</property>
   </object>
+  <object class="GtkImage" id="image11">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-fullscreen</property>
+    <property name="icon_size">5</property>
+  </object>
   <object class="GtkImage" id="image2">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-fullscreen</property>
-  </object>
-  <object class="GtkImage" id="image1">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="xalign">0.55000001192092896</property>
-    <property name="stock">gtk-go-forward</property>
   </object>
   <object class="GtkImage" id="image3">
     <property name="visible">True</property>
@@ -28,16 +35,16 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-fullscreen</property>
   </object>
-  <object class="GtkImage" id="image6">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-fullscreen</property>
-    <property name="icon-size">5</property>
-  </object>
   <object class="GtkImage" id="image5">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-fullscreen</property>
+  </object>
+  <object class="GtkImage" id="image6">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-fullscreen</property>
+    <property name="icon_size">5</property>
   </object>
   <object class="GtkImage" id="image7">
     <property name="visible">True</property>
@@ -45,6 +52,7 @@
     <property name="xalign">0.49000000953674316</property>
     <property name="yalign">0.47999998927116394</property>
     <property name="stock">gtk-fullscreen</property>
+    <property name="icon_size">5</property>
   </object>
   <object class="GtkImage" id="image8">
     <property name="visible">True</property>
@@ -202,6 +210,18 @@
                         <signal name="activate" handler="undo_checkout_order" swapped="no"/>
                       </object>
                     </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="UndoConfirmationDialog">
+                        <property name="label" translatable="yes">Undo Confirm Dialog</property>
+                        <property name="use_action_appearance">False</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="image">image11</property>
+                        <property name="use_stock">False</property>
+                        <property name="always_show_image">True</property>
+                        <signal name="activate" handler="unconfirm_order" swapped="no"/>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
@@ -316,7 +336,6 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="relief">half</property>
                         <property name="focus_on_click">False</property>
                         <signal name="clicked" handler="confirm_order" swapped="no"/>
@@ -351,7 +370,6 @@ kitchen.</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="focus_on_click">False</property>
                         <signal name="clicked" handler="confirm_checkout" swapped="no"/>
                         <child>
@@ -381,7 +399,6 @@ CHECKOUT of this order.</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="relief">half</property>
                         <property name="focus_on_click">False</property>
                         <signal name="activate" handler="remove_menu_item" swapped="no"/>
@@ -474,7 +491,6 @@ menu item from the order.</property>
                             <property name="vexpand">True</property>
                             <property name="hscrollbar_policy">always</property>
                             <property name="vscrollbar_policy">always</property>
-                            <property name="window_placement_set">True</property>
                             <property name="shadow_type">in</property>
                             <child>
                               <placeholder/>
@@ -589,7 +605,6 @@ to edit the note
 stored in the
 selected menu
 item.</property>
-                    <property name="use_action_appearance">False</property>
                     <property name="focus_on_click">False</property>
                     <signal name="activate" handler="edit_note" swapped="no"/>
                     <signal name="clicked" handler="edit_note" swapped="no"/>
@@ -614,7 +629,6 @@ to edit the STARS
 rating of the 
 selected menu
 item.</property>
-                    <property name="use_action_appearance">False</property>
                     <property name="focus_on_click">False</property>
                     <signal name="activate" handler="edit_stars" swapped="no"/>
                     <signal name="clicked" handler="edit_stars" swapped="no"/>
@@ -650,7 +664,6 @@ item.</property>
                     <property name="tooltip_text" translatable="yes">Opens a window to edit
 the items associated with
 the selected menu item.</property>
-                    <property name="use_action_appearance">False</property>
                     <property name="relief">half</property>
                     <property name="focus_on_click">False</property>
                     <signal name="activate" handler="edit_options" swapped="no"/>
@@ -718,7 +731,6 @@ the selected menu item.</property>
                                 <property name="receives_default">True</property>
                                 <property name="margin_left">6</property>
                                 <property name="margin_right">6</property>
-                                <property name="use_action_appearance">False</property>
                                 <property name="focus_on_click">False</property>
                                 <signal name="clicked" handler="add_new_reservation" swapped="no"/>
                                 <child>
@@ -747,7 +759,6 @@ the selected menu item.</property>
                                 <property name="receives_default">True</property>
                                 <property name="margin_left">5</property>
                                 <property name="margin_right">5</property>
-                                <property name="use_action_appearance">False</property>
                                 <property name="focus_on_click">False</property>
                                 <signal name="clicked" handler="remove_selected_reservation" swapped="no"/>
                                 <child>
@@ -825,7 +836,6 @@ the selected menu item.</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="receives_default">True</property>
-                                <property name="use_action_appearance">False</property>
                                 <property name="focus_on_click">False</property>
                                 <signal name="clicked" handler="confirm_selected_upcoming_order" swapped="no"/>
                                 <child>
@@ -854,7 +864,6 @@ the selected menu item.</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="receives_default">True</property>
-                                <property name="use_action_appearance">False</property>
                                 <property name="focus_on_click">False</property>
                                 <signal name="clicked" handler="remove_selected_upcoming_order" swapped="no"/>
                                 <child>
