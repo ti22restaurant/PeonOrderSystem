@@ -149,8 +149,9 @@ class MenuDisplaySelectionDialog(SelectionDialog, AbstractObserver):
         @return: None
         """
         itr = iter(self._main_model).iter
-        value = self._main_model[itr]
-        self._secondary_model.set_key(value)
+        if itr:
+            value = self._main_model[itr]
+            self._secondary_model.set_key(value)
 
     def add_key(self, obj, entry):
         """Adds the key stored in the
