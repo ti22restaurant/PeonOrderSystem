@@ -67,7 +67,7 @@ class OrderDisplayComponent(TreeViewComponent):
         function when called.
         """
         selection = self._view.get_selection()
-        selection.set_select_function(func, None *args)
+        selection.set_select_function(func, None, *args)
 
     def set_model(self, model):
         """Sets the current display
