@@ -35,6 +35,16 @@
             "py/object": "peonordersystem.src.MenuItem.OptionItem"
         }
     ],
+    "MEAT": [
+        {
+            "_category": "MEAT",
+            "_name": "NEW OPTION",
+            "_price": 0.0,
+            "_price_scalar": 1.0,
+            "_relation": null,
+            "py/object": "peonordersystem.src.MenuItem.OptionItem"
+        }
+    ],
     "MISC": [
         {
             "_category": "MISC",
