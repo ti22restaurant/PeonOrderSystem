@@ -11,15 +11,14 @@ import copy
 from time import strftime
 
 from . import Editor
-from .dialogs import Dialog
 from .builder.Builder import Builder
 from .Reservations import Reservations
 from .UpcomingOrders import UpcomingOrders
 from .Orders import Orders
-
 from peonordersystem.src import ErrorLogger
 from peonordersystem.src import CustomExceptions
 from peonordersystem.src import Settings
+from peonordersystem.src.interface.dialogs.depreciated import Dialog
 
 
 def non_fatal_error_notification(func):
@@ -412,6 +411,23 @@ class UI(object):
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data
+    def unconfirm_order(self, *args):
+        """Begins a dialog window that allows the
+        user to select an order that will be unconfirmed.
+
+        @param args: catchall to catch button pressed
+        """
+        self.update_status("waiting to unconfirm order ...")
+        order_data = iter(self.orders)
+        confirmed = self.editor.selection_dialog(order_data, self.order_unconfirmed)
+
+        if confirmed:
+            self.update_status("Unconfirming selected order... done")
+        else:
+            self.update_status("Unconfirm cancelled")
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
     def confirm_checkout(self, *args):  # @IGNORE:W0613
         """Callback method when check order button has been
         clicked. This method instantiates a new dialog window
@@ -564,6 +580,24 @@ class UI(object):
                                        priority_order=priority_order)
 
         return curr_name, curr_order
+
+    @non_fatal_error_notification
+    @ErrorLogger.log_func_data
+    def order_unconfirmed(self, selection, *args):
+        """Method used as callback when the selection
+        has been selected to be unconfirmed.
+
+        @param selection: str or tuple of str
+        representing the order to be unconfirmed
+
+        @param args:
+        @return:
+        """
+        self.order_selection_confirm_function(selection)
+        self.orders.unconfirm_order()
+        curr_name, _ = self.orders.get_order_info()
+        self.upcoming_orders.remove_by_name(curr_name)
+
 
     @non_fatal_error_notification
     @ErrorLogger.log_func_data

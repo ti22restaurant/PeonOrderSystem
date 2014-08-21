@@ -1,5 +1,6 @@
 """
+
 @author: Carl McGraw
-@contact: cjmcgraw( at )u.washington.edu
-@version: 1.0
+@contact: cjmcgraw(- at -)u.washington.edu
+@version: 1.x
 """

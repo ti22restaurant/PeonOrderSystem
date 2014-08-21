@@ -168,7 +168,7 @@ class PeonOrderSystem(UI):
         @return: None
         """
         order_name, order_list = self.get_order_info()
-        ConfirmationSystem.print_check(order_name, order_list)
+        ConfirmationSystem.print_check(order_name, (order_list,))
 
     def perform_audit(self, start_date, end_date, **kwargs):
         """Override Method.

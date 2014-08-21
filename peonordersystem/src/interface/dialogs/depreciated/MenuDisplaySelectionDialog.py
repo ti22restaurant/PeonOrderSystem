@@ -7,16 +7,12 @@ main GUI.
 @contact: cjmcgraw( at )u.washington.edu
 @version: 1.0
 """
-from .models.UniqueModel import UniqueModel
-from .models.KeyModel import KeyModel
-from .models.CategoriesModel import CategoriesModel
 
-from .views.MainView import MainView
-from .views.SecondaryView import SecondaryView
-from .views.PropertiesView import PropertiesView
 from .views.abc.SelectionObserver import AbstractObserver
 
-from peonordersystem.src.interface.dialogs.Dialog import SelectionDialog
+from peonordersystem.src.interface.dialogs.depreciated.Dialog import SelectionDialog
+from peonordersystem.src.interface.dialogs.depreciated.models import UniqueModel, CategoriesModel, KeyModel
+from peonordersystem.src.interface.dialogs.depreciated.views import MainView, PropertiesView, SecondaryView
 
 
 class MenuDisplaySelectionDialog(SelectionDialog, AbstractObserver):
@@ -51,15 +47,15 @@ class MenuDisplaySelectionDialog(SelectionDialog, AbstractObserver):
         self._observed = []
 
         self._confirm_func = confirm_func
-        self._main_view = MainView('Page Keys')
-        self._secondary_view = SecondaryView('Display Categories')
-        self._properties_view = PropertiesView('Unused Categories')
+        self._main_view = MainView.MainView('Page Keys')
+        self._secondary_view = SecondaryView.SecondaryView('Display Categories')
+        self._properties_view = PropertiesView.PropertiesView('Unused Categories')
 
         unused_categories = self._get_unused_categories(category_data, categories)
 
-        self._main_model = KeyModel(category_data.keys())
-        self._secondary_model = CategoriesModel(category_data)
-        self._properties_model = UniqueModel(unused_categories)
+        self._main_model = KeyModel.KeyModel(category_data.keys())
+        self._secondary_model = CategoriesModel.CategoriesModel(category_data)
+        self._properties_model = UniqueModel.UniqueModel(unused_categories)
 
         self._set_up()
         super(MenuDisplaySelectionDialog, self).__init__(parent, self.TITLE)
