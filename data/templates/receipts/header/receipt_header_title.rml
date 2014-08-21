@@ -1,18 +1,18 @@
 <para align="center">
     <font name=Symbol size=5>a</font>
-    <font size=10 name=Helvetica>
+    <font size=8 name=Helvetica>
         {RESTAURANT_ADDRESS}
     </font>
     <font name=Symbol size=5>a</font>
     <br/>
     <font name=Symbol size=5>a</font>
-    <font size=10 name=Helvetica>
+    <font size=8 name=Helvetica>
         {RESTAURANT_WEBSITE}
     </font>
     <font name=Symbol size=5>a</font>
     <br/>
     <font name=Symbol size=5>a</font>
-    <font size=10 name=Helvetica>
+    <font size=8 name=Helvetica>
         {RESTAURANT_NUMBER}
     </font>
     <font name=Symbol size=5>a</font>
