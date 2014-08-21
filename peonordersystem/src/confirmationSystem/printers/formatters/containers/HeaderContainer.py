@@ -132,7 +132,7 @@ class HeaderContainer(TicketHeaderContainer):
     and write receipt Headers.
     """
     # Determined experimentally
-    DEFAULT_HEADER_HEIGHT = 174
+    DEFAULT_HEADER_HEIGHT = 85 + RECEIPT_IMAGE_HEIGHT
     HEADER_IMAGE_PATH = join(SYSTEM_MEDIA_PATH, RECEIPT_IMAGE_FILE_NAME)
 
     def _create_components(self):
