@@ -17,9 +17,9 @@ SYSTEM_TITLE = 'Fish Cake Factory'
 #====================================================================================
 # This block represents constants used for printing receipt information.
 #====================================================================================
-RECEIPT_IMAGE_FILE_NAME = 'fish_cake_logo_receipt.jpg'
+RECEIPT_IMAGE_FILE_NAME = 'Default.png'
 RECEIPT_IMAGE_WIDTH = 200
-RECEIPT_IMAGE_HEIGHT = 90
+RECEIPT_IMAGE_HEIGHT = 200
 
 # This area represents the RML and config files used to generate the
 # header for the receipt.
