@@ -44,7 +44,7 @@ class KitchenTable(TableComponent):
         @return: int representing the
         height.
         """
-        return self._item_rows * self.NAME_SIZE + self._option_rows * self.SUB_SIZE
+        return (self._item_rows + self._option_rows) * self.NAME_SIZE
 
     def generate_tables(self, data):
         """Generates the tables that

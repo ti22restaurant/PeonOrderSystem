@@ -76,7 +76,7 @@ MENU_ITEM_CONFIRMED_COLOR_HEXADECIMAL = '#999999'
 # This block represents constants that are used in the CheckOperations module,
 # these constants effect the process of summing checks.
 #====================================================================================
-SALES_TAX = .10
+SALES_TAX = .0905
 
 #==============================================================================
 # This block represents constants that are utilized by the audit dialogs when
