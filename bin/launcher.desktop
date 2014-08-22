@@ -2,7 +2,7 @@
 Version=1.0
 Name=PeonOrderSystem
 Comment=Point-of-sales Ordering system
-Exec=
+Exec=/home/ti22/PeonOrderSystem/bin/main.py
 Terminal=False
 Icon=
 Type=Application
