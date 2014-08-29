@@ -123,14 +123,112 @@
     ],
     "BEER": [
         {
-            "_default_stars": 3,
+            "_default_stars": 0,
             "_locked": false,
             "_name": "TSINGTAO",
             "_notes": "",
             "_option_choices": [],
-            "_price": 50.0,
+            "_price": 3.75,
             "_price_scalar": 1.0,
             "comp_message": null,
+            "confirmed": true,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "SINGHA LAGER",
+            "_notes": "",
+            "_option_choices": [],
+            "_price": 3.75,
+            "_price_scalar": 1.0,
+            "comp_message": null,
+            "confirmed": true,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "ELYSIAN IPA",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [],
+            "_price": 4.25,
+            "_price_scalar": 1.0,
+            "confirmed": true,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "ELYSIAN RED",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 33
+            },
+            "_price": 4.25,
+            "_price_scalar": 1.0,
+            "confirmed": true,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "ROTATING",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 33
+            },
+            "_price": 4.25,
+            "_price_scalar": 1.0,
+            "confirmed": true,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "BUD LIGHT",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 33
+            },
+            "_price": 3.75,
+            "_price_scalar": 1.0,
+            "confirmed": true,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        }
+    ],
+    "BEVERAGES": [
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "THAI COFFEE",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [],
+            "_price": 3.5,
+            "_price_scalar": 1.0,
             "confirmed": true,
             "editable": false,
             "options": [],
@@ -138,14 +236,97 @@
             "stars": 0
         },
         {
-            "_default_stars": 3,
+            "_default_stars": 0,
             "_locked": false,
-            "_name": "SINGHA LAGER",
+            "_name": "THAI TEA",
             "_notes": "",
-            "_option_choices": [],
-            "_price": 50.0,
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 43
+            },
+            "_price": 3.5,
             "_price_scalar": 1.0,
-            "comp_message": null,
+            "confirmed": true,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "SODA POP",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 43
+            },
+            "_price": 2.5,
+            "_price_scalar": 1.0,
+            "confirmed": true,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "GINGER BEER",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 43
+            },
+            "_price": 3.5,
+            "_price_scalar": 1.0,
+            "confirmed": true,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "LEMONGRASS SODA",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 43
+            },
+            "_price": 3.5,
+            "_price_scalar": 1.0,
+            "confirmed": true,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "SODA WATER",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [],
+            "_price": 1.0,
+            "_price_scalar": 1.0,
+            "confirmed": true,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "HOT TEA/ICE TEA",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [],
+            "_price": 3.0,
+            "_price_scalar": 1.0,
             "confirmed": true,
             "editable": false,
             "options": [],
@@ -154,21 +335,6 @@
         }
     ],
     "CAKES": [
-        {
-            "_default_stars": 3,
-            "_locked": false,
-            "_name": "SPICY CATFISH CAKES",
-            "_notes": "",
-            "_option_choices": [],
-            "_price": 11.999999999999998,
-            "_price_scalar": 1.0,
-            "comp_message": null,
-            "confirmed": false,
-            "editable": true,
-            "options": [],
-            "py/object": "peonordersystem.src.MenuItem.MenuItem",
-            "stars": 3
-        },
         {
             "_default_stars": 3,
             "_locked": false,
@@ -307,7 +473,7 @@
         {
             "_default_stars": 0,
             "_locked": false,
-            "_name": "NEW MENU ITEM",
+            "_name": "CAKE SPECIAL",
             "_notes": "",
             "_notification_message": null,
             "_option_choices": {
@@ -328,7 +494,96 @@
             "_locked": false,
             "_name": "MASSAMUN CURRY",
             "_notes": "",
-            "_option_choices": [],
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "SHRIMP",
+                    "_price": 2.0000000000000013,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "VEGGIES ONLY",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "VEGETABLES",
+                    "_name": "POTATO",
+                    "_price": 1.0,
+                    "_price_scalar": 0.0,
+                    "_relation": "NO",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "BF",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "RICE",
+                    "_name": "BROWN RICE",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "VEGETABLES",
+                    "_name": "POTATO",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SEAFOD",
+                    "_price": 3.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 10.999999999999998,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -343,7 +598,16 @@
             "_locked": false,
             "_name": "PINEAPPLE PRAWN CURRY",
             "_notes": "",
-            "_option_choices": [],
+            "_option_choices": [
+                {
+                    "_category": "RICE",
+                    "_name": "BROWN RICE",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 12.999999999999998,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -358,7 +622,96 @@
             "_locked": false,
             "_name": "GREEN CURRY",
             "_notes": "",
-            "_option_choices": [],
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "BF",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "EXRA MEAT",
+                    "_price": 2.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SHRIMP",
+                    "_price": 2.0000000000000013,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "VEGGIES ONLY",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SEAFOD",
+                    "_price": 3.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "EXTRA VEGGIES",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "RICE",
+                    "_name": "BROWN RICE",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 10.999999999999998,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -373,7 +726,16 @@
             "_locked": false,
             "_name": "RED CURRY",
             "_notes": "",
-            "_option_choices": [],
+            "_option_choices": [
+                {
+                    "_category": "RICE",
+                    "_name": "BROWN RICE",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 10.999999999999998,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -388,7 +750,88 @@
             "_locked": false,
             "_name": "PANANG CURRY",
             "_notes": "",
-            "_option_choices": [],
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "SEAFOD",
+                    "_price": 3.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "VEGGIES ONLY",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "BF",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "RICE",
+                    "_name": "BROWN RICE",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SHRIMP",
+                    "_price": 2.0000000000000013,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "EXRA MEAT",
+                    "_price": 2.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 10.999999999999998,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -403,10 +846,106 @@
             "_locked": false,
             "_name": "YELLOW CURRY",
             "_notes": "",
-            "_option_choices": [],
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "BF",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SHRIMP",
+                    "_price": 2.0000000000000013,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SEAFOD",
+                    "_price": 3.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "EXRA MEAT",
+                    "_price": 2.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "RICE",
+                    "_name": "BROWN RICE",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "EXTRA VEGGIES",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 10.999999999999998,
             "_price_scalar": 1.0,
             "comp_message": null,
+            "confirmed": false,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "SALMON PANANG",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [],
+            "_price": 15.0,
+            "_price_scalar": 1.0,
             "confirmed": false,
             "editable": true,
             "options": [],
@@ -452,7 +991,7 @@
             "_notes": "",
             "_notification_message": null,
             "_option_choices": {
-                "py/id": 89
+                "py/id": 160
             },
             "_price": 4.999999999999938,
             "_price_scalar": 1.0,
@@ -469,7 +1008,7 @@
             "_notes": "",
             "_notification_message": null,
             "_option_choices": {
-                "py/id": 89
+                "py/id": 160
             },
             "_price": 3.9999999999999893,
             "_price_scalar": 1.0,
@@ -486,7 +1025,7 @@
             "_notes": "",
             "_notification_message": null,
             "_option_choices": {
-                "py/id": 89
+                "py/id": 160
             },
             "_price": 7.0,
             "_price_scalar": 1.0,
@@ -520,7 +1059,7 @@
             "_notes": "",
             "_notification_message": null,
             "_option_choices": {
-                "py/id": 99
+                "py/id": 170
             },
             "_price": 9.0,
             "_price_scalar": 1.0,
@@ -537,7 +1076,7 @@
             "_notes": "",
             "_notification_message": null,
             "_option_choices": {
-                "py/id": 99
+                "py/id": 170
             },
             "_price": 9.0,
             "_price_scalar": 1.0,
@@ -554,7 +1093,7 @@
             "_notes": "",
             "_notification_message": null,
             "_option_choices": {
-                "py/id": 99
+                "py/id": 170
             },
             "_price": 10.0,
             "_price_scalar": 1.0,
@@ -571,7 +1110,7 @@
             "_notes": "",
             "_notification_message": null,
             "_option_choices": {
-                "py/id": 99
+                "py/id": 170
             },
             "_price": 8.0,
             "_price_scalar": 1.0,
@@ -588,7 +1127,7 @@
             "_notes": "",
             "_notification_message": null,
             "_option_choices": {
-                "py/id": 99
+                "py/id": 170
             },
             "_price": 9.0,
             "_price_scalar": 1.0,
@@ -605,7 +1144,7 @@
             "_notes": "",
             "_notification_message": null,
             "_option_choices": {
-                "py/id": 99
+                "py/id": 170
             },
             "_price": 10.0,
             "_price_scalar": 1.0,
@@ -622,7 +1161,7 @@
             "_notes": "",
             "_notification_message": null,
             "_option_choices": {
-                "py/id": 99
+                "py/id": 170
             },
             "_price": 10.0,
             "_price_scalar": 1.0,
@@ -639,11 +1178,109 @@
             "_notes": "",
             "_notification_message": null,
             "_option_choices": {
-                "py/id": 99
+                "py/id": 170
             },
             "_price": 10.0,
             "_price_scalar": 1.0,
             "confirmed": false,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "DRINK SPECIAL 8",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [],
+            "_price": 8.0,
+            "_price_scalar": 1.0,
+            "confirmed": true,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "DRINK SPECIAL 9",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 189
+            },
+            "_price": 9.0,
+            "_price_scalar": 1.0,
+            "confirmed": true,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "DRINK SPECIAL 10",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 189
+            },
+            "_price": 10.0,
+            "_price_scalar": 1.0,
+            "confirmed": true,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "DRINK SPECIAL 11",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 189
+            },
+            "_price": 11.0,
+            "_price_scalar": 1.0,
+            "confirmed": true,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "LEMONADE",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [],
+            "_price": 3.0,
+            "_price_scalar": 1.0,
+            "confirmed": true,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "STRAWBERRY LEMON",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 198
+            },
+            "_price": 3.0,
+            "_price_scalar": 1.0,
+            "confirmed": true,
             "editable": false,
             "options": [],
             "py/object": "peonordersystem.src.MenuItem.MenuItem",
@@ -714,14 +1351,1185 @@
             "stars": 0
         }
     ],
-    "MISC": [],
+    "HAPPY HOUR": [
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "HAPPY WELL",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [],
+            "_price": 5.0,
+            "_price_scalar": 1.0,
+            "confirmed": true,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "HAPPY WINE",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 216
+            },
+            "_price": 5.0,
+            "_price_scalar": 1.0,
+            "confirmed": true,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "HAPPY BEER",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 216
+            },
+            "_price": 0.0,
+            "_price_scalar": 1.0,
+            "confirmed": true,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "HAPPY SPRING",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 216
+            },
+            "_price": 4.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "HAPPY SATAY",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 216
+            },
+            "_price": 3.5,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "HAPPY RIBS",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 216
+            },
+            "_price": 3.5,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "HAPPY TARO",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 216
+            },
+            "_price": 3.5,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "HAPPY CORN",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 216
+            },
+            "_price": 3.5,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        }
+    ],
+    "LUNCH": [
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "RED CURRY",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "SHRIMP",
+                    "_price": 2.0000000000000013,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "RICE",
+                    "_name": "BROWN RICE",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SEAFOD",
+                    "_price": 3.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "EXRA MEAT",
+                    "_price": 2.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "BF",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "EXTRA VEGGIES",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "VEGGIES ONLY",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
+            "_price": 9.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "GREEN CURRY",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "SHRIMP",
+                    "_price": 2.0000000000000013,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "BF",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "EXRA MEAT",
+                    "_price": 2.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "RICE",
+                    "_name": "BROWN RICE",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "VEGGIES ONLY",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "EXTRA VEGGIES",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SEAFOD",
+                    "_price": 3.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
+            "_price": 9.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "YELLOW CURRY",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SHRIMP",
+                    "_price": 2.0000000000000013,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "EXTRA VEGGIES",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SEAFOD",
+                    "_price": 3.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "RICE",
+                    "_name": "BROWN RICE",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "VEGGIES ONLY",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "BF",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
+            "_price": 9.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "MASSAMUN ",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "EXTRA VEGGIES",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "RICE",
+                    "_name": "BROWN RICE",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "BF",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SHRIMP",
+                    "_price": 2.0000000000000013,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SEAFOD",
+                    "_price": 3.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "EXRA MEAT",
+                    "_price": 2.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "VEGGIES ONLY",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
+            "_price": 9.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "PANANG",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "EXTRA VEGGIES",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "RICE",
+                    "_name": "BROWN RICE",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SEAFOD",
+                    "_price": 3.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "EXRA MEAT",
+                    "_price": 2.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SHRIMP",
+                    "_price": 2.0000000000000013,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "VEGGIES ONLY",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "BF",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
+            "_price": 9.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "HOUSE RICE",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "EXTRA VEGGIES",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "SPICES",
+                    "_name": "CILANTRO",
+                    "_price": 0.25,
+                    "_price_scalar": 0.0,
+                    "_relation": "NO",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "BF",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SEAFOD",
+                    "_price": 3.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SHRIMP",
+                    "_price": 2.0000000000000013,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "RICE",
+                    "_name": "BROWN RICE",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "EXRA MEAT",
+                    "_price": 2.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "VEGGIES ONLY",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
+            "_price": 9.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "GARLIC DELIGHT",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "BF",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "EXRA MEAT",
+                    "_price": 2.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "RICE",
+                    "_name": "BROWN RICE",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "VEGGIES ONLY",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
+            "_price": 9.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "ORANGE CHICKEN",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [
+                {
+                    "_category": "VEGETABLES",
+                    "_name": "BELL PEPPERS",
+                    "_price": 1.0,
+                    "_price_scalar": 0.0,
+                    "_relation": "NO",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "RICE",
+                    "_name": "BROWN RICE",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "SPICES",
+                    "_name": "BASIL",
+                    "_price": 1.0,
+                    "_price_scalar": 0.0,
+                    "_relation": "NO",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
+            "_price": 9.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "CK VEGGIE DELIGHT",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "SHRIMP",
+                    "_price": 2.0000000000000013,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "EXTRA VEGGIES",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "VEGGIES ONLY",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "RICE",
+                    "_name": "BROWN RICE",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "BF",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
+            "_price": 9.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "CASHEW NUT",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "EXTRA VEGGIES",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "RICE",
+                    "_name": "BROWN RICE",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "VEGGIES ONLY",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
+            "_price": 9.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "SWEET AND SOUR",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "SHRIMP",
+                    "_price": 2.0000000000000013,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "BF",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "RICE",
+                    "_name": "BROWN RICE",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
+            "_price": 9.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "CHILI & BASIL",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [],
+            "_price": 9.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "BF AND MUSHROOM",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 362
+            },
+            "_price": 10.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "SESAME BEEF",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 362
+            },
+            "_price": 11.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        }
+    ],
     "NOODLES": [
         {
             "_default_stars": 0,
             "_locked": false,
             "_name": "PRA RAM NOODLE",
             "_notes": "",
-            "_option_choices": [],
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "EXRA MEAT",
+                    "_price": 2.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "VEGGIES ONLY",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "EXTRA VEGGIES",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 8.999999999999998,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -736,7 +2544,64 @@
             "_locked": false,
             "_name": "PHAD THAI",
             "_notes": "",
-            "_option_choices": [],
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "VEGGIES ONLY",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SHRIMP",
+                    "_price": 2.0000000000000013,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "BF",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 8.999999999999998,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -751,7 +2616,64 @@
             "_locked": false,
             "_name": "PAD KEE MAO",
             "_notes": "",
-            "_option_choices": [],
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "SHRIMP",
+                    "_price": 2.0000000000000013,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "EXRA MEAT",
+                    "_price": 2.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "BF",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 9.999999999999998,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -766,7 +2688,56 @@
             "_locked": false,
             "_name": "PAD SEE LEW",
             "_notes": "",
-            "_option_choices": [],
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "BF",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SHRIMP",
+                    "_price": 2.0000000000000013,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 8.999999999999998,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -781,7 +2752,48 @@
             "_locked": false,
             "_name": "LARD NA NOODLE",
             "_notes": "",
-            "_option_choices": [],
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "BF",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 8.999999999999998,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -796,39 +2808,26 @@
         {
             "_default_stars": 0,
             "_locked": false,
-            "_name": "PRAWN SALAD",
-            "_notes": "",
-            "_option_choices": [],
-            "_price": 13.999999999999956,
-            "_price_scalar": 1.0,
-            "comp_message": null,
-            "confirmed": false,
-            "editable": true,
-            "options": [],
-            "py/object": "peonordersystem.src.MenuItem.MenuItem",
-            "stars": 0
-        },
-        {
-            "_default_stars": 0,
-            "_locked": false,
-            "_name": "BEEF SALAD",
-            "_notes": "",
-            "_option_choices": [],
-            "_price": 11.999999999999998,
-            "_price_scalar": 1.0,
-            "comp_message": null,
-            "confirmed": false,
-            "editable": true,
-            "options": [],
-            "py/object": "peonordersystem.src.MenuItem.MenuItem",
-            "stars": 0
-        },
-        {
-            "_default_stars": 0,
-            "_locked": false,
             "_name": "CRISPY TROUT SALAD",
             "_notes": "",
-            "_option_choices": [],
+            "_option_choices": [
+                {
+                    "_category": "NUTS",
+                    "_name": "PEANUTS",
+                    "_price": 1.0,
+                    "_price_scalar": 0.0,
+                    "_relation": "NO",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "VEGETABLES",
+                    "_name": "ONIONS",
+                    "_price": 1.0,
+                    "_price_scalar": 0.0,
+                    "_relation": "NO",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 14.999999999999998,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -843,7 +2842,48 @@
             "_locked": false,
             "_name": "GREEN PAPAYA/PRAWN SALAD",
             "_notes": "",
-            "_option_choices": [],
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "SHRIMP",
+                    "_price": 2.0000000000000013,
+                    "_price_scalar": 0.0,
+                    "_relation": "NO",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "NUTS",
+                    "_name": "PEANUTS",
+                    "_price": 1.0,
+                    "_price_scalar": 0.0,
+                    "_relation": "NO",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "EXRA MEAT",
+                    "_price": 2.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 0.0,
+                    "_relation": "SUB",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 0.0,
+                    "_relation": "SUB",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 10.999999999999998,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -869,6 +2909,178 @@
             "options": [],
             "py/object": "peonordersystem.src.MenuItem.MenuItem",
             "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "THAI SALAD",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SHRIMP",
+                    "_price": 2.0000000000000013,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SEAFOD",
+                    "_price": 3.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "EXRA MEAT",
+                    "_price": 2.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "BF",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
+            "_price": 12.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        }
+    ],
+    "SIDES": [
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "STEAMED VEGGIES",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [],
+            "_price": 4.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "JASMINE RICE",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 443
+            },
+            "_price": 1.5,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "BROWN RICE",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 443
+            },
+            "_price": 2.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "FRIED EGG",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 443
+            },
+            "_price": 2.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "ASIAN SLAW",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [],
+            "_price": 4.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "SALAD",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 452
+            },
+            "_price": 4.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": true,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
         }
     ],
     "SOUP": [
@@ -877,7 +3089,48 @@
             "_locked": false,
             "_name": "TOM YUM SPICY SOUP",
             "_notes": "",
-            "_option_choices": [],
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 0.0,
+                    "_relation": "SUB",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SEAFOD",
+                    "_price": 3.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SHRIMP",
+                    "_price": 2.0000000000000013,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 0.0,
+                    "_relation": "SUB",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 0.0,
+                    "_relation": "SUB",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 8.999999999999979,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -892,7 +3145,24 @@
             "_locked": false,
             "_name": "TOFU SPINACH SOUP",
             "_notes": "",
-            "_option_choices": [],
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "VEGGIES ONLY",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 0.0,
+                    "_relation": "NO",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 8.999999999999979,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -907,7 +3177,64 @@
             "_locked": false,
             "_name": "NOODLE SOUP",
             "_notes": "",
-            "_option_choices": [],
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "BF",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "VEGGIES ONLY",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "SPICES",
+                    "_name": "CILANTRO",
+                    "_price": 0.25,
+                    "_price_scalar": 0.0,
+                    "_relation": "NO",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 8.999999999999979,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -922,7 +3249,40 @@
             "_locked": false,
             "_name": "TOM KA CHICKEN",
             "_notes": "",
-            "_option_choices": [],
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "VEGGIES ONLY",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 8.999999999999979,
             "_price_scalar": 1.0,
             "comp_message": null,
@@ -935,33 +3295,48 @@
     ],
     "SPECIAL": [
         {
-            "_default_stars": 3,
-            "_locked": false,
-            "_name": "CRISPY CALAMARI",
-            "_notes": "",
-            "_option_choices": [],
-            "_price": 8.95,
-            "_price_scalar": 1.0,
-            "comp_message": null,
-            "confirmed": false,
-            "editable": true,
-            "options": [],
-            "py/object": "peonordersystem.src.MenuItem.MenuItem",
-            "stars": 3
-        },
-        {
             "_default_stars": 0,
             "_locked": false,
             "_name": "COCONUT SHRIMP",
             "_notes": "",
             "_notification_message": null,
             "_option_choices": {
-                "py/id": 99
+                "py/id": 170
             },
             "_price": 10.0,
             "_price_scalar": 1.0,
             "confirmed": false,
             "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "***TO GO***",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [],
+            "_price": 0.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "**ALLERGY**",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [],
+            "_price": 0.0,
+            "_price_scalar": 1.0,
+            "confirmed": false,
+            "editable": true,
             "options": [],
             "py/object": "peonordersystem.src.MenuItem.MenuItem",
             "stars": 0
@@ -974,9 +3349,56 @@
             "_name": "HOUSE GARLIC DELIGHT",
             "_notes": "",
             "_notification_message": null,
-            "_option_choices": {
-                "py/id": 23
-            },
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "BF",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "SPICES",
+                    "_name": "CILANTRO",
+                    "_price": 0.25,
+                    "_price_scalar": 0.0,
+                    "_relation": "NO",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 10.0,
             "_price_scalar": 1.0,
             "confirmed": false,
@@ -991,9 +3413,32 @@
             "_name": "ORANGE CHICKEN",
             "_notes": "",
             "_notification_message": null,
-            "_option_choices": {
-                "py/id": 23
-            },
+            "_option_choices": [
+                {
+                    "_category": "SPICES",
+                    "_name": "BASIL",
+                    "_price": 1.0,
+                    "_price_scalar": 0.0,
+                    "_relation": "NO",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "SPICES",
+                    "_name": "PEPPER",
+                    "_price": 0.0,
+                    "_price_scalar": 0.0,
+                    "_relation": "NO",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "VEGETABLES",
+                    "_name": "BELL PEPPERS",
+                    "_price": 1.0,
+                    "_price_scalar": 0.0,
+                    "_relation": "NO",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 10.0,
             "_price_scalar": 1.0,
             "confirmed": false,
@@ -1008,9 +3453,48 @@
             "_name": "VEGETABLE DELIGHT",
             "_notes": "",
             "_notification_message": null,
-            "_option_choices": {
-                "py/id": 23
-            },
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "EXRA MEAT",
+                    "_price": 2.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "VEGGIES ONLY",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 10.0,
             "_price_scalar": 1.0,
             "confirmed": false,
@@ -1025,9 +3509,88 @@
             "_name": "CASHEW NUT",
             "_notes": "",
             "_notification_message": null,
-            "_option_choices": {
-                "py/id": 23
-            },
+            "_option_choices": [
+                {
+                    "_category": "VEGETABLES",
+                    "_name": "CELERY",
+                    "_price": 1.0,
+                    "_price_scalar": 0.0,
+                    "_relation": "NO",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "VEGETABLES",
+                    "_name": "BELL PEPPERS",
+                    "_price": 1.0,
+                    "_price_scalar": 0.0,
+                    "_relation": "NO",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "EXRA MEAT",
+                    "_price": 2.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "VEGETABLES",
+                    "_name": "ONIONS",
+                    "_price": 1.0,
+                    "_price_scalar": 0.0,
+                    "_relation": "NO",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "BF",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "VEGETABLES",
+                    "_name": "CARROTS",
+                    "_price": 1.0,
+                    "_price_scalar": 0.0,
+                    "_relation": "NO",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 10.0,
             "_price_scalar": 1.0,
             "confirmed": false,
@@ -1042,9 +3605,72 @@
             "_name": "SWEET AND SOUR",
             "_notes": "",
             "_notification_message": null,
-            "_option_choices": {
-                "py/id": 23
-            },
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "VEGGIES ONLY",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "BF",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (F)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "SHRIMP",
+                    "_price": 2.0000000000000013,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "EXRA MEAT",
+                    "_price": 2.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "TOFU (S)",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 10.0,
             "_price_scalar": 1.0,
             "confirmed": false,
@@ -1059,9 +3685,48 @@
             "_name": "CHILI AND BASIL",
             "_notes": "",
             "_notification_message": null,
-            "_option_choices": {
-                "py/id": 23
-            },
+            "_option_choices": [
+                {
+                    "_category": "MEAT",
+                    "_name": "EXTRA VEGGIES",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "VEGETABLES",
+                    "_name": "BELL PEPPERS",
+                    "_price": 1.0,
+                    "_price_scalar": 0.0,
+                    "_relation": "NO",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "CK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "MEAT",
+                    "_name": "PORK",
+                    "_price": 0.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                },
+                {
+                    "_category": "SPICES",
+                    "_name": "BASIL",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 11.0,
             "_price_scalar": 1.0,
             "confirmed": false,
@@ -1076,9 +3741,16 @@
             "_name": "BEEF AND MUSHROOM",
             "_notes": "",
             "_notification_message": null,
-            "_option_choices": {
-                "py/id": 23
-            },
+            "_option_choices": [
+                {
+                    "_category": "VEGETABLES",
+                    "_name": "BROCCOLI",
+                    "_price": 1.0,
+                    "_price_scalar": 1.0,
+                    "_relation": "ADD",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 11.0,
             "_price_scalar": 1.0,
             "confirmed": false,
@@ -1093,9 +3765,16 @@
             "_name": "SESAME HONEY BEEF",
             "_notes": "",
             "_notification_message": null,
-            "_option_choices": {
-                "py/id": 23
-            },
+            "_option_choices": [
+                {
+                    "_category": "VEGETABLES",
+                    "_name": "ONIONS",
+                    "_price": 1.0,
+                    "_price_scalar": 0.0,
+                    "_relation": "NO",
+                    "py/object": "peonordersystem.src.MenuItem.OptionItem"
+                }
+            ],
             "_price": 12.0,
             "_price_scalar": 1.0,
             "confirmed": false,
@@ -1158,12 +3837,12 @@
     ],
     "WINE": [
         {
-            "_default_stars": 3,
+            "_default_stars": 0,
             "_locked": false,
-            "_name": "LONE BIRCH SAUVIGNON BLANC",
+            "_name": "LONE BIRCH CHARD",
             "_notes": "",
             "_option_choices": [],
-            "_price": 50.0,
+            "_price": 7.0,
             "_price_scalar": 1.0,
             "comp_message": null,
             "confirmed": true,
@@ -1173,12 +3852,12 @@
             "stars": 0
         },
         {
-            "_default_stars": 3,
+            "_default_stars": 0,
             "_locked": false,
-            "_name": "AIRFIELD RED",
+            "_name": "AIRFIELD BOMBSHELL RED",
             "_notes": "",
             "_option_choices": [],
-            "_price": 50.0,
+            "_price": 10.0,
             "_price_scalar": 1.0,
             "comp_message": null,
             "confirmed": true,
@@ -1188,12 +3867,12 @@
             "stars": 0
         },
         {
-            "_default_stars": 3,
+            "_default_stars": 0,
             "_locked": false,
             "_name": "LONE BIRCH RIESLING",
             "_notes": "",
             "_option_choices": [],
-            "_price": 50.0,
+            "_price": 7.0,
             "_price_scalar": 1.0,
             "comp_message": null,
             "confirmed": true,
@@ -1203,12 +3882,12 @@
             "stars": 0
         },
         {
-            "_default_stars": 3,
+            "_default_stars": 0,
             "_locked": false,
             "_name": "AIRFIELD SAUVIGNON BLANC",
             "_notes": "",
             "_option_choices": [],
-            "_price": 50.0,
+            "_price": 9.0,
             "_price_scalar": 1.0,
             "comp_message": null,
             "confirmed": true,
@@ -1218,14 +3897,63 @@
             "stars": 0
         },
         {
-            "_default_stars": 3,
+            "_default_stars": 0,
             "_locked": false,
             "_name": "C.M., PINOT NOIR",
             "_notes": "",
             "_option_choices": [],
-            "_price": 50.0,
+            "_price": 7.0,
             "_price_scalar": 1.0,
             "comp_message": null,
+            "confirmed": true,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "C.M., CABERNET ",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": [],
+            "_price": 9.0,
+            "_price_scalar": 1.0,
+            "confirmed": true,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "WHITE WINE SPECIAL",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 43
+            },
+            "_price": 10.0,
+            "_price_scalar": 1.0,
+            "confirmed": true,
+            "editable": false,
+            "options": [],
+            "py/object": "peonordersystem.src.MenuItem.MenuItem",
+            "stars": 0
+        },
+        {
+            "_default_stars": 0,
+            "_locked": false,
+            "_name": "RED WINE SPECIAL",
+            "_notes": "",
+            "_notification_message": null,
+            "_option_choices": {
+                "py/id": 43
+            },
+            "_price": 12.0,
+            "_price_scalar": 1.0,
             "confirmed": true,
             "editable": false,
             "options": [],

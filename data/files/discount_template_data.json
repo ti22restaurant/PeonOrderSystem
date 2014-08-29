@@ -14,5 +14,21 @@
             100.0,
             true
         ]
+    },
+    {
+        "py/tuple": [
+            "GROUPON",
+            "$-25.0",
+            -25.0,
+            false
+        ]
+    },
+    {
+        "py/tuple": [
+            "BITESQUAD",
+            "-100.0%",
+            -100.0,
+            true
+        ]
     }
 ]

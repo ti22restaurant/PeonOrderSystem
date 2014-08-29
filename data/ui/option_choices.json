@@ -1,2 +1,71 @@
 {
+    "__reduce__": [
+        {
+            "py/type": "collections.OrderedDict"
+        },
+        {
+            "py/tuple": [
+                [
+                    [
+                        "APPS, SOUPS, SALAD",
+                        [
+                            "APPETIZER",
+                            "SOUP",
+                            "SALAD"
+                        ]
+                    ],
+                    [
+                        "RICE/NOODLES",
+                        [
+                            "NOODLES",
+                            "FRIED RICE"
+                        ]
+                    ],
+                    [
+                        "DRINKS",
+                        [
+                            "BEVERAGES",
+                            "DRINKS"
+                        ]
+                    ],
+                    [
+                        "CURRIES/STIR-FRY",
+                        [
+                            "CURRIES",
+                            "STIR-FRY"
+                        ]
+                    ],
+                    [
+                        "FISH CAKES",
+                        [
+                            "CAKES"
+                        ]
+                    ],
+                    [
+                        "BEER/WINE",
+                        [
+                            "BEER",
+                            "WINE"
+                        ]
+                    ],
+                    [
+                        "DESSERT/SPECIALS/SIDES",
+                        [
+                            "SPECIAL",
+                            "DESSERT",
+                            "SIDES"
+                        ]
+                    ],
+                    [
+                        "LUNCH/HAPPY",
+                        [
+                            "LUNCH",
+                            "HAPPY HOUR"
+                        ]
+                    ]
+                ]
+            ]
+        }
+    ],
+    "py/object": "collections.OrderedDict"
 }
