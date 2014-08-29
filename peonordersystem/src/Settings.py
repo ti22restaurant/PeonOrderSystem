@@ -17,7 +17,7 @@ SYSTEM_TITLE = 'Fish Cake Factory'
 #====================================================================================
 # This block represents constants used for printing receipt information.
 #====================================================================================
-RECEIPT_IMAGE_FILE_NAME = 'Ti22_131x105.png'
+RECEIPT_IMAGE_FILE_NAME = 'Ti22_131x105.jpg'
 RECEIPT_IMAGE_WIDTH = 131
 RECEIPT_IMAGE_HEIGHT = 105
 
