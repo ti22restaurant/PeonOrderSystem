@@ -63,6 +63,7 @@ class Printer(AbstractPrinter):
         self._check_data_type(data)
         self._kitchen_formatter.format_data(data)
         file_path = self._kitchen_formatter.file_path
+        self._front_printer.send_to_printer(file_path)
         return self._kitchen_printer.send_to_printer(file_path)
 
     def _check_data_type(self, data):
